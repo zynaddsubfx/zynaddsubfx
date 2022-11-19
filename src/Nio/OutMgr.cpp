@@ -30,11 +30,55 @@ OutMgr &OutMgr::getInstance(const SYNTH_T *synth)
     return instance;
 }
 
+#if HAVE_BG_SYNTH_THREAD
+void *
+OutMgr::_refillThread(void *arg)
+{
+    return static_cast<OutMgr *>(arg)->refillThread();
+}
+
+void *
+OutMgr::refillThread()
+{
+    refillLock();
+    while (bgSynthEnabled) {
+        refillSmps(stales + synth.buffersize);
+        refillWakeup();
+        refillWait();
+    }
+    refillUnlock();
+    return 0;
+}
+
+void
+OutMgr::setBackgroundSynth(bool enable)
+{
+    void *dummy;
+
+    if (bgSynthEnabled == enable)
+        return;
+    if (bgSynthEnabled) {
+        refillLock();
+        bgSynthEnabled = false;
+        refillWakeup();
+        refillUnlock();
+
+        pthread_join(bgSynthThread, &dummy);
+    } else {
+        refillLock();
+        bgSynthEnabled = true;
+        refillUnlock();
+
+        pthread_create(&bgSynthThread, 0, &_refillThread, this);
+    }
+}
+#endif
+
 OutMgr::OutMgr(const SYNTH_T *synth_)
     :wave(new WavEngine(*synth_)),
-      priBuf(new float[4096],
-             new float[4096]), priBuffCurrent(priBuf),
-      master(NULL), stales(0), synth(*synth_)
+      priBuf(new float[FRAME_SIZE_MAX],
+             new float[FRAME_SIZE_MAX]),
+      priBuffCurrent(priBuf), master(NULL), stales(0), synth(*synth_)
 {
     assert(synth_);
     currentOut = NULL;
@@ -44,20 +88,58 @@ OutMgr::OutMgr(const SYNTH_T *synth_)
     outl = new float[synth.buffersize];
     memset(outl, 0, synth.bufferbytes);
     memset(outr, 0, synth.bufferbytes);
+
+#if HAVE_BG_SYNTH_THREAD
+    pthread_mutex_init(&bgSynthMtx, 0);
+    pthread_cond_init(&bgSynthCond, 0);
+    bgSynthEnabled = false;
+#endif
+    midiFlushOffset = 0;
+
+    /* at any stales value, there should be space for synth.buffersize samples */
+    maxStoredSmps = FRAME_SIZE_MAX - (FRAME_SIZE_MAX % synth.buffersize);
+    assert(maxStoredSmps > (unsigned int)synth.buffersize);
+    maxStoredSmps -= synth.buffersize;
 }
 
 OutMgr::~OutMgr()
 {
+#if HAVE_BG_SYNTH_THREAD
+    setBackgroundSynth(false);
+#endif
+
     delete wave;
     delete [] priBuf.l;
     delete [] priBuf.r;
     delete [] outr;
     delete [] outl;
+#if HAVE_BG_SYNTH_THREAD
+    pthread_cond_destroy(&bgSynthCond);
+    pthread_mutex_destroy(&bgSynthMtx);
+#endif
+}
+
+void OutMgr::refillSmps(unsigned int smpsLimit)
+{
+    InMgr &midi = InMgr::getInstance();
+
+    while(smpsLimit > curStoredSmps()) {
+        refillUnlock();
+        if(!midi.empty() &&
+           !midi.flush(midiFlushOffset, midiFlushOffset + synth.buffersize)) {
+          midiFlushOffset += synth.buffersize;
+        } else {
+          midiFlushOffset = 0;
+        }
+        master->AudioOut(outl, outr);
+        refillLock();
+        addSmps(outl, outr);
+    }
 }
 
 /* Sequence of a tick
  * 1) Lets remove old/stale samples
- * 2) Apply appliciable midi events
+ * 2) Apply applicable MIDI events
  * 3) Lets see if we need to generate samples
  * 4) Lets generate some
  * 5) Goto 2 if more are needed
@@ -66,20 +148,39 @@ OutMgr::~OutMgr()
  */
 const Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
-    InMgr &midi = InMgr::getInstance();
+    auto retval = priBuf;
     //SysEv->execute();
-    removeStaleSmps();
-    int i=0;
-    while(frameSize > storedSmps()) {
-        if(!midi.empty()) {
-            midi.flush(i*synth.buffersize, (i+1)*synth.buffersize);
-        }
-        master->AudioOut(outl, outr);
-        addSmps(outl, outr);
-        i++;
+    refillLock();
+    /* cleanup stales, if any */
+    if(frameSize + stales > maxStoredSmps)
+        removeStaleSmps();
+#if HAVE_BG_SYNTH_THREAD
+    /* check if backround sampling is enabled */
+    if(bgSynthEnabled) {
+        assert(frameSize <= (unsigned int)synth.buffersize);
+        /* wait for background samples to complete, if any */
+        while(frameSize + stales > curStoredSmps())
+            refillWait();
+    } else {
+#endif
+        /* check if drivers ask for too many samples */
+        assert(frameSize + stales <= maxStoredSmps);
+        /* produce samples foreground, if any */
+        refillSmps(frameSize + stales);
+#if HAVE_BG_SYNTH_THREAD
     }
-    stales = frameSize;
-    return priBuf;
+#endif
+    retval.l += stales;
+    retval.r += stales;
+    stales += frameSize;
+#if HAVE_BG_SYNTH_THREAD
+    if(bgSynthEnabled) {
+        /* start refill thread again, if any */
+        refillWakeup();
+    }
+#endif
+    refillUnlock();
+    return retval;
 }
 
 AudioOut *OutMgr::getOut(string name)
@@ -194,7 +295,7 @@ void OutMgr::removeStaleSmps()
     if(!stales)
         return;
 
-    const int leftover = storedSmps() - stales;
+    const int leftover = curStoredSmps() - stales;
 
     assert(leftover > -1);
 

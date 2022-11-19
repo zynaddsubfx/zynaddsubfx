@@ -113,6 +113,12 @@ if(HAVE_SCHEDULER AND (NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME}))
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
 
+if(HAVE_BG_SYNTH_THREAD)
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=1)
+else()
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=0)
+endif()
+
 if(HAVE_ASYNC)
     add_definitions(-DHAVE_ASYNC=1)
 else()
@@ -702,8 +708,8 @@ package_status(JackEnable       "JACK     " "enabled" ${Yellow})
 package_status(OssEnable        "OSS      " "enabled" ${Yellow})
 package_status(PaEnable         "PA       " "enabled" ${Yellow})
 package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
+package_status(HAVE_BG_SYNTH_THREAD "Background synthesizer thread" "enabled" ${Yellow})
 #TODO GUI MODULE
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
-
 
 message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW3F_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
