@@ -40,18 +40,19 @@ class LFO
         void releasekey();
     private:
         typedef enum lfo_state_type{
-            delaying, 
+            delaying,
             fadingIn,
             running,
             fadingOut
         } lfo_state_type;
-    
+
         float baseOut(const char waveShape, const float phase);
         float biquad(float input);
         void updatePars();
-        
+
         lfo_state_type lfo_state;
-        
+
+        float lfofreq;
         //tempo stored to detect changes
         unsigned int tempo;
         //Phase of Oscillator
@@ -62,6 +63,8 @@ class LFO
         float incrnd, nextincrnd;
         //Amplitude Randomness
         float amp1, amp2;
+        //old tRef value to check for change
+        unsigned long tRefOld;
 
         // RND mode
         int first_half;
@@ -83,7 +86,7 @@ class LFO
         //Timestamp of noteoff
         int64_t releaseTimestamp;
         //Time to ramp out
-        
+
         int64_t fadeOutDuration;
         float rampUp, rampDown, rampOnRelease;
         // store the constant out value before oscillating starts

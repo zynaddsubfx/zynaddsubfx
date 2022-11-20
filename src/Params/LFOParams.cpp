@@ -103,6 +103,8 @@ static const rtosc::Ports _ports = {
 
     rToggle(Pcontinous, rShort("c"), rDefault(false),
             "Enable for global operation"),
+    rToggle(Psync, rShort("s"), rDefault(false),
+            "Enable for midi sync"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
         "Note frequency stretch"),
     rParamZyn(numerator, rShort("num"), rLinear(0,99), rDefault(0),
@@ -159,7 +161,7 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, loc_unspecified, time_)
 {
 }
 
@@ -173,6 +175,7 @@ LFOParams::LFOParams(float freq_,
                      float fadein_,
                      float fadeout_,
                      char Pcontinous_,
+                     char Psync_,
                      consumer_location_t loc,
                      const AbsTime *time_) : loc(loc),
                                              time(time_),
@@ -187,6 +190,7 @@ LFOParams::LFOParams(float freq_,
     Dfadein     = fadein_;
     Dfadeout    = fadeout_;
     Dcontinous  = Pcontinous_;
+    Dsync       = Psync_;
 
     setup();
 }
@@ -197,7 +201,7 @@ LFOParams::LFOParams(consumer_location_t loc,
                                              last_update_timestamp(0) {
 
     auto init =
-        [&](float freq_, char Pintensity_, char Pstartphase_, float delay_)
+        [&](float freq_, char Pintensity_, char Pstartphase_, float delay_, char Psync_)
     {
         Dfreq       = freq_;
         Dintensity  = Pintensity_;
@@ -207,19 +211,19 @@ LFOParams::LFOParams(consumer_location_t loc,
         Drandomness = 0;
         Ddelay      = delay_;
         Dfadein     = 0.0f;
-        Dfadeout    = 10.0f;
+        Dsync       = Psync_;
         Dcontinous  = 0;
 
     };
 
     switch(loc)
     {
-        case ad_global_amp:    init(6.49, 0, 64, 0.0f); break;
-        case ad_global_freq:   init(3.71, 0, 64, 0.0f); break;
-        case ad_global_filter: init(6.49, 0, 64, 0.0f); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 0.94f); break;
-        case ad_voice_freq:    init(1.19, 40,  0, 0.0f); break;
-        case ad_voice_filter:  init(1.19, 20, 64, 0.0f); break;
+        case ad_global_amp:    init(6.49, 0, 64, 0, 0); break;
+        case ad_global_freq:   init(3.71, 0, 64, 0, 0); break;
+        case ad_global_filter: init(6.49, 0, 64, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 0.94, 0); break;
+        case ad_voice_freq:    init(1.19, 40,  0,  0, 0); break;
+        case ad_voice_filter:  init(1.19, 20, 64, 0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 
@@ -241,6 +245,7 @@ void LFOParams::defaults()
     fadein      = Dfadein;
     fadeout     = Dfadeout;
     Pcontinous  = Dcontinous;
+    Psync       = Dsync;
     Pfreqrand   = 0;
     Pstretch    = 64;
     numerator   = 0;
@@ -262,7 +267,7 @@ void LFOParams::add2XML(XMLwrapper& xml)
     xml.addparreal("fadeout", fadeout);
     xml.addpar("stretch", Pstretch);
     xml.addparbool("continous", Pcontinous);
-    xml.addpar("numerator", numerator);
+    xml.addparbool("sync", Psync);
     xml.addpar("denominator", denominator);
 }
 
@@ -293,7 +298,7 @@ void LFOParams::getfromXML(XMLwrapper& xml)
     }
     Pstretch    = xml.getpar127("stretch", Pstretch);
     Pcontinous  = xml.getparbool("continous", Pcontinous);
-
+    Psync  = xml.getparbool("sync", Psync);
     numerator = xml.getpar("numerator", numerator, 0, 99);
     denominator = xml.getpar("denominator", denominator, 0, 99);
 }
@@ -312,7 +317,7 @@ void LFOParams::paste(LFOParams &x)
     COPY(fadein);
     COPY(fadeout);
     COPY(Pcontinous);
-    COPY(numerator);
+    COPY(Psync);
     COPY(denominator);
     COPY(Pstretch);
 

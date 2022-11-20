@@ -504,7 +504,7 @@ static const Ports master_ports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-    {"tempo::i", rProp(parameter) rDefault(120) rShort("Tempo") rUnit(BPM) rDoc("Tempo / Beats per minute") rLinear(40, 200), 0,
+    {"tempo::i", rProp(parameter) rDefault(120) rShort("BPM") rDoc("Tempo / Beats per minute") rLinear(40, 200) rMap(unit, bpm), 0,
         rBegin;
         if(!strcmp("i",rtosc_argument_string(msg))) {
             m->time.tempo = rtosc_argument(msg, 0).i;
@@ -775,7 +775,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
-    
+
     // set default tempo
     time.tempo = 120;
 
@@ -834,6 +834,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     mastercb = 0;
     mastercb_ptr = 0;
+
+    beatClock = new BeatClock(synth, time);
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
@@ -851,7 +853,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
          */
 
         if(!offline)
-            new_master->AudioOut(outl, outr);
+            new_master->AudioOut(outl, outr, 0);
         if(nio)
             Nio::masterSwap(new_master);
         if (this_master->hasMasterCb()) {
@@ -962,6 +964,7 @@ void Master::defaults()
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
+        //~ printf("Master::noteOn chan = %d  note = %d  velocity = %d \n", chan, note, velocity);
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
@@ -1056,6 +1059,30 @@ void Master::setController(char chan, int type, note_t note, float value)
         if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
             part[npart]->SetController(type, note, value, keyshift);
 }
+
+/*
+ * Midi Sync
+ */
+
+void Master::midiTcSync(unsigned long nanos, int seconds) {
+
+    // set referenceTime to sample index of TC 00h:00m:00s
+    unsigned long refTimeNew = nanos - ((long)seconds * 1000000000);
+    // but only change something if difference is > 0.1s to filter out jitter
+    if (abs(((long)refTimeNew - (long)referenceTime)) > 100000000)
+        referenceTime = refTimeNew;
+    //~ time.tRef = (referenceTime - time.time)
+    printf("MidiTcSync - referenceTime = %lu\n", referenceTime);
+    printf("MidiTcSync - time.time = %lu\n", time.time());
+}
+
+//~ void Master::midiSppSync(unsigned long nanos, int beats) {
+    //~ beatClock->midiSppSync(nanos, beats);
+//~ }
+
+//~ void Master::setSignature(int numerator, int denominator) {
+
+//~ }
 
 void Master::vuUpdate(const float *outl, const float *outr)
 {
@@ -1249,8 +1276,9 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
 /*
  * Master audio out (the final sound)
  */
-bool Master::AudioOut(float *outl, float *outr)
+bool Master::AudioOut(float *outr, float *outl, unsigned long tstamp_)
 {
+    time.tStamp = tstamp_;
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
@@ -1478,7 +1506,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
             nsamples -= smps;
 
             //generate samples
-            if (! AudioOut(bufl, bufr))
+            if (! AudioOut(bufl, bufr, 0))
                 return;
 
             off  = 0;
