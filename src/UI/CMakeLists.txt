@@ -88,7 +88,7 @@ add_dependencies(zynaddsubfx_gui_bridge zynaddsubfx_gui)
 
 
 if(NtkGui)
-  target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES})
+  target_link_libraries(zynaddsubfx_gui ${NTK_IMAGES_LIBRARIES} ${NTK_LIBRARIES})
 endif(NtkGui)
 
 if(FltkGui)
