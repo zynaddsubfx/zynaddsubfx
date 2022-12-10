@@ -28,14 +28,15 @@ using rtosc::RtData;
     int nfilt = atoi(msg-2); \
     int id    = 10+nfilt*5+offset; \
     if(rtosc_narguments(msg)) \
-        obj->changepar(id, rtosc_argument(msg,0).i);\
-    else \
-        d.reply(d.loc, "i", obj->getpar(id))
+    { \
+        obj->changepar(id, enum_key_from_msg(d.port->meta(), msg)); \
+    } else { \
+        d.reply(d.loc, "i", obj->getpar(id)); }
 
 #define rEnd }
 
 static rtosc::Ports filterports {
-    {"Ptype::i", rProp(parameter) rOptions(Off, LP1, HP1, LP2,
+    {"Ptype::i:S", rProp(parameter) rProp(enumerated) rOptions(Off, LP1, HP1, LP2,
             HP2, BP, notch, peak, l.shelf, h.shelf)
         rShort("type") rDoc("Filter Type"), 0,
         rBegin;
