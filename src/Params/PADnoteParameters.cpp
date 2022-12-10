@@ -80,7 +80,7 @@ static const rtosc::Ports realtime_ports =
     rParamI(PDetune,        rShort("fine"), rLinear(0, 16383), rDefault(8192),
         "Fine Detune"),
     rParamI(PCoarseDetune,  rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,  rShort("type"),
+    rOption(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
             rDefault(L10cents), "Magnitude of Detune"),
 

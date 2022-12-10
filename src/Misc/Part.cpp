@@ -109,10 +109,10 @@ static const Ports partPorts = {
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, rDefault(""),
         "Instrument comments"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "User specified label"),
-    rArrayI(Pefxroute, NUM_PART_EFX,
-            rOptions(Next Effect,Part Out,Dry Out),
-            ":default\0=[\"Next Effect\"S...]\0",
-            "Effect Routing"),
+    rArrayOption(Pefxroute, NUM_PART_EFX,
+        rOptions(Next Effect,Part Out,Dry Out),
+        ":default\0=[\"Next Effect\"S...]\0",
+        "Effect Routing"),
     rArrayT(Pefxbypass, NUM_PART_EFX, rDefault([false...]),
         "If an effect is bypassed"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
@@ -121,7 +121,7 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+    {"polyType::i:c:S", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
         rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
@@ -140,7 +140,15 @@ static const Ports partPorts = {
                 return;
             }
 
-            int i = rtosc_argument(msg, 0).i;
+            int i;
+            if(rtosc_type(msg, 0) == 'S') {
+                auto prop = d.port->meta();
+                i = enum_key(prop, rtosc_argument(msg, 0).s);
+                assert(!prop["min"] || i >= atoi(prop["min"]));
+                assert(!prop["max"] || i <= atoi(prop["max"]));
+            } else {
+                i = rtosc_argument(msg, 0).i;
+            }
             if(i == 0) {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
@@ -238,7 +246,7 @@ static const Ports kitPorts = {
             "ADsynth enable"),
     rToggle(Psubenabled, rDefault(false), "SUBsynth enable"),
     rToggle(Ppadenabled, rDefault(false), "PADsynth enable"),
-    rParamZyn(Psendtoparteffect,
+    rOption(Psendtoparteffect,
             rOptions(FX1, FX2, FX3, Off), rDefault(FX1),
             "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "Kit User Specified Label"),

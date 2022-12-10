@@ -85,7 +85,7 @@ static const rtosc::Ports SUBnotePorts = {
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
-    rParamI(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
+    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
             rDefault(Harmonic)
             "Spread of harmonic frequencies"),
@@ -101,7 +101,7 @@ static const rtosc::Ports SUBnotePorts = {
             rDefault(2), "Number of filter stages"),
     rParamZyn(Pbandwidth, rShort("bandwidth"), rDefault(40),
               "Bandwidth of filters"),
-    rParamZyn(Phmagtype,  rShort("mag. type"),
+    rOption(Phmagtype,  rShort("mag. type"),
               rOptions(linear, -40dB, -60dB, -80dB, -100dB),
               rDefault(linear), "Magnitude scale"),
     rArray(Phmag, MAX_SUB_HARMONICS, rDefault([127 0 0 ...]),

@@ -128,13 +128,13 @@ const rtosc::Ports FilterParams::ports = {
             } else
                 d.reply(d.loc, "i", obj->Psequence[idx].nvowel);
         }},
-    {"type-svf::i", rProp(parameter) rShort("type")
+    {"type-svf::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
         rOptions(low, high, band, notch)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
-    {"type-moog::i", rProp(parameter) rShort("type")
+    {"type-moog::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
         rOptions(HP, BP, LP)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
-    {"type-comb::i", rProp(parameter) rShort("type")
+    {"type-comb::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
         rOptions(BWD, FWD, both)
             rDoc("Comb Filter Type"), 0, rOptionCb(Ptype)},
     //UI reader
