@@ -240,7 +240,7 @@ unsigned char Distortion::getpresetpar(unsigned char npreset, unsigned int npar)
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
             /* lower the volume if this is system effect */
-            return (3 * presets[npreset][npar]) / 2;
+            return (2 * presets[npreset][npar]) / 3;
         }
         return presets[npreset][npar];
     }
