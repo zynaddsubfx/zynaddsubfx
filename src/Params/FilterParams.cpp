@@ -35,7 +35,7 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 #define rObject FilterParams::Pvowels_t::formants_t
 
 static const rtosc::Ports subsubports = {
-    rParamZyn(freq, rShort("f.freq"), "Formant frequency"),
+    rParamZyn(freq, rShort("f.freq"), rDefault(128), "Formant frequency"),
     rParamZyn(amp,  rShort("f.str"),  rDefault(127), "Strength of formant"),
     rParamZyn(q,    rShort("f.q"),    rDefault(64),
               "The formant's quality factor, also known as "
@@ -116,7 +116,9 @@ const rtosc::Ports FilterParams::ports = {
     rToggle(Psequencereversed,  rShort("reverse"),
             rDefault(false), "If the modulator input is inverted"),
 
-    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rDoc("Vowel number of this sequence position"), NULL,
+    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rProp(parameter)
+        rDefault([0 1 2 3 4 5 0 1])
+        rDoc("Vowel number of this sequence position"), NULL,
         [](const char *msg, RtData &d){
             FilterParams *obj = (FilterParams *) d.obj;
             const char *mm = msg;

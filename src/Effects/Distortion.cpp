@@ -29,6 +29,7 @@ rtosc::Ports Distortion::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Overdrive 1, Overdrive 2, A. Exciter 1, A. Exciter 2, Guitar Amp,
                     Quantisize)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
