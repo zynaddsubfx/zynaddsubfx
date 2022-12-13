@@ -44,7 +44,7 @@ rtosc::Ports Echo::ports = {
     rEffParVol(rDefaultDepends(presetOfVolume), rDefault(67),
         rPresetsAt(6, 81, 81, 62),
         rPresetsAt(16, 33, 33, 33, 33, 33, 33, 40, 40, 31)),
-    rEffParPan(rPresetsAt(2, 75, 60, 60, 64, 60, 60)),
+    rEffParPan(rDefaultDepends(preset), rPresetsAt(2, 75, 60, 60, 64, 60, 60)),
     rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127),
             rPresets(35, 21, 60, 44, 102, 44, 46, 26, 28),
             "Length of Echo"),

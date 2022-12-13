@@ -73,7 +73,7 @@ static const rtosc::Ports local_ports = {
         }}, // must come before rPaste, because apropos otherwise picks "preset-type" first
     rPaste,
     rEnabledCondition(self-enabled, obj->geteffect()),
-    rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
+    rRecurp(filterpars, rDefaultDepends(efftype), "Filter Parameter for Dynamic Filter"),
     {"Pvolume::i", rProp(parameter) rLinear(0,127) rShort("amt") rDoc("amount of effect"),
         0,
         [](const char *msg, rtosc::RtData &d)
