@@ -33,6 +33,7 @@ namespace zyn {
 rtosc::Ports Sympathetic::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Generic, Piano, Grand, Guitar, 12-String)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;

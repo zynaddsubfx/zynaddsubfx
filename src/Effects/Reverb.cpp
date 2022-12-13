@@ -30,6 +30,7 @@ rtosc::Ports Reverb::ports = {
     {"preset::i", rOptions(Cathedral1, Cathedral2, Cathedral3,
             Hall1, Hall2, Room1, Room2, Basement,
             Tunnel, Echoed1, Echoed2, VeryLong1, VeryLong2)
+                  rDefault(0)
                   rProp(parameter)
                   rDoc("Instrument Presets"), 0,
                   rBegin;

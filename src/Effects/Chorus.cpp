@@ -29,6 +29,7 @@ rtosc::Ports Chorus::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Chorus1, Chorus2, Chorus3, Celeste1, Celeste2,
                            Flange1, Flange2, Flange3, Flange4, Flange5)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;

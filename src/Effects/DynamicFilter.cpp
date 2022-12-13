@@ -28,6 +28,7 @@ namespace zyn {
 
 rtosc::Ports DynamicFilter::ports = {
     {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph2)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
