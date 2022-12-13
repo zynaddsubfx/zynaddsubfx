@@ -38,7 +38,7 @@ static const rtosc::Ports _ports = {
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter, unspecified),
             "location of the filter"),
-    rParamF(freq, rShort("freq"), rUnit(HZ), rLog(0.0775679,85.25),
+    rParamF(freq, rShort("freq"), rUnit(HZ), rLogWithLogmin(0.0,85.25,0.0775679),
             rDefaultDepends(loc),
             rPreset(ad_global_amp, 6.49), // 80
             rPreset(ad_global_freq, 3.71), // 70
