@@ -1506,7 +1506,7 @@ uint8_t Part::Kit::sendto(void) const
 
 bool Part::Kit::validNote(char note) const
 {
-    return !Pmuted && inRange((uint8_t)note, Pminkey, Pmaxkey);
+    return !Pmuted && Penabled && inRange((uint8_t)note, Pminkey, Pmaxkey);
 }
 
 }
