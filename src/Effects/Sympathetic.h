@@ -32,7 +32,7 @@ const unsigned int num_triple_strings = 48;
 // frequencies of a guitar in standard e tuning
 const float guitar_freqs[6] = {82.4f, 110.0f, 146.8f, 196.0f, 246.9f, 329.6f};
 
-class Sympathetic:public Effect
+class Sympathetic final:public Effect
 {
 
     public:

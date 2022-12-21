@@ -22,7 +22,7 @@
 namespace zyn {
 
 /**Chorus and Flange effects*/
-class Chorus:public Effect
+class Chorus final:public Effect
 {
     public:
         Chorus(EffectParams pars);
