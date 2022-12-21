@@ -22,7 +22,7 @@
 namespace zyn {
 
 /**Creates Reverberation Effects*/
-class Reverb:public Effect
+class Reverb final:public Effect
 {
     public:
         Reverb(EffectParams pars);
