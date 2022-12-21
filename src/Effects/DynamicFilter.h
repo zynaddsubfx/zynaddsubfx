@@ -20,7 +20,7 @@
 namespace zyn {
 
 /**DynamicFilter Effect*/
-class DynamicFilter:public Effect
+class DynamicFilter final:public Effect
 {
     public:
         DynamicFilter(EffectParams pars);

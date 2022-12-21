@@ -25,7 +25,7 @@
 
 namespace zyn {
 
-class Phaser:public Effect
+class Phaser final:public Effect
 {
     public:
         Phaser(EffectParams pars);
