@@ -585,7 +585,8 @@ void FilterParams::add2XML(XMLwrapper& xml)
     //filter parameters
     xml.addpar("category", Pcategory);
     xml.addpar("type", Ptype);
-    xml.addparreal("basefreq", basefreq);
+    float basefreq_min = std::atof(ports["basefreq"]->meta()["min"]);
+    xml.addparreal("basefreq", std::max(basefreq_min, basefreq));
     xml.addparreal("baseq", baseq);
     xml.addpar("stages", Pstages);
     xml.addparreal("freq_tracking", freqtracking);

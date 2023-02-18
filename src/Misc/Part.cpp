@@ -1246,7 +1246,8 @@ void Part::add2XML(XMLwrapper& xml)
     xml.addparbool("note_on", Pnoteon);
     xml.addparbool("poly_mode", Ppolymode);
     xml.addpar("legato_mode", Plegatomode);
-    xml.addpar("key_limit", Pkeylimit);
+    unsigned char keylimit_max = std::atoi(ports["Pkeylimit"]->meta()["max"]);
+    xml.addpar("key_limit", std::min(Pkeylimit, keylimit_max));
     xml.addpar("voice_limit", Pvoicelimit);
 
     xml.beginbranch("INSTRUMENT");

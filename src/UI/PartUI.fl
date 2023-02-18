@@ -415,7 +415,6 @@ if (event==FL_RIGHT_MOUSE){
           tooltip {Key Limit} xywh {215 155 50 20} labelsize 10 align 8 textfont 1 textsize 10
           code0 {o->init("Pkeylimit",'i');}
           code1 {o->step(1.0,10.0);}
-          code2 {o->range(0,127);}
           class Fl_Osc_Counter
         }
         Fl_Choice {} {
