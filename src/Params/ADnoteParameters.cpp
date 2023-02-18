@@ -755,7 +755,10 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 {
     xml.addpar("type", Type);
 
-    xml.addpar("unison_size", Unison_size);
+    unsigned char unison_min = std::atoi(ports["Unison_size"]->meta()["min"]);
+    unsigned char unison_max = std::atoi(ports["Unison_size"]->meta()["max"]);
+    unsigned char unison_to_save = std::min(std::max(Unison_size, unison_min), unison_max);
+    xml.addpar("unison_size", unison_to_save);
     xml.addpar("unison_frequency_spread",
                 Unison_frequency_spread);
     xml.addpar("unison_stereo_spread", Unison_stereo_spread);
