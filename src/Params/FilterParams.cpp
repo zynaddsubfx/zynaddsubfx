@@ -35,8 +35,15 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 #define rObject FilterParams::Pvowels_t::formants_t
 
 static const rtosc::Ports subsubports = {
-    rParamZyn(freq, rShort("f.freq"), rDefault(128), "Formant frequency"),
-    rParamZyn(amp,  rShort("f.str"),  rDefault(127), "Strength of formant"),
+    rParamZyn(loc, rProp(internal), "location of the filter"),
+    rParamZyn(freq, rShort("f.freq"), rDefault(128),
+              rDefaultDepends(loc),
+              rPresets(34, 99, 108, 61, 71, 99, 70, 80, 20, 100),
+              "Formant frequency"),
+    rParamZyn(amp,  rShort("f.str"),  rDefault(127),
+              rDefaultDepends(loc),
+              rPresets(127, 122, 112, 127, 121, 117, 127, 122, 127, 121),
+              "Strength of formant"),
     rParamZyn(q,    rShort("f.q"),    rDefault(64),
               "The formant's quality factor, also known as "
               "resonance bandwidth or Q for short"),
@@ -57,6 +64,7 @@ static const rtosc::Ports subports = {
         }},
 };
 
+
 #define rObject FilterParams
 #undef  rChangeCb
 #define rChangeCb do { obj->changed = true; if ( obj->time) {      \
@@ -66,22 +74,40 @@ const rtosc::Ports FilterParams::ports = {
     rPasteRt,
     rArrayPasteRt,
     rOption(loc, rProp(internal),
-            rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect),
+            rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect,
+                     dynfilter_0, dynfilter_1, dynfilter_2,
+                     dynfilter_3, dynfilter_4),
             "location of the filter"),
     rOption(Pcategory,          rShort("class"),
-            rOptions(analog, formant, st.var., moog, comb), rDefault(analog),
+            rOptions(analog, formant, st.var., moog, comb),
+            rDefault(analog), rDefaultDepends(loc),
+            rPreset(dynfilter_1, 2), rPreset(dynfilter_3, formant), rPreset(dynfilter_4, formant),
             "Class of filter"),
     rOption(Ptype,              rShort("type"),
             rOptions(LP1, HP1, LP2, HP2, BP, notch, peak, l.shelf, h.shelf),
-            rDefault(LP2), "Filter Type"),
+            rDefault(LP2), rDefaultDepends(loc),
+            rPreset(dynfilter_0, LP2),
+            rPreset(dynfilter_1, LP1),
+            rPreset(dynfilter_2, BP),
+            rPreset(dynfilter_3, LP1),
+            rPreset(dynfilter_4, LP1),
+            "Filter Type"),
     rParamI(Pstages,            rShort("stages"),
-            rLinear(0,5), rDefault(0), "Filter Stages"),
+            rLinear(0,5), rDefault(0), rDefaultDepends(loc),
+            rPreset(dynfilter_0, 1), rPreset(dynfilter_2, 2),
+            rPreset(dynfilter_3, 1), rPreset(dynfilter_4, 1),
+            "Filter Stages"),
     rParamF(baseq,               rShort("q"),      rUnit(none),  rLog(0.1, 1000),
             rDefaultDepends(loc),
             rPreset(ad_global_filter, 0x1.1592acp+0),
             rPreset(ad_voice_filter, 0x1.e2f3ap+1),
             rPreset(sub_filter, 0x1.1592acp+0),
             rPreset(in_effect, 0x1.384298p+2),
+            rPreset(dynfilter_0, 0x1.384298p+2),
+            rPreset(dynfilter_1, 0x1.384298p+2),
+            rPreset(dynfilter_2, 0x1.384298p+2),
+            rPreset(dynfilter_3, 0x1.d04b16p+2),
+            rPreset(dynfilter_4, 0x1.d04b16p+2),
             "Quality Factor (resonance/bandwidth)"),
     rParamF(basefreq,           rShort("cutoff"),
             rUnit(Hz),    rLog(31.25, 32000),
@@ -90,6 +116,11 @@ const rtosc::Ports FilterParams::ports = {
             rPreset(ad_voice_filter, 30313.21f),
             rPreset(sub_filter, 30313.21f),
             rPreset(in_effect, 0x1.f3fffcp+9),
+            rPreset(dynfilter_0, 0x1.65673ep+8),
+            rPreset(dynfilter_1, 0x1.818d7ap+10),
+            rPreset(dynfilter_2, 0x1.f3fffcp+9),
+            rPreset(dynfilter_3, 0x1.d48ab6p+8),
+            rPreset(dynfilter_4, 0x1.f3fffcp+9),
             "Base cutoff frequency"),
     rParamF(freqtracking,       rShort("f.track"), rUnit(%),
             rLinear(-100, 100), rDefault(0.0f),
@@ -98,11 +129,13 @@ const rtosc::Ports FilterParams::ports = {
             rLinear(-30, 30),   rDefault(0.0f),
             "Output Gain"),
     rParamI(Pnumformants,       rShort("formants"),
-            rLinear(1,12),      rDefault(3),
+            rLinear(1,12),      rDefault(3),         rDefaultDepends(loc),
+            rPreset(dynfilter_4, 2),
             "Number of formants to be used"),
     rParamZyn(Pformantslowness, rShort("slew"),
             rDefault(64), "Rate that formants change"),
     rParamZyn(Pvowelclearness,  rShort("clarity"), rDefault(64),
+            rDefaultDepends(loc), rPreset(dynfilter_4, 0),
             "How much each vowel is smudged with the next in sequence. A high clarity will avoid smudging."),
     rParamZyn(Pcenterfreq,      rShort("cutoff"),  rDefault(64),
             "Center Freq (formant)"),
@@ -110,7 +143,10 @@ const rtosc::Ports FilterParams::ports = {
             "Number of octaves for formant"),
 
     rParamI(Psequencesize,    rShort("seq.size"),
-            rLinear(0, FF_MAX_SEQUENCE), rDefault(3), "Length of vowel sequence"),
+            rLinear(0, FF_MAX_SEQUENCE),
+            rDefault(3), rDefaultDepends(loc),
+            rPreset(dynfilter_3, 2), rPreset(dynfilter_4, 2),
+            "Length of vowel sequence"),
     rParamZyn(Psequencestretch, rShort("seq.str"),
             rDefault(40), "How modulators stretch the sequence"),
     rToggle(Psequencereversed,  rShort("reverse"),
@@ -426,10 +462,34 @@ void FilterParams::defaults(int n)
 {
     int j = n;
 
+    updateLoc(loc, n);
     for(int i = 0; i < FF_MAX_FORMANTS; ++i) {
         Pvowels[j].formants[i].freq = (int)(RND * 127.0f); //some random freqs
         Pvowels[j].formants[i].q    = 64;
         Pvowels[j].formants[i].amp  = 127;
+    }
+}
+
+void FilterParams::updateLoc(int newloc)
+{
+    loc = newloc;
+    for(int j = 0; j < FF_MAX_VOWELS; ++j)
+        updateLoc(newloc, j);
+}
+
+void FilterParams::updateLoc(int newloc, int n)
+{
+    int j   = n;
+    for(int i = 0; i < FF_MAX_FORMANTS; ++i)
+    {
+        if (newloc == dynfilter_3 && i < 2 && j < 3)
+        {
+            Pvowels[j].formants[i].loc  = j * 3 + i; /* 0 .. 5 */
+        } else if (newloc == dynfilter_4 && i < 2 && j < 2) {
+            Pvowels[j].formants[i].loc  = j * 3 + i; /* 6 .. 9 */
+        } else {
+            Pvowels[j].formants[i].loc = -1;
+        }
     }
 }
 

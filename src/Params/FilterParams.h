@@ -72,6 +72,7 @@ class FilterParams:public PresetsArray
 
         struct Pvowels_t {
             struct formants_t {
+                unsigned char loc; //!< only relevant for DynFilter's default values
                 unsigned char freq, amp, q; //frequency,amplitude,Q
             } formants[FF_MAX_FORMANTS];
         } Pvowels[FF_MAX_VOWELS];
@@ -94,6 +95,7 @@ class FilterParams:public PresetsArray
 
         void defaults(int n); //!< set default for formant @p n
 
+        void updateLoc(int newloc);
         int loc; //!< consumer location
         bool changed;
 
@@ -105,6 +107,7 @@ class FilterParams:public PresetsArray
     private:
         // common
         void setup();
+        void updateLoc(int newloc, int n);
 
         //stored default parameters
         unsigned char Dtype;

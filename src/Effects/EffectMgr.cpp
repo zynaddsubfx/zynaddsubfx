@@ -73,7 +73,8 @@ static const rtosc::Ports local_ports = {
         }}, // must come before rPaste, because apropos otherwise picks "preset-type" first
     rPaste,
     rEnabledCondition(self-enabled, obj->geteffect()),
-    rRecurp(filterpars, rDefaultDepends(efftype), "Filter Parameter for Dynamic Filter"),
+    rEnabledCondition(is-dynamic-filter, (obj->geteffect()==8)),
+    rRecurp(filterpars, rDepends(preset), rEnabledByCondition(is-dynamic-filter), "Filter Parameter for Dynamic Filter"),
     {"Pvolume::i", rProp(parameter) rLinear(0,127) rShort("amt") rDoc("amount of effect"),
         0,
         [](const char *msg, rtosc::RtData &d)
@@ -309,8 +310,13 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
     memory.dealloc(efx);
+
+    int new_loc = (_nefx == 8) ? dynfilter_0 : in_effect;
+    if(new_loc != filterpars->loc)
+        filterpars->updateLoc(new_loc);
     EffectParams pars(memory, insertion, efxoutl, efxoutr, 0,
             synth.samplerate, synth.buffersize, filterpars, avoidSmash);
+
     try {
         switch (nefx) {
             case 1:

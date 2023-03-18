@@ -187,6 +187,7 @@ void DynamicFilter::reinitfilter(void)
 void DynamicFilter::setfilterpreset(unsigned char npreset)
 {
     filterpars->defaults();
+    filterpars->updateLoc(dynfilter_0 + npreset);
 
     switch(npreset) {
         case 0:
