@@ -60,10 +60,9 @@ class FilterParams:public PresetsArray
         float    freqtracking; //!< Tracking of center frequency with note frequency (percentage)
         float    gain;         //!< filter's output gain (dB)
 
-        int Pq;         //dummy
-        int Pfreq;      //dummy
-        int Pfreqtrack; //dummy
-        int Pgain;      //dummy
+        static float baseqFromOldPq(int Pq);
+        static float gainFromOldPgain(int Pgain);
+        static float basefreqFromOldPreq(int Pfreq);
 
         //Formant filter parameters
         unsigned char Pnumformants; //how many formants are used

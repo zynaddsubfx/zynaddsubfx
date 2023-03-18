@@ -188,34 +188,34 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
         case 0:
             filterpars->Pcategory = 0;
             filterpars->Ptype     = 2;
-            filterpars->Pfreq     = 45;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(45);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 1:
             filterpars->Pcategory = 2;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 72;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 0;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(72);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 0;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 2:
             filterpars->Pcategory = 0;
             filterpars->Ptype     = 4;
-            filterpars->Pfreq     = 64;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 2;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(64);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 2;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 3:
             filterpars->Pcategory = 1;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 50;
-            filterpars->Pq      = 70;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(50);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(70);
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
 
             filterpars->Psequencesize = 2;
             // "I"
@@ -242,10 +242,10 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
         case 4:
             filterpars->Pcategory = 1;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 64;
-            filterpars->Pq      = 70;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(64);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(70);
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
 
             filterpars->Psequencesize   = 2;
             filterpars->Pnumformants    = 2;
