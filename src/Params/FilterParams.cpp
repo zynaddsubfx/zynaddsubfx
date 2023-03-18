@@ -280,8 +280,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pfreq = rtosc_argument(msg, 0).i;
-                obj->basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
-                obj->basefreq  = powf(2.0f, obj->basefreq + 9.96578428f);
+                obj->basefreq  = basefreqFromOldPreq(Pfreq);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pfreq);
             } else {
@@ -310,7 +309,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pgain = rtosc_argument(msg, 0).i;
-                obj->gain   = (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
+                obj->gain   = gainFromOldPgain(Pgain); //-30..30dB
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pgain);
             } else {
@@ -324,7 +323,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pq = rtosc_argument(msg, 0).i;
-                obj->baseq  = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+                obj->baseq  = baseqFromOldPq(Pq);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pq);
             } else {
@@ -393,13 +392,11 @@ FilterParams::~FilterParams()
 void FilterParams::defaults()
 {
     Ptype = Dtype;
-    Pfreq = Dfreq;
-    Pq    = Dq;
 
     Pstages       = 0;
-    basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
+    basefreq  = (Dfreq / 64.0f - 1.0f) * 5.0f;
     basefreq  = powf(2.0f, basefreq + 9.96578428f);
-    baseq     = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+    baseq     = expf(powf((float) Dq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
 
     gain = 0.0f;
     freqtracking = 0.0f;
@@ -447,8 +444,6 @@ void FilterParams::getfromFilterParams(const FilterParams *pars)
         return;
 
     Ptype = pars->Ptype;
-    Pfreq = pars->Pfreq;
-    Pq    = pars->Pq;
 
     Pstages       = pars->Pstages;
     freqtracking  = pars->freqtracking;
@@ -496,6 +491,25 @@ float FilterParams::getfreqtracking(float notefreq) const
 float FilterParams::getgain() const
 {
     return gain;
+}
+
+/*
+ * wrappers old <-> new parameters
+ */
+float FilterParams::baseqFromOldPq(int Pq)
+{
+    return expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+}
+
+float FilterParams::gainFromOldPgain(int Pgain)
+{
+    return (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
+}
+
+float FilterParams::basefreqFromOldPreq(int Pfreq)
+{
+    float tmp = (Pfreq / 64.0f - 1.0f) * 5.0f;
+    return powf(2.0f, tmp + 9.96578428f);
 }
 
 /*
@@ -685,7 +699,6 @@ void FilterParams::paste(FilterParams &x)
     COPY(Pcategory);
     COPY(Ptype);
     COPY(basefreq);
-    COPY(Pq);
     COPY(Pstages);
     COPY(freqtracking);
     COPY(gain);
