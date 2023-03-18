@@ -48,6 +48,7 @@ class FormantFilterGraph : public Fl_Box, public Fl_Osc_Widget {
 
         struct {
             struct {
+                unsigned char loc;
                 unsigned char freq, amp, q; //frequency,amplitude,Q
             } formants[FF_MAX_FORMANTS];
         } Pvowels[FF_MAX_VOWELS];
