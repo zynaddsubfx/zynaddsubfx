@@ -28,6 +28,7 @@ using std::complex;
 rtosc::Ports Alienwah::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(wah 1, wah 2, wah 3, wah 4)
+                  rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;

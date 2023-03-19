@@ -31,6 +31,7 @@ rtosc::Ports Echo::ports = {
     {"preset::i", rOptions(Echo 1, Echo 2, Echo 3, Simple Echo, Canyon, Panning Echo 1,
                            Panning Echo 2, Panning Echo 3, Feedback Echo)
                   rDefault(0)
+                  rProp(alias)
                   rProp(parameter)
                   rDoc("Instrument Presets"), 0,
                   rBegin;

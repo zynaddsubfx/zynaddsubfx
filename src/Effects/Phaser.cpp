@@ -46,6 +46,7 @@ rtosc::Ports Phaser::ports = {
                            Phaser 5, Phaser 6,
                            APhaser 1, APhaser 2, APhaser 3, APhaser 4,
                            APhaser 5, APhaser 6)
+                  rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
