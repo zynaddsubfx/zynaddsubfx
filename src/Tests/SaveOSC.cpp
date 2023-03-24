@@ -35,11 +35,25 @@ class SaveOSCTest
 #endif
             master = m;
             master->setMasterChangedCallback(__masterChangedCallback, this);
+            master->setUnknownAddressCallback(__unknownAddressCallback, this);
         }
 
+        // TODO: eliminate static callbacks
         static void __masterChangedCallback(void* ptr, zyn::Master* m)
         {
             ((SaveOSCTest*)ptr)->_masterChangedCallback(m);
+        }
+
+        std::atomic<unsigned> unknown_addresses_count = { 0 };
+
+        void _unknownAddressCallback(bool, rtosc::msg_t)
+        {
+            ++unknown_addresses_count;
+        }
+
+        static void __unknownAddressCallback(void* ptr, bool offline, rtosc::msg_t msg)
+        {
+            ((SaveOSCTest*)ptr)->_unknownAddressCallback(offline, msg);
         }
 
         void setUp() {

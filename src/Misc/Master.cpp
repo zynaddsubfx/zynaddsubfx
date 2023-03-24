@@ -901,6 +901,8 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
                 uToB->peak(),
                 rtosc_argument_string(uToB->peak()));
         fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        if(unknown_address_cb)
+            unknown_address_cb(unknown_address_cb_ptr, offline, uToB->peak());
     }
     else if(d.forwarded)
         bToU->raw_write(msg);
