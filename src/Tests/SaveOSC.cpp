@@ -145,7 +145,10 @@ class SaveOSCTest
                 // (ignore)
             }
             else
-                fprintf(stderr, "Unknown message \"%s\", ignoring...\n", msg);
+            {
+                // parameter update triggers message to UI
+                // (ignore)
+            }
         }
 
     public:
