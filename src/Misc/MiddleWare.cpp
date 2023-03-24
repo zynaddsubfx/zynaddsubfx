@@ -830,17 +830,11 @@ public:
                             std::ofstream ofs(filename);
                             ofs << savefile;
                         }
-                        else {
-                            std::cout << "The savefile content follows" << std::endl;
-                            std::cout << "---->8----" << std::endl;
-                            std::cout << savefile << std::endl;
-                            std::cout << "---->8----" << std::endl;
-                        }
                     }
                     else
                     {
                         std::cout << savefile << std::endl;
-                        std::cerr << "Can not write OSC savefile!! (see tmp1.txt and tmp2.txt)"
+                        std::cerr << "Cannot write OSC savefile!! (see tmp1.txt and tmp2.txt)"
                                   << std::endl;
                         std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
                         tmp1 << xml;
@@ -2217,7 +2211,8 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
     if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, -1)) {
-        printf("[Warning] Invalid message in sendToRemote <%s>...\n", rtmsg);
+        printf("[Warning] Invalid message in sendToRemote <%s, %s>...\n",
+               rtmsg, dest.c_str());
         return;
     }
 
