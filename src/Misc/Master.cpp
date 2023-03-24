@@ -1809,10 +1809,12 @@ char* Master::getXMLData()
 
 // this is being called as a "read only op" directly by the MiddleWare thread;
 // note that the Master itself is frozen
-std::string Master::saveOSC(std::string savefile)
+std::string Master::saveOSC(std::string savefile, std::set<std::string>& alreadyWritten)
 {
     return rtosc::save_to_file(ports, this,
                                nullptr, version_in_rtosc_fmt(), // both unused
+                               alreadyWritten,
+                               {"non-realtime"}, // excluded non-reatlime ports
                                savefile);
 }
 

@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "Microtonal.h"
 #include <atomic>
+#include <set>
 #include <rtosc/automations.h>
 #include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
@@ -78,7 +79,7 @@ class Master
         int loadXML(const char *filename);
 
         /**Append all settings to an OSC savefile (as specified by RT OSC)*/
-        std::string saveOSC(std::string savefile);
+        std::string saveOSC(std::string savefile, std::set<std::string>& alreadyWritten);
         /**loads all settings from an OSC file (as specified by RT OSC)
          * @param dispatcher Message dispatcher and modifier
          * @return 0 for ok or <0 if there is an error*/
