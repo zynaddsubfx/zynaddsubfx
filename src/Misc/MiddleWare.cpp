@@ -735,7 +735,8 @@ public:
     // In user language, this is called "saving a master", but we
     // are saving parameters owned by Master and by MiddleWare
     // Return 0 if OK, <0 if not
-    int saveParams(const char *filename, bool osc_format = false)
+    int saveParams(const char *filename, std::string& savefile,
+                   bool osc_format = false)
     {
         int res;
         if(osc_format)
@@ -757,19 +758,19 @@ public:
             master->copyMasterCbTo(&master2);
             master2.frozenState = true;
 
-            std::string savefile;
+            std::set<std::string> alreadyWritten;
             rtosc_version m_version =
             {
                 (unsigned char) version.get_major(),
                 (unsigned char) version.get_minor(),
                 (unsigned char) version.get_revision()
             };
-            savefile = rtosc::save_to_file(getNonRtParamPorts(), this, "ZynAddSubFX", m_version);
+            savefile = rtosc::save_to_file(getNonRtParamPorts(), this, "ZynAddSubFX", m_version, alreadyWritten, {});
             savefile += '\n';
 
-            doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res]()
+            doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
             {
-                savefile = master->saveOSC(savefile);
+                savefile = master->saveOSC(savefile, alreadyWritten);
 #if 1
                 // load the savefile string into another master to compare the results
                 // between the original and the savefile-loaded master
