@@ -65,6 +65,13 @@ class MiddleWare
         //Handle a rtosc Message uToB
         void transmitMsg_va(const char *, const char *args, va_list va);
 
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui(const char * msg);
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui(const char *, const char *args, ...);
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui_va(const char *, const char *args, va_list va);
+
         //Send a message to middleware from an arbitrary thread
         void messageAnywhere(const char *msg, const char *args, ...);
 

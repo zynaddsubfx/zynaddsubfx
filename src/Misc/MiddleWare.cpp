@@ -2529,6 +2529,33 @@ void MiddleWare::transmitMsg_va(const char *path, const char *args, va_list va)
         fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
+void MiddleWare::transmitMsgGui(const char *msg)
+{
+    activeUrl("GUI");
+    transmitMsg(msg);
+}
+
+void MiddleWare::transmitMsgGui(const char *path, const char *args, ...)
+{
+    char buffer[1024];
+    va_list va;
+    va_start(va,args);
+    if(rtosc_vmessage(buffer,1024,path,args,va))
+        transmitMsgGui(buffer);
+    else
+        fprintf(stderr, "Error in transmitMsgGui(...)\n");
+    va_end(va);
+}
+
+void MiddleWare::transmitMsgGui_va(const char *path, const char *args, va_list va)
+{
+    char buffer[1024];
+    if(rtosc_vmessage(buffer, 1024, path, args, va))
+        transmitMsgGui(buffer);
+    else
+        fprintf(stderr, "Error in transmitMsgGui(va)n");
+}
+
 void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
 {
     auto *mem = impl->multi_thread_source.alloc();

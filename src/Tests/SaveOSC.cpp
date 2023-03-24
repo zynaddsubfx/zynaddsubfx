@@ -97,7 +97,7 @@ class SaveOSCTest
             rtosc_arg_val_t start_time;
             rtosc_arg_val_current_time(&start_time);
 
-            mw->transmitMsg(osc_path, "st", arg1, start_time.val.t);
+            mw->transmitMsgGui(osc_path, "st", arg1, start_time.val.t);
 
             int attempt;
             for(attempt = 0; attempt < tries; ++attempt)
