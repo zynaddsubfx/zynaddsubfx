@@ -85,6 +85,8 @@ class SaveOSCTest
             std::string file;
             uint64_t stamp;
             bool status;
+            std::string savefile_content;
+            int msgnext = 0, msgmax;
         } recent;
         std::mutex cb_mutex;
         using mutex_guard = std::lock_guard<std::mutex>;
@@ -97,7 +99,7 @@ class SaveOSCTest
             rtosc_arg_val_t start_time;
             rtosc_arg_val_current_time(&start_time);
 
-            mw->transmitMsgGui(osc_path, "st", arg1, start_time.val.t);
+            mw->transmitMsgGui(osc_path, "stT", arg1, start_time.val.t);
 
             int attempt;
             for(attempt = 0; attempt < tries; ++attempt)
@@ -135,10 +137,31 @@ class SaveOSCTest
 #ifdef SAVE_OSC_DEBUG
                 fprintf(stderr, "Received message \"%s\".\n", msg);
 #endif
-                recent.operation = msg;
-                recent.file = rtosc_argument(msg, 0).s;
-                recent.stamp = rtosc_argument(msg, 1).t;
-                recent.status = rtosc_argument(msg, 2).T;
+                int args = rtosc_narguments(msg);
+
+                if(args == 3)
+                {
+                    assert(!strcmp(rtosc_argument_string(msg), "stT"));
+                    recent.operation = msg;
+                    recent.file = rtosc_argument(msg, 0).s;
+                    recent.stamp = rtosc_argument(msg, 1).t;
+                    recent.status = rtosc_argument(msg, 2).T;
+                    recent.savefile_content.clear();
+                    recent.msgmax = recent.msgnext = 0;
+                }
+                else
+                {
+                    assert(!strcmp(rtosc_argument_string(msg), "stiis"));
+                    assert(rtosc_argument(msg, 0).s == recent.file);
+                    assert(rtosc_argument(msg, 1).t == recent.stamp);
+                    if(recent.msgmax)
+                        assert(recent.msgmax == rtosc_argument(msg, 3).i);
+                    else
+                        recent.msgmax = rtosc_argument(msg, 3).i;
+                    assert(recent.msgnext == rtosc_argument(msg, 2).i);
+                    recent.savefile_content += rtosc_argument(msg, 4).s;
+                    ++recent.msgnext;
+                }
             }
             else if(!strcmp(msg, "/damage"))
             {

@@ -1466,12 +1466,30 @@ void save_cb(const char *msg, RtData &d)
     // the read-only operation writes to the buffer again. Copy to string:
     const string file = rtosc_argument(msg, 0).s;
     uint64_t request_time = 0;
+    bool saveToString = false;
     if(rtosc_narguments(msg) > 1)
         request_time = rtosc_argument(msg, 1).t;
+    if(rtosc_narguments(msg) > 2)
+        saveToString = rtosc_argument(msg, 2).T;
 
-    int res = impl.saveParams(file.c_str(), osc_format);
+    std::string savefile;
+    int res = impl.saveParams(file.c_str(), savefile, osc_format);
     d.broadcast(d.loc, (res == 0) ? "stT" : "stF",
                 file.c_str(), request_time);
+
+    if(saveToString)
+    {
+        std::size_t max_each = 768;
+        std::size_t msgcount = 0;
+        std::size_t msgmax = (savefile.length()-1) / max_each;
+        for(std::size_t pos = 0; pos < savefile.length(); pos += max_each)
+        {
+            std::size_t len = std::min(max_each, savefile.length() - pos);
+            d.reply(d.loc, "stiis",
+                    file.c_str(), request_time, msgcount++, msgmax,
+                    savefile.substr(pos, len).c_str());
+        }
+    }
 }
 
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
@@ -1643,8 +1661,8 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadKbm(file, d);
         rEnd},
-    {"save_xmz:s:st", 0, 0, save_cb<false>},
-    {"save_osc:s:st", 0, 0, save_cb<true>},
+    {"save_xmz:s:st:stT:stF", 0, 0, save_cb<false>},
+    {"save_osc:s:st:stT:stF", 0, 0, save_cb<true>},
     {"save_xiz:is", 0, 0,
         rBegin;
         const int   part_id = rtosc_argument(msg,0).i;
