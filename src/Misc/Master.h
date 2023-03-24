@@ -123,6 +123,12 @@ class Master
         bool runOSC(float *outl, float *outr, bool offline=false,
                     Master* master_from_mw = nullptr);
 
+        //For debugging OSC issues
+        void setUnknownAddressCallback(void(*cb)(void*,bool,rtosc::msg_t), void* ptr) {
+            unknown_address_cb = cb;
+            unknown_address_cb_ptr = ptr;
+        }
+
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
@@ -234,6 +240,8 @@ class Master
 
     private:
         std::atomic<bool> run_osc_in_use = { false };
+        void (*unknown_address_cb)(void*,bool,rtosc::msg_t) = nullptr;
+        void* unknown_address_cb_ptr;
 
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
