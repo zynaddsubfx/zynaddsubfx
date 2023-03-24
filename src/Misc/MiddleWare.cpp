@@ -776,6 +776,7 @@ public:
                 // this requires a temporary master switch
                 Master* old_master = master;
                 dispatcher.updateMaster(&master2);
+                while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
 
                 res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
                 // TODO: compare MiddleWare, too?
@@ -794,6 +795,7 @@ public:
                 printf("Saved in less than %d ms.\n", 50*i);
 
                 dispatcher.updateMaster(old_master);
+                while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
 #endif
                 if(res < 0)
                 {
@@ -2622,6 +2624,7 @@ void MiddleWare::switchMaster(Master* new_master)
 
     if(impl->master->hasMasterCb())
     {
+        impl->master->setMasterSwitchUpcoming();
         // inform the realtime thread about the switch
         // this will be done by calling the mastercb
         transmitMsg("/switch-master", "b", sizeof(Master*), &new_master);

@@ -140,6 +140,8 @@ class Master
         //Copy callback to other master
         void copyMasterCbTo(Master* dest);
         bool hasMasterCb() const;
+        void setMasterSwitchUpcoming() { masterSwitchUpcoming = true; }
+        bool isMasterSwitchUpcoming() const { return masterSwitchUpcoming; }
         void setAudioCompressor(bool enabled);
 
         /**parts \todo see if this can be made to be dynamic*/
@@ -246,6 +248,7 @@ class Master
         //Callback When Master changes
         void(*mastercb)(void*,Master*);
         void* mastercb_ptr;
+        std::atomic<bool> masterSwitchUpcoming = { false };
 
         //! apply an OSC event with a DataObj parameter
         //! @note This may be called by MiddleWare if we are offline

@@ -858,6 +858,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
             this_master->mastercb(this_master->mastercb_ptr, new_master);
         }
         bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+        masterSwitchUpcoming = false;
         return false;
     } else if(!strcmp(msg, "/switch-master")) {
         // if the other stuff from load-master is needed optionally
@@ -866,6 +867,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
         if (hasMasterCb())
             mastercb(mastercb_ptr, new_master);
+        masterSwitchUpcoming = false;
         return false;
     }
 
