@@ -247,7 +247,7 @@ static const rtosc::Ports non_realtime_ports =
     rParamI(Pquality.oct, rShort("octaves"), rLinear(0,7), rDefault(3),
             "Number of octaves to sample (above the first sample"),
 
-    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rLinear(0,1000)
+    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rProp(non-realtime) rLinear(0,1000)
         rDefault(500) rDoc("Bandwidth Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);

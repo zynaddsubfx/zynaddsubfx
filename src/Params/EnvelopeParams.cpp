@@ -85,9 +85,6 @@ static const rtosc::Ports localPorts = {
                      sub_freq, sub_bandwidth),
             "location of the envelope"),
     rToggle(Pfreemode, rDefault(false), "Complex Envelope Definitions"),
-#undef  rChangeCb
-#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
-                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); }
     rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(loc),
             rPresetAtMulti(3, ad_global_freq, ad_voice_freq,
                               ad_voice_fm_freq,
@@ -102,8 +99,6 @@ static const rtosc::Ports localPorts = {
             rDepends(Pfreemode),
             rDefault(2),
             "Location of the sustain point"),
-    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
-    rParams(Penvval, MAX_ENVELOPE_POINTS, "Envelope Values"),
     rParamZyn(Penvstretch,  rShort("stretch"), rDefaultDepends(loc),
             rPresetAtMulti(0, ad_global_freq, ad_global_filter,
                               ad_voice_freq, ad_voice_filter, ad_voice_fm_freq,
@@ -161,11 +156,54 @@ static const rtosc::Ports localPorts = {
               rPresetAtMulti(40, ad_voice_filter, ad_voice_fm_freq),
               rDefault(64),
               "Release Value"),
+#undef rChangeCb
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); } \
+                  if(idx >= obj->Penvpoints) { obj->Penvpoints = idx + 1; }
+    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, rProp(alias), "Envelope Delay Times"),
+    rParams(Penvval, MAX_ENVELOPE_POINTS,
+        rEnabledBy(Pfreemode),
+        rDefault([64 64 ...]),
+        rPreset(ad_global_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_fm_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_fm_freq, [20 64 40 64 64 ...]),
+        rPreset(ad_voice_freq, [30 64 64 ...]),
+        rPreset(ad_voice_filter, [90 40 64 40 64 64 ...]),
+        rPreset(sub_bandwidth, [100 64 64 ...]),
+        rPreset(sub_freq, [30 64 64 ...]),
+        rDefaultDepends(loc) rDepends(Penvpoints) rDepends(Pfreemode), "Envelope Values"),
+#undef rChangeCb
     {"Envmode:", rDoc("Envelope variant type"), NULL,
         rBegin;
         d.reply(d.loc, "i", env->Envmode);
         rEnd},
-
+    {"envdt#" STRINGIFY(MAX_ENVELOPE_POINTS) "::f", rProp(parameter)
+        rEnabledBy(Pfreemode)
+        rDefault([0.0 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_voice_freq, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_voice_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 6.98 (0x1.be978ep+2) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_voice_filter, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.97 (0x1.f0a3d8p-1) 0.01 (0x1.26e978p-7) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_voice_fm_freq, [0.00 (0x0p+0) 3.62 (0x1.cf5c28p+1) 1.88 (0x1.e0418ap+0) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_voice_fm_amp, [0.00 (0x0p+0) 1.88 (0x1.e0418ap+0) 3.62 (0x1.cf5c28p+1) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_global_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_global_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.04 (0x1.4fdf3cp-5) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(ad_global_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(sub_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(sub_bandwidth, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rPreset(sub_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
+        rDefaultDepends(loc) rDoc("Envelope Delay Times (ms)") rDepends(Pfreemode), nullptr,
+    //{"envdt#" STRINGIFY(MAX_ENVELOPE_POINTS) "::f", rProp(parameter) rDefault([0.00 (0x0p+0) 71.32 (0x1.1d485ep+6) 71.32 (0x1.1d485ep+6) ...]) rDoc("Envelope Delay Times (ms)"), nullptr,
+        rBOILS_BEGIN
+            if(!strcmp("", args)) {
+                data.reply(loc, "f", obj->envdt[idx]); // TODO: use default code here?
+            } else {
+                float var = rtosc_argument(msg, 0).f;
+                rLIMIT(var, atof)
+                rAPPLY(envdt[idx], f)
+                data.broadcast(loc, "f", obj->envdt[idx]);
+            }
+        rBOILS_END},
     {"envdt", rDoc("Envelope Delay Times (ms)"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
@@ -258,7 +296,6 @@ static const rtosc::Ports localPorts = {
 
         rEnd},
 };
-#undef  rChangeCb
 
 const rtosc::Ports &EnvelopeParams::ports = localPorts;
 

@@ -507,7 +507,7 @@ void Phaser::changepar(int npar, unsigned char value)
             setdistortion(value);
             break;
         case 14:
-            Panalog = value;
+            Panalog = (value!=0);
             break;
     }
 }
