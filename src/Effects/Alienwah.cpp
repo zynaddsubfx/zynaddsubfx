@@ -36,7 +36,10 @@ rtosc::Ports Alienwah::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresetsAt(3, 93)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+               rDefault(63), rPresetsAt(3, 46),
+               rPresetsAt(16, 127, 127, 127, 93)),
     rEffParPan(),
     rEffPar(Pfreq,     2, rShort("freq") rPresets(70, 73, 63, 25),
             "Effect Frequency"),

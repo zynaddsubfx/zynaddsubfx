@@ -78,7 +78,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
             "Frequency Randomness (calculated uniformly at each cycle)"),
     rParamF(delay, rShort("delay"), rSpecial(disable), rUnit(S),
-              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0),
+              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0.0),
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
     rParamF(fadein, rShort("f.in"), rSpecial(disable), rUnit(S),

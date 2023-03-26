@@ -64,15 +64,20 @@
         if(!rtosc_narguments(msg)) \
             d.reply(d.loc, "i", eff.getpar(idx)); \
         else { \
-            eff.changepar(0, rtosc_argument(msg, 0).i); \
+            eff.changepar(idx, rtosc_argument(msg, 0).i); \
             d.broadcast(d.loc, "i", eff.getpar(idx)); \
         } \
     }}
 #define rEffParVol(...) rEffParCommon(Pvolume, "amt", "amount of effect", 0, \
     __VA_ARGS__)
 #define rEffParPan(...) rEffParCommon(Ppanning, "pan", "panning", 1, \
-    __VA_ARGS__)
-
+    rDefault(64), __VA_ARGS__)
+#define rPresetForVolume \
+    {"presetOfVolume:", rProp(internal), 0, \
+     rBegin; (void)msg; \
+     rObject *o = (rObject*)d.obj; \
+     d.reply(d.loc, "i", o->Ppreset + (16 * o->insertion)); \
+     rEnd}
 
 namespace zyn {
 

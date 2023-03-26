@@ -136,7 +136,7 @@ static int get_next_int(const char *msg)
 }
 
 static const Ports mapping_ports = {
-    {"offset::f", rProp(parameter) rDefault(0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
+    {"offset::f", rProp(parameter) rDefault(0.0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -147,7 +147,7 @@ static const Ports mapping_ports = {
         } else
             d.reply(d.loc, "f", a.getSlotSubOffset(slot, param));
         rEnd},
-    {"gain::f", rProp(parameter) rDefault(100) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
+    {"gain::f", rProp(parameter) rDefault(100.0) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -233,7 +233,7 @@ static const Ports slot_ports = {
     //                              rtosc_argument(msg, 1).s,
     //                              rtosc_argument(msg, 2).T);
     //    rEnd},
-    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
+    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.f) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
         rBegin;
         int num = d.idx[0];
         if(!strcmp("f",rtosc_argument_string(msg))) {
@@ -272,7 +272,7 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
+    {"active::T:F",  rProp(parameter) rDefault(false) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
         if(rtosc_narguments(msg)) {
@@ -469,7 +469,7 @@ static const Ports master_ports = {
                master->Volume  = master->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
                d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
            }}},
-    rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,13.3333f),
+    rParamF(Volume, rShort("volume"), rDefault(-6.67 (-0x1.aaaaacp+2)), rLinear(-40.0f,13.3333f),
              rUnit(dB), "Master Volume"),
     {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
         [](const char *msg, rtosc::RtData &d) {

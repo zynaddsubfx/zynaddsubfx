@@ -38,7 +38,7 @@ static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
     rPasteRt,
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
-    rParamF(Volume,  rShort("volume"), rDefault(0), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
+    rParamF(Volume,  rShort("volume"), rDefault(0.f), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
     rParamF(AmpVelocityScaleFunction, rShort("sense"), rDefault(70.86),
         rLinear(0.0, 100.0), "Amplitude Velocity Sensing function"),

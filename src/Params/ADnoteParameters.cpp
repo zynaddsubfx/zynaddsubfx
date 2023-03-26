@@ -117,7 +117,7 @@ static const Ports voicePorts = {
         rDefault(8192),           "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"),     rDefault(0),
         "Coarse Detune"),
-    rParamZyn(PDetuneType,        rShort("type"),
+    rOption(PDetuneType,        rShort("type"),
         rOptions(L35cents, L10cents, E100cents, E1200cents), rDefault(L35cents),
         "Magnitude of Detune"),
     rToggle(PFreqEnvelopeEnabled, rShort("enable"),     rDefault(false),
@@ -138,8 +138,8 @@ static const Ports voicePorts = {
             else
                 obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
         }},
-    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
-        rDoc("Part Volume"), NULL,
+    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB)
+        rDefault(-0x1.983064p+3) rLinear(-60.0f, 0.0f) rDoc("Part Volume"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -344,7 +344,7 @@ static const Ports globalPorts = {
     rParamI(PDetune,              rShort("fine"),
             rLinear(0, 16383), rDefault(8192), "Fine Detune"),
     rParamI(PCoarseDetune,   rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,   rShort("type"),
+    rOption(PDetuneType,   rShort("type"),
               rOptions(L35cents, L10cents, E100cents, E1200cents),
               rDefault(L10cents),
               "Detune Scaling Type"),

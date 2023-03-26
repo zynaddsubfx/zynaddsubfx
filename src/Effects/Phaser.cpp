@@ -54,7 +54,8 @@ rtosc::Ports Phaser::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(64), rPreset(3, 39), rPreset(10, 25)),
+    rEffParVol(rDefaultDepends(preset),
+            rDefault(64), rPreset(3, 39), rPreset(10, 25)),
     rEffParPan(),
     rEffPar(lfo.Pfreq,       2, rShort("freq"),
             rPresets(36, 35, 31, 22, 20, 53, 14, 14, 9, 14, 127, 1),

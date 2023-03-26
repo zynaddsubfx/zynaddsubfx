@@ -199,12 +199,12 @@ static const rtosc::Ports non_realtime_ports =
             rDefault(Off), "Type of amplitude multiplier"),
     rParamZyn(Php.amp.par1, rShort("p1"),   rDefault(80),
         "Amplitude multiplier parameter"),
-    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(60),
+    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(64),
         "Amplitude multiplier parameter"),
     rToggle(Php.autoscale,  rShort("auto"), rDefault(true),
         "Autoscaling Harmonics"),
     rOption(Php.onehalf, rShort("side"),
-            rOptions(Full, Upper Half, Lower Half), rDefault(Full)
+            rOptions(Full, Upper Half, Lower Half), rDefault(Full),
             "Harmonic cutoff model"),
 
     //Harmonic Bandwidth
@@ -220,7 +220,7 @@ static const rtosc::Ports non_realtime_ports =
     rOption(Phrpos.type,
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
                 Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Harmonic Overtone shifting mode"),
     rParamI(Phrpos.par1, rShort("p1"), rLinear(0,255), rDefault(0),
         "Harmonic position parameter"),
