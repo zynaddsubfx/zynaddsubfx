@@ -78,11 +78,11 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
     rParamI(Pkeylimit, rShort("limit"), rProp(parameter),
-    rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
 #undef rChangeCb
 #define rChangeCb obj->setvoicelimit(obj->Pvoicelimit);
     rParamI(Pvoicelimit, rShort("vlimit"), rProp(parameter),
-    rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
@@ -239,8 +239,8 @@ static const Ports kitPorts = {
             rPreset(true, true), rPreset(false, false),
             "Kit item enable"),
     rToggle(Pmuted,  rDefault(false), "Kit item mute"),
-    rParamZyn(Pminkey, rDefault(0),  "Kit item min key"),
-    rParamZyn(Pmaxkey, rDefault(127)  "Kit item max key"),
+    rParamZyn(Pminkey, rDefault(0),   "Kit item min key"),
+    rParamZyn(Pmaxkey, rDefault(127), "Kit item max key"),
     rToggle(Padenabled, rDefaultDepends(firstkit),
             rPreset(true, true), rPreset(false, false),
             "ADsynth enable"),

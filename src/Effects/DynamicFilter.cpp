@@ -36,7 +36,10 @@ rtosc::Ports DynamicFilter::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(110), rPreset(2, 110), rPreset(4, 127)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+               rDefault(55), rPreset(2, 50), rPreset(4, 63),
+               rPresetsAt(16, 110, 110, 100, 110, 127)),
     rEffParPan(),
     rEffPar(Pfreq,      2, rShort("freq"),   rPresets(80, 70, 30, 80, 50),
             "Effect Frequency"),

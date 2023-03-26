@@ -38,7 +38,7 @@ static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
     rPasteRt,
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
-    rParamF(Volume,  rShort("volume"), rDefault(0), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
+    rParamF(Volume,  rShort("volume"), rDefault(0.f), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
     rParamF(AmpVelocityScaleFunction, rShort("sense"), rDefault(70.86),
         rLinear(0.0, 100.0), "Amplitude Velocity Sensing function"),
@@ -85,9 +85,9 @@ static const rtosc::Ports SUBnotePorts = {
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
-    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
+    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type"),
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Spread of harmonic frequencies"),
     rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255), rShort("p1"),
             rDefault(0), "Overtone Parameter"),

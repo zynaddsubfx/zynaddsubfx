@@ -37,7 +37,10 @@ rtosc::Ports Distortion::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresetsAt(2, 64, 64)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+            rPresetsAt(0,  84, 84, 42, 42,  84, 84),
+            rPresetsAt(16,127,127, 64, 64, 127,127)),
     rEffParPan(),
     rEffPar(Plrcross, 2, rShort("l/r"), rDefault(35), "Left/Right Crossover"),
     rEffPar(Pdrive,   3, rShort("drive"),
