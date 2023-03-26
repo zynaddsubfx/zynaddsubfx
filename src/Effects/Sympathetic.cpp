@@ -43,25 +43,32 @@ rtosc::Ports Sympathetic::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresets(100, 80, 100, 90)),
-    rEffParPan(rDefault(64)),
+    {"presetOfVolume:", rProp(internal), 0,
+        rBegin; (void)msg;
+        rObject *o = (rObject*)d.obj;
+        d.reply(d.loc, "i", o->Ppreset + (16 * o->insertion));
+        rEnd},
+    rEffParVol(rDefaultDepends(presetOfVolume),
+            rPresetsAt(0, 84, 66, 53, 66, 60),
+            rPresetsAt(16, 127, 100, 80, 100, 90)),
+    rEffParPan(),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
-            rPresets(125, 125, 110, 110), "Resonance"),
+            rPresets(125, 125, 125, 110, 110), "Resonance"),
     rEffPar(Pdrive,   3, rShort("dr"), rDefault(65),
-            rPresets(5, 5, 20, 20), "Input Amplification"),
+            rPresets(5, 5, 5, 20, 20), "Input Amplification"),
     rEffPar(Plevel,   4, rShort("lev"), rDefault(65),
-            rPresets(80, 90, 65, 77), "Output Amplification"),
+            rPresets(80, 80, 90, 65, 77), "Output Amplification"),
     rEffPar(Punison_frequency_spread,  5, rShort("detune"), rDefault(30),
-            rPresets(10, 5, 0, 10), "Unison String Detune"),
+            rPresets(10, 10, 5, 0, 10), "Unison String Detune"),
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffParRange(Punison_size, 9, rShort("uni"), rLinear(1,3), rDefault(1),
-            rPresets(3, 1, 1, 2), "Number of Unison Strings"),
-    rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(0),
-            rPresets(12, 60, 6, 6), "Number of Strings"),
-    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
-            rPresets(57, 33, 52, 52), "Midi Note of Lowest String"),
+            rPresets(3, 3, 1, 1, 2), "Number of Unison Strings"),
+    rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76),
+            rPresets(12, 12, 60, 6, 6), "Number of Strings"),
+    rEffPar(Pbasenote, 11, rShort("base"), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
+            rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -83,6 +90,8 @@ Sympathetic::Sympathetic(EffectParams pars)
       Pq(65),
       Punison_size(1),
       Punison_frequency_spread(30),
+      Pstrings(12),
+      Pbasenote(57),
       baseFreq(220.0f)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -93,6 +102,8 @@ Sympathetic::Sympathetic(EffectParams pars)
     // precalc gainbwd_init = gainbwd_offset + gainbwd_factor * Pq
     // 0.873f + 0.001f * 65 = 0.873f + 0.065f = 0.938f
     filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.938f);
+
+    setpreset(Ppreset);
     calcFreqs(); // sets freqs
     cleanup();
 }
@@ -271,9 +282,11 @@ void Sympathetic::calcFreqsGuitar()
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define PRESET_SIZE 13
-#define NUM_PRESETS 4
+#define NUM_PRESETS 5
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note
+        //Generic
+        {127, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
         //Piano 12-String
         {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
         //Piano 60-String
@@ -328,8 +341,11 @@ void Sympathetic::changepar(int npar, unsigned char value)
             filterBank->outgain = (float)Plevel/65.0f;
             break;
         case 5:
-            Punison_frequency_spread = value;
-            calcFreqs();
+            if(Punison_frequency_spread != value)
+            {
+                Punison_frequency_spread = value;
+                calcFreqs();
+            }
             break;
         case 6:
             if(value > 1)
@@ -344,19 +360,34 @@ void Sympathetic::changepar(int npar, unsigned char value)
             sethpf(value);
             break;
         case 9:
-            Punison_size = limit(value, (unsigned char) 1, (unsigned char) 3);
-            if (Punison_size>2) Ppreset=0;
-            calcFreqs();
+        {
+            auto lim = limit(value, (unsigned char) 1, (unsigned char) 3);
+            if(Punison_size != lim)
+            {
+                Punison_size = lim;
+                if (Punison_size>2) Ppreset=0;
+                calcFreqs();
+            }
             break;
+        }
         case 10:
-            Pstrings = limit(value, (unsigned char) 0, (unsigned char) 76);
-            if (Pstrings>6) Ppreset=0;
-            calcFreqs();
+        {
+            auto lim = limit(value, (unsigned char) 0, (unsigned char) 76);
+            if(Pstrings != lim)
+            {
+                Pstrings = lim;
+                if (Pstrings>6) Ppreset=0;
+                calcFreqs();
+            }
             break;
+        }
         case 11:
-            Pbasenote = value;
-            baseFreq = powf(2.0f, ((float)Pbasenote-69.0f)/12.0f)*440.0f;
-            calcFreqs();
+            if (Pbasenote != value)
+            {
+                Pbasenote = value;
+                baseFreq = powf(2.0f, ((float)Pbasenote-69.0f)/12.0f)*440.0f;
+                calcFreqs();
+            }
             break;
         default:
             break;
