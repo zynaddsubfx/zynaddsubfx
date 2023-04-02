@@ -31,6 +31,7 @@ class SEQParams:public Presets
         SEQParams(consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
         SEQParams(float freq_,
+                  float intensity_,
                   float cutoff_,
                   unsigned char steps_,
                   float delay_,
@@ -70,6 +71,7 @@ class SEQParams:public Presets
 
         /* Default parameters */
         float         Dfreq;
+        float         Dintensity;
         unsigned char Dcutoff;
         float         Ddelay;
         unsigned char Dcontinous;
