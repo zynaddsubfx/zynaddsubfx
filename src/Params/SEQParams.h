@@ -48,9 +48,9 @@ class SEQParams:public Presets
 
 
         float freq;
+        float intensity;
         float cutoff; /**<cutoff frequency of LP filter (0.0f=off) */
         float delay; /**<delay (0=off)*/
-        float intensity;
         unsigned char continous; 
         unsigned char steps; 
         int           numerator;  /**<numerator for integer ratio between system tempo and LFO freq (0=off)*/

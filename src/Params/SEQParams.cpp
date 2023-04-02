@@ -40,7 +40,7 @@ static const rtosc::Ports _ports = {
             "location of the filter"),
     rParamF(freq, rShort("freq"), rDefault(2.0f), rUnit(Hz), rLinear(0.1f,10.0f),
             "step frequency"),
-    rParamF(intensity, rShort("depth"), rLinear(0.0, 2.0), rDefault(1.0),
+    rParamF(intensity, rShort("depth"), rLinear(0.0, 2.0), rDefault(0.0),
               "Intensity of SEQ"),
     rParamF(cutoff, rShort("lp"), rDefault(MAX_CUTOFF), rUnit(Hz), rLinear(0.0f,MAX_CUTOFF),
             "cutoff of lp-filter for output\n 40.0=off"),
@@ -124,8 +124,8 @@ SEQParams::SEQParams(float freq_,
     setup();
 }
 
-SEQParams::SEQParams(consumer_location_t loc,
-                     const AbsTime *time_) : loc(loc),
+SEQParams::SEQParams(consumer_location_t loc_,
+                     const AbsTime *time_) : loc(loc_),
                                              time(time_),
                                              last_update_timestamp(0) {
 
@@ -138,18 +138,18 @@ SEQParams::SEQParams(consumer_location_t loc,
         Dsteps      = 8;
         Ddelay      = 0.0f;
         Dcontinous  = false;
-        for(int i = 0; i<NUM_SEQ_STEPS; ++i)
+        for(auto i = 0; i<NUM_SEQ_STEPS; ++i)
             Dsequence[i] = val_;
 
     };
 
     switch(loc)
-    {                    // (float freq_, float intensity_, char cutoff_, unsigned char steps_, float val_)
-        case ad_global_amp:    init(1.0f); break;
-        case ad_global_freq:   init(0.0f); break;
-        case ad_global_filter: init(0.0f); break;
+    {
+        case ad_global_amp:
         case ad_voice_amp:     init(1.0f); break;
-        case ad_voice_freq:    init(0.0f); break;
+        case ad_global_freq:
+        case ad_global_filter:
+        case ad_voice_freq:
         case ad_voice_filter:  init(0.0f); break;
         default: throw std::logic_error("Invalid SEQ consumer location");
     }
@@ -200,22 +200,20 @@ void SEQParams::add2XML(XMLwrapper& xml)
 
 void SEQParams::getfromXML(XMLwrapper& xml)
 {
-
-    freq       = xml.getparreal("freq", freq);
-    intensity  = xml.getparreal("intensity", intensity);
-    cutoff     = xml.getparreal("cutoff", cutoff);
-    steps      = xml.getpar("steps", steps,1,127);
-    delay      = xml.getparreal("delay", delay);
-    continous  = xml.getparbool("continous", continous);
-    numerator  = xml.getpar("numerator", numerator, 0, 99);
-    denominator= xml.getpar("denominator", denominator, 0, 99);
+    freq       = xml.getparreal("freq", 2.0f);
+    intensity  = xml.getparreal("intensity", 0.0f);
+    cutoff     = xml.getparreal("cutoff", MAX_CUTOFF);
+    steps      = xml.getpar("steps", 8,1,127);
+    delay      = xml.getparreal("delay", 0.0f);
+    continous  = xml.getparbool("continous", false);
+    numerator  = xml.getpar("numerator", 0, 0, 99);
+    denominator= xml.getpar("denominator", 4, 0, 99);
 
     if(xml.enterbranch("SEQUENCE")) {
         for(int n = 0; n < NUM_SEQ_STEPS; ++n) {
-            sequence[n] = 0.0f;
             if(xml.enterbranch("STEP", n + 1) == 0)
                 continue;
-            sequence[n] = xml.getparreal("value", 0.0f);
+            sequence[n] = xml.getparreal("value", (loc == ad_global_amp || loc == ad_voice_amp) ? 1.0f : 0.0f);
             xml.exitbranch();
         }
         xml.exitbranch(); // SEQUENCE
@@ -227,6 +225,7 @@ void SEQParams::getfromXML(XMLwrapper& xml)
 void SEQParams::paste(SEQParams &x)
 {
     COPY(freq);
+    COPY(intensity);
     COPY(cutoff);
     COPY(steps);
     COPY(delay);

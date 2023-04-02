@@ -24,7 +24,7 @@ namespace zyn {
 SEQ::SEQ(const SEQParams &seqpars_, const AbsTime &t, WatchManager *m,
         const char *watch_prefix)
     :time(t),
-    delayTime(t, seqpars_.delay), //0..4 sec
+    delayTime(t, seqpars_.delay), // 0..4 sec Idea: delay time as 1/4 beats
     dt(t.dt()),
     seqpars(seqpars_),
     watchOut(m, watch_prefix, "out")
