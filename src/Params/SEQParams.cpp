@@ -185,7 +185,8 @@ void SEQParams::add2XML(XMLwrapper& xml)
         const bool has_default_value =
             ( (sequence[n] == 1.0f) &&
               (loc == ad_global_amp || loc == ad_voice_amp) ) ||
-            (sequence[n] == 0.0f);
+            ( (sequence[n] == 0.0f) &&
+             !(loc == ad_global_amp || loc == ad_voice_amp) );
         if(has_default_value)
             continue;
         xml.beginbranch("STEP", n + 1);
