@@ -174,6 +174,7 @@ void SEQParams::defaults()
 void SEQParams::add2XML(XMLwrapper& xml)
 {
     xml.addparreal("freq", freq);
+    xml.addparreal("intensity", intensity);
     xml.addparreal("cutoff", cutoff);
     xml.addpar("steps", steps);
     xml.addparreal("delay", delay);
@@ -200,6 +201,7 @@ void SEQParams::getfromXML(XMLwrapper& xml)
 {
 
     freq       = xml.getparreal("freq", freq);
+    intensity  = xml.getparreal("intensity", intensity);
     cutoff     = xml.getparreal("cutoff", cutoff);
     steps      = xml.getpar("steps", steps,1,127);
     delay      = xml.getparreal("delay", delay);
