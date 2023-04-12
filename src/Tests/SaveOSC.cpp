@@ -175,6 +175,34 @@ class SaveOSCTest
             }
         }
 
+        void wait_for_message()
+        {
+            int attempt;
+            for(attempt = 0; attempt < 1000; ++attempt)
+            {
+                mutex_guard guard(cb_mutex);
+                if(recent.msgmax &&
+                   recent.msgnext > recent.msgmax)
+                {
+                    break;
+                }
+                usleep(1000);
+            }
+            assert(attempt < 1000);
+        }
+
+        void dump_savefile(int res)
+        {
+            const std::string& savefile = recent.savefile_content;
+            std::cout << "Saving "
+                      << (res == EXIT_SUCCESS ? "successful" : "failed")
+                      << "." << std::endl;
+            std::cout << "The savefile content follows" << std::endl;
+            std::cout << "----8<----" << std::endl;
+            std::cout << savefile << std::endl;
+            std::cout << "---->8----" << std::endl;
+        }
+
     public:
         SaveOSCTest() { setUp(); }
         ~SaveOSCTest() { tearDown(); }
@@ -207,6 +235,8 @@ class SaveOSCTest
                     rval = timeOutOperation("/save_osc", "", 1000)
                          ? EXIT_SUCCESS
                          : EXIT_FAILURE;
+                    wait_for_message();
+                    dump_savefile(rval);
                 }
                 else
                 {
@@ -300,28 +330,10 @@ class SaveOSCTest
                       : EXIT_FAILURE;
 
 
-                int attempt;
-                for(attempt = 0; attempt < 1000; ++attempt)
-                {
-                    mutex_guard guard(cb_mutex);
-                    if(recent.msgmax &&
-                       recent.msgnext > recent.msgmax)
-                    {
-                        break;
-                    }
-                    usleep(1000);
-                }
+                wait_for_message();
+                dump_savefile(res);
 
-                assert(attempt < 1000);
                 const std::string& savefile = recent.savefile_content;
-                std::cout << "Saving "
-                          << (res == EXIT_SUCCESS ? "successful" : "failed")
-                          << "." << std::endl;
-                std::cout << "The savefile content follows" << std::endl;
-                std::cout << "----8<----" << std::endl;
-                std::cout << savefile << std::endl;
-                std::cout << "---->8----" << std::endl;
-
                 const char* next_line;
                 for(const char* line = savefile.c_str();
                     *line && res == EXIT_SUCCESS;

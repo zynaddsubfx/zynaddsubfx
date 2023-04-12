@@ -85,9 +85,9 @@ static const rtosc::Ports SUBnotePorts = {
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
-    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
+    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type"),
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Spread of harmonic frequencies"),
     rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255), rShort("p1"),
             rDefault(0), "Overtone Parameter"),

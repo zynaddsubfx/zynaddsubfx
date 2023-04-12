@@ -172,7 +172,7 @@ static const rtosc::Ports localPorts = {
         rPreset(ad_voice_filter, [90 40 64 40 64 64 ...]),
         rPreset(sub_bandwidth, [100 64 64 ...]),
         rPreset(sub_freq, [30 64 64 ...]),
-        rDefaultDepends(loc) rDepends(Penvpoints) rDepends(Pfreemode), "Envelope Values"),
+        rDefaultDepends(loc) rDepends(Penvpoints,Pfreemode,PA_val,PD_val,PS_val,PR_val), "Envelope Values"),
 #undef rChangeCb
     {"Envmode:", rDoc("Envelope variant type"), NULL,
         rBegin;
@@ -192,7 +192,7 @@ static const rtosc::Ports localPorts = {
         rPreset(sub_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
         rPreset(sub_bandwidth, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
         rPreset(sub_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...])
-        rDefaultDepends(loc) rDoc("Envelope Delay Times (ms)") rDepends(Pfreemode), nullptr,
+        rDefaultDepends(loc) rDoc("Envelope Delay Times (ms)") rDepends(Pfreemode,A_dt,D_dt,R_dt), nullptr,
     //{"envdt#" STRINGIFY(MAX_ENVELOPE_POINTS) "::f", rProp(parameter) rDefault([0.00 (0x0p+0) 71.32 (0x1.1d485ep+6) 71.32 (0x1.1d485ep+6) ...]) rDoc("Envelope Delay Times (ms)"), nullptr,
         rBOILS_BEGIN
             if(!strcmp("", args)) {

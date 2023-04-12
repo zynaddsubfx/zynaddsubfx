@@ -302,7 +302,7 @@ void Distortion::changepar(int npar, unsigned char value)
             Pstereo = (value > 1) ? 1 : value;
             break;
         case 10:
-            Pprefiltering = value;
+            Pprefiltering = (value!=0);
             break;
         case 11:
             Pfuncpar = value;

@@ -154,6 +154,50 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 d.broadcast(d.loc, "i", mag);
             }
         }},
+    {"basefuncFFTfreqs::b", rProp(parameter) rProp(non-realtime) rDepends(magnitude, phase)
+        rDoc("FFT freqs of base function")
+        rDefault([0.f 0.f ...]),
+        NULL, rBOIL_BEGIN
+            // no. of floats to send/recv is (oscilsize/2-1) * 2,
+            // because the first FFT bin is not used, and each bin has real+img
+            const int32_t bufsize = obj->synth.oscilsize-2; // no. of floats
+            if(!rtosc_narguments(msg))
+            {
+                float* tmpbuf = new float[bufsize];
+                for (int i = 0; i < bufsize/2; ++i)
+                {
+                    tmpbuf[2*i]   = obj->myBuffers().basefuncFFTfreqs[i+1].real();
+                    tmpbuf[2*i+1] = obj->myBuffers().basefuncFFTfreqs[i+1].imag();
+                }
+                data.reply(loc, "b", bufsize*sizeof(float), tmpbuf);
+                delete[] tmpbuf;
+            } else {
+                rtosc_blob_t blob = rtosc_argument(msg, 0).b;
+                float* buf = (float*) blob.data;
+                int len = blob.len/sizeof(float);
+                int max = std::min(len, bufsize);
+                for (int i = 0; i < max/2; ++i) // TODO: reply all, just like above?
+                {
+/*                    if(buf[2*i])
+             {
+                 printf("%d -> %d->R: %e\n",2*i, i+1, buf[2*i]);
+             }
+                    if(buf[2*i+1]) printf("%d -> %d->C: %e\n",2*i+1, i+1, buf[2*i+1]);*/
+                    obj->myBuffers().basefuncFFTfreqs[i+1] =
+                        fft_t(buf[2*i], buf[2*i+1]);
+                }
+                for(int i = 0; i < max/2; ++i)
+         {
+             if(obj->myBuffers().basefuncFFTfreqs[i+1].real())
+                          {
+                              printf("%d->R: %e\n",i+1,obj->myBuffers().basefuncFFTfreqs[i+1].real());
+                          }
+         }
+                // TODO: call prepare etc.
+                data.broadcast(loc, "b", max, buf);
+            }
+        rBOIL_END
+        },
     {"base-spectrum:", rProp(non-realtime) rDoc("Returns spectrum of base waveshape"),
         NULL, [](const char *, rtosc::RtData &d) {
             OscilGen &o = *((OscilGen*)d.obj);

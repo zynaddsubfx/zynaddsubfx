@@ -1450,6 +1450,8 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
                                           Pefxroute[nefx],
                                           0,
                                           NUM_PART_EFX);
+            if(Pefxroute[nefx]>2) // fix for broken savefiles
+                Pefxroute[nefx]=2;
             partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
             Pefxbypass[nefx] = xml.getparbool("bypass", Pefxbypass[nefx]);
             xml.exitbranch();
