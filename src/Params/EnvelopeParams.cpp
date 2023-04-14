@@ -26,6 +26,10 @@ using namespace rtosc;
 
 namespace zyn {
 
+#define DAMAGEPARENT char part_loc[128]; strncpy(part_loc, d.loc, sizeof(part_loc));\
+     part_loc[sizeof(part_loc) - 1] = '\0'; char *end = strrchr(part_loc, '/');\
+     if(end) { end[1] = '\0'; d.broadcast("/damage", "s", part_loc); }
+
 #define rObject EnvelopeParams
 #define rBegin [](const char *msg, RtData &d) { \
     (void)* msg; EnvelopeParams *env = (rObject*) d.obj
@@ -76,7 +80,9 @@ static const rtosc::Ports localPorts = {
     rSelf(EnvelopeParams),
     rPasteRt,
 #undef  rChangeCb
-#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); if (obj->time) { \
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  else obj->updatenonfree(); \
+                  if (obj->time) { \
         obj->last_update_timestamp = obj->time->time(); }
     rOption(loc, rProp(internal),
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
@@ -114,6 +120,18 @@ static const rtosc::Ports localPorts = {
             "Linear or Logarithmic Envelopes"),
     rToggle(Prepeating, rShort("repeat"), rDefault(false),
             "Repeat the Envelope"),
+            
+    #undef  rChangeCb
+    #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  else obj->updatefree(); \
+                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); }\
+                  char part_loc[128]; \
+                  strncpy(part_loc, loc, sizeof(part_loc)); \
+                  part_loc[sizeof(part_loc) - 1] = '\0'; \
+                  char *end = strrchr(part_loc, '/'); \
+                  if(end) { \
+                      end[1] = '\0'; \
+                      data.broadcast("/damage", "s", part_loc);}
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), "Attack Time"),
     rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f), rDefaultDepends(loc),
               rPreset(ad_global_freq, 0.254f),   rPreset(ad_global_filter, 0.127f),
@@ -157,7 +175,8 @@ static const rtosc::Ports localPorts = {
               rDefault(64),
               "Release Value"),
 #undef rChangeCb
-#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree();  \
+                  else obj->updatenonfree(); \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); } \
                   if(idx >= obj->Penvpoints) { obj->Penvpoints = idx + 1; }
     rParamsDT(envdt,  MAX_ENVELOPE_POINTS, rProp(alias), "Envelope Delay Times"),
@@ -220,6 +239,8 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f)/1000; //store as seconds in member variable
             }
+            env->updatenonfree();
+            DAMAGEPARENT
         }
         rEnd},
     {"dt", rDoc("Envelope Delay Times (sec)"), NULL,
@@ -236,8 +257,11 @@ static const rtosc::Ports localPorts = {
             }
             d.replyArray(d.loc, arg_types, args);
         } else {
-            for(int i=0; i<N && i<M; ++i)
+            for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f);
+            }
+            env->updatenonfree();
+            DAMAGEPARENT
         }
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
@@ -256,6 +280,8 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->Penvval[i] = limit(roundf(rtosc_argument(msg,i).f*127.0f), 0.0f, 127.0f);
             }
+            env->updatenonfree();
+            DAMAGEPARENT
         }
         rEnd},
 
@@ -506,7 +532,27 @@ void EnvelopeParams::converttofree()
     }
 }
 
+void EnvelopeParams::updatefree()
+{
+    Penvval[0]  = PA_val;
+    envdt[1]    = A_dt;
+    envdt[Penvsustain]   = D_dt;
+    Penvval[Penvsustain-1]  = PD_val;
+    Penvval[Penvsustain]  = PS_val;
+    envdt[Penvpoints-1]   = R_dt;
+    Penvval[Penvpoints-1]  = PR_val;
+}
 
+void EnvelopeParams::updatenonfree()
+{
+    PA_val = Penvval[0];
+    A_dt = envdt[1];
+    D_dt = envdt[Penvsustain];
+    PD_val = Penvval[Penvsustain-1];
+    PS_val = Penvval[Penvsustain];
+    R_dt = envdt[Penvpoints-1];
+    PR_val = Penvval[Penvpoints-1];
+}
 
 
 void EnvelopeParams::add2XML(XMLwrapper& xml)
