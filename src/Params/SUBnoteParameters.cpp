@@ -578,6 +578,8 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
             Volume    = -60.0f * ( 1.0f - vol / 96.0f);
+            if(Volume == -0.f)
+                Volume = 0.f;
         } else {
             Volume    = xml.getparreal("volume", Volume);
         }
