@@ -622,9 +622,14 @@ void OscilGen::oscilfilter(fft_t *freqs) const
 void OscilGen::changebasefunction(OscilGenBuffers& bfrs) const
 {
     if(Pcurrentbasefunc != 0) {
-        getbasefunction(bfrs, bfrs.tmpsmps);
-        if(fft)
-            fft->smps2freqs_noconst_input(bfrs.tmpsmps, bfrs.basefuncFFTfreqs);
+        if(Pcurrentbasefunc == 127 && !Pbasefuncmodulation) {
+            // this would be a no-op, skip it
+        }
+        else {
+            getbasefunction(bfrs, bfrs.tmpsmps);
+            if(fft)
+                fft->smps2freqs_noconst_input(bfrs.tmpsmps, bfrs.basefuncFFTfreqs);
+        }
         clearDC(bfrs.basefuncFFTfreqs.data);
     }
     else //in this case bfrs.basefuncFFTfreqs are not used
