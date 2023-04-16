@@ -154,6 +154,47 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 d.broadcast(d.loc, "i", mag);
             }
         }},
+    {"basefuncFFTfreqs::b", rProp(parameter) rProp(non-realtime)
+        rBlobType(f) rDepends(magnitude, phase) rDefault([0.f 0.f ...])
+        rDoc("FFT freqs of base function"),
+        NULL, rBOIL_BEGIN
+            // no. of floats to send/recv is (oscilsize/2-1) * 2,
+            // because the first FFT bin is not used, and each bin has real+imag
+            const int32_t bufsize = obj->synth.oscilsize-2;
+            if(!rtosc_narguments(msg))
+            {
+                float* tmpbuf = new float[bufsize];
+                for (int i = 0; i < bufsize/2; ++i)
+                {
+                    tmpbuf[2*i]   = obj->myBuffers().basefuncFFTfreqs[i+1].real();
+                    tmpbuf[2*i+1] = obj->myBuffers().basefuncFFTfreqs[i+1].imag();
+                }
+                data.reply(loc, "b", bufsize*sizeof(float), tmpbuf);
+                delete[] tmpbuf;
+            } else {
+                rtosc_blob_t blob = rtosc_argument(msg, 0).b;
+                float* buf = (float*) blob.data;
+                int len = blob.len/sizeof(float);
+                int max = std::min(len, bufsize);
+                for (int i = 0; i < max/2; ++i)
+                {
+                    obj->myBuffers().basefuncFFTfreqs[i+1] =
+                        fft_t(buf[2*i], buf[2*i+1]);
+                }
+                // TODO: Simplify this code section when merging with WT branch
+                char  repath[128];
+                strcpy(repath, data.loc);
+                char *edit   = strrchr(repath, '/')+1;
+                strcpy(edit, "prepare");
+                FFTfreqBuffer freqs = obj->fft->allocFreqBuf();
+                OscilGenBuffers& bfrs = obj->myBuffers();
+                obj->prepare(bfrs, freqs);
+                data.chain(repath, "b", sizeof(fft_t*), &freqs.data);
+                bfrs.pendingfreqs = freqs.data;
+                data.broadcast(loc, "b", bufsize*sizeof(float), buf);
+            }
+        rBOIL_END
+        },
     {"base-spectrum:", rProp(non-realtime) rDoc("Returns spectrum of base waveshape"),
         NULL, [](const char *, rtosc::RtData &d) {
             OscilGen &o = *((OscilGen*)d.obj);
@@ -1493,7 +1534,8 @@ void OscilGen::getfromXML(XMLwrapper& xml)
         clearDC(bfrs.basefuncFFTfreqs.data);
         normalize(bfrs.basefuncFFTfreqs.data, synth.oscilsize);
         bfrs.cachedbasevalid = false;
-    }}
+    }
+}
 
 
 //Define basic functions
