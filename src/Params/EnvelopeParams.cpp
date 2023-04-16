@@ -102,7 +102,23 @@ static const rtosc::Ports localPorts = {
             rDepends(Pfreemode),
             rDefault(2),
             "Location of the sustain point"),
-    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
+    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, rProp(alias), "Envelope Delay Times"),
+    rArrayF(envdt, MAX_ENVELOPE_POINTS, rProp(parameter),
+            rEnabledBy(Pfreemode),
+            rDefault([0.0 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_freq, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 6.98 (0x1.be978ep+2) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_filter, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.97 (0x1.f0a3d8p-1) 0.01 (0x1.26e978p-7) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_fm_freq, [0.00 (0x0p+0) 3.62 (0x1.cf5c28p+1) 1.88 (0x1.e0418ap+0) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_fm_amp, [0.00 (0x0p+0) 1.88 (0x1.e0418ap+0) 3.62 (0x1.cf5c28p+1) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.04 (0x1.4fdf3cp-5) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_bandwidth, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rDefaultDepends(loc), rDepends(Pfreemode,A_dt,D_dt,R_dt),
+            "Envelope Delay Times (ms)"),
     rParams(Penvval, MAX_ENVELOPE_POINTS,
         rEnabledBy(Pfreemode),
         rDefault([64 64 ...]),
@@ -185,7 +201,6 @@ static const rtosc::Ports localPorts = {
         rBegin;
         d.reply(d.loc, "i", env->Envmode);
         rEnd},
-
     {"envdt", rDoc("Envelope Delay Times (ms)"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
