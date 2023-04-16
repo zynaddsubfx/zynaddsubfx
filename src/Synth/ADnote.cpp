@@ -21,6 +21,7 @@
 #include "../globals.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#include "../Params/EnvelopeParams.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Containers/ScratchString.h"
 #include "../Containers/NotePool.h"
@@ -850,7 +851,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         if(param.PAmpEnvelopeEnabled) {
             vce.AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope,
                     basefreq, synth.dt(), wm,
-                    (pre+"VoicePar"+nvoice+"/AmpEnvelope/").c_str);
+                    (pre+"VoicePar"+nvoice+"/AmpEnvelope/").c_str, 
+                     VelF(velocity, param.AmpEnvelope->vStretchFunction));
             vce.AmpEnvelope->envout_dB(); //discard the first envelope sample
             vce.newamplitude *= vce.AmpEnvelope->envout_dB();
         }
@@ -865,7 +867,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         if(param.PFreqEnvelopeEnabled)
             vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope,
                     basefreq, synth.dt(), wm,
-                    (pre+"VoicePar"+nvoice+"/FreqEnvelope/").c_str);
+                    (pre+"VoicePar"+nvoice+"/FreqEnvelope/").c_str, 
+                     VelF(velocity, param.FreqEnvelope->vStretchFunction));
 
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
@@ -883,7 +886,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 vce.FilterEnvelope =
                     memory.alloc<Envelope>(*param.FilterEnvelope,
                             basefreq, synth.dt(), wm,
-                            (pre+"VoicePar"+nvoice+"/FilterEnvelope/").c_str);
+                            (pre+"VoicePar"+nvoice+"/FilterEnvelope/").c_str, 
+                     VelF(velocity, param.FilterEnvelope->vStretchFunction));
                 vce.Filter->addMod(*vce.FilterEnvelope);
             }
 
@@ -935,7 +939,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         if(param.PFMFreqEnvelopeEnabled)
             vce.FMFreqEnvelope = memory.alloc<Envelope>(*param.FMFreqEnvelope,
                     basefreq, synth.dt(), wm,
-                    (pre+"VoicePar"+nvoice+"/FMFreqEnvelope/").c_str);
+                    (pre+"VoicePar"+nvoice+"/FMFreqEnvelope/").c_str, 
+                     VelF(velocity, param.FMFreqEnvelope->vStretchFunction));
 
         vce.FMnewamplitude = vce.FMVolume * ctl.fmamp.relamp;
 
@@ -943,7 +948,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             vce.FMAmpEnvelope =
                 memory.alloc<Envelope>(*param.FMAmpEnvelope,
                         basefreq, synth.dt(), wm,
-                        (pre+"VoicePar"+nvoice+"/FMAmpEnvelope/").c_str);
+                        (pre+"VoicePar"+nvoice+"/FMAmpEnvelope/").c_str, 
+                     VelF(velocity, param.FMAmpEnvelope->vStretchFunction));
             vce.FMnewamplitude *= vce.FMAmpEnvelope->envout_dB();
         }
     }
@@ -2023,12 +2029,14 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
 {
     ScratchString pre = prefix;
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq,
-            synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str);
+            synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str, 
+                     VelF(velocity, param.FreqEnvelope->vStretchFunction));
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FreqLfo/").c_str);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
-            synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
+            synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str, 
+                     VelF(velocity, param.AmpEnvelope->vStretchFunction));
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
 
@@ -2039,7 +2047,8 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
             stereo, basefreq);
 
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq,
-            synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str);
+            synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str, 
+                     VelF(velocity, param.FilterEnvelope->vStretchFunction));
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FilterLfo/").c_str);
 

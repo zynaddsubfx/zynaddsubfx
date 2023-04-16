@@ -56,6 +56,8 @@ class EnvelopeParams:public Presets
         float         envdt[MAX_ENVELOPE_POINTS];
         unsigned char Penvval[MAX_ENVELOPE_POINTS];
         unsigned char Penvstretch; //64=normal stretch (piano-like), 0=no stretch
+        float vStretch;
+        float vStretchFunction;
         unsigned char Pforcedrelease; //0 - OFF, 1 - ON
         unsigned char Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
         unsigned char Prepeating; //0 - OFF, 1 - ON
