@@ -18,6 +18,7 @@
 #include <vector>
 #include "../globals.h"
 #include "Config.h"
+#include <stdint.h>
 
 //entries in a bank
 #define BANK_SIZE 160
