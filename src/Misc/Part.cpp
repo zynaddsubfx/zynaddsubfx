@@ -847,8 +847,13 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_resonance_bandwidth:
             ctl.setresonancebw(par);
-            kit[0].adpars->GlobalPar.Reson->
-            sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
+            for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
+                if(kit[item].adpars == NULL)
+                    continue;
+                kit[item].adpars->GlobalPar.Reson->
+                sendcontroller(C_resonance_bandwidth,
+                               ctl.resonancebandwidth.relbw);
+            }
             break;
     }
 }
