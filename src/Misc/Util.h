@@ -164,7 +164,7 @@ char *rtosc_splat(const char *path, std::set<std::string>);
  * types
  */
 #define rParamZyn(name, ...) \
-  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
+  {STRINGIFY(name) "::i",  rProp(parameter) rDefaultProps rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 
 #define rPresetType \
 {"preset-type:", rProp(internal) rDoc("clipboard type of object"), 0, \

@@ -158,6 +158,8 @@ static const rtosc::Ports non_realtime_ports =
 {
     rSelf(PADnoteParameters),
     rPresetType,
+#undef rDefaultProps
+#define rDefaultProps rProp(non-realtime)
     {"paste:b", rProp(internal) rDoc("paste port"), 0,
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
@@ -246,6 +248,8 @@ static const rtosc::Ports non_realtime_ports =
             "Samples per octave"),
     rParamI(Pquality.oct, rShort("octaves"), rLinear(0,7), rDefault(3),
             "Number of octaves to sample (above the first sample"),
+#undef rDefaultProps
+#define rDefaultProps
 
     {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rProp(non-realtime) rLinear(0,1000)
         rDefault(500) rDoc("Bandwidth Of Harmonics"), NULL,
@@ -258,7 +262,7 @@ static const rtosc::Ports non_realtime_ports =
                 d.reply(d.loc, "i", p->Pbandwidth);
             }}},
 
-    {"bandwidthvalue:", rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
+    {"bandwidthvalue:", rProp(non-realtime) rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
         [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             d.reply(d.loc, "f", p->setPbandwidth(p->Pbandwidth));
@@ -310,6 +314,7 @@ static const rtosc::Ports non_realtime_ports =
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };
+#undef rDefaultProps
 #undef rChangeCb
 
 const rtosc::Ports &PADnoteParameters::non_realtime_ports = zyn::non_realtime_ports;

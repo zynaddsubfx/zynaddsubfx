@@ -36,6 +36,8 @@ namespace zyn {
 const rtosc::Ports OscilGen::non_realtime_ports = {
     rSelf(OscilGen),
     rPaste,
+#undef rDefaultProps
+#define rDefaultProps rProp(non-realtime)
     //TODO ensure min/max
     rOption(Phmagtype, rShort("scale"),
             rOptions(linear,dB scale (-40),
@@ -97,10 +99,12 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
               "modulation parameter"),
     rToggle(ADvsPAD, rShort("If it is used by PADSynth"),
             "If it is used by PADSynth (and not ADSynth)"),
+#undef rDefaultProps
+#define rDefaultProps
 
 
     //TODO update to rArray and test
-    {"phase#128::c:i", rProp(parameter) rLinear(0,127)
+    {"phase#128::c:i", rProp(parameter) rLinear(0,127) rProp(non-realtime)
         rDefault([64 ...])
         rDoc("Sets harmonic phase"),
         NULL, [](const char *m, rtosc::RtData &d) {
@@ -127,7 +131,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             }
         }},
     //TODO update to rArray and test
-    {"magnitude#128::c:i", rProp(parameter) rLinear(0,127)
+    {"magnitude#128::c:i", rProp(parameter) rLinear(0,127) rProp(non-realtime)
         rDefault([127 64 64 ...]) rDoc("Sets harmonic magnitude"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //printf("I'm at '%s'\n", d.loc);
@@ -303,6 +307,7 @@ const rtosc::Ports OscilGen::realtime_ports{
         }},
 
 };
+#undef rDefaultProps
 
 const rtosc::MergePorts OscilGen::ports{
     &OscilGen::realtime_ports,
