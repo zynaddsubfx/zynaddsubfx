@@ -661,6 +661,8 @@ void FilterParams::getfromXML(XMLwrapper& xml)
         gain         = xml.getparreal("gain",       0);
         freqtracking = xml.getparreal("freq_tracking", 0);
     }
+    float basefreq_min = std::atof(ports["basefreq"]->meta()["min"]);
+    basefreq = std::max(basefreq, basefreq_min);
 
     //formant filter parameters
     if(xml.enterbranch("FORMANT_FILTER")) {

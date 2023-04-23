@@ -1470,7 +1470,8 @@ void Part::getfromXML(XMLwrapper& xml)
     Plegatomode = xml.getparbool("legato_mode", Plegatomode); //older versions
     if(!Plegatomode)
         Plegatomode = xml.getpar127("legato_mode", Plegatomode);
-    Pkeylimit = xml.getpar127("key_limit", Pkeylimit);
+    int keylimit_max = std::atoi(ports["Pkeylimit"]->meta()["max"]);
+    Pkeylimit = std::min(keylimit_max, xml.getpar127("key_limit", Pkeylimit));
     Pvoicelimit = xml.getpar127("voice_limit", Pvoicelimit);
 
 

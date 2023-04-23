@@ -1242,7 +1242,10 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
 void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 {
     Enabled     = xml.getparbool("enabled", 0);
-    Unison_size = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_in_file = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_min = std::atoi(ports["Unison_size"]->meta()["min"]);
+    unsigned char unison_max = std::atoi(ports["Unison_size"]->meta()["max"]);
+    Unison_size = std::min(std::max(unison_in_file, unison_min), unison_max);
     Unison_frequency_spread = xml.getpar127("unison_frequency_spread",
                                              Unison_frequency_spread);
     Unison_stereo_spread = xml.getpar127("unison_stereo_spread",
