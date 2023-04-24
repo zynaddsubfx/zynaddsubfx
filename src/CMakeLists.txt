@@ -18,6 +18,7 @@ find_package(Alsa)
 find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+find_package(HOMEBREW)  #for libpng and libjpeg (for fltk on MacOS)
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
@@ -461,10 +462,10 @@ if(FltkGui)
 		string(STRIP "${FLTK_LDFLAGS}" FLTK_LIBRARIES)
 	endif()
 
-	message(STATUS ${FLTK_LDFLAGS})
+	message(STATUS "Link flags: ${FLTK_LDFLAGS}")
 
 
-	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
+	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -524,7 +525,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW3F_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW3F_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS} ${HOMEBREW_LIB_DIR})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -689,6 +690,7 @@ package_status(ZLIB_FOUND       "zlib     " "found"   ${Red})
 package_status(MXML_FOUND       "mxml     " "found"   ${Red})
 package_status(FFTW3F_FOUND     "fftw3f   " "found"   ${Red})
 package_status(LIBLO_FOUND      "liblo    " "found"   ${Red})
+package_status(HOMEBREW_FOUND   "Homebrew " "found"   ${Yellow})
 package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(X11_Xpm_FOUND    "xpm      " "found"   ${Yellow})
 package_status(FLTK_FOUND       "fltk     " "found"   ${Yellow})

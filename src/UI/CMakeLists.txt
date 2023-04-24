@@ -29,9 +29,15 @@ if(NtkGui)
 endif()
 
 if(FltkGui)
+    link_directories(${HOMEBREW_LIB_DIR})  # This is necessary for fltk to find libpng and other libraries on MacOS.
     add_executable(zynaddsubfx-ext-gui guimain.cpp)
-    target_link_libraries(zynaddsubfx-ext-gui zynaddsubfx_gui ${FLTK_LIBRARIES}
-        ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} ${LIBLO_LIBRARIES} rtosc rtosc-cpp)
+    target_link_libraries(zynaddsubfx-ext-gui
+        zynaddsubfx_gui
+        ${FLTK_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${LIBLO_LIBRARIES}
+        rtosc
+        rtosc-cpp)
     if(X11_FOUND AND X11_Xpm_FOUND)
         add_definitions(-DHAS_X11=1)
         target_link_libraries(zynaddsubfx-ext-gui ${X11_LIBRARIES} -lXpm)

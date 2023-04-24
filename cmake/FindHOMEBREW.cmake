@@ -1,0 +1,10 @@
+#Find Homebrew
+
+if ("Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
+  if(DEFINED ENV{HOMEBREW_PREFIX}) 
+    set(HOMEBREW_LIB_DIR "$ENV{HOMEBREW_PREFIX}/lib")
+  endif()
+endif()
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(HOMEBREW DEFAULT_MSG HOMEBREW_LIB_DIR)
