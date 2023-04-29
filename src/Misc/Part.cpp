@@ -53,8 +53,9 @@ static const Ports partPorts = {
               "How many parts are before this in the Master"),
 #undef  rChangeCb
 #define rChangeCb if(obj->Penabled == false) obj->AllNotesOff();
-    rToggle(Penabled, rShort("enable"), rDefaultDepends(partno),
-            rPresets(true), rDefault(false), "Part enable"),
+    rToggle(Penabled, rShort("enable"),
+            rPreset(0, true), rDefault(false), rDefaultDepends(partno),
+            "Part enable"),
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
@@ -89,6 +90,7 @@ static const Ports partPorts = {
     rParamZyn(Pmaxkey, rShort("max"), rDefault(127), "Max Used Key"),
     rParamZyn(Pkeyshift, rShort("shift"), rDefault(64), "Part keyshift"),
     rOption(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
+            rDefaultDepends(partno),
             rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
             "Active MIDI channel"),
     rParamZyn(Pvelsns,   rShort("sense"), rDefault(64), "Velocity sensing"),

@@ -126,7 +126,7 @@ class Part
         void setvoicelimit(unsigned char Pvoicelimit);
         void setkititemstatus(unsigned kititem, bool Penabled_);
 
-        unsigned char partno; /**<if it's the Master's first part*/
+        unsigned char partno; /**<the part number in Master*/
         bool          Penabled; /**<if the part is enabled*/
         float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
