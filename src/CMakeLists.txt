@@ -479,9 +479,13 @@ if(FltkGui)
 endif()
 
 if(NtkGui)
+  unset (FLTK_FLUID_EXECUTABLE)
+  find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
+  if (NOT FLTK_FLUID_EXECUTABLE)
+    message(FATAL_ERROR "ntk-fluid not found. If it's not in PATH, please invoke cmake with -DCMAKE_PROGRAM_PATH=<location/of/ntk-fluid>")
+  endif()
 
-    find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
-
+  message(STATUS "NTK Fluid executable: ${FLTK_FLUID_EXECUTABLE}")
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_IMAGES_LIBRARIES} ${NTK_LIBRARIES} ${OPENGL_LIBRARIES})
