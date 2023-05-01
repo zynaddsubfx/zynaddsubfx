@@ -16,3 +16,4 @@ CMakeFiles
 build
 doc/gen/
 doc/zynaddsubfx.html
+.DS_Store
