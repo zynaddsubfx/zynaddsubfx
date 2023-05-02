@@ -11,13 +11,15 @@
 
 ## Build and test a release candidate
 
-All applies to the 4 UI options: no-gui, fltk, ntk and zyn-fusion.
-
-- Check the code builds on Linux, Mac and Windows (standalone and plugin versions)
+- Check the code builds on Linux: no gui, fltk, ntk, zest.
+  Standalone and plugin versions.
+- Check the code builds on Windows: zest. Standalone and plugin versions.
+- Check the code builds on Mac: fltk, standalone only.
 - Check the docker containers produce binaries
 - Check the code runs on Linux, Mac and Windows (standalone and plugin versions)
 
-Then tag the release git commit with the version number.
+Then tag the release git commit with the version number (zynaddsubfx,
+mruby-zest-build).
 
 ## Publish the new version
 
