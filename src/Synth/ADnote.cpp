@@ -1837,9 +1837,9 @@ int ADnote::noteout(float *outl, float *outr)
             if(stereo)
                 for(int i = 0; i < synth.buffersize; ++i) { //stereo
                     outl[i] += tmpwavel[i] * NoteVoicePar[nvoice].Volume
-                               * NoteVoicePar[nvoice].Panning * 2.0f;
-                    outr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
                                * (1.0f - NoteVoicePar[nvoice].Panning) * 2.0f;
+                    outr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
+                               * NoteVoicePar[nvoice].Panning * 2.0f;
                 }
             else
                 for(int i = 0; i < synth.buffersize; ++i) //mono
@@ -1849,10 +1849,10 @@ int ADnote::noteout(float *outl, float *outr)
             if(stereo)
                 for(int i = 0; i < synth.buffersize; ++i) { //stereo
                     bypassl[i] += tmpwavel[i] * NoteVoicePar[nvoice].Volume
-                                  * NoteVoicePar[nvoice].Panning * 2.0f;
-                    bypassr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
                                   * (1.0f
                                      - NoteVoicePar[nvoice].Panning) * 2.0f;
+                    bypassr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
+                                  * NoteVoicePar[nvoice].Panning * 2.0f;
                 }
             else
                 for(int i = 0; i < synth.buffersize; ++i) //mono
@@ -1885,13 +1885,13 @@ int ADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * NoteGlobalPar.Panning;
-            outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= tmpvol * NoteGlobalPar.Panning;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-            outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
         }
 
     //Apply the punch

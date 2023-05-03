@@ -587,13 +587,13 @@ int SUBnote::noteout(float *outl, float *outr)
                                                  newamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * panning;
-            outr[i] *= tmpvol * (1.0f - panning);
+            outl[i] *= tmpvol * (1.0f - panning);
+            outr[i] *= tmpvol * panning;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= newamplitude * panning;
-            outr[i] *= newamplitude * (1.0f - panning);
+            outl[i] *= newamplitude * (1.0f - panning);
+            outr[i] *= newamplitude * panning;
         }
     watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;
