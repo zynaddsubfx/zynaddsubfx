@@ -26,7 +26,6 @@ if(PKG_CONFIG_FOUND)
 
     pkg_check_modules(FFTW3F REQUIRED fftw3f)
     pkg_check_modules(MXML REQUIRED mxml)
-    pkg_check_modules(ZLIB REQUIRED zlib)
 
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
@@ -39,6 +38,11 @@ else()
     find_package(MXML REQUIRED)
     find_package(LIBLO REQUIRED)
     find_package(PORTAUDIO)
+endif()
+# special case for zlib, which is a system lib on macOS
+if(PKG_CONFIG_FOUND AND NOT APPLE)
+    pkg_check_modules(ZLIB REQUIRED zlib)
+else()
     find_package(ZLIB REQUIRED)
 endif()
 
