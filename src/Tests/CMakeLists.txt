@@ -15,8 +15,16 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+    set(SUPPORTS_LD_NO_AS_NEEDED FALSE)
+else()
+    set(SUPPORTS_LD_NO_AS_NEEDED TRUE)
+endif()
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
+    ${MXML_LIBRARIES} pthread $<$<BOOL:${SUPPORTS_LD_NO_AS_NEEDED}>:-Wl,--no-as-needed> "-lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
 
@@ -61,7 +69,7 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
                            ${PLATFORM_LIBRARIES})
 
     add_executable(ins-test InstrumentStats.cpp)
-    target_link_libraries(ins-test ${test_lib} rt)
+    target_link_libraries(ins-test ${test_lib} $<$<NOT:$<BOOL:${APPLE}>>:rt>)
 
     if(LIBLO_FOUND)
         cp_script(check-ports.rb)
