@@ -15,7 +15,10 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-if(${CXX_COMPILER_ID} MATCHES "AppleClang")
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
     set(SUPPORTS_LD_NO_AS_NEEDED FALSE)
 else()
     set(SUPPORTS_LD_NO_AS_NEEDED TRUE)
