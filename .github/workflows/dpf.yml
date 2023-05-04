@@ -34,6 +34,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      # FIXME remove after updating DPF
+      - name: fake dpf script
+        run: |
+          rm DPF/utils/package-osx-bundles.sh
+          ln -s $(which ls) DPF/utils/package-osx-bundles.sh
+          touch ZynAddSubFX-macOS.pkg
       - uses: distrho/dpf-cmake-action@v1
         with:
           target: ${{ matrix.target }}
