@@ -15,8 +15,13 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
+if(${CXX_COMPILER_ID} MATCHES "AppleClang")
+    set(SUPPORTS_LD_NO_AS_NEEDED FALSE)
+else()
+    set(SUPPORTS_LD_NO_AS_NEEDED TRUE)
+endif()
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wl,--no-as-needed> "-lpthread")
+    ${MXML_LIBRARIES} pthread $<$<BOOL:${SUPPORTS_LD_NO_AS_NEEDED}>:-Wl,--no-as-needed> "-lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
 
