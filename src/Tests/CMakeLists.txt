@@ -69,7 +69,7 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
                            ${PLATFORM_LIBRARIES})
 
     add_executable(ins-test InstrumentStats.cpp)
-    target_link_libraries(ins-test ${test_lib} rt)
+    target_link_libraries(ins-test ${test_lib} $<$<NOT:$<BOOL:${APPLE}>>:rt>)
 
     if(LIBLO_FOUND)
         cp_script(check-ports.rb)
