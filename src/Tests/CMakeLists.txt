@@ -64,8 +64,10 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     target_link_libraries(ins-test ${test_lib} rt)
 
     if(LIBLO_FOUND)
-        cp_script(check-ports.rb)
-        add_test(PortChecker check-ports.rb)
+        quick_test(PortChecker zynaddsubfx_core zynaddsubfx_nio
+                   zynaddsubfx_gui_bridge
+                   ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                   ${PLATFORM_LIBRARIES})
     endif()
     add_executable(save-osc SaveOSC.cpp)
     target_link_libraries(save-osc
