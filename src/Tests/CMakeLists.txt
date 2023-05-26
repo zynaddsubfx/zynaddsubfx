@@ -15,8 +15,15 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
+if("Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
+    #--no-as-needed is not supported by Apple CLang.
+    SET(ZYNCORE_FLAGS "-Wl")
+else()
+    SET(ZYNCORE_FLAGS "-Wl,--no-as-needed")
+endif()
+
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
+    ${MXML_LIBRARIES} pthread ${ZYNCORE_FLAGS} "-lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
 
