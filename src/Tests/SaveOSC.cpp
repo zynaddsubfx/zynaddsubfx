@@ -244,6 +244,7 @@ class SaveOSCTest
                     fprintf(stderr, "Loading XMZ file %s...\n", filename.c_str());
                     load_ok = timeOutOperation("/load_xmz", filename.c_str(), 1000);
                 }
+                mw->discardAllbToUButHandleFree();
 
                 if(load_ok)
                 {
@@ -256,6 +257,7 @@ class SaveOSCTest
                          ? EXIT_SUCCESS
                          : EXIT_FAILURE;
                     wait_for_message();
+                    mw->discardAllbToUButHandleFree();
                     dump_savefile(rval);
                 }
                 else

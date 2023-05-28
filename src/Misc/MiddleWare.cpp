@@ -577,6 +577,7 @@ public:
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
     ~MiddleWareImpl(void);
+    void discardAllbToUButHandleFree();
     void recreateMinimalMaster();
 
     //Check offline vs online mode in plugins
@@ -755,103 +756,106 @@ public:
             zyn::Config config;
             config.cfg.SaveFullXml = master->SaveFullXml;
 
-            zyn::SYNTH_T* synth = new zyn::SYNTH_T;
-            synth->buffersize = master->synth.buffersize;
-            synth->samplerate = master->synth.samplerate;
-            synth->alias();
+            zyn::SYNTH_T* synth2 = new zyn::SYNTH_T;
+            synth2->buffersize = master->synth.buffersize;
+            synth2->samplerate = master->synth.samplerate;
+            synth2->alias();
 
-            zyn::Master master2(*synth, &config);
-            master->copyMasterCbTo(&master2);
-            master2.frozenState = true;
-
-            std::set<std::string> alreadyWritten;
-            rtosc_version m_version =
             {
-                (unsigned char) version.get_major(),
-                (unsigned char) version.get_minor(),
-                (unsigned char) version.get_revision()
-            };
-            savefile = rtosc::save_to_file(getNonRtParamPorts(), this, "ZynAddSubFX", m_version, alreadyWritten, {});
-            savefile += '\n';
+                zyn::Master master2(*synth2, &config);
+                master->copyMasterCbTo(&master2);
+                master2.frozenState = true;
 
-            doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
-            {
-                savefile = master->saveOSC(savefile, alreadyWritten);
+                std::set<std::string> alreadyWritten;
+                rtosc_version m_version =
+                {
+                    (unsigned char) version.get_major(),
+                    (unsigned char) version.get_minor(),
+                    (unsigned char) version.get_revision()
+                };
+                savefile = rtosc::save_to_file(getNonRtParamPorts(), this, "ZynAddSubFX", m_version, alreadyWritten, {});
+                savefile += '\n';
+
+                doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
+                {
+                    savefile = master->saveOSC(savefile, alreadyWritten);
 #if 1
-                // load the savefile string into another master to compare the results
-                // between the original and the savefile-loaded master
-                // this requires a temporary master switch
-                Master* old_master = master;
-                dispatcher.updateMaster(&master2);
-                while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    // load the savefile string into another master to compare the results
+                    // between the original and the savefile-loaded master
+                    // this requires a temporary master switch
+                    Master* old_master = master;
+                    dispatcher.updateMaster(&master2);
+                    while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
 
-                res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
-                // TODO: compare MiddleWare, too?
+                    res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
+                    // TODO: compare MiddleWare, too?
 
-                // The above call is done by this thread (i.e. the MiddleWare thread), but
-                // it sends messages to master2 in order to load the values
-                // We need to wait until savefile has been loaded into master2
-                int i;
-                for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
-                    os_usleep(50000);
-                if(i >= 20) // >= 1 second?
-                {
-                    // Master failed to fetch its messages
-                    res = -1;
-                }
-                printf("Saved in less than %d ms.\n", 50*i);
-
-                dispatcher.updateMaster(old_master);
-                while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
-#endif
-                if(res < 0)
-                {
-                    std::cerr << "invalid savefile (or a backend error)!" << std::endl;
-                    std::cerr << "complete savefile:" << std::endl;
-                    std::cerr << savefile << std::endl;
-                    std::cerr << "first entry that could not be parsed:" << std::endl;
-
-                    for(int i = -res + 1; savefile[i]; ++i)
-                    if(savefile[i] == '\n')
+                    // The above call is done by this thread (i.e. the MiddleWare thread), but
+                    // it sends messages to master2 in order to load the values
+                    // We need to wait until savefile has been loaded into master2
+                    int i;
+                    for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
+                        os_usleep(50000);
+                    if(i >= 20) // >= 1 second?
                     {
-                        savefile.resize(i);
-                        break;
+                        // Master failed to fetch its messages
+                        res = -1;
                     }
-                    std::cerr << (savefile.c_str() - res) << std::endl;
+                    printf("Saved in less than %d ms.\n", 50*i);
 
-                    res = -1;
-                }
-                else
-                {
-                    char* xml = master->getXMLData(),
-                        * xml2 = master2.getXMLData();
-                    // TODO: below here can be moved out of read only op
-
-                    res = strcmp(xml, xml2) ? -1 : 0;
-
-                    if(res == 0)
+                    dispatcher.updateMaster(old_master);
+                    while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
+#endif
+                    if(res < 0)
                     {
-                        if(filename && *filename)
+                        std::cerr << "invalid savefile (or a backend error)!" << std::endl;
+                        std::cerr << "complete savefile:" << std::endl;
+                        std::cerr << savefile << std::endl;
+                        std::cerr << "first entry that could not be parsed:" << std::endl;
+
+                        for(int i = -res + 1; savefile[i]; ++i)
+                        if(savefile[i] == '\n')
                         {
-                            std::ofstream ofs(filename);
-                            ofs << savefile;
+                            savefile.resize(i);
+                            break;
                         }
+                        std::cerr << (savefile.c_str() - res) << std::endl;
+
+                        res = -1;
                     }
                     else
                     {
-                        std::cout << savefile << std::endl;
-                        std::cerr << "Cannot write OSC savefile!! (see tmp1.txt and tmp2.txt)"
-                                  << std::endl;
-                        std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
-                        tmp1 << xml;
-                        tmp2 << xml2;
-                        res = -1;
-                    }
+                        char* xml = master->getXMLData(),
+                            * xml2 = master2.getXMLData();
+                        // TODO: below here can be moved out of read only op
 
-                    free(xml);
-                    free(xml2);
-                }
-            });
+                        res = strcmp(xml, xml2) ? -1 : 0;
+
+                        if(res == 0)
+                        {
+                            if(filename && *filename)
+                            {
+                                std::ofstream ofs(filename);
+                                ofs << savefile;
+                            }
+                        }
+                        else
+                        {
+                            std::cout << savefile << std::endl;
+                            std::cerr << "Cannot write OSC savefile!! (see tmp1.txt and tmp2.txt)"
+                                      << std::endl;
+                            std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
+                            tmp1 << xml;
+                            tmp2 << xml2;
+                            res = -1;
+                        }
+
+                        free(xml);
+                        free(xml2);
+                    }
+                });
+            }
+            delete synth2;
         }
         else // xml format
         {
@@ -2024,8 +2028,18 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     offline = false;
 }
 
+void MiddleWareImpl::discardAllbToUButHandleFree()
+{
+    while(bToU->hasNext()) {
+        const char *rtmsg = bToU->read();
+        if(!strcmp(rtmsg, "/free"))
+                bToUhandle(rtmsg);
+    }
+}
+
 MiddleWareImpl::~MiddleWareImpl(void)
 {
+    discardAllbToUButHandleFree();
 
     if(server)
         lo_server_free(server);
@@ -2683,6 +2697,11 @@ void MiddleWare::switchMaster(Master* new_master)
         // this will be done by calling the mastercb
         transmitMsg("/switch-master", "b", sizeof(Master*), &new_master);
     }
+}
+
+void MiddleWare::discardAllbToUButHandleFree()
+{
+    impl->discardAllbToUButHandleFree();
 }
 
 }

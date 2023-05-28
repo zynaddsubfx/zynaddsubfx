@@ -101,6 +101,8 @@ class MiddleWare
         //!@warning use with care, and only in frozen state
         void switchMaster(Master* new_master);
 
+        void discardAllbToUButHandleFree();
+
         static const rtosc::MergePorts& getAllPorts();
 
     private:
