@@ -1744,12 +1744,16 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         impl.loadMaster(NULL);
         d.broadcast("/damage", "s", "/");
         rEnd},
-    {"load_xiz:is", 0, 0,
+    {"load_xiz:is:ist", 0, 0,
         rBegin;
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
+        uint64_t request_time = 0;
+        if(rtosc_narguments(msg) > 2)
+            request_time = rtosc_argument(msg, 2).t;
         impl.pending_load[part_id]++;
         impl.loadPart(part_id, file, impl.master, d);
+        d.broadcast(d.loc, "stT", file, request_time);
         rEnd},
     {"load-part:is", 0, 0,
         rBegin;
