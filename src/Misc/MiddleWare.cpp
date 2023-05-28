@@ -628,6 +628,8 @@ public:
                                    config->cfg.Interpolation,
                                    &master->microtonal, master->fft, &master->watcher,
                                    ("/part"+to_s(npart)+"/").c_str());
+                p->partno  = npart % NUM_MIDI_CHANNELS;
+                p->Prcvchn = npart % NUM_MIDI_CHANNELS;
                 if(p->loadXMLinstrument(filename))
                     fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 
@@ -651,6 +653,8 @@ public:
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
+        p->partno  = npart % NUM_MIDI_CHANNELS;
+        p->Prcvchn = npart % NUM_MIDI_CHANNELS;
 
         if(p->loadXMLinstrument(filename))
             fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
@@ -682,6 +686,8 @@ public:
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
+        p->partno  = npart % NUM_MIDI_CHANNELS;
+        p->Prcvchn = npart % NUM_MIDI_CHANNELS;
         p->applyparameters();
         obj_store.extractPart(p, npart);
         kits.extractPart(p, npart);
