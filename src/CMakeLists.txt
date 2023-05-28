@@ -18,6 +18,9 @@ find_package(Alsa)
 find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+find_package(ECM)
+set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+find_package(LibGit2)
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
@@ -76,6 +79,7 @@ else()
   SET (GuiModule off  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 endif()
 SET (CompileTests ON CACHE BOOL "whether tests should be compiled in or not")
+SET (CompileExtensiveTests OFF CACHE BOOL "whether tests that take a long time should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
