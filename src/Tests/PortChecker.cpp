@@ -7,6 +7,7 @@
 #include <rtosc/thread-link.h>
 #include <rtosc/rtosc-time.h>
 #include <rtosc/port-checker.h>
+#include <liblo-server.h>  // from rtosc's test directory
 
 #include "../Misc/Master.h"
 #include "../Misc/MiddleWare.h"
@@ -88,7 +89,9 @@ class PortChecker
 
             bool ok;
             try {
-                rtosc::port_checker pc;
+                int timeout_msecs = 50;
+                rtosc::liblo_server sender(timeout_msecs), other(timeout_msecs);
+                rtosc::port_checker pc(&sender, &other);
                 ok = pc(mw->getServerPort());
 
                 if(!pc.print_sanity_checks())

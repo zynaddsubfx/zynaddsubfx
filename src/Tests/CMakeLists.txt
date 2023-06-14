@@ -7,7 +7,7 @@ function(quick_test test_name link)
     add_executable(${test_name} "${test_name}.cpp")
     add_test(NAME ${test_name}
              COMMAND ${test_name})
-     target_link_libraries(${test_name} ${link} ${ARGN})
+    target_link_libraries(${test_name} ${link} ${ARGN})
 endfunction()
 
 #for tests looking for files stored in the source dir
@@ -64,10 +64,12 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     target_link_libraries(ins-test ${test_lib} rt)
 
     if(LIBLO_FOUND)
-        quick_test(PortChecker zynaddsubfx_core zynaddsubfx_nio
+        quick_test(PortChecker lo-server zynaddsubfx_core zynaddsubfx_nio
                    zynaddsubfx_gui_bridge
                    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
                    ${PLATFORM_LIBRARIES})
+        target_include_directories(PortChecker PRIVATE ${RTOSC_TEST_INCLUDE_DIR})
+        target_link_directories(PortChecker PRIVATE ${RTOSC_TEST_LIB_DIR})
     endif()
     add_executable(save-osc SaveOSC.cpp)
     target_link_libraries(save-osc
