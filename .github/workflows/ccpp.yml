@@ -1,6 +1,10 @@
 name: Ubuntu Build CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   build:
@@ -21,10 +25,13 @@ jobs:
       run: git submodule update --init
     - name: configure
       run: mkdir build && cd build && cmake ..
+    - name: configure-extensive
+      if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
+      run: cd build && cmake -DCompileExtensiveTests=ON ..
     - name: make
       run: cd build && make
     - name: make test
-      run: cd build && make test
+      run: cd build && make test CTEST_OUTPUT_ON_FAILURE=1
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
 #    container:
