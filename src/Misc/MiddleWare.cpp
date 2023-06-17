@@ -844,9 +844,12 @@ public:
                             std::cout << savefile << std::endl;
                             std::cerr << "Cannot write OSC savefile!! (see tmp1.txt and tmp2.txt)"
                                       << std::endl;
-                            std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
-                            tmp1 << xml;
-                            tmp2 << xml2;
+                            {
+                                std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
+                                tmp1 << xml;
+                                tmp2 << xml2;
+                            }
+                            system("diff tmp1.txt tmp2.txt");
                             res = -1;
                         }
 
