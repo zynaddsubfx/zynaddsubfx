@@ -982,7 +982,7 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume = 12.0412f - 60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412f + 60.0f * (vol / 96.0f - 1.0f);
         } else if (upgrade_3_0_5) {
             printf("file version less than 3.0.5\n");
             Volume = 12.0412f + xml.getparreal("volume", Volume);
@@ -1285,7 +1285,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            volume    = -60.0f * ( 1.0f - vol / 127.0f);
+            volume    = 60.0f * (vol / 127.0f - 1.0f);
         } else {
             volume    = xml.getparreal("volume", volume);
         }
