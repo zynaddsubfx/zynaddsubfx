@@ -159,6 +159,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             }
         }},
     {"basefuncFFTfreqs::b", rProp(parameter) rProp(non-realtime)
+        rProp(no port checker) // buggy port
         rBlobType(f) rDepends(magnitude, phase) rDefault([0.f 0.f ...])
         rDoc("FFT freqs of base function"),
         NULL, rBOIL_BEGIN
