@@ -475,7 +475,7 @@ class SaveOSCTest
         {
             git_libgit2_init();
 
-            git_buf root_path = {0};
+            git_buf root_path = {0, 0, 0};
             git_repository_discover(&root_path, ".", 0, NULL);
 
             git_repository *repo = NULL;
