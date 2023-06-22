@@ -19,7 +19,7 @@ find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(ECM)
-set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
 find_package(LibGit2)
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
