@@ -51,7 +51,7 @@ static const rtosc::Ports _ports = {
             "Enable for global phase syncronization"),
     rParamZyn(numerator, rShort("num"), rLinear(0,99), rDefault(0),
         "Numerator of ratio to bpm\n0 = OFF"),
-    rParamZyn(denominator, rShort("dem"), rLinear(1,99), rDefault(4),
+    rParamZyn(denominator, rShort("dem"), rLinear(0,99), rDefault(4),
         "Denominator of ratio to bpm"),
     rParamZyn(steps, rShort("steps"), rLinear(1,128), rDefault(8),
             "number of steps"),

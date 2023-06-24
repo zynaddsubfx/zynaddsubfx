@@ -39,7 +39,7 @@ SEQ::SEQ(const SEQParams &seqpars_, const AbsTime &t, WatchManager *m,
             duration = 1.0/seqpars.freq;
 
     } else {
-        duration = 240.0f / limit(((float(time.tempo)) * seqpars.denominator / seqpars.numerator), 0.001f, 1000.0f);
+        duration = 240.0f / limit(((float(time.tempo)) * seqpars.denominator / seqpars.numerator), 0.001f, 10000.0f);
     }
 
     if (seqpars.continous)
