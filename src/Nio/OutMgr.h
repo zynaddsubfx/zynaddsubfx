@@ -34,7 +34,7 @@ class OutMgr
         ~OutMgr();
 
         /**Execute a tick*/
-        const Stereo<float *> tick(unsigned int frameSize) REALTIME;
+        Stereo<float *> tick(unsigned int frameSize) REALTIME;
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)
