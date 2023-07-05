@@ -1,0 +1,161 @@
+/*
+  ZynAddSubFX - a software synthesizer
+
+  Echo.cpp - Echo effect
+  Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2010 Mark McCurry
+  Author: Nasca Octavian Paul
+          Mark McCurry
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+*/
+
+#include <cmath>
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+#include "../Misc/Allocator.h"
+#include "Reverse.h"
+
+#define MAX_DELAY 2
+
+namespace zyn {
+
+#define rObject Reverse
+#define rBegin [](const char *msg, rtosc::RtData &d) {
+#define rEnd }
+
+rtosc::Ports Reverse::ports = {
+    {"preset::i", rOptions(Reverse)
+                  rDefault(0)
+                  rProp(alias)
+                  rProp(parameter)
+                  rDoc("Instrument Presets"), 0,
+                  rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
+                  rEnd},
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume), rDefault(67),
+        rPresetsAt(6, 81, 81, 62),
+        rPresetsAt(16, 33, 33, 33, 33, 33, 33, 40, 40, 31)),
+    rEffParPan(rDefaultDepends(preset), rPresetsAt(2, 75, 60, 60, 64, 60, 60)),
+    rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127),
+            rPresets(10),
+            "Length of Echo"),
+};
+#undef rBegin
+#undef rEnd
+#undef rObject
+
+Reverse::Reverse(EffectParams pars)
+    :Effect(pars),Pvolume(50),Pdelay(60)
+{
+    combfilterL = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
+    combfilterR = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
+    setpreset(Ppreset);
+}
+
+Reverse::~Reverse()
+{
+    memory.dealloc(combfilterL);
+    memory.dealloc(combfilterR);
+}
+
+//Cleanup the effect
+void Reverse::cleanup(void)
+{
+
+}
+
+//Initialize the delays
+void Reverse::initdelays(void)
+{
+    cleanup();
+
+}
+
+//Effect output
+void Reverse::out(const Stereo<float *> &input)
+{
+    if(Pstereo) //Stereo
+        for(int i = 0; i < buffersize; ++i) {
+            efxoutl[i] = input.l[i] * pangainL;
+            efxoutr[i] = input.r[i] * pangainR;
+        }
+    else //Mono
+        for(int i = 0; i < buffersize; ++i)
+            efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
+    
+    
+    combfilterL->filterout(efxoutl);
+    if(Pstereo) combfilterR->filterout(efxoutr);
+
+}
+
+
+//Parameter control
+void Reverse::setvolume(unsigned char _Pvolume)
+{
+    Pvolume = _Pvolume;
+
+    if(insertion == 0) {
+        if (Pvolume == 0) {
+            outvolume = 0.0f;
+        } else {
+            outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
+        }
+        volume    = 1.0f;
+    }
+    else
+        volume = outvolume = Pvolume / 127.0f;
+    if(Pvolume == 0)
+        cleanup();
+}
+
+void Reverse::setdelay(unsigned char _Pdelay)
+{
+    Pdelay   = _Pdelay;
+}
+
+unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
+{
+    return 0;
+}
+
+void Reverse::setpreset(unsigned char npreset)
+{
+    Ppreset = npreset;
+}
+
+void Reverse::changepar(int npar, unsigned char value)
+{
+    switch(npar) {
+        case 0:
+            setvolume(value);
+            break;
+        case 1:
+            setpanning(value);
+            break;
+        case 2:
+            setdelay(value);
+            break;
+    }
+}
+
+unsigned char Reverse::getpar(int npar) const
+{
+    switch(npar) {
+        case 0:  return Pvolume;
+        case 1:  return Ppanning;
+        case 2:  return Pdelay;
+        default: return 0; // in case of bogus parameter number
+    }
+}
+
+}
