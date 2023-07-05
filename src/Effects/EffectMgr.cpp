@@ -27,6 +27,7 @@
 #include "DynamicFilter.h"
 #include "Phaser.h"
 #include "Sympathetic.h"
+#include "../Effects/Reverse.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
@@ -134,6 +135,7 @@ static const rtosc::Ports local_ports = {
                     if(eff->denominator) {
                         switch(eff->nefx) {
                         case 2: // Echo
+                        case 10: // Reverse
                             // invert:
                             // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
                             Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
@@ -145,6 +147,7 @@ static const rtosc::Ports local_ports = {
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
+                        
                             freq =  ((float)eff->time->tempo * 
                                      (float)eff->denominator / 
                                      (240.0f * (float)eff->numerator));
@@ -181,6 +184,7 @@ static const rtosc::Ports local_ports = {
                     if(eff->numerator) {
                         switch(eff->nefx) {
                         case 2: // Echo
+                        case 10: // Reverse
                             // invert:
                             // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
                             Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
@@ -229,7 +233,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i:c:S", rOptions(Disabled, Reverb, Echo, Chorus,
-     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic) rDefault(Disabled)
+     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic, Reverse) rDefault(Disabled)
      rProp(parameter) rDoc("Get Effect Type"), NULL,
      rCOptionCb(obj->nefx, obj->changeeffectrt(var))},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -258,6 +262,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(Phaser),
     rSubtype(Reverb),
     rSubtype(Sympathetic),
+    rSubtype(Reverse),
 };
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
@@ -346,6 +351,9 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
             case 9:
                 efx = memory.alloc<Sympathetic>(pars);
                 break;
+            case 10:
+                efx = memory.alloc<Reverse>(pars);
+                break;
             //put more effect here
             default:
                 efx = NULL;
@@ -358,6 +366,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
         if (numerator>0) {
             switch(nefx) {
                 case 2: // Echo
+                case 10:// Reverse
                     // invert:
                     // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
                     Pdelay = (int)roundf((20320.0f / (float)time->tempo) * 
