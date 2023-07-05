@@ -173,7 +173,7 @@ const rtosc::Ports FilterParams::ports = {
         rOptions(HP, BP, LP)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
     {"type-comb::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
-        rOptions(BWD, FWD, both, BWDN, FWDN, bothN)
+        rOptions(BWD, FWD, both, BWDN, FWDN, bothN, REV)
             rDoc("Comb Filter Type"), 0, rOptionCb(Ptype)},
     //UI reader
     {"Pvowels:", rDoc("Get Formant Vowels"), NULL,
