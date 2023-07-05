@@ -14,10 +14,11 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc), buffercounter(0)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
-    mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
+    //~ mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
+    mem_size = (int)ceilf((float)samplerate*1.4f) + buffersize + 2; // 40bpm
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     output = (float*)memory.alloc_mem(mem_size*sizeof(float));
     memset(input, 0, mem_size*sizeof(float));
@@ -57,19 +58,35 @@ void CombFilter::filterout(float *smp)
     memcpy(&input[mem_size-buffersize], smp, buffersize*sizeof(float));
     for (int i = 0; i < buffersize; i ++)
     {
-        // calculate the feedback sample positions in the buffer
-        float pos = float(mem_size-buffersize+i)-delay;
-        // add the fwd and bwd feedback samples to current sample
-        smp[i] = smp[i]*gain + tanhX(
-            gainfwd * sampleLerp( input, pos) - 
-            gainbwd * sampleLerp(output, pos)); 
-        // copy new sample to output buffer
-        output[mem_size-buffersize+i] = smp[i];
+        if (reversed)
+        {
+            float pos = (mem_size-buffersize-fmodf((2*buffercounter*buffersize+i),delay));
+            smp[i] = sampleLerp( input, pos);
+            //~ printf("delay:%f\n", delay);
+            //~ printf("   fmodf:%f\n", fmodf((2*buffercounter*buffersize+i),delay));
+            //~ printf("   mem_size:%d\n", mem_size);
+            //~ printf("   buffersize:%d\n", buffersize);
+            //~ printf(" pos:%f\n", pos);
+            
+        }
+        else 
+        {
+            // calculate the feedback sample positions in the buffer
+            float pos = float(mem_size-buffersize+i)-delay;
+            // add the fwd and bwd feedback samples to current sample
+            smp[i] = smp[i]*gain + tanhX(
+                gainfwd * sampleLerp( input, pos) - 
+                gainbwd * sampleLerp(output, pos)); 
+            // copy new sample to output buffer
+            output[mem_size-buffersize+i] = smp[i];
+        }
         // apply output gain
         smp[i] *= outgain;
     }
     // shift the buffer content one buffersize to the left
     memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
+    // increase buffer counter
+    ++buffercounter;
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
@@ -81,7 +98,7 @@ void CombFilter::setfreq_and_q(float freq, float q)
 void CombFilter::setfreq(float freq)
 {
     float ff = limit(freq, 25.0f, 40000.0f);
-    delay = ((float)samplerate)/ff;
+    delay = (reversed ? 25.0f : 1.0f) *((float)samplerate)/ff;
 }
 
 void CombFilter::setq(float q_)
@@ -104,14 +121,20 @@ void CombFilter::settype(unsigned char type_)
         default:
             gainfwd = 0.0f;
             gainbwd = q;
+            reversed = false;
             break;
         case 1:
             gainfwd = q;
             gainbwd = 0.0f;
+            reversed = false;
             break;
         case 2:
             gainfwd = q;
             gainbwd = q;
+            reversed = false;
+            break;
+        case 3:
+            reversed = true;
             break;
         case 3:
             gainfwd = 0.0f;
