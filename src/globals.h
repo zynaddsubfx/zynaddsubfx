@@ -73,6 +73,9 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
+class  Sync;
+
+
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
@@ -180,6 +183,11 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+/*
+ * Maximum length of the reverse delay effect
+ */
+#define MAX_REV_DELAY_SECONDS 4.0f
+
 #define MAX_PRESETTYPE_SIZE 30
 
 #define LOG_2 0.693147181f
@@ -237,6 +245,8 @@ typedef std::complex<fftwf_real> fft_t;
                                     i < size; \
                                     i++) \
                                     data_[i] = 0.0f; }
+
+#define PPQ 480
 
 enum ONOFFTYPE {
     OFF = 0, ON = 1

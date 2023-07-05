@@ -286,7 +286,7 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* sync_,
     const int &gzip_compression, const int &interpolation,
     Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),
@@ -302,6 +302,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     memory(alloc),
     synth(synth_),
     time(time_),
+    sync(sync_),
     gzip_compression(gzip_compression),
     interpolation(interpolation)
 {
@@ -326,7 +327,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time);
+        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time, sync);
         Pefxbypass[nefx] = false;
     }
     assert(partefx[0]);

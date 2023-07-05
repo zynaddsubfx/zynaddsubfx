@@ -65,7 +65,7 @@ rtosc::Ports DynamicFilter::ports = {
 
 DynamicFilter::DynamicFilter(EffectParams pars)
     :Effect(pars),
-      lfo(pars.srate, pars.bufsize),
+      lfo(pars.srate, pars.bufsize, pars.time),
       Pvolume(110),
       Pdepth(0),
       Pampsns(90),

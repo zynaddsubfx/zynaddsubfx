@@ -400,13 +400,13 @@ static const Ports master_ports = {
                           Part7, Part8, Part9, Part10, Part11, Part12,
                           Part13, Part14, Part15, Part16) rDefault([Off ...]),
                  "Part to insert part onto"),
-    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(-64,63) rUnit(semitones)
-        rDefault(0) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
+    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127)
+        rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift-64);
+            d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPkeyshift(limit<char>(rtosc_argument(m,0).i+64,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pkeyshift-64);}}},
+            ((Master*)d.obj)->setPkeyshift(limit<char>(rtosc_argument(m,0).i,0,127));
+            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pkeyshift);}}},
     {"echo", rDoc("Hidden port to echo messages"), 0, [](const char *m, RtData&d) {
        d.reply(m-1);}},
     {"get-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
@@ -766,7 +766,7 @@ void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 }
 
 Master::Master(const SYNTH_T &synth_, Config* config)
-    :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
+    :HDDRecorder(synth_), time(synth_), sync(), ctl(synth_, &time),
     microtonal(config->cfg.GzipCompression), bank(config),
     automate(16,4,8),
     frozenState(false), pendingMemory(false),
@@ -775,9 +775,15 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
+    
+    sync = new Sync();
 
     // set default tempo
     time.tempo = 120;
+    time.bar = 0;
+    time.beat = 0;
+    time.tick = 0.0f;
+    time.bpm = 0.0f;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
@@ -807,7 +813,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
-        part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
+        part[npart] = new Part(*memory, synth, time, sync, config->cfg.GzipCompression,
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
         smoothing_part_l[npart].sample_rate( synth.samplerate );
@@ -821,11 +827,11 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time);
+        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time, sync);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
+        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time, sync);
 
     //Note Visualization
     memset(activeNotes, 0, sizeof(activeNotes));

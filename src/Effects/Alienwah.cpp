@@ -68,7 +68,7 @@ rtosc::Ports Alienwah::ports = {
 
 Alienwah::Alienwah(EffectParams pars)
     :Effect(pars),
-      lfo(pars.srate, pars.bufsize),
+      lfo(pars.srate, pars.bufsize, pars.time),
       oldl(NULL),
       oldr(NULL)
 {

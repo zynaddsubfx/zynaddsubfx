@@ -18,6 +18,7 @@
 #include "../globals.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
+#include "../Misc/Sync.h"
 
 // effect parameters differing between single effects
 #ifndef rEffPar
@@ -97,7 +98,7 @@ struct EffectParams
      * @return Initialized Effect Parameter object*/
     EffectParams(Allocator &alloc_, bool insertion_, float *efxoutl_, float *efxoutr_,
             unsigned char Ppreset_, unsigned int srate, int bufsize, FilterParams *filterpars_,
-            bool filterprotect=false);
+            bool filterprotect=false, const AbsTime *time_ = nullptr);
 
 
     Allocator &alloc;
@@ -109,14 +110,18 @@ struct EffectParams
     int bufsize;
     FilterParams *filterpars;
     bool filterprotect;
+    const AbsTime *time;
 };
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
-class Effect
+class Effect: public Observer
 {
     public:
         Effect(EffectParams pars);
         virtual ~Effect() {}
+
+        void update() override {}
+
         /**
          * Get default preset parameter value
          * @param npreset chosen preset
@@ -162,6 +167,7 @@ class Effect
                           * Master Output only.*/
 
         float volume;
+        float speedfactor;
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
@@ -182,6 +188,8 @@ class Effect
 
         //Allocator
         Allocator &memory;
+
+        const AbsTime *time;
 
         // current setup
         unsigned int samplerate;

@@ -590,6 +590,7 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
                                    master->time,
+                                   master->sync,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
                                    &master->microtonal, master->fft, &master->watcher,
@@ -649,6 +650,7 @@ public:
 
         Part *p = new Part(*master->memory, synth,
                 master->time,
+                master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
@@ -2627,6 +2629,7 @@ void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
         fprintf(stderr, "Middleware::messageAnywhere message too big...\n");
         impl->multi_thread_source.free(mem);
     }
+    va_end(va);
 }
 
 
