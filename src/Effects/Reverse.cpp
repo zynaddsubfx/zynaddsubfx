@@ -28,26 +28,14 @@ namespace zyn {
 #define rEnd }
 
 rtosc::Ports Reverse::ports = {
-    {"preset::i", rOptions(Reverse)
-                  rDefault(0)
-                  rProp(alias)
-                  rProp(parameter)
-                  rDoc("Instrument Presets"), 0,
-                  rBegin;
-                  rObject *o = (rObject*)d.obj;
-                  if(rtosc_narguments(msg))
-                      o->setpreset(rtosc_argument(msg, 0).i);
-                  else
-                      d.reply(d.loc, "i", o->Ppreset);
-                  rEnd},
     rPresetForVolume,
-    rEffParVol(rDefaultDepends(presetOfVolume), rDefault(67),
-        rPresetsAt(6, 81, 81, 62),
-        rPresetsAt(16, 33, 33, 33, 33, 33, 33, 40, 40, 31)),
-    rEffParPan(rDefaultDepends(preset), rPresetsAt(2, 75, 60, 60, 64, 60, 60)),
+    rEffParVol(),
+    rEffParPan(),
     rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127),
             rPresets(10),
-            "Length of Echo"),
+            "Length of Reversed Segment"),
+    rEffParTF(Pstereo, 3, rShort("stereo"),
+              "Stereo"),
 };
 #undef rBegin
 #undef rEnd
@@ -58,7 +46,9 @@ Reverse::Reverse(EffectParams pars)
 {
     combfilterL = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
     combfilterR = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
-    setpreset(Ppreset);
+    combfilterL->settype(3);
+    combfilterR->settype(3);
+    Ppanning = 64;
 }
 
 Reverse::~Reverse()
@@ -70,15 +60,10 @@ Reverse::~Reverse()
 //Cleanup the effect
 void Reverse::cleanup(void)
 {
-
+    combfilterR->reset();
+    combfilterL->reset();
 }
 
-//Initialize the delays
-void Reverse::initdelays(void)
-{
-    cleanup();
-
-}
 
 //Effect output
 void Reverse::out(const Stereo<float *> &input)
@@ -145,6 +130,9 @@ void Reverse::changepar(int npar, unsigned char value)
         case 2:
             setdelay(value);
             break;
+        case 3:
+            Pstereo = (value > 1) ? 1 : value;
+            break;
     }
 }
 
@@ -154,6 +142,7 @@ unsigned char Reverse::getpar(int npar) const
         case 0:  return Pvolume;
         case 1:  return Ppanning;
         case 2:  return Pdelay;
+        case 3:  return Pstereo;
         default: return 0; // in case of bogus parameter number
     }
 }
