@@ -66,8 +66,6 @@ class Reverse final:public Effect
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
 
-        void initdelays(void);
-
         CombFilter* combfilterL;
         CombFilter* combfilterR;
 };
