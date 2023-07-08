@@ -30,6 +30,7 @@ class CombFilter:public Filter
         void setq(float q) override;
         void setgain(float dBgain) override;
         void settype(unsigned char type);
+        void reset();
 
     private:
     

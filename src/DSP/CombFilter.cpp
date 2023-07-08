@@ -18,11 +18,10 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     //~ mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
-    mem_size = (int)ceilf((float)samplerate*1.4f) + buffersize + 2; // 40bpm
+    mem_size = (int)ceilf((float)samplerate*1.5f) + buffersize + 2; // 40bpm
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     output = (float*)memory.alloc_mem(mem_size*sizeof(float));
-    memset(input, 0, mem_size*sizeof(float));
-    memset(output, 0, mem_size*sizeof(float));
+    reset();
 
     setfreq_and_q(Ffreq, q);
     settype(type);
@@ -149,6 +148,12 @@ void CombFilter::settype(unsigned char type_)
             gainbwd = -q;
             break;
     }
+}
+
+void CombFilter::reset()
+{
+    memset(input, 0, mem_size*sizeof(float));
+    memset(output, 0, mem_size*sizeof(float));
 }
 
 };
