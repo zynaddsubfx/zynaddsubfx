@@ -106,6 +106,8 @@ void Reverse::setvolume(unsigned char _Pvolume)
 void Reverse::setdelay(unsigned char _Pdelay)
 {
     Pdelay   = _Pdelay;
+    combfilterL->setfreq(1.0f/Pdelay);
+    combfilterR->setfreq(1.0f/Pdelay);
 }
 
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
