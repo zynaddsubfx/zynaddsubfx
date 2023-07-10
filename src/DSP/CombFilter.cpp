@@ -22,6 +22,8 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     output = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
+    
+    fading_samples = 0.005f * samplerate;
 
     setfreq_and_q(Ffreq, q);
     settype(type);
@@ -59,8 +61,20 @@ void CombFilter::filterout(float *smp)
     {
         if (reversed)
         {
-            float pos = (mem_size-buffersize-fmodf((2*buffercounter*buffersize+i),delay));
-            smp[i] = sampleLerp( input, pos);
+            // calculate the relative position inside the "reverted" buffer
+            const float reverse_pos = fmodf((2*buffercounter*buffersize+i),delay); //TBD: is the 2 actually correct?
+            // reading head starts at the end of the last buffer and goes backwards
+            const float pos = (mem_size-buffersize)-reverse_pos;
+            // crossfade for 5ms
+            if(reverse_pos < fading_samples)
+            {
+                const float fadein = reverse_pos / fading_samples;
+                const float fadeout = 1.0f - fadein;
+                smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
+            }
+            else
+                smp[i] = sampleLerp( input, pos);
+                
             //~ printf("delay:%f\n", delay);
             //~ printf("   fmodf:%f\n", fmodf((2*buffercounter*buffersize+i),delay));
             //~ printf("   mem_size:%d\n", mem_size);
