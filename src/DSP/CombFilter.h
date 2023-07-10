@@ -49,7 +49,8 @@ class CombFilter:public Filter
         float gainbwd;
         float delay;        
         bool reversed;
-        int buffercounter;        
+        int buffercounter;      
+        float fading_samples;  
         
         Allocator &memory;
         int mem_size;
