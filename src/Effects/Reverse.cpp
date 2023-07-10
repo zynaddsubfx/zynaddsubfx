@@ -49,6 +49,7 @@ Reverse::Reverse(EffectParams pars)
     combfilterL->settype(3);
     combfilterR->settype(3);
     Ppanning = 64;
+    setdelay(Pdelay);
 }
 
 Reverse::~Reverse()
