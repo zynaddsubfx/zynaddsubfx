@@ -38,7 +38,7 @@ class CombFilter:public Filter
         float* output;
         float gain;
         float q;
-        unsigned char type;
+        unsigned char f_type;
 
         float step(float x);
 
@@ -51,6 +51,7 @@ class CombFilter:public Filter
         bool reversed;
         int buffercounter;      
         float fading_samples;  
+        float reverse_offset;  
         
         Allocator &memory;
         int mem_size;

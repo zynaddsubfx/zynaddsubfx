@@ -31,8 +31,7 @@ rtosc::Ports Reverse::ports = {
     rPresetForVolume,
     rEffParVol(),
     rEffParPan(),
-    rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127),
-            rPresets(10),
+    rEffPar(Pdelay,   2, rShort("length"), rLinear(0, 127),
             "Length of Reversed Segment"),
     rEffParTF(Pstereo, 3, rShort("stereo"),
               "Stereo"),
@@ -42,14 +41,14 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars)
-    :Effect(pars),Pvolume(50),Pdelay(60)
+    :Effect(pars),Pvolume(50),Pdelay(25.0f)
 {
-    combfilterL = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
-    combfilterR = memory.alloc<CombFilter>(&memory, 4, 20.0f, 10, samplerate, buffersize);
-    combfilterL->settype(3);
-    combfilterR->settype(3);
+    combfilterL = memory.alloc<CombFilter>(&memory, 3, 25.0f, 10, samplerate, buffersize);
+    combfilterR = memory.alloc<CombFilter>(&memory, 3, 25.0f, 10, samplerate, buffersize);
+    //~ combfilterL->settype(3);
+    //~ combfilterR->settype(3);
     Ppanning = 64;
-    setdelay(Pdelay);
+    //setdelay(Pdelay);
 }
 
 Reverse::~Reverse()
