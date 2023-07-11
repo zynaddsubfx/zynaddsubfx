@@ -14,25 +14,24 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc), buffercounter(0)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), f_type(Ftype), memory(*alloc), buffercounter(0)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
-    //~ mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
-    mem_size = (int)ceilf((float)samplerate*1.5f) + buffersize + 2; // 40bpm
-    input = (float*)memory.alloc_mem(mem_size*sizeof(float));
-    output = (float*)memory.alloc_mem(mem_size*sizeof(float));
-    reset();
+    if (Ftype==3) mem_size = (int)ceilf((float)samplerate*1.51f) + buffersize + 2; // 40bpm -> 1.5s
+    else mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
     
-    fading_samples = 0.005f * samplerate;
+    input = (float*)memory.alloc_mem(mem_size*sizeof(float));
+    if (Ftype!=3) output = (float*)memory.alloc_mem(mem_size*sizeof(float)); // not needed for Reverse
+    reset();
 
+    fading_samples = 0.01f * samplerate;
     setfreq_and_q(Ffreq, q);
-    settype(type);
 }
 
 CombFilter::~CombFilter(void)
 {
     memory.dealloc(input);
-    memory.dealloc(output);
+    if (f_type!=3) memory.dealloc(output);
 }
 
 
@@ -57,30 +56,26 @@ void CombFilter::filterout(float *smp)
     memmove(&input[0], &input[buffersize], (mem_size-buffersize)*sizeof(float));
     // copy new input samples to the right end of the buffer
     memcpy(&input[mem_size-buffersize], smp, buffersize*sizeof(float));
+    
     for (int i = 0; i < buffersize; i ++)
     {
         if (reversed)
         {
             // calculate the relative position inside the "reverted" buffer
-            const float reverse_pos = fmodf((2*buffercounter*buffersize+i),delay); //TBD: is the 2 actually correct?
+            const float reverse_pos = fmodf((reverse_offset+i),delay);
             // reading head starts at the end of the last buffer and goes backwards
             const float pos = (mem_size-buffersize)-reverse_pos;
-            // crossfade for 5ms
-            if(reverse_pos < fading_samples)
+            // crossfade for a few samples whenever reverse_pos restarts
+            if(reverse_pos <= fading_samples)
             {
-                const float fadein = reverse_pos / fading_samples;
-                const float fadeout = 1.0f - fadein;
+                const float fadein = reverse_pos / fading_samples; // 0 -> 1
+                const float fadeout = 1.0f - fadein;               // 1 -> 0
+                //fade in the newer sampleblock + fade out the older samples
                 smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
             }
             else
                 smp[i] = sampleLerp( input, pos);
-                
-            //~ printf("delay:%f\n", delay);
-            //~ printf("   fmodf:%f\n", fmodf((2*buffercounter*buffersize+i),delay));
-            //~ printf("   mem_size:%d\n", mem_size);
-            //~ printf("   buffersize:%d\n", buffersize);
-            //~ printf(" pos:%f\n", pos);
-            
+
         }
         else 
         {
@@ -97,9 +92,10 @@ void CombFilter::filterout(float *smp)
         smp[i] *= outgain;
     }
     // shift the buffer content one buffersize to the left
-    memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
-    // increase buffer counter
-    ++buffercounter;
+    if (!reversed) memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
+    // increase the offset
+    reverse_offset += 2*buffersize;
+    if (reverse_offset > delay) reverse_offset = fmodf(reverse_offset, delay);
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
@@ -111,13 +107,13 @@ void CombFilter::setfreq_and_q(float freq, float q)
 void CombFilter::setfreq(float freq)
 {
     float ff = limit(freq, 25.0f, 40000.0f);
-    delay = (reversed ? 25.0f : 1.0f) *((float)samplerate)/ff;
+    delay = (reversed ? 25.0f : 1.0f) * ((float)samplerate) / ff;
 }
 
 void CombFilter::setq(float q_)
 {
     q = cbrtf(0.0015f*q_);
-    settype(type);
+    settype(f_type);
 }
 
 void CombFilter::setgain(float dBgain)
@@ -127,8 +123,28 @@ void CombFilter::setgain(float dBgain)
 
 void CombFilter::settype(unsigned char type_)
 {
-    type = type_;
-    switch (type)
+    if (f_type != type_)
+    {
+        if (type_!=3) // switching to comb
+        {
+            memory.dealloc(input); // dealloc to change size
+            mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2;
+            input = (float*)memory.alloc_mem(mem_size*sizeof(float));
+            output = (float*)memory.alloc_mem(mem_size*sizeof(float));
+            
+        }
+        else // switching to reverse
+        {
+            mem_size = (int)ceilf((float)samplerate*1.51f) + buffersize + 2;
+            memory.dealloc(input);
+            memory.dealloc(output); // not needed anymore
+            input = (float*)memory.alloc_mem(mem_size*sizeof(float));
+        }
+        f_type = type_;
+        reset();
+    }
+
+    switch (f_type)
     {
         case 0:
         default:
@@ -147,6 +163,8 @@ void CombFilter::settype(unsigned char type_)
             reversed = false;
             break;
         case 3:
+            gainfwd = 0.0f;
+            gainbwd = 0.0f;
             reversed = true;
             break;
         case 3:
@@ -167,7 +185,7 @@ void CombFilter::settype(unsigned char type_)
 void CombFilter::reset()
 {
     memset(input, 0, mem_size*sizeof(float));
-    memset(output, 0, mem_size*sizeof(float));
+    if (f_type!=3) memset(output, 0, mem_size*sizeof(float));
 }
 
 };

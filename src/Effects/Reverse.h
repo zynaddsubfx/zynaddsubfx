@@ -60,8 +60,8 @@ class Reverse final:public Effect
     private:
         //Parameters
         unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        unsigned char Pdelay;   /**<#3 Delay of the Echo*/
-        unsigned char Pstereo; // 64 is centered
+        unsigned char Pdelay;   /**<#2 Length of reversed segment*/
+        unsigned char Pstereo;
 
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
