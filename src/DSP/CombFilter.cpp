@@ -24,7 +24,7 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     if (Ftype!=3) output = (float*)memory.alloc_mem(mem_size*sizeof(float)); // not needed for Reverse
     reset();
 
-    fading_samples = samplerate/100.0f;
+    fading_samples = (int)samplerate/25;
     
     setfreq_and_q(Ffreq, q);
 }
@@ -68,10 +68,10 @@ void CombFilter::filterout(float *smp)
             const float pos = (mem_size-1-buffersize)-reverse_pos;
             
             // crossfade for a few samples whenever reverse_pos restarts
-            // reset fade counter
-            if(reverse_pos<1.0f) {
-                fade_counter = 0;
+            if(reverse_pos<reverse_pos_hist) {
+                fade_counter = 0;  // reset fade counter
             }
+            reverse_pos_hist = reverse_pos; // store reverse_pos for turnaround detection
             
             if(fade_counter <= fading_samples) // inside fading segment
             {
@@ -79,40 +79,12 @@ void CombFilter::filterout(float *smp)
                 const float fadeout = 1.0f - fadein;               // 1 -> 0
                 //fade in the newer sampleblock + fade out the older samples
                 smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
-                
-                if (i>buffersize-2 
-                        || i<2 
-                        || fade_counter < 2
-                        || fading_samples - fade_counter < 2) {
-
-                    printf("i: %d   fading block\n",i);
-                    printf("reverse_pos: %f\n", reverse_pos);
-                    printf("fading_samples: %d\n", fading_samples);
-                    printf("pos: %f\n", pos);
-                    printf("pos-delay: %f\n", pos-delay);
-                    printf("fade_counter: %d\n", fade_counter);
-                    printf("fadein: %f\n", fadein);
-                    printf("fadeout: %f\n", fadeout);
-                    printf("sampleLerp( input, pos): <--------%f\n", sampleLerp( input, pos));
-                    printf("sampleLerp( input, pos-delay): %f <--- TO THIS\n", sampleLerp( input, pos-delay));
-                    printf("smp[i]: %f \n\n", smp[i]);
-                }
             }
             else { // outside fading segment
                 smp[i] = sampleLerp( input, pos);
-                if ( reverse_pos > delay - 1.0f) { // last sample before fading
-                    printf("\n--------------------------------------------------------------\n");
-                    printf("i: %d before fading block   delay: %f\n",i, delay);
-                    printf("delay: %f\n", delay);
-                    printf("reverse_pos: %f\n", reverse_pos);
-                    printf("pos: %f\n", pos);
-                    printf("pos-delay: %f\n", pos-delay);
-                    printf("sampleLerp( input, pos): %f <-------- COMPARE THIS\n\n", sampleLerp( input, pos));
-                    printf("smp[i]: %f \n\n", smp[i]);
-                }
             }
         }
-        else 
+        else // not in reverse mode
         {
             // calculate the feedback sample positions in the buffer
             float pos = float(mem_size-buffersize+i)-delay;
@@ -131,6 +103,7 @@ void CombFilter::filterout(float *smp)
     // increase the offset
     reverse_offset += 2*buffersize; // + 1*buffersize because of the leftshifting 
                                     // + 1*buffersize because i turns from buffersize-1 to 0
+    // prevent overflow
     if (reverse_offset > delay) reverse_offset = fmodf(reverse_offset, delay);
 }
 
