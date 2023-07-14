@@ -53,6 +53,7 @@ class CombFilter:public Filter
         bool reversed;
         int buffercounter;      
         float reverse_offset;
+        float reverse_pos_hist;
         int fading_samples;  
         int fade_counter; 
         
