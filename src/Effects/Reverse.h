@@ -17,6 +17,7 @@
 #include "Effect.h"
 #include "../Misc/Stereo.h"
 #include "../DSP/CombFilter.h"
+#include "../Misc/Time.h"
 
 namespace zyn {
 
@@ -24,7 +25,7 @@ namespace zyn {
 class Reverse final:public Effect
 {
     public:
-        Reverse(EffectParams pars);
+        Reverse(EffectParams pars, const AbsTime *time_);
         ~Reverse();
 
         void out(const Stereo<float *> &input);
@@ -65,6 +66,8 @@ class Reverse final:public Effect
 
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
+        
+        const AbsTime *time;
 
         CombFilter* combfilterL;
         CombFilter* combfilterR;
