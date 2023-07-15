@@ -30,7 +30,7 @@
 #include "../Effects/Reverse.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
-#include "../Misc/Time.h"
+
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
@@ -352,7 +352,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 efx = memory.alloc<Sympathetic>(pars);
                 break;
             case 10:
-                efx = memory.alloc<Reverse>(pars);
+                efx = memory.alloc<Reverse>(pars, time);
                 break;
             //put more effect here
             default:

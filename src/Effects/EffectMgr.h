@@ -18,6 +18,7 @@
 
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
+#include "../Misc/Time.h"
 
 namespace zyn {
 
