@@ -13,7 +13,7 @@
 namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
-    unsigned int srate, int bufsize)
+    unsigned int srate, int bufsize, float tRef)
     :Filter(srate, bufsize), gain(1.0f), q(Fq), f_type(Ftype), buffercounter(0), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
@@ -25,8 +25,8 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     reset();
 
     fading_samples = (int)samplerate/25;
-    
     setfreq_and_q(Ffreq, q);
+    reverse_offset = fmodf(tRef, delay);
 }
 
 CombFilter::~CombFilter(void)
@@ -115,11 +115,9 @@ void CombFilter::setfreq_and_q(float freq, float q)
 
 void CombFilter::setfreq(float freq)
 {
-    // for reversed delay [0.01 .. 1.5] sec ff= 1/delay 
-    float ff = (reversed ? limit(freq, 0.5f, 64.0f) : limit(freq, 25.0f, 40000.0f));
+    // for reversed delay [0.05 .. 1.5] sec ff= 1/delay 
+    float ff = (reversed ? limit(freq, 0.5f, 20.0f) : limit(freq, 25.0f, 40000.0f));
     delay = ((float)samplerate)/ff;
-    //delay = (reversed ? 25.0f : 1.0f) * ((float)samplerate) / ff; //only needed id friven with scaled parameter
-    //~ fading_samples = samplerate/(ff*20.0f);
 }
 
 void CombFilter::setq(float q_)
