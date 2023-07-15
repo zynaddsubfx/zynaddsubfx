@@ -120,6 +120,15 @@ void CombFilter::setfreq(float freq)
     delay = ((float)samplerate)/ff;
 }
 
+void CombFilter::setphase(float phase)
+{
+    // for reversed delay [0.05 .. 1.5] sec ff= 1/delay 
+    if(phase != phase_offset) {
+        reverse_offset += phase - phase_offset;
+        phase_offset = phase;
+    }
+}
+
 void CombFilter::setq(float q_)
 {
     q = cbrtf(0.0015f*q_);

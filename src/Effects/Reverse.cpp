@@ -33,8 +33,10 @@ rtosc::Ports Reverse::ports = {
     rEffParPan(),
     rEffPar(Pdelay,   2, rShort("length"), rLinear(0, 127), rDefault(25),
             "Length of Reversed Segment"),
-    rEffParTF(Pstereo, 3, rShort("stereo"),
+    rEffParTF(Pstereo,3, rShort("stereo"),
               "Stereo"),
+    rEffPar(Pphase,   4, rShort("phase"), rLinear(0, 127), rDefault(64),
+            "Phase offset for Reversed Segment"),
 };
 #undef rBegin
 #undef rEnd
@@ -108,6 +110,13 @@ void Reverse::setdelay(unsigned char _Pdelay)
     combfilterR->setfreq(85.6666666666f / float(Pdelay+1));
 }
 
+void Reverse::setphase(unsigned char _Pphase)
+{
+    Pphase = _Pphase;
+    combfilterL->setphase(float(Pphase)/120.0f);
+    combfilterR->setphase(float(Pphase)/120.0f);
+}
+
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 {
     return 0;
@@ -133,6 +142,9 @@ void Reverse::changepar(int npar, unsigned char value)
         case 3:
             Pstereo = (value > 1) ? 1 : value;
             break;
+        case 4:
+            setphase(value);
+            break;
     }
 }
 
@@ -143,6 +155,7 @@ unsigned char Reverse::getpar(int npar) const
         case 1:  return Ppanning;
         case 2:  return Pdelay;
         case 3:  return Pstereo;
+        case 4:  return Pphase;
         default: return 0; // in case of bogus parameter number
     }
 }

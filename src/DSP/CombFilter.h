@@ -26,6 +26,7 @@ class CombFilter:public Filter
         ~CombFilter() override;
         void filterout(float *smp) override;
         void setfreq(float freq) override;
+        void setphase(float phase);
         void setfreq_and_q(float freq, float q_) override;
         void setq(float q) override;
         void setgain(float dBgain) override;
@@ -53,6 +54,7 @@ class CombFilter:public Filter
         bool reversed;
         int buffercounter;      
         float reverse_offset;
+        float phase_offset;
         float reverse_pos_hist;
         int fading_samples;  
         int fade_counter; 
