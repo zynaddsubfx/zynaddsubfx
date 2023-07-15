@@ -22,7 +22,7 @@ class CombFilter:public Filter
     public:
         //! @param Fq resonance, range [0.1,1000], logscale
         CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
-                unsigned int srate, int bufsize);
+                unsigned int srate, int bufsize, float tRef=0.0f);
         ~CombFilter() override;
         void filterout(float *smp) override;
         void setfreq(float freq) override;

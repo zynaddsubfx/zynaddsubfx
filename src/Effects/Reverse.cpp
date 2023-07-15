@@ -40,11 +40,12 @@ rtosc::Ports Reverse::ports = {
 #undef rEnd
 #undef rObject
 
-Reverse::Reverse(EffectParams pars)
-    :Effect(pars),Pvolume(50),Pdelay(25.0f)
+Reverse::Reverse(EffectParams pars, const AbsTime *time_)
+    :Effect(pars),Pvolume(50),Pdelay(25.0f), time(time_)
 {
-    combfilterL = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize);
-    combfilterR = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize);
+    float tRef = float(time->time());
+    combfilterL = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize, tRef);
+    combfilterR = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize, tRef);
     Ppanning = 64;
 }
 
