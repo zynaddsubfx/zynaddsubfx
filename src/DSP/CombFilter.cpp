@@ -16,7 +16,6 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     unsigned int srate, int bufsize, float tRef)
     :Filter(srate, bufsize), gain(1.0f), q(Fq), f_type(Ftype), buffercounter(0), memory(*alloc)
 {
-    //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     if (Ftype==3) mem_size = (int)ceilf((float)samplerate*1.51f) + buffersize + 2; // 40bpm -> 1.5s
     else mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
     
@@ -116,8 +115,12 @@ void CombFilter::setfreq_and_q(float freq, float q)
 void CombFilter::setfreq(float freq)
 {
     // for reversed delay [0.05 .. 1.5] sec ff= 1/delay 
-    float ff = (reversed ? limit(freq, 0.5f, 20.0f) : limit(freq, 25.0f, 40000.0f));
+    float ff = (reversed ? limit(freq, 0.66927f, 20.0f) : limit(freq, 25.0f, 40000.0f));
     delay = ((float)samplerate)/ff;
+    // limit fading_samples to be < 1/2 delay length
+    if (int(delay)/2 < samplerate/25 ) fading_samples = int(delay)/2;
+    else fading_samples = samplerate/25;
+    
 }
 
 void CombFilter::setphase(float phase)
