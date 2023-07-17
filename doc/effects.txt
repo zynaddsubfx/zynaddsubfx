@@ -529,3 +529,59 @@ LFO.
 where the vocal is between "Ahhhhh" and "Eeeeee".
 ** *L/R* applies crossover in the end of every stage. This is currently not 
 implemented for the Analog Phaser.
+
+Sympathetic
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The Sympathetic aims to 'simulate' the sympathetic resonance in a piano.
+That is the effect, that all other strings on a piano are also oscillating
+when one string is played. With high Q setting it's more like playing with sustain pedal.
+
+TIP: map the sustain pedal to the Q parameter
+
+Function
+^^^^^^^^
+
+It is made off a bank of combfilters that are by default tuned like the 
+strings of a piano.
+
+Description
+^^^^^^^^^^^
+
+** *Drive* how much input signal id fed to the strings
+** *Level* Output Volume
+** *Str* Number of strings to use. 12 is a full Octave. On small systems 
+be carefull with cpu load
+** *Q* How strong is the Reflection
+** *Uni* Unisono - how many strings should have the 'same' frequency it' used with the
+next paremeter.
+** *Detune* Amount of detune between the unisono strings
+** *Base* midi note of the lowest string
+
+Reverse
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The reversed effect plays the audio signal backwards. To prevent a time paradoxon
+it the input signal is chopped in segments that are reversed one by one.
+One classic usage is the reversing of a decaying sound for example from reverb.
+
+Function
+^^^^^^^^
+With a melotron it was possible to reverse each key by turning the magentic tape around.
+
+
+Description
+^^^^^^^^^^^
+
+** *Length* Length of the segments being played backwards.
+** *Numerator&Denominator* Alternatively the length can be set relative 
+to the global Tempo (bpm)
+** *Phase* adjust the time when the reversed segments start relative to a
+global time reference. It's usefull only when used together with another 
+timed element like LFO.
