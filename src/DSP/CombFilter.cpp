@@ -14,18 +14,21 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize, float tRef)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), f_type(Ftype), buffercounter(0), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), f_type(Ftype), buffercounter(0), 
+    fading_samples((int)samplerate/25), memory(*alloc)
 {
-    if (Ftype==3) mem_size = (int)ceilf((float)samplerate*1.51f) + buffersize + 2; // 40bpm -> 1.5s
+    
+    // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples > 0 --> mem_size = maxdelay + 2*fading_samples + buffersize
+    if (Ftype==3) mem_size = (int)ceilf((float)samplerate*1.50f) + 2*fading_samples + buffersize + 1; // 40bpm -> 1.5s
     else mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
     
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     if (Ftype!=3) output = (float*)memory.alloc_mem(mem_size*sizeof(float)); // not needed for Reverse
     reset();
 
-    fading_samples = (int)samplerate/25;
     setfreq_and_q(Ffreq, q);
     reverse_offset = fmodf(tRef, delay);
+    reverse_pos_hist = -1;
 }
 
 CombFilter::~CombFilter(void)
@@ -62,13 +65,18 @@ void CombFilter::filterout(float *smp)
         if (reversed)
         {
             // calculate the current relative position inside the "reverted" buffer
-            const float reverse_pos = fmodf((reverse_offset+i),delay);
+            const float reverse_pos = fmodf((reverse_offset+phase_offset+i),delay);
             // reading head starts at the end of the last buffer and goes backwards
-            const float pos = (mem_size-1-buffersize)-reverse_pos;
+            const float pos = (mem_size-1-buffersize)-reverse_pos; // 
+            assert(pos>0);
             
             // crossfade for a few samples whenever reverse_pos restarts
             if(reverse_pos<reverse_pos_hist) {
                 fade_counter = 0;  // reset fade counter
+                //~ printf("reverse_pos_hist: %f\n", reverse_pos_hist);
+                //~ printf("reverse_pos: %f\n", reverse_pos);
+                //~ printf("pos: %f\n", pos);
+                //~ printf("i: %d\n", i);
             }
             reverse_pos_hist = reverse_pos; // store reverse_pos for turnaround detection
             
@@ -78,6 +86,16 @@ void CombFilter::filterout(float *smp)
                 const float fadeout = 1.0f - fadein;               // 1 -> 0
                 //fade in the newer sampleblock + fade out the older samples
                 smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
+                if(pos-delay<=0) {
+                    printf("\ni: %d\n", i);
+                    printf("fading_samples: %d\n", fading_samples);
+                    printf("fade_counter: %d\n", fade_counter);
+                    printf("reverse_pos: %f\n", reverse_pos);
+                    printf("pos: %f\n", pos);
+                    printf("delay: %f\n", delay);
+                    printf("pos-delay: %f\n", pos-delay);
+                }
+                assert(pos-delay>0);
             }
             else { // outside fading segment
                 smp[i] = sampleLerp( input, pos);
@@ -102,7 +120,7 @@ void CombFilter::filterout(float *smp)
     // increase the offset
     reverse_offset += 2*buffersize; // + 1*buffersize because of the leftshifting 
                                     // + 1*buffersize because i turns from buffersize-1 to 0
-    // prevent overflow
+    // prevent overflow - no effect on reverse_pos in the next cycle
     if (reverse_offset > delay) reverse_offset = fmodf(reverse_offset, delay);
 }
 
@@ -118,17 +136,17 @@ void CombFilter::setfreq(float freq)
     float ff = (reversed ? limit(freq, 0.66927f, 20.0f) : limit(freq, 25.0f, 40000.0f));
     delay = ((float)samplerate)/ff;
     // limit fading_samples to be < 1/2 delay length
-    if (int(delay)/2 < samplerate/25 ) fading_samples = int(delay)/2;
+    if (int(delay)/2 < int(samplerate/25) ) fading_samples = int(delay)/2;
     else fading_samples = samplerate/25;
     
 }
 
 void CombFilter::setphase(float phase)
 {
-    // for reversed delay [0.05 .. 1.5] sec ff= 1/delay 
-    if(phase != phase_offset) {
-        reverse_offset += phase - phase_offset;
-        phase_offset = phase;
+    float phase_offset_new = (phase-0.5)*delay;
+    if(phase_offset_new != phase_offset) {
+        reverse_offset += phase_offset_new - phase_offset;
+        phase_offset = phase_offset_new;
     }
 }
 
