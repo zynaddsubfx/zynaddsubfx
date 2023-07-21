@@ -78,8 +78,8 @@ void Hysteresis::init(void)
 void Hysteresis::out(const Stereo<float *> &input)
 {
     for(int i = 0; i < buffersize; ++i) {
-        efxoutl[i] = ja_l->getMagnetization(input.l[i]*Pdrive/10.0f);
-        efxoutr[i] = ja_r->getMagnetization(input.r[i]*Pdrive/10.0f);
+        efxoutl[i] = ja_l->getMagnetization(input.l[i]*float(Pdrive/32));
+        efxoutr[i] = ja_r->getMagnetization(input.r[i]*float(Pdrive/32));
     }
     //~ printf("-----i: %d\n", buffersize-1);
     //~ printf("input.l[i]: %f\n", input.l[ buffersize-1]);
