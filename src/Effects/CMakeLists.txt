@@ -12,5 +12,7 @@ set(zynaddsubfx_effect_SRCS
 	Effects/Phaser.cpp
 	Effects/Reverb.cpp
 	Effects/Sympathetic.cpp
+	Effects/Hysteresis.cpp
+	Effects/JilesAtherton.cpp
     PARENT_SCOPE
 )
