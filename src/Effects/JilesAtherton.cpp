@@ -33,8 +33,6 @@ float JilesAtherton::getMagnetization(float _H) {
     float B = Ms * (1.0f - exp(-alpha * H / Hc));
     // Calculate the magnetization.
     float M = B / (1.0f + beta * B);
-    // update state
-    updateParameters();
     // Return the magnetization.
     return -M /(1.5f + Mr);
 }
