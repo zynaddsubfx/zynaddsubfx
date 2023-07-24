@@ -57,29 +57,29 @@ Hysteresis::Hysteresis(EffectParams pars)
       Premanence(64),
       Pcoercivity(64)
 {
-    ja_l = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
-    ja_r = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
+    hyst_l = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
+    hyst_r = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
 }
 
 Hysteresis::~Hysteresis()
 {
-    memory.devalloc(ja_l);
-    memory.devalloc(ja_r);
+    memory.devalloc(hyst_l);
+    memory.devalloc(hyst_r);
 }
 
 //Initialize the delays
 void Hysteresis::init(void)
 {
-    ja_l->init();
-    ja_r->init();
+    //~ hyst_l->init();
+    //~ hyst_r->init();
 }
 
 //Effect output
 void Hysteresis::out(const Stereo<float *> &input)
 {
     for(int i = 0; i < buffersize; ++i) {
-        efxoutl[i] = ja_l->getMagnetization(input.l[i]*float(Pdrive)/32.0f);
-        efxoutr[i] = ja_r->getMagnetization(input.r[i]*float(Pdrive)/32.0f);
+        efxoutl[i] = hyst_l->applyHysteresis(input.l[i]*float(Pdrive)/32.0f);
+        efxoutr[i] = hyst_r->applyHysteresis(input.r[i]*float(Pdrive)/32.0f);
     }
     //~ printf("-----i: %d\n", buffersize-1);
     //~ printf("input.l[i]: %f\n", input.l[ buffersize-1]);
@@ -112,18 +112,27 @@ void Hysteresis::setdrive(unsigned char _Pdrive)
 void Hysteresis::setremanence(unsigned char _Premanence)
 {
     Premanence   = _Premanence;
-    ja_l->setMr(float(Premanence+3)/128.0f);
-    ja_r->setMr(float(Premanence+3)/128.0f);
+    hyst_l->setMr(float(Premanence+3)/32.0f);
+    hyst_r->setMr(float(Premanence+3)/32.0f);
 }
 
 void Hysteresis::setcoercivity(unsigned char _Pcoercivity)
 {
     Pcoercivity   = _Pcoercivity;
-    ja_l->setHc(float((Pcoercivity+2)));
-    ja_r->setHc(float((Pcoercivity+2)));
+    hyst_l->setHc(float((Pcoercivity+2)/8.0f));
+    hyst_r->setHc(float((Pcoercivity+2)/8.0f));
 }
 
+// Add the setter functions for alpha and beta
+//~ void Hysteresis::setalpha(unsigned char Palpha) {
+    //~ hyst_l->setAlpha(float(Palpha)/128.0f);
+    //~ hyst_r->setAlpha(float(Palpha)/128.0f);
+//~ }
 
+//~ void Hysteresis::setbeta(unsigned char Pbeta) {
+    //~ hyst_l->setBeta(float(Pbeta)/128.0f);
+    //~ hyst_r->setBeta(float(Pbeta)/128.0f);
+//~ }
 
 unsigned char Hysteresis::getpresetpar(unsigned char npreset, unsigned int npar)
 {
