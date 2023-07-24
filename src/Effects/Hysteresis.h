@@ -16,6 +16,7 @@
 
 #include "Effect.h"
 #include "../Misc/Stereo.h"
+#include "PreisachHysteresis.h"
 #include "JilesAtherton.h"
 
 namespace zyn {
@@ -71,9 +72,11 @@ class Hysteresis:public Effect
         void setdrive(unsigned char _Pdrive);
         void setremanence(unsigned char _Premanence);
         void setcoercivity(unsigned char _Pcoercivity);
+        //~ void setalpha(unsigned char _Palpha);
+        //~ void setbeta(unsigned char _Pbeta);
         
-        JilesAtherton * ja_l;
-        JilesAtherton * ja_r;
+        JilesAtherton* hyst_l;
+        JilesAtherton* hyst_r;
 };
 
 }

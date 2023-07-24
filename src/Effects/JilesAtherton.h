@@ -17,14 +17,15 @@ public:
   void setMr(float Mr);
 
   // Get the magnetization as a function of the applied field.
-  float getMagnetization(float H);
+  float applyHysteresis(float H);
   
   //
-  void init(void);
+  //~ void init(void);
 
 private:
 
-  void updateParameters();
+  //~ void updateParameters();
+  float tanhX(float x);
   // The coercive field.
   // This is the strength of the applied field required to reduce the magnetization to zero.
   float Hc;
@@ -46,6 +47,8 @@ private:
   
   // store last magnetic field
   float H;
+  float dH;
+  float M;
 };
 
 }
