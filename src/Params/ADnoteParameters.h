@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include <cstdint>
 
 namespace zyn {
 

@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "../globals.h"
 #include "Presets.h"
+#include <cstdint>
 
 namespace zyn {
 

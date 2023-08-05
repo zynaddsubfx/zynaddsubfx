@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
+#include <cstdint>
 
 namespace zyn {
 
