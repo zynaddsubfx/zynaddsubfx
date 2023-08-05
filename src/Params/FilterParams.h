@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
+#include <stdint.h>
 
 namespace zyn {
 
