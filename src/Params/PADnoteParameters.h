@@ -19,7 +19,7 @@
 #include "Presets.h"
 #include <string>
 #include <functional>
-
+#include <cstdint>
 namespace zyn {
 
 /**

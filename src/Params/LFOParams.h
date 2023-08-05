@@ -17,6 +17,7 @@
 #include <Misc/Time.h>
 #include <rtosc/ports.h>
 #include "Presets.h"
+#include <cstdint>
 
 #define LFO_SINE      0
 #define LFO_TRIANGLE  1
