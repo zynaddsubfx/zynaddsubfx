@@ -337,17 +337,22 @@ void waveShapeSmps(int n,
         // f(x) = tan(x)
         {
             ws = 0.1f + (ws * 2.0f);
+            par = par * 4.0f;
             
             // precalc offset with distortion function applied
             // f(x) = x * (0.5 - 0.5 * cos(x * pi))
-            offsetCompensation = offs * (0.5f - 0.5f * cos(offs * PI));;
+            offsetCompensation = offs * (0.5f - 0.5f * par * cos(offs * PI));;
 
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal for drive
                 smps[i] += offs; // add dc offset
                 // f(x) = x * (0.5 - 0.5 * cos(x * pi))
-                if (smps[i] < 1.0f)
-                    smps[i] = smps[i] * (0.5f - 0.5f * cos(smps[i] * PI));
+                if (smps[i] > 1.0f)
+                    smps[i] = smps[i] * (0.5f + 0.5f * par);
+                else if (smps[i] < -1.0f)
+                    smps[i] = smps[i] * (0.5f + 0.5f * par);
+                else
+                    smps[i] = smps[i] * (0.5f - 0.5f * par * cos(smps[i] * PI));
 
                 //subtract offset with distortion function applied
                 smps[i] -= offsetCompensation;
