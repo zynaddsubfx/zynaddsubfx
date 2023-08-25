@@ -23,7 +23,7 @@
 namespace zyn {
 
 /**"AlienWah" Effect*/
-class Alienwah:public Effect
+class Alienwah final:public Effect
 {
     public:
         Alienwah(EffectParams pars);

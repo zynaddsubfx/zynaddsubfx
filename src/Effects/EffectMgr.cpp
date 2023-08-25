@@ -26,6 +26,7 @@
 #include "EQ.h"
 #include "DynamicFilter.h"
 #include "Phaser.h"
+#include "Sympathetic.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
@@ -47,9 +48,33 @@ namespace zyn {
         }}
 static const rtosc::Ports local_ports = {
     rSelf(EffectMgr, rEnabledByCondition(self-enabled)),
+    {"preset::i", rProp(parameter) rDepends(efftype) rDoc("Effect Preset Selector")
+        rDefault(0), NULL,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            char loc[1024];
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            if(!rtosc_narguments(msg))
+                d.reply(d.loc, "i", eff->getpreset());
+            else {
+                eff->changepresetrt(rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->getpreset());
+
+                //update parameters as well
+                fast_strcpy(loc, d.loc, sizeof(loc));
+                char *tail = strrchr(loc, '/');
+                if(!tail)
+                    return;
+                for(int i=0;i<128;++i) {
+                    sprintf(tail+1, "parameter%d", i);
+                    d.broadcast(loc, "i", eff->geteffectparrt(i));
+                }
+            }
+        }}, // must come before rPaste, because apropos otherwise picks "preset-type" first
     rPaste,
     rEnabledCondition(self-enabled, obj->geteffect()),
-    rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
+    rEnabledCondition(is-dynamic-filter, (obj->geteffect()==8)),
+    rRecurp(filterpars, rDepends(preset), rEnabledByCondition(is-dynamic-filter), "Filter Parameter for Dynamic Filter"),
     {"Pvolume::i", rProp(parameter) rLinear(0,127) rShort("amt") rDoc("amount of effect"),
         0,
         [](const char *msg, rtosc::RtData &d)
@@ -93,29 +118,6 @@ static const rtosc::Ports local_ports = {
             } else if(rtosc_type(msg, 0) == 'F'){
                 eff->seteffectparrt(atoi(mm), 0);
                 d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
-            }
-        }},
-    {"preset::i", rProp(parameter) rProp(alias) rDoc("Effect Preset Selector")
-        rDefault(0), NULL,
-        [](const char *msg, rtosc::RtData &d)
-        {
-            char loc[1024];
-            EffectMgr *eff = (EffectMgr*)d.obj;
-            if(!rtosc_narguments(msg))
-                d.reply(d.loc, "i", eff->getpreset());
-            else {
-                eff->changepresetrt(rtosc_argument(msg, 0).i);
-                d.broadcast(d.loc, "i", eff->getpreset());
-
-                //update parameters as well
-                fast_strcpy(loc, d.loc, sizeof(loc));
-                char *tail = strrchr(loc, '/');
-                if(!tail)
-                    return;
-                for(int i=0;i<128;++i) {
-                    sprintf(tail+1, "parameter%d", i);
-                    d.broadcast(loc, "i", eff->geteffectparrt(i));
-                }
             }
         }},
     {"numerator::i", rShort("num") rDefault(0) rLinear(0,99)
@@ -227,7 +229,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i:c:S", rOptions(Disabled, Reverb, Echo, Chorus,
-     Phaser, Alienwah, Distortion, EQ, DynFilter) rDefault(Disabled)
+     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic) rDefault(Disabled)
      rProp(parameter) rDoc("Get Effect Type"), NULL,
      rCOptionCb(obj->nefx, obj->changeeffectrt(var))},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -255,6 +257,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(EQ),
     rSubtype(Phaser),
     rSubtype(Reverb),
+    rSubtype(Sympathetic),
 };
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
@@ -307,8 +310,13 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
     memory.dealloc(efx);
+
+    int new_loc = (_nefx == 8) ? dynfilter_0 : in_effect;
+    if(new_loc != filterpars->loc)
+        filterpars->updateLoc(new_loc);
     EffectParams pars(memory, insertion, efxoutl, efxoutr, 0,
             synth.samplerate, synth.buffersize, filterpars, avoidSmash);
+
     try {
         switch (nefx) {
             case 1:
@@ -334,6 +342,9 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 break;
             case 8:
                 efx = memory.alloc<DynamicFilter>(pars);
+                break;
+            case 9:
+                efx = memory.alloc<Sympathetic>(pars);
                 break;
             //put more effect here
             default:

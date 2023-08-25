@@ -47,7 +47,7 @@ class AudioOut:public virtual Engine
     protected:
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        const Stereo<float *> getNext();
+        Stereo<float *> getNext();
 
         const SYNTH_T &synth;
         int samplerate;

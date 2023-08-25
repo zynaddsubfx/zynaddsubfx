@@ -176,6 +176,7 @@ struct ADnoteVoiceParam {
 
     // filter bypass
     unsigned char Pfilterbypass;
+    unsigned char PfilterFcCtlBypass;
 
     /** Voice oscillator */
     OscilGen *OscilGn;

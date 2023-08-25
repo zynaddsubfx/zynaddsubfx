@@ -61,7 +61,7 @@ class EffectMgr:public Presets
         unsigned char geteffectpar(int npar);
         unsigned char geteffectparrt(int npar) REALTIME;
 
-        const bool insertion;
+        const bool insertion; //!< true iff insertion or part fx
         float     *efxoutl, *efxoutr;
 
         // used by UI

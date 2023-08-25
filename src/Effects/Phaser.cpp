@@ -46,6 +46,8 @@ rtosc::Ports Phaser::ports = {
                            Phaser 5, Phaser 6,
                            APhaser 1, APhaser 2, APhaser 3, APhaser 4,
                            APhaser 5, APhaser 6)
+                  rProp(alias)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -54,7 +56,8 @@ rtosc::Ports Phaser::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(64), rPreset(3, 39), rPreset(10, 25)),
+    rEffParVol(rDefaultDepends(preset),
+            rDefault(64), rPreset(3, 39), rPreset(10, 25)),
     rEffParPan(),
     rEffPar(lfo.Pfreq,       2, rShort("freq"),
             rPresets(36, 35, 31, 22, 20, 53, 14, 14, 9, 14, 127, 1),
@@ -504,7 +507,7 @@ void Phaser::changepar(int npar, unsigned char value)
             setdistortion(value);
             break;
         case 14:
-            Panalog = value;
+            Panalog = (value!=0);
             break;
     }
 }

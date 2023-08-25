@@ -7,7 +7,7 @@ function(quick_test test_name link)
     add_executable(${test_name} "${test_name}.cpp")
     add_test(NAME ${test_name}
              COMMAND ${test_name})
-     target_link_libraries(${test_name} ${link} ${ARGN})
+    target_link_libraries(${test_name} ${link} ${ARGN})
 endfunction()
 
 #for tests looking for files stored in the source dir
@@ -16,7 +16,7 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
+    ${MXML_LIBRARIES} pthread )
 
 message(STATUS "Linking tests with: ${test_lib}")
 
@@ -66,17 +66,39 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     target_link_libraries(ins-test ${test_lib} rt)
 
     if(LIBLO_FOUND)
-        cp_script(check-ports.rb)
-        add_test(PortChecker check-ports.rb)
+        quick_test(PortChecker lo-server zynaddsubfx_core zynaddsubfx_nio
+                   zynaddsubfx_gui_bridge
+                   ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                   ${PLATFORM_LIBRARIES})
+        target_include_directories(PortChecker PRIVATE ${RTOSC_TEST_INCLUDE_DIR})
+        target_link_directories(PortChecker PRIVATE ${RTOSC_TEST_LIB_DIR})
     endif()
+
     add_executable(save-osc SaveOSC.cpp)
-    target_link_libraries(save-osc
-        zynaddsubfx_core zynaddsubfx_nio
-        zynaddsubfx_gui_bridge
-        ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-        ${PLATFORM_LIBRARIES})
-    #this will be replaced with a for loop when the code will get more stable:
-    add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
+    if(LIBGIT2_FOUND)
+        target_include_directories(save-osc PRIVATE ${LIBGIT2_INCLUDE_DIRS})
+        target_link_libraries(save-osc
+            zynaddsubfx_core zynaddsubfx_nio
+            zynaddsubfx_gui_bridge
+            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            ${LIBGIT2_LIBRARIES}
+            ${PLATFORM_LIBRARIES})
+    else()
+        target_compile_definitions(save-osc PRIVATE -DZYN_GIT_WORKTREE="${CMAKE_SOURCE_DIR}")
+        target_link_libraries(save-osc
+            zynaddsubfx_core zynaddsubfx_nio
+            zynaddsubfx_gui_bridge
+            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            ${PLATFORM_LIBRARIES})
+    endif()
+    # test all presets
+    add_test(SaveOscPresets save-osc)
+    # test the most insane XIZ file
+    add_test(SaveOscBigFile save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/banks/olivers-100/0032-Drum\ Kit.xiz)
+    # not realized, because it takes 15 minutes each time:
+    if (CompileExtensiveTests)
+        add_test(SaveOscAllFiles save-osc test-all)
+    endif()
 
 endif()
 

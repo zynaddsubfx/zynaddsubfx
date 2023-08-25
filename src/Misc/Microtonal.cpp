@@ -66,7 +66,8 @@ const rtosc::Ports Microtonal::ports = {
     rParamZyn(Pmapsize, rDefault(12), "Size of key map"),
     rToggle(Pmappingenabled, rDefault(false), "Mapping Enable"),
 
-    rParams(Pmapping, 128, rDefault([0 1 ...]), "Mapping of keys"),
+    //rParams(Pmapping, 128, rDefault([0 1 ... 127]), "Mapping of keys"),
+    rParams(Pmapping, 128, "Mapping of keys"),
     rParamZyn(Pglobalfinedetune, rShort("fine"), rDefault(64),
         "Fine detune for all notes"),
 

@@ -28,35 +28,40 @@ using rtosc::RtData;
     int nfilt = atoi(msg-2); \
     int id    = 10+nfilt*5+offset; \
     if(rtosc_narguments(msg)) \
-        obj->changepar(id, rtosc_argument(msg,0).i);\
-    else \
-        d.reply(d.loc, "i", obj->getpar(id))
+    { \
+        obj->changepar(id, enum_key_from_msg(d.port->meta(), msg)); \
+    } else { \
+        d.reply(d.loc, "i", obj->getpar(id)); }
 
 #define rEnd }
 
 static rtosc::Ports filterports {
-    {"Ptype::i", rProp(parameter) rOptions(Off, LP1, HP1, LP2,
-            HP2, BP, notch, peak, l.shelf, h.shelf)
+    {"Ptype::i:S", rProp(parameter) rProp(enumerated) rOptions(Off, LP1, HP1, LP2,
+            HP2, BP, notch, peak, l.shelf, h.shelf) rDefault(0)
         rShort("type") rDoc("Filter Type"), 0,
         rBegin;
         rEQ(0);
         rEnd},
     {"Pfreq::i", rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("freq"), 0,
         rBegin;
         rEQ(1);
         rEnd},
     {"Pgain::i", rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("gain"), 0,
         rBegin;
         rEQ(2);
         rEnd},
     {"Pq::i",    rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("q") rDoc("Resonance/Bandwidth"), 0,
         rBegin;
         rEQ(3);
         rEnd},
     {"Pstages::i", rProp(parameter) rMap(min, 0) rMap(max, 4)
+        rDefault(0)
         rShort("stages") rDoc("Additional filter stages"), 0,
         rBegin;
         rEQ(4);
@@ -64,6 +69,7 @@ static rtosc::Ports filterports {
 };
 
 rtosc::Ports EQ::ports = {
+    rEffParVol(rDefault(67)),
     {"filter#8/", 0, &filterports,
         rBegin;
         (void)obj;

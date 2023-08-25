@@ -18,6 +18,9 @@ find_package(Alsa)
 find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+find_package(ECM)
+list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+find_package(LibGit2)
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
@@ -76,6 +79,7 @@ else()
   SET (GuiModule off  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 endif()
 SET (CompileTests ON CACHE BOOL "whether tests should be compiled in or not")
+SET (CompileExtensiveTests OFF CACHE BOOL "whether tests that take a long time should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
@@ -111,6 +115,12 @@ endif()
 if(HAVE_SCHEDULER AND (NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME}))
     # Add scheduler function existence info (OSX compatibility)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
+endif()
+
+if(HAVE_BG_SYNTH_THREAD)
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=1)
+else()
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=0)
 endif()
 
 if(HAVE_ASYNC)
@@ -448,17 +458,8 @@ if(NTK_FOUND)
 endif(NTK_FOUND)
 
 if(FltkGui)
-	#UGLY WORKAROUND
-	find_program (FLTK_CONFIG fltk-config)
-	if (FLTK_CONFIG)
-		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
-		string(STRIP "${FLTK_LDFLAGS}" FLTK_LIBRARIES)
-	endif()
-
-	message(STATUS ${FLTK_LDFLAGS})
-
-
-	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
+	
+	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -473,12 +474,16 @@ if(FltkGui)
 endif()
 
 if(NtkGui)
+  unset (FLTK_FLUID_EXECUTABLE)
+  find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
+  if (NOT FLTK_FLUID_EXECUTABLE)
+    message(FATAL_ERROR "ntk-fluid not found. If it's not in PATH, please invoke cmake with -DCMAKE_PROGRAM_PATH=<location/of/ntk-fluid>")
+  endif()
 
-    find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
-
+  message(STATUS "NTK Fluid executable: ${FLTK_FLUID_EXECUTABLE}")
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
-	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
+	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_IMAGES_LIBRARIES} ${NTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	if(X11_FOUND AND X11_Xpm_FOUND)
 	     set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
@@ -702,8 +707,8 @@ package_status(JackEnable       "JACK     " "enabled" ${Yellow})
 package_status(OssEnable        "OSS      " "enabled" ${Yellow})
 package_status(PaEnable         "PA       " "enabled" ${Yellow})
 package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
+package_status(HAVE_BG_SYNTH_THREAD "Background synthesizer thread" "enabled" ${Yellow})
 #TODO GUI MODULE
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
-
 
 message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW3F_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

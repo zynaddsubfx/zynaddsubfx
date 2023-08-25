@@ -266,6 +266,7 @@ void ADnote::setupVoice(int nvoice)
     voice.FilterLfo      = NULL;
 
     voice.filterbypass = param.Pfilterbypass;
+    voice.filterFcCtlBypass = param.PfilterFcCtlBypass;
 
     setupVoiceMod(nvoice);
 
@@ -743,6 +744,8 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         voice.filterbypass =
             pars.VoicePar[nvoice].Pfilterbypass;
+        voice.filterFcCtlBypass =
+            pars.VoicePar[nvoice].PfilterFcCtlBypass;
 
 
         voice.FMVoice = pars.VoicePar[nvoice].PFMVoice;
@@ -1350,7 +1353,8 @@ void ADnote::computecurrentparameters()
         /****************/
         auto *voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
-            voiceFilter->update(relfreq, ctl.filterq.relq);
+            const float voicerelfreq = NoteVoicePar[nvoice].filterFcCtlBypass == 0 ? relfreq : 0.0f;
+            voiceFilter->update(voicerelfreq, ctl.filterq.relq);
         }
 
         if(NoteVoicePar[nvoice].noisetype == 0) { //compute only if the voice isn't noise
@@ -2137,9 +2141,9 @@ int ADnote::noteout(float *outl, float *outr)
             if(stereo)
                 for(int i = 0; i < synth.buffersize; ++i) { //stereo
                     outl[i] += tmpwavel[i] * NoteVoicePar[nvoice].Volume
-                               * NoteVoicePar[nvoice].Panning * 2.0f;
-                    outr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
                                * (1.0f - NoteVoicePar[nvoice].Panning) * 2.0f;
+                    outr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
+                               * NoteVoicePar[nvoice].Panning * 2.0f;
                 }
             else
                 for(int i = 0; i < synth.buffersize; ++i) //mono
@@ -2149,10 +2153,10 @@ int ADnote::noteout(float *outl, float *outr)
             if(stereo)
                 for(int i = 0; i < synth.buffersize; ++i) { //stereo
                     bypassl[i] += tmpwavel[i] * NoteVoicePar[nvoice].Volume
-                                  * NoteVoicePar[nvoice].Panning * 2.0f;
-                    bypassr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
                                   * (1.0f
                                      - NoteVoicePar[nvoice].Panning) * 2.0f;
+                    bypassr[i] += tmpwaver[i] * NoteVoicePar[nvoice].Volume
+                                  * NoteVoicePar[nvoice].Panning * 2.0f;
                 }
             else
                 for(int i = 0; i < synth.buffersize; ++i) //mono
@@ -2185,13 +2189,13 @@ int ADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * NoteGlobalPar.Panning;
-            outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= tmpvol * NoteGlobalPar.Panning;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-            outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
         }
 
     //Apply the punch

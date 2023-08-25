@@ -38,7 +38,7 @@ inline float CombFilter::tanhX(const float x)
 {
     // Pade approximation of tanh(x) bound to [-1 .. +1]
     // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
-    float x2 = x*x;
+    const float x2 = x*x;
     return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2)); //
 }
 

@@ -62,7 +62,7 @@ NSM_Client::command_save(char **out_msg)
     if(!project_filename)
         return ERR_NO_SESSION_OPEN;
 
-    middleware->transmitMsg("/save_xmz", "s", project_filename);
+    middleware->transmitMsgGui("/save_xmz", "s", project_filename);
 
     return r;
 }
@@ -97,9 +97,9 @@ NSM_Client::command_open(const char *name,
     int r = ERR_OK;
 
     if(0 == stat(new_filename, &st))
-        middleware->transmitMsg("/load_xmz", "s", new_filename);
+        middleware->transmitMsgGui("/load_xmz", "s", new_filename);
     else
-        middleware->transmitMsg("/reset_master", "");
+        middleware->transmitMsgGui("/reset_master", "");
 
     if(project_filename)
         free(project_filename);

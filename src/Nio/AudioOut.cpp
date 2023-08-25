@@ -43,9 +43,12 @@ int AudioOut::getSampleRate()
 void AudioOut::setBufferSize(int _bufferSize)
 {
     bufferSize = _bufferSize;
+#if HAVE_BG_SYNTH_THREAD
+    OutMgr::getInstance().setBackgroundSynth(_bufferSize < synth.buffersize);
+#endif
 }
 
-const Stereo<float *> AudioOut::getNext()
+Stereo<float *> AudioOut::getNext()
 {
     return OutMgr::getInstance().tick(bufferSize);
 }

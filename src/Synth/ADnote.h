@@ -185,6 +185,8 @@ class ADnote:public SynthNote
 
             /* Filter Bypass */
             int filterbypass;
+            /* Filter Fq Control Bypass */
+            int filterFcCtlBypass;
 
             /* Delay (ticks) */
             int DelayTicks;

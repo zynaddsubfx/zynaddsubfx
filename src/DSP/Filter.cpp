@@ -60,7 +60,7 @@ Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
             break;
         case 4:
             filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
-            filter->outgain = dB2rap(pars->getgain());
+            filter->setgain(pars->getgain());
             break;
         default:
             filter = memory.alloc<AnalogFilter>(Ftype, 1000.0f, pars->getq(), Fstages, srate, bufsize);

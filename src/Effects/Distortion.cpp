@@ -29,6 +29,8 @@ rtosc::Ports Distortion::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Overdrive 1, Overdrive 2, A. Exciter 1, A. Exciter 2, Guitar Amp,
                     Quantisize)
+                  rProp(alias)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -37,7 +39,10 @@ rtosc::Ports Distortion::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresetsAt(2, 64, 64)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+            rPresetsAt(0,  84, 84, 42, 42,  84, 84),
+            rPresetsAt(16,127,127, 64, 64, 127,127)),
     rEffParPan(),
     rEffPar(Plrcross, 2, rShort("l/r"), rDefault(35), "Left/Right Crossover"),
     rEffPar(Pdrive,   3, rShort("drive"),
@@ -240,7 +245,7 @@ unsigned char Distortion::getpresetpar(unsigned char npreset, unsigned int npar)
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
             /* lower the volume if this is system effect */
-            return (3 * presets[npreset][npar]) / 2;
+            return (2 * presets[npreset][npar]) / 3;
         }
         return presets[npreset][npar];
     }
@@ -297,7 +302,7 @@ void Distortion::changepar(int npar, unsigned char value)
             Pstereo = (value > 1) ? 1 : value;
             break;
         case 10:
-            Pprefiltering = value;
+            Pprefiltering = (value!=0);
             break;
         case 11:
             Pfuncpar = value;
