@@ -439,7 +439,7 @@ static const Ports voicePorts = {
             std::size_t sem_idx; // optional
             Tensor1<WaveTable::float32>* waves1;
             Tensor2<WaveTable::float32>* waves2;
-            bool fillNext;
+            bool fillNextTable;
             if(rtosc_type(msg, 3) == 'i')
             {
                 int sem_idx_int = rtosc_argument(msg, 3).i;
@@ -449,18 +449,18 @@ static const Ports voicePorts = {
                 waves1 = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 4).b.data;
                 waves2 = nullptr;
                 // if single semantic is specified ('i'), this just updates one
-                // element in the current table
-                fillNext = false;
+                // element in the **current** table
+                fillNextTable = false;
             } else {
                 sem_idx = all_semantics();
                 waves1 = nullptr;
                 waves2 = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 3).b.data;
                 // if all semantics are selected
-                // (no 'i'), this updates the "next" table
-                fillNext = true;
+                // (no 'i'), this updates the **next** table
+                fillNextTable = true;
             }
             WaveTable* const wt =
-                fillNext
+                fillNextTable
                 ? (isModOsc ? obj->nextTableMod : obj->nextTable)
                 : (isModOsc ? obj->tableMod : obj->table);
             WaveTable* const current = (isModOsc ? obj->tableMod : obj->table);
@@ -525,7 +525,7 @@ static const Ports voicePorts = {
                     // if this was the last index, the new tensor is complete, so
                     // we can use it
                     // -1 for C-style array indexing
-                    if(fillNext && freq_idx == wt->size_freqs() - 1)
+                    if(fillNextTable && freq_idx == wt->size_freqs() - 1)
                     {
 #ifdef DBG_WAVETABLES
                         printf("WT: AD: swap tensors\n");

@@ -27,6 +27,10 @@
 //#define DBG_WAVETABLES
 //#define DBG_WAVETABLES_BASIC
 
+enum class FMTYPE {
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, WAVE_MOD
+};
+
 namespace zyn {
 
 /*
@@ -368,8 +372,9 @@ public:
     @invariant r <= w + m_size (non-cyclic)
 
     While "normal" ringbuffers only allow w < r + m_size, this ringbuffer
-    allows w <= r + m_size. This means, w === r mod m_size can have 2
-    meanings, which is while we calculate mod (m_size*2) internally
+    allows w <= r + m_size, in order to allow ringbuffers of size 1.
+    This means, w === r mod m_size can have 2 meanings, which is while we
+    calculate mod (m_size*2) internally.
 */
 class AbstractRingbuffer
 {
@@ -474,14 +479,16 @@ private:
  * Wavetable
  */
 
-tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq);
+tensor_size_t findIndexForFreq(const Tensor<1, wavetable_types::float32>& freqs, float freq);
 
 using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;
 
 //! Tensor3 that keeps track of its subtensors, using a Tensor of
-//! AbstractRingbuffer
+//! AbstractRingbuffer. The Tensor<3, , wavetable_types::float32> keeps the
+//! buffers while the Tensor<1, AbstractRingbuffer> keeps one ringbuffer for
+//! each frequency, each keeping indices for all the semantics.
 class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>
 {
     using base_type = Tensor<3, wavetable_types::float32>;
@@ -536,6 +543,8 @@ private:
     Tensor1<float32> freqs;
     //! The waves.
     //! 1st dim: semantics, 2nd: freqs, 3rd: time.
+    //! This class also contains a ringbuffer for each freq, which can keep
+    //! track how many waves have been consumed yet.
     Tensor3ForWaveTable data;
 
     // Helpers to get the addresses
@@ -543,6 +552,7 @@ private:
     const Tensor1<float32>* const freqs_addr = &freqs;
 
     WtMode m_mode;
+    FMTYPE m_modType;  // FM type this wave has been c
 
     // the following things are just timestamps/markers
     // - might be merged into less or just one variable
@@ -568,6 +578,7 @@ public:
     // mode
     void setMode(WtMode mode) { m_mode = mode; }
     WtMode mode() const { return m_mode; }
+    FMTYPE modType() const { return m_modType; }
 
     // ringbuffer
     AbstractRingbuffer::size_t size_freqs() const { return freqs.size(); }
@@ -611,7 +622,7 @@ public:
     const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
     //! Find best index in freq tensor to play frequency freq
-    tensor_size_t findBestIndex(float freq) const;
+    tensor_size_t findIndexForFreq(float freq) const;
     //! Return sample slice for given frequency
     const Tensor1<float32> &getNextWaveToConsume(float32 freq);
     //! Return whole table for all values of wave parameters

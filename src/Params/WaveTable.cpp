@@ -24,13 +24,13 @@
 
 namespace zyn {
 
-tensor_size_t WaveTable::findBestIndex(float freq) const
+tensor_size_t WaveTable::findIndexForFreq(float freq) const
 {
-    return zyn::findBestIndex(freqs, freq);
+    return zyn::findIndexForFreq(freqs, freq);
 }
 
 // find the wave which has the best frequency to play with "freq"
-tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq)
+tensor_size_t findIndexForFreq(const Tensor<1, wavetable_types::float32>& freqs, float freq)
 {
     auto not_less_than_freq = std::lower_bound(freqs.begin(), freqs.end(), freq);
     if(not_less_than_freq == freqs.end())
@@ -50,7 +50,7 @@ tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, fl
 const Tensor1<WaveTable::float32>& WaveTable::getNextWaveToConsume(float32 freq)
 {
     assert(mode() != WtMode::freqwave_smps);
-    tensor_size_t bestI = findBestIndex(freq);
+    tensor_size_t bestI = findIndexForFreq(freq);
 
     AbstractRingbuffer& rb = data.ringbuffers[bestI];
     assert(data[rb.read_pos()].size() == freqs.size());

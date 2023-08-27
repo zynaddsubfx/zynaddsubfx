@@ -84,7 +84,13 @@ private:
     int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
     float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
-
+    
+    // integer that increases by 1 for every change
+    // atomic, because accessed from 2 threads:
+    // * MiddleWare thread (increased when the non-RT params change)
+    // * ADnoteParameters::requestWavetables() (reads the change stamp
+    //   in order to do comparisons: "has the OscilGen been changed recently?")
+    // TODO: Should this not be in the OscilGen class?
     std::atomic<unsigned> m_change_stamp;
 };
 

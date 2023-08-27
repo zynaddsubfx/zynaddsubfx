@@ -51,7 +51,7 @@ Wavetable layout:
 
 ADnote contains two wavetables per OscilGen:
 
-- current wavetable (in used, can be refilled with new waves)
+- current wavetable (is used, can be refilled with new waves)
 - next wavetable (under construction after parameter change)
 
 ## Asynchonicity principles
@@ -61,7 +61,7 @@ time. This can cause issues, like outdated requests. To avoid this, the
 following principles have been set up:
 
 * wavetable requests induced by parameter changes always carry a timestamp
-* any side should not rely on the other side handling the asynchonicity
+* any side should not rely on the other side handling the asynchronicity
   "well", i.e. it can not be relied on the other side detectig messages
   with outdated timestamps
 
@@ -86,7 +86,7 @@ entry points, marked with an "X".
     |                                                           |
     - suppress further "wavetable-params-changed"               |
     |                                                           |
-    |                          - mark current ringbuffer        |
+    |                          - mark current wavetable         |
     |                            "outdated until                |
     |                            waves for timestamp arrive"    |
     |                                                           |

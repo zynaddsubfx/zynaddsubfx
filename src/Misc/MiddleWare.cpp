@@ -309,7 +309,7 @@ private:
 
 public:
     //! If not already done, inform RT that params relevant for wavetable
-    //! calculation failed. If freqs or semantics could have changed, send those
+    //! calculation changed. If freqs or semantics could have changed, send those
     //! aswell.
     void chainWtParamRequest(int part, int kit, int voice, bool isModOsc, rtosc::RtData& d)
     {
@@ -1217,11 +1217,11 @@ public:
     //! Multiple threads can run this function simultaneously
     //! Fill calculatedTables[job]
     void calculateWavetableData1Thread(const waveTablesToGenerateStruct& params, std::size_t job,
-                                      OscilGen* oscilGen,
-                                      wavetable_types::WtMode wtMode,
-                                      std::size_t size_semantics,
-                                      const WaveTable::float32* freqs_array,
-                                      const WaveTable::IntOrFloat* sem_array)
+                                       OscilGen* oscilGen,
+                                       wavetable_types::WtMode wtMode,
+                                       std::size_t size_semantics,
+                                       const WaveTable::float32* freqs_array,
+                                       const WaveTable::IntOrFloat* sem_array)
     {
 #ifdef DBG_WAVETABLES_BASIC
         const char* mode_str = "unknown";

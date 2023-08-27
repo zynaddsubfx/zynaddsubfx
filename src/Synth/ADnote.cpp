@@ -488,8 +488,8 @@ void ADnote::setupVoiceDetune(int nvoice)
 
 void ADnote::setupVoiceMod(int nvoice, bool first_run)
 {
-    auto &param = pars.VoicePar[nvoice];
-    auto &voice = NoteVoicePar[nvoice];
+    auto &param = pars.VoicePar[nvoice];  // ADnoteParameters
+    auto &voice = NoteVoicePar[nvoice];   // ADnote
     float FMVolume;
 
     bool wtModeHasChanged = false;
@@ -539,7 +539,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                         // this is VERY unlikely, because this means:
                         // - PFMEnabled            ==     WT
                         // - WaveTable::mode()     == non-WT
-                        // - FMenabled (unitl now) ==     WT
+                        // - FMenabled (until now) ==     WT
                         // so this means that the user requested to change into non-WT mode
                         // and then changed again into WT mode
                         wtModeHasChanged = true;
@@ -1770,7 +1770,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyOrWtModulation(int nvoice, FM
         assert(vce.OscilSmp.isWaveTable);
         freq = getvoicebasefreq(nvoice);
         wt = NoteVoicePar[nvoice].OscilSmp.table;
-        freqIndex = wt->findBestIndex(freq);
+        freqIndex = wt->findIndexForFreq(freq);
     }
     else
     {

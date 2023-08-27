@@ -39,11 +39,11 @@ class TensorTest
 
         void testPowerOf2(void)
         {
-            TS_ASSERT_EQUAL_INT(AbstractRingbuffer::debugfunc_is_power_of_2(1), 1);
-            TS_ASSERT_EQUAL_INT(AbstractRingbuffer::debugfunc_is_power_of_2(2), 1);
-            TS_ASSERT_EQUAL_INT(AbstractRingbuffer::debugfunc_is_power_of_2(4), 1);
-            TS_ASSERT_EQUAL_INT(AbstractRingbuffer::debugfunc_is_power_of_2(0), 0);
-            TS_ASSERT_EQUAL_INT(AbstractRingbuffer::debugfunc_is_power_of_2(3), 0);
+            TS_ASSERT( AbstractRingbuffer::debugfunc_is_power_of_2(1));
+            TS_ASSERT( AbstractRingbuffer::debugfunc_is_power_of_2(2));
+            TS_ASSERT( AbstractRingbuffer::debugfunc_is_power_of_2(4));
+            TS_ASSERT(!AbstractRingbuffer::debugfunc_is_power_of_2(0));
+            TS_ASSERT(!AbstractRingbuffer::debugfunc_is_power_of_2(3));
         }
 
         void testRb(void)
@@ -286,11 +286,11 @@ class TensorTest
             wavetable_types::float32 raw[] = { 55.f, 110.f, 220.f };
             Tensor<1, wavetable_types::float32> freqs(sizeof(raw)/sizeof(raw[0]));
             freqs.debug_set_data_using_deep_copy(raw);
-            TS_ASSERT_EQUAL_INT(findBestIndex(freqs, -1.f), 0);
-            TS_ASSERT_EQUAL_INT(findBestIndex(freqs, 0.f), 0);
-            TS_ASSERT_EQUAL_INT(findBestIndex(freqs, 110.f), 1);
-            TS_ASSERT_EQUAL_INT(findBestIndex(freqs, 220.f), 2);
-            TS_ASSERT_EQUAL_INT(findBestIndex(freqs, 440.f), 2);
+            TS_ASSERT_EQUAL_INT(findIndexForFreq(freqs, -1.f), 0);
+            TS_ASSERT_EQUAL_INT(findIndexForFreq(freqs, 0.f), 0);
+            TS_ASSERT_EQUAL_INT(findIndexForFreq(freqs, 110.f), 1);
+            TS_ASSERT_EQUAL_INT(findIndexForFreq(freqs, 220.f), 2);
+            TS_ASSERT_EQUAL_INT(findIndexForFreq(freqs, 440.f), 2);
         }
 };
 
