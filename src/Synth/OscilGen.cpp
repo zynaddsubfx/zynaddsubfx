@@ -130,7 +130,7 @@ const rtosc::Ports OscilGen::ports = {
                 bfrs.pendingfreqs = freqs.data;
                 delete[] bfrs.oscilFFTfreqs.data;
                 bfrs.oscilFFTfreqs.data = freqs.data;
-                ++bfrs.m_change_stamp;
+                ++o.m_change_stamp;
             }
         }},
     //TODO update to rArray and test
@@ -155,7 +155,7 @@ const rtosc::Ports OscilGen::ports = {
                 bfrs.pendingfreqs = freqs.data;
                 delete[] bfrs.oscilFFTfreqs.data;
                 bfrs.oscilFFTfreqs.data = freqs.data;
-                ++bfrs.m_change_stamp;
+                ++o.m_change_stamp;
             }
         }},
     {"basefuncFFTfreqs::b", rProp(parameter) rProp(non-realtime)
@@ -240,7 +240,7 @@ const rtosc::Ports OscilGen::ports = {
             char *edit   = strrchr(repath, '/')+1;
             *edit = 0;
             d.broadcast("/damage", "s", repath);
-            ++((OscilGen*)d.obj)->myBuffers().m_change_stamp;
+            ++((OscilGen*)d.obj)->m_change_stamp;
         }},
     {"use-as-base:", rProp(non-realtime) rDoc("Translates current waveform into base"),
         NULL, [](const char *, rtosc::RtData &d) {
@@ -251,7 +251,7 @@ const rtosc::Ports OscilGen::ports = {
             char *edit   = strrchr(repath, '/')+1;
             *edit = 0;
             d.broadcast("/damage", "s", repath);
-            ++((OscilGen*)d.obj)->myBuffers().m_change_stamp;
+            ++((OscilGen*)d.obj)->m_change_stamp;
         }},
     rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"),
             rDefaultDepends(ADvsPAD), rPreset(true, 127), rPreset(false, 64),
@@ -401,7 +401,6 @@ OscilGenBuffers::OscilGenBuffers(zyn::OscilGenBuffersCreator c) :
     scratchFreqs(ctorAllocFreqs(c.fft, c.oscilsize))
 {
     defaults();
-    m_change_stamp.store(0);
 }
 
 OscilGenBuffers::~OscilGenBuffers()
@@ -455,6 +454,8 @@ OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
       res(res_),
       synth(synth_)
 {
+    m_change_stamp.store(0);
+
     if(fft_) {
         // FFTwrapper should operate exactly on all "oscilsize" bytes
         assert(fft_->fftsize() == synth_.oscilsize);
@@ -1540,7 +1541,7 @@ void OscilGen::paste(OscilGen &o)
         changebasefunction(bfrs);
     this->prepare(bfrs);
 
-    ++bfrs.m_change_stamp;
+    ++m_change_stamp;
 }
 #undef COPY
 
@@ -1714,7 +1715,7 @@ void OscilGen::getfromXML(XMLwrapper& xml)
         bfrs.cachedbasevalid = false;
     }
 
-    ++bfrs.m_change_stamp;
+    ++m_change_stamp;
 }
 
 

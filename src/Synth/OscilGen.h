@@ -50,8 +50,6 @@ public:
     OscilGenBuffers(OscilGenBuffersCreator creator);
     ~OscilGenBuffers();
     void defaults();
-    unsigned change_stamp() const { return m_change_stamp; }
-    void inc_change_stamp() { ++m_change_stamp; }
 
 private:
     // OscilGen needs to work with this data
@@ -84,14 +82,6 @@ private:
     int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
     float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
-    
-    // integer that increases by 1 for every change
-    // atomic, because accessed from 2 threads:
-    // * MiddleWare thread (increased when the non-RT params change)
-    // * ADnoteParameters::requestWavetables() (reads the change stamp
-    //   in order to do comparisons: "has the OscilGen been changed recently?")
-    // TODO: Should this not be in the OscilGen class?
-    std::atomic<unsigned> m_change_stamp;
 };
 
 class OscilGen:public Presets, NoCopyNoMove
@@ -148,11 +138,12 @@ class OscilGen:public Presets, NoCopyNoMove
         //! calculate freqs + semantics
         std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
             calculateWaveTableScales(wavetable_types::WtMode wtMode, bool voice_uses_reso) const;
+
         //! Get wavetable related time stamp - used to compare the age of a WT
         //! with the age of the generating OscilGen
-        unsigned change_stamp() const { return myBuffers().change_stamp(); }
+        unsigned change_stamp() const { return m_change_stamp; }
         //! This is increased on every modifying change (see rChangeCb)
-        void inc_change_stamp() { myBuffers().inc_change_stamp(); }
+        void inc_change_stamp() { ++m_change_stamp; }
 
         //Parameters
 
@@ -229,6 +220,14 @@ class OscilGen:public Presets, NoCopyNoMove
         //work on this variable in parallel, race conditions would be possible.
         //So this might vanish, soon
         OscilGenBuffers m_myBuffers;
+
+        // integer that increases by 1 for every change
+        // atomic, because accessed from 2 threads:
+        // * MiddleWare thread (increased when the non-RT params change)
+        // * ADnoteParameters::requestWavetables() (reads the change stamp
+        //   in order to do comparisons: "has the OscilGen been changed recently?")
+        // TODO: Should this not be in the OscilGen class?
+        std::atomic<unsigned> m_change_stamp;
 
         FFTwrapper *fft;
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
