@@ -46,22 +46,22 @@ Reverse::Reverse(EffectParams pars, const AbsTime *time_)
     :Effect(pars),Pvolume(50),Pdelay(25.0f), time(time_)
 {
     float tRef = float(time->time());
-    combfilterL = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize, tRef);
-    combfilterR = memory.alloc<CombFilter>(&memory, 3, 85.6666666666f / float(Pdelay+1), 10, samplerate, buffersize, tRef);
+    reverterL = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
+    reverterR = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
     Ppanning = 64;
 }
 
 Reverse::~Reverse()
 {
-    memory.dealloc(combfilterL);
-    memory.dealloc(combfilterR);
+    memory.dealloc(reverterL);
+    memory.dealloc(reverterR);
 }
 
 //Cleanup the effect
 void Reverse::cleanup(void)
 {
-    combfilterR->reset();
-    combfilterL->reset();
+    reverterR->reset();
+    reverterL->reset();
 }
 
 
@@ -78,8 +78,8 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
     
-    combfilterL->filterout(efxoutl);
-    if(Pstereo) combfilterR->filterout(efxoutr);
+    reverterL->filterout(efxoutl);
+    if(Pstereo) reverterR->filterout(efxoutr);
 
 }
 
@@ -106,15 +106,15 @@ void Reverse::setvolume(unsigned char _Pvolume)
 void Reverse::setdelay(unsigned char _Pdelay)
 {
     Pdelay = _Pdelay;
-    combfilterL->setfreq(85.6666666666f / float(Pdelay+1));
-    combfilterR->setfreq(85.6666666666f / float(Pdelay+1));
+    reverterL->setfreq(85.6666666666f / float(Pdelay+1));
+    reverterR->setfreq(85.6666666666f / float(Pdelay+1));
 }
 
 void Reverse::setphase(unsigned char _Pphase)
 {
     Pphase = _Pphase;
-    combfilterL->setphase(float(Pphase)/120.0f);
-    combfilterR->setphase(float(Pphase)/120.0f);
+    reverterL->setphase(float(Pphase)/120.0f);
+    reverterR->setphase(float(Pphase)/120.0f);
 }
 
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
