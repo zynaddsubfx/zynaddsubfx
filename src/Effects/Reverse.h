@@ -16,7 +16,7 @@
 
 #include "Effect.h"
 #include "../Misc/Stereo.h"
-#include "../DSP/CombFilter.h"
+#include "../DSP/Reverter.h"
 #include "../Misc/Time.h"
 
 namespace zyn {
@@ -71,8 +71,8 @@ class Reverse final:public Effect
         
         const AbsTime *time;
 
-        CombFilter* combfilterL;
-        CombFilter* combfilterR;
+        Reverter* reverterL;
+        Reverter* reverterR;
 };
 
 }
