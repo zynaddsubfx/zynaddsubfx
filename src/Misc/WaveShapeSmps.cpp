@@ -356,6 +356,7 @@ void waveShapeSmps(int n,
 
                 //subtract offset with distortion function applied
                 smps[i] -= offsetCompensation;
+                smps[i] /= ws;
             }
             break;
         }
