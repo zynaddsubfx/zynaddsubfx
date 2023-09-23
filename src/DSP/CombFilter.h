@@ -22,16 +22,14 @@ class CombFilter:public Filter
     public:
         //! @param Fq resonance, range [0.1,1000], logscale
         CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
-                unsigned int srate, int bufsize, float tRef=0.0f);
+                unsigned int srate, int bufsize);
         ~CombFilter() override;
         void filterout(float *smp) override;
         void setfreq(float freq) override;
-        void setphase(float phase);
         void setfreq_and_q(float freq, float q_) override;
         void setq(float q) override;
         void setgain(float dBgain) override;
         void settype(unsigned char type);
-        void reset();
 
     private:
     
@@ -39,7 +37,7 @@ class CombFilter:public Filter
         float* output;
         float gain;
         float q;
-        unsigned char f_type;
+        unsigned char type;
 
         float step(float x);
 
@@ -48,16 +46,7 @@ class CombFilter:public Filter
 
         float gainfwd;
         float gainbwd;
-        float delay;  
-        
-        // for reverse mode      
-        bool reversed;
-        int buffercounter;      
-        float reverse_offset;
-        float phase_offset;
-        float reverse_pos_hist;
-        int fading_samples;  
-        int fade_counter; 
+        float delay;        
         
         Allocator &memory;
         int mem_size;
