@@ -43,12 +43,12 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(25.0f), time(time_)
+    :Effect(pars),Pvolume(50),Pstereo(0),Pdelay(25.0f), time(time_)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
     reverterR = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
-    Ppanning = 64;
+    setpanning(64);
 }
 
 Reverse::~Reverse()
