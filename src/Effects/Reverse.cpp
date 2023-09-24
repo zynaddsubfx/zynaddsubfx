@@ -43,11 +43,11 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pstereo(0),Pdelay(25.0f), time(time_)
+    :Effect(pars),Pvolume(50),Pdelay(41),Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
-    reverterL = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
-    reverterR = memory.alloc<Reverter>(&memory, 85.6666666666f / float(Pdelay+1), samplerate, buffersize, tRef);
+    reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/85.6666666667f, samplerate, buffersize, tRef);
+    reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/85.6666666667f, samplerate, buffersize, tRef);
     setpanning(64);
 }
 
@@ -77,10 +77,9 @@ void Reverse::out(const Stereo<float *> &input)
         for(int i = 0; i < buffersize; ++i)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
-    
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
-
+    else memcpy(efxoutr, efxoutl, bufferbytes);
 }
 
 
@@ -106,15 +105,15 @@ void Reverse::setvolume(unsigned char _Pvolume)
 void Reverse::setdelay(unsigned char _Pdelay)
 {
     Pdelay = _Pdelay;
-    reverterL->setfreq(85.6666666666f / float(Pdelay+1));
-    reverterR->setfreq(85.6666666666f / float(Pdelay+1));
+    reverterL->setdelay(float(Pdelay+1)/85.3333333333f);
+    reverterR->setdelay(float(Pdelay+1)/85.3333333333f);
 }
 
 void Reverse::setphase(unsigned char _Pphase)
 {
     Pphase = _Pphase;
-    reverterL->setphase(float(Pphase)/120.0f);
-    reverterR->setphase(float(Pphase)/120.0f);
+    reverterL->setphase(float(Pphase)/127.0f);
+    reverterR->setphase(float(Pphase)/127.0f);
 }
 
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)

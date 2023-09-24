@@ -61,7 +61,7 @@ class Reverse final:public Effect
     private:
         //Parameters
         unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        unsigned char Pdelay;   /**<#2 Length of reversed segment*/
+        unsigned char Pdelay;   /**<#2 Length of reversed segment 127 = 1.5s*/
         unsigned char Pstereo;
         unsigned char Pphase;
 

@@ -12,18 +12,18 @@
 
 namespace zyn{
 
-Reverter::Reverter(Allocator *alloc, float Ffreq,
+Reverter::Reverter(Allocator *alloc, float delay,
     unsigned int srate, int bufsize, float tRef)
     :gain(1.0f), samplerate(srate), buffersize(bufsize), buffercounter(0), fading_samples((int)srate/25), memory(*alloc)
 {
     
-    // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 --> mem_size = maxdelay + maxphase + 2*fading_samples + buffersize
+    // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 
+    //  --> mem_size = maxdelay + maxphase + 2*fading_samples + buffersize
     mem_size = (int)ceilf((float)srate*2.25f) + 2*fading_samples + buffersize + 1; // 40bpm -> 1.5s phase 1.5s/2 
-    
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
 
-    setfreq(Ffreq);
+    setdelay(delay);
     reverse_offset = fmodf(tRef, delay);
     reverse_pos_hist = -1;
 }
@@ -69,17 +69,18 @@ void Reverter::filterout(float *smp)
             fade_counter = 0;  // reset fade counter
         }
         
-        reverse_pos_hist = reverse_pos; // store reverse_pos for turnaround detection
+        // store reverse_pos for turnaround detection
+        reverse_pos_hist = reverse_pos; 
         
         // apply phase offset after turnaround detection
+        assert(pos>phase_offset);
         pos -= phase_offset;
-        
         
         if(fade_counter <= fading_samples) // inside fading segment
         {
             const float fadein = (float)fade_counter++ / (float)fading_samples; // 0 -> 1
             const float fadeout = 1.0f - fadein;               // 1 -> 0
-            //fade in the newer sampleblock + fade out the older samples
+            // fade in the newer sampleblock + fade out the older samples
             smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
             assert(pos-delay>0);
         }
@@ -97,20 +98,27 @@ void Reverter::filterout(float *smp)
     if (reverse_offset > delay) reverse_offset = fmodf(reverse_offset, delay);
 }
 
-void Reverter::setfreq(float freq)
+void Reverter::setdelay(float _delay)
 {
-    // for reversed delay [0.05 .. 1.5] sec ff= 1/delay 
-    float ff = limit(freq, 0.66927f, 20.0f);
-    delay = ((float)samplerate)/ff;
-    // limit fading_samples to be < 1/2 delay length
-    if (int(delay)/2 < int(samplerate/25.0f) ) fading_samples = int(delay)/2;
-    else fading_samples = samplerate/25.0f;
+    delay = _delay;
+    // limit fading_samples to be < 1/3 delay length
+    if (delay/3.0f > float(samplerate)/25.0f ) fading_samples = samplerate/25;
+    else fading_samples = (int)(delay*float(samplerate))/3.0f;
+    
+    // update phase_offset
+    const float phase_offset_new = (phase-0.5f)*delay;
+    if(phase_offset_new != phase_offset) {
+        reverse_offset += phase_offset_new - phase_offset;
+        phase_offset = phase_offset_new;
+    }
     
 }
 
-void Reverter::setphase(float phase)
+void Reverter::setphase(float _phase)
 {
-    float phase_offset_new = (phase-0.5)*delay;
+    phase = _phase;
+    // update phase_offset
+    const float phase_offset_new = (phase-0.5f)*delay;
     if(phase_offset_new != phase_offset) {
         reverse_offset += phase_offset_new - phase_offset;
         phase_offset = phase_offset_new;
