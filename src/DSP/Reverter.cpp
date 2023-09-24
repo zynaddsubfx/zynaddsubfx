@@ -17,8 +17,8 @@ Reverter::Reverter(Allocator *alloc, float Ffreq,
     :gain(1.0f), samplerate(srate), buffersize(bufsize), buffercounter(0), fading_samples((int)srate/25), memory(*alloc)
 {
     
-    // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples > 0 --> mem_size = maxdelay + 2*fading_samples + buffersize
-    mem_size = (int)ceilf((float)srate*1.50f) + 2*fading_samples + buffersize + 1; // 40bpm -> 1.5s
+    // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 --> mem_size = maxdelay + maxphase + 2*fading_samples + buffersize
+    mem_size = (int)ceilf((float)srate*2.25f) + 2*fading_samples + buffersize + 1; // 40bpm -> 1.5s phase 1.5s/2 
     
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
@@ -59,16 +59,21 @@ void Reverter::filterout(float *smp)
     for (int i = 0; i < buffersize; i ++)
     {
         // calculate the current relative position inside the "reverted" buffer
-        const float reverse_pos = fmodf((reverse_offset+phase_offset+i),delay);
+        const float reverse_pos = fmodf((reverse_offset+i),delay);
         // reading head starts at the end of the last buffer and goes backwards
-        const float pos = (mem_size-1-buffersize)-reverse_pos; // 
+        float pos = (mem_size-1-buffersize)-reverse_pos; // 
         assert(pos>0);
         
         // crossfade for a few samples whenever reverse_pos restarts
         if(reverse_pos<reverse_pos_hist) {
             fade_counter = 0;  // reset fade counter
         }
+        
         reverse_pos_hist = reverse_pos; // store reverse_pos for turnaround detection
+        
+        // apply phase offset after turnaround detection
+        pos -= phase_offset;
+        
         
         if(fade_counter <= fading_samples) // inside fading segment
         {
