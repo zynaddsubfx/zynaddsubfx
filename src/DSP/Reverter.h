@@ -21,11 +21,11 @@ class Reverter
 {
     public:
         //! @param Fq resonance, range [0.1,1000], logscale
-        Reverter(Allocator *alloc, float Ffreq,
+        Reverter(Allocator *alloc, float delay,
                 unsigned int srate, int bufsize, float tRef=0.0f);
         ~Reverter();
         void filterout(float *smp);
-        void setfreq(float freq);
+        void setdelay(float delay);
         void setphase(float phase);
         void setgain(float dBgain);
         void reset();
@@ -36,10 +36,11 @@ class Reverter
         float gain;
 
         float step(float x);
-
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
+        
         float delay;  
+        float phase;
            
         int buffercounter;      
         float reverse_offset;
