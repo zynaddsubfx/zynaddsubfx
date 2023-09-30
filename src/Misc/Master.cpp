@@ -19,7 +19,7 @@
 #include "zyn-version.h"
 #include "../Misc/Stereo.h"
 #include "../Misc/Util.h"
-#include "../Params/LFOParams.h"
+#include "../Params/WaveTableFwd.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Allocator.h"
@@ -1275,8 +1275,7 @@ bool Master::AudioOut(float *outl, float *outr)
     //(and the callbacks do not always have an rtosc::RtData object)
     if(bToU)
     {
-        int64_t nTimesPerSec = 5;
-        if((time.time() % ((int64_t)time.framesPerSec()/nTimesPerSec)) == 0)
+        if((time.time() % ((int64_t)time.framesPerSec()/wavetable_constants::masterRequestWtFreq)) == 0)
         {
             // all parts/kits are allocated, so request wavetables for all of them
             // however, most kits will have adpars == nullptr, and even if they

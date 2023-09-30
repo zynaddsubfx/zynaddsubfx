@@ -42,6 +42,11 @@ namespace wavetable_types
     };
 }
 
+namespace wavetable_constants
+{
+constexpr const int masterRequestWtFreq = 5;
+}
+
 using tensor_size_t = std::size_t;
 
 //! Tensor class for all dimensions != 1
