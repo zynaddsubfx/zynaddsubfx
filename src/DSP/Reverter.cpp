@@ -14,7 +14,19 @@ namespace zyn{
 
 Reverter::Reverter(Allocator *alloc, float delay,
     unsigned int srate, int bufsize, float tRef)
-    :gain(1.0f), samplerate(srate), buffersize(bufsize), buffercounter(0), fading_samples((int)srate/25), memory(*alloc)
+    :input(nullptr),
+    gain(1.0f),
+    delay(0.5f),
+    phase(0.0f),
+    buffercounter(0),
+    reverse_offset(0.0f),
+    phase_offset(0.0f),
+    reverse_pos_hist(0.0f),
+    fading_samples((int)srate/25),
+    fade_counter(0),
+    memory(*alloc),
+    samplerate(srate),
+    buffersize(bufsize)
 {
     
     // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 
@@ -102,7 +114,7 @@ void Reverter::setdelay(float _delay)
 {
     delay = _delay;
     // limit fading_samples to be < 1/3 delay length
-    if (delay/3.0f > float(samplerate)/25.0f ) fading_samples = samplerate/25;
+    if (delay > 0.12f ) fading_samples = samplerate/25;
     else fading_samples = (int)(delay*float(samplerate))/3.0f;
     
     // update phase_offset
