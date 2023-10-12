@@ -1267,31 +1267,6 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
  */
 inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
 {
-    // windowed sinc kernel factor Fs*0.3, rejection 80dB
-    const float_t kernel[] = {
-        0.0010596256917418426f,
-        0.004273442181254887f,
-        0.0035466063043375785f,
-        -0.014555483937137638f,
-        -0.04789321342588484f,
-        -0.050800020978553066f,
-        0.04679847159974432f,
-        0.2610646708018185f,
-        0.4964802251145513f,
-        0.6000513532962539f,
-        0.4964802251145513f,
-        0.2610646708018185f,
-        0.04679847159974432f,
-        -0.050800020978553066f,
-        -0.04789321342588484f,
-        -0.014555483937137638f,
-        0.0035466063043375785f,
-        0.004273442181254887f,
-        0.0010596256917418426f
-        };
-
-
-
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
@@ -1366,8 +1341,8 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
-                tw[i] = tw[i]
-                    * (1.0f - amp) + amp * NoteVoicePar[FMVoice].VoiceOut[i];
+                tw[i] = tw[i] * (1.0f - amp) 
+                        + amp * NoteVoicePar[FMVoice].VoiceOut[i];
             }
         }
     }
@@ -1529,6 +1504,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
+                //integrate (accumulate) tw
                 fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
                 tw[i] = fmold;
             }
@@ -1552,6 +1528,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
+        
+        int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
+        int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
+
+        int    ovsmpposlo;
+        int    ovsmpposhi;
+        int    uflow;
+        assert(vce.oscfreqlo[k] < 1.0f);
+        float out = 0;
 
         for(int i = 0; i < synth.buffersize; ++i) {
             int FMmodfreqhi = 0;
@@ -1572,8 +1557,27 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-            tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
-                    + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
+            // apply AA kernel here:
+            
+            // calculate first kernel sample position
+            ovsmpposlo  = carposlo - (LENGTHOF(kernel)-1)/2 * ovsmpfreqlo;
+            uflow = ovsmpposlo>>24;
+            ovsmpposhi  = carposhi - (LENGTHOF(kernel)-1)/2 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
+            ovsmpposlo &= 0xffffff;
+            ovsmpposhi &= synth.oscilsize - 1;
+            out = 0;
+            for (int l = 0; l<LENGTHOF(kernel); l++) {
+                out += kernel[l] * (
+                    smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) +
+                    smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
+                // advance to next kernel sample
+                ovsmpposlo += ovsmpfreqlo;
+                ovsmpposhi += ovsmpfreqhi + (ovsmpposlo>>24); // add the 24-bit overflow
+                ovsmpposlo &= 0xffffff;
+                ovsmpposhi &= synth.oscilsize - 1;
+
+            }
+            tw[i] = out;
 
             poslo += freqlo;
             if(poslo >= (1<<24)) {
