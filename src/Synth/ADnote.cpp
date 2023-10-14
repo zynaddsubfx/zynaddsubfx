@@ -1269,27 +1269,46 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
 {
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
+        // calculate integer and fractional part of sample position for the first sample of the output buffer
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
+        // calculate integer and fractional part of the relative frequency
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
+        
+        // calculate the relative frequency for the AA filter
         int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
         int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
-
+        
+        // variables to store the sampling position and underflow during AA filtering
         int    ovsmpposlo;
         int    ovsmpposhi;
         int    uflow;
+        
+        // get the pointers to the source an destination sample buffers
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
+        
+        // fractional part should be < 1.0 
         assert(vce.oscfreqlo[k] < 1.0f);
+        
+        // variable to accumulate the output to
         float out = 0;
 
         for(int i = 0; i < synth.buffersize; ++i) {
+            // calculate the fractional part of the sampling position for the first filter kernel sample
             ovsmpposlo  = poslo - (LENGTHOF(kernel)-1)/2 * ovsmpfreqlo;
+            // check for underflow
             uflow = ovsmpposlo>>24;
-            ovsmpposhi  = poshi - (LENGTHOF(kernel)-1)/2 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
+            // calculate the integer part of the sampling position for the first filter kernel sample
+            ovsmpposhi  = poshi - (LENGTHOF(kernel)-1)/2 * ovsmpfreqhi 
+                            - ((0x00 - uflow) & 0xff);     // subtract the underflow from fractional part
+            
+            // make sure we stay inside the buffer
             ovsmpposlo &= 0xffffff;
             ovsmpposhi &= synth.oscilsize - 1;
+            
+            // reset output value
             out = 0;
             for (int l = 0; l<LENGTHOF(kernel); l++) {
                 out += kernel[l] * (
@@ -1529,6 +1548,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
         
+        // TBD: wouldnt it be better to use synth.samplerate_f/2
+        //      No.
         int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
         int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
 
