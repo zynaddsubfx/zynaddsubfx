@@ -1280,6 +1280,10 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
         int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
         
+        
+        
+        
+        
         // variables to store the sampling position and underflow during AA filtering
         int    ovsmpposlo;
         int    ovsmpposhi;
@@ -1547,11 +1551,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
-        
-        // TBD: wouldnt it be better to use synth.samplerate_f/2
-        //      No.
-        int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
-        int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
 
         int    ovsmpposlo;
         int    ovsmpposhi;
@@ -1562,9 +1561,13 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         for(int i = 0; i < synth.buffersize; ++i) {
             int FMmodfreqhi = 0;
             F2I(tw[i], FMmodfreqhi);
-            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            float FMmodfreqlo = tw[i]-FMmodfreqhi; //fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             if(FMmodfreqhi < 0)
                 FMmodfreqlo++;
+            
+            // tune AA resampling filter to modulator
+            int    ovsmpfreqhi = FMmodfreqhi/3 ;
+            int    ovsmpfreqlo = (int)((FMmodfreqlo/3.0f) * (1<<24));
 
             //carrier
             int carposhi = poshi + FMmodfreqhi;
@@ -1588,7 +1591,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             ovsmpposhi &= synth.oscilsize - 1;
             out = 0;
             for (int l = 0; l<LENGTHOF(kernel); l++) {
-                out += kernel[l] * (
+                if (kernel[l]!=0.0f) out += kernel[l] * (
                     smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) +
                     smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
                 // advance to next kernel sample
