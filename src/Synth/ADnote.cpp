@@ -1667,7 +1667,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             int FMmodfreqhi = 0;
             F2I(tw[i], FMmodfreqhi);
             float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
-            if(FMmodfreqhi < 0)
+            if(FMmodfreqlo < 0)
                 FMmodfreqlo++;
 
             //carrier
