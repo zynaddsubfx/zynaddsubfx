@@ -1527,8 +1527,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                //integrate (accumulate) tw
-                fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
+                
+                fmold = fmold + tw[i] * normalize;
                 tw[i] = fmold;
             }
             vce.FMoldsmp[k] = fmold;
@@ -1581,8 +1581,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-            // apply AA kernel here:
-            
+            // apply AA kernel
             // calculate first kernel sample position
             ovsmpposlo  = carposlo - (LENGTHOF(kernel)-1)/2 * ovsmpfreqlo;
             uflow = ovsmpposlo>>24;
