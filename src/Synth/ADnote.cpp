@@ -1629,7 +1629,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
+                fmold = fmold + (tw[i] * normalize);
                 tw[i] = fmold;
             }
             vce.FMoldsmp[k] = fmold;
