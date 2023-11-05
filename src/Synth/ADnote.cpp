@@ -1267,74 +1267,64 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
  */
 inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
 {
-    // windowed sinc kernel factor Fs*0.3, rejection 80dB
-    const float_t kernel[] = {
-        0.0010596256917418426f,
-        0.004273442181254887f,
-        0.0035466063043375785f,
-        -0.014555483937137638f,
-        -0.04789321342588484f,
-        -0.050800020978553066f,
-        0.04679847159974432f,
-        0.2610646708018185f,
-        0.4964802251145513f,
-        0.6000513532962539f,
-        0.4964802251145513f,
-        0.2610646708018185f,
-        0.04679847159974432f,
-        -0.050800020978553066f,
-        -0.04789321342588484f,
-        -0.014555483937137638f,
-        0.0035466063043375785f,
-        0.004273442181254887f,
-        0.0010596256917418426f
-        };
-
-
-
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
+
+        // calculate integer and fractional part of sample position for the first sample of the output buffer
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
+
+        // calculate integer and fractional part of the relative frequency
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
-        int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
-        int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
 
-        int    ovsmpposlo;
-        int    ovsmpposhi;
-        int    uflow;
+        // get the pointers to the source an destination sample buffers
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
+
+        // variables to store the sampling position and underflow during AA filtering
+        int    ovsmpposhi;
+        
+        // fractional part should be < 1.0 
         assert(vce.oscfreqlo[k] < 1.0f);
+        
+        // variable to accumulate the output to
         float out = 0;
 
         for(int i = 0; i < synth.buffersize; ++i) {
-            ovsmpposlo  = poslo - (LENGTHOF(kernel)-1)/2 * ovsmpfreqlo;
-            uflow = ovsmpposlo>>24;
-            ovsmpposhi  = poshi - (LENGTHOF(kernel)-1)/2 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
-            ovsmpposlo &= 0xffffff;
-            ovsmpposhi &= synth.oscilsize - 1;
-            out = 0;
-            for (int l = 0; l<LENGTHOF(kernel); l++) {
-                out += kernel[l] * (
-                    smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) +
-                    smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
-                // advance to next kernel sample
-                ovsmpposlo += ovsmpfreqlo;
-                ovsmpposhi += ovsmpfreqhi + (ovsmpposlo>>24); // add the 24-bit overflow
-                ovsmpposlo &= 0xffffff;
-                ovsmpposhi &= synth.oscilsize - 1;
 
+            // resampling factor
+            const int rsmpfactor = (freqhi>40) ? 40 : (freqhi<1) ? 1 : freqhi;
+            // offset of the oscillator sample to be multplied with first kernel position
+            const int startoffset = 2*rsmpfactor;
+            // position of that oscillator sample
+            ovsmpposhi  = poshi - startoffset;
+            ovsmpposhi &= synth.oscilsize - 1;
+            // step size in the filter kernel
+            const int stpsize = 40/rsmpfactor;
+            // first kernel sample to be used
+            const int startposhi = poslo*stpsize/(1<<24);
+
+            // reset output value
+            out = 0;
+            for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
+                const float factor = 
+                    (pars.GlobalPar.wskernel[l] * ((1<<24) - poslo) +
+                    pars.GlobalPar.wskernel[l+1] * poslo)/(1.0f*(1<<24));
+                    
+                out += factor*smps[ovsmpposhi];
+
+                // advance to next oscillator sample
+                ovsmpposhi++;
+                ovsmpposhi &= synth.oscilsize - 1;
             }
+            tw[i] = out*(float)stpsize;
 
             // advance to next sample
             poslo += freqlo;
             poshi += freqhi + (poslo>>24);
             poslo &= 0xffffff;
             poshi &= synth.oscilsize - 1;
-
-            tw[i] = out;
 
         }
         vce.oscposhi[k] = poshi;
