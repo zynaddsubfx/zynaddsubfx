@@ -55,6 +55,22 @@ inline void BlackmanHarrisWindow(int N, float* w )
     }
 }
 
+inline float i0(float x) {
+  return 1 + x * x / 4;
+}
+
+// Compute the Kaiser window.
+inline void KaiserWindow(float beta, int N, float* w ) {
+    for (int n = 0; n < N; n++) {
+        w[n] = i0(beta * sqrt(1 - pow(2 * n / (N - 1) - 1, 2))) / i0(beta);
+    }
+}
+
+inline void HannWindow(int N, float* w ) {
+    for (int n = 0; n < N; n++) {
+        w[n] = 0.5 * (1 - cos(2 * M_PI * n / (N - 1)));
+    }
+}
 
 // Compute a windowed sinc kernel
 //
@@ -71,12 +87,12 @@ void windowedsinc(float fc, float gain, int N, float *h) {
     s[n] = (n == (N-1)/2) ? 1 : sin(2 * M_PI * fc * (n - (N - 1) / 2)) / (2 * M_PI * fc * (n - (N - 1) / 2));
   }
 
+  // Compute the window.
   float w[N];
-  // Compute the Blackmann-Harris window.
-  //~ BlackmanHarrisWindow(N, w );
-  for (int n = 0; n < N; n++) {
-    w[n] = 0.5 * (1 - cos(2 * M_PI * n / (N - 1)));
-  }
+  //KaiserWindow(N, 8, w);  // nan audio
+  BlackmanHarrisWindow(N, w);
+  //~ HannWindow(N, w);
+
 
   // Multiply the sinc filter by the window.
   for (int n = 0; n < N; n++) {

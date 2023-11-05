@@ -1547,8 +1547,11 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             // FM: accumulate tw to transform freq to pos
             // PM: use tw as pos
             fmold += tw[i];
-            if(FMmode == FMTYPE::FREQ_MOD) fmpos=fmold; 
-            else fmpos = tw[i];
+            if(FMmode == FMTYPE::FREQ_MOD)
+                fmpos=fmold; 
+            else 
+                fmpos = tw[i];
+
             int FMmodposhi = 0;
             F2I(fmpos, FMmodposhi);
             int FMmodposlo = ((fmpos-FMmodposhi) * (1<<24));//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
@@ -1573,20 +1576,24 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 // carrier frequency
                 const int carfreqhi = tw[i]+freqhi;
                 // resampling factor
-                const int rsmpfactor = (carfreqhi>40) ? 40 : (carfreqhi<1) ? 1 : carfreqhi;
+                const int rsmpfactor = (abs(carfreqhi)<1) ? 1 : abs(carfreqhi);
                 // offset of the oscillator sample to be multplied with first kernel position
                 const int startoffset = 2*rsmpfactor;
                 // position of that oscillator sample
                 ovsmpposhi  = carposhi - startoffset;
                 ovsmpposhi &= synth.oscilsize - 1;
                 // step size in the filter kernel
-                const int stpsize = 40/rsmpfactor;
+                const int stpsize = rsmpfactor>40 ? 1 : 40/rsmpfactor;
+                const int ovsmpfreqhi = rsmpfactor<40 ? 1 : rsmpfactor/40;
                 // first kernel sample to be used
-                const int startposhi = (carposlo*stpsize)>>24;
-
+                const int startposhi = (carposlo*stpsize*ovsmpfreqhi)>>24;                
+                //~ if (ovsmpfreqhi>10) {
+                //~ DEBUGPRINTi(ovsmpfreqhi);
+                //~ DEBUGPRINTi(startoffset);
+                //~ }
                 // reset output value
                 out = 0;
-                for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
+                for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) { 
                     const float kernelsample = 
                         (pars.GlobalPar.wskernel[l] * ((1<<24) - carposlo) +
                         pars.GlobalPar.wskernel[l+1] * carposlo)/(1.0f*(1<<24));
@@ -1594,7 +1601,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                     out += kernelsample*smps[ovsmpposhi];
 
                     // advance to next oscillator sample 
-                    ovsmpposhi++;
+                    ovsmpposhi += ovsmpfreqhi;
                     ovsmpposhi &= synth.oscilsize - 1;
                 }
                 tw[i] = out*(float)stpsize;
