@@ -101,7 +101,7 @@ class ADnote:public SynthNote
          * @param FMmode modulation type 0=Phase 1=Frequency*/
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode);
-        //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+        inline void ComputeVoiceOscillatorSync(int nvoice);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
