@@ -1569,35 +1569,40 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-
-            // carrier frequency
-            const int carfreqhi = tw[i]+freqhi;
-            // resampling factor
-            const int rsmpfactor = (carfreqhi>40) ? 40 : (carfreqhi<1) ? 1 : carfreqhi;
-            // offset of the oscillator sample to be multplied with first kernel position
-            const int startoffset = 2*rsmpfactor;
-            // position of that oscillator sample
-            ovsmpposhi  = carposhi - startoffset;
-            ovsmpposhi &= synth.oscilsize - 1;
-            // step size in the filter kernel
-            const int stpsize = 40/rsmpfactor;
-            // first kernel sample to be used
-            const int startposhi = (carposlo*stpsize)>>24;
-
-            // reset output value
-            out = 0;
-            for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
-                const float kernelsample = 
-                    (pars.GlobalPar.wskernel[l] * ((1<<24) - carposlo) +
-                    pars.GlobalPar.wskernel[l+1] * carposlo)/(1.0f*(1<<24));
-                    
-                out += kernelsample*smps[ovsmpposhi];
-
-                // advance to next oscillator sample 
-                ovsmpposhi++;
+            if(NoteVoicePar[nvoice].AAEnabled) { 
+                // carrier frequency
+                const int carfreqhi = tw[i]+freqhi;
+                // resampling factor
+                const int rsmpfactor = (carfreqhi>40) ? 40 : (carfreqhi<1) ? 1 : carfreqhi;
+                // offset of the oscillator sample to be multplied with first kernel position
+                const int startoffset = 2*rsmpfactor;
+                // position of that oscillator sample
+                ovsmpposhi  = carposhi - startoffset;
                 ovsmpposhi &= synth.oscilsize - 1;
+                // step size in the filter kernel
+                const int stpsize = 40/rsmpfactor;
+                // first kernel sample to be used
+                const int startposhi = (carposlo*stpsize)>>24;
+
+                // reset output value
+                out = 0;
+                for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
+                    const float kernelsample = 
+                        (pars.GlobalPar.wskernel[l] * ((1<<24) - carposlo) +
+                        pars.GlobalPar.wskernel[l+1] * carposlo)/(1.0f*(1<<24));
+                        
+                    out += kernelsample*smps[ovsmpposhi];
+
+                    // advance to next oscillator sample 
+                    ovsmpposhi++;
+                    ovsmpposhi &= synth.oscilsize - 1;
+                }
+                tw[i] = out*(float)stpsize;
             }
-            tw[i] = out*(float)stpsize;
+            else {
+                tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
+                    + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
+            }
 
             poslo += freqlo;
             if(poslo >= (1<<24)) {
