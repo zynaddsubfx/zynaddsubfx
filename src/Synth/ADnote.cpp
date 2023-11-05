@@ -1539,9 +1539,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         
         // variables to store the sampling position and underflow during AA filtering
         int    ovsmpposhi;
-        
-        // variable to accumulate the output to
-        float out = 0;
+
         for(int i = 0; i < synth.buffersize; ++i) {
             float fmpos;
             // FM: accumulate tw to transform freq to pos
@@ -1582,17 +1580,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 // position of that oscillator sample
                 ovsmpposhi  = carposhi - startoffset;
                 ovsmpposhi &= synth.oscilsize - 1;
-                // step size in the filter kernel
+                //for resampling factor up to 40 we reduce the kernel step size down to 1.
+                // -> lower cut off frequency
                 const int stpsize = rsmpfactor>40 ? 1 : 40/rsmpfactor;
+                // for resampling factor above 40 start scipping oscillator samples
                 const int ovsmpfreqhi = rsmpfactor<40 ? 1 : rsmpfactor/40;
                 // first kernel sample to be used
                 const int startposhi = (carposlo*stpsize*ovsmpfreqhi)>>24;                
-                //~ if (ovsmpfreqhi>10) {
-                //~ DEBUGPRINTi(ovsmpfreqhi);
-                //~ DEBUGPRINTi(startoffset);
-                //~ }
                 // reset output value
-                out = 0;
+                float out = 0;
                 for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) { 
                     const float kernelsample = 
                         (pars.GlobalPar.wskernel[l] * ((1<<24) - carposlo) +
@@ -1604,7 +1600,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                     ovsmpposhi += ovsmpfreqhi;
                     ovsmpposhi &= synth.oscilsize - 1;
                 }
-                tw[i] = out*(float)stpsize;
+                tw[i] = out*(float)(stpsize);
             }
             else {
                 tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
