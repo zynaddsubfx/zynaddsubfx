@@ -1543,11 +1543,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         // variable to accumulate the output to
         float out = 0;
         for(int i = 0; i < synth.buffersize; ++i) {
-            // accumulate the freq to get a pos
+            float fmpos;
+            // FM: accumulate tw to transform freq to pos
+            // PM: use tw as pos
             fmold += tw[i];
+            if(FMmode == FMTYPE::FREQ_MOD) fmpos=fmold; 
+            else fmpos = tw[i];
             int FMmodposhi = 0;
-            F2I(fmold, FMmodposhi);
-            int FMmodposlo = ((fmold-FMmodposhi) * (1<<24));//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            F2I(fmpos, FMmodposhi);
+            int FMmodposlo = ((fmpos-FMmodposhi) * (1<<24));//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             // make the rounding error symmetric
             if(FMmodposlo < 0)
                 FMmodposlo++;
