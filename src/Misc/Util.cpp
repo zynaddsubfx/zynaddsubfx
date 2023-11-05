@@ -42,11 +42,25 @@ bool isPlugin = false;
 
 prng_t prng_state = 0x1234;
 
-// Compute a Hann windowed sinc kernel
+inline void BlackmanHarrisWindow(int N, float* w )
+{
+    const float a0      = 0.35875f;
+    const float a1      = 0.48829f;
+    const float a2      = 0.14128f;
+    const float a3      = 0.01168f;
+
+    for(auto i = 0; i < N; i++ )
+    {
+        w[i]   = a0 - (a1 * cosf( (2.0f * M_PI * i) / (N - 1) )) + (a2 * cosf( (4.0f * M_PI * i) / (N - 1) )) - (a3 * cosf( (6.0f * M_PI * i) / (N - 1) ));
+    }
+}
+
+
+// Compute a windowed sinc kernel
 //
 // Args:
 //   fc:    Cutoff frequency as a fraction of the sampling rate (in (0, 0.5))
-//   beta:  Kaiser window parameter
+//   gain:  gain factor of the kernel
 //   h:     Output array
 //
 void windowedsinc(float fc, float gain, int N, float *h) {
@@ -58,7 +72,8 @@ void windowedsinc(float fc, float gain, int N, float *h) {
   }
 
   float w[N];
-  // Compute the Hann window.
+  // Compute the Blackmann-Harris window.
+  //~ BlackmanHarrisWindow(N, w );
   for (int n = 0; n < N; n++) {
     w[n] = 0.5 * (1 - cos(2 * M_PI * n / (N - 1)));
   }
