@@ -42,6 +42,46 @@ bool isPlugin = false;
 
 prng_t prng_state = 0x1234;
 
+// Compute a Hann windowed sinc kernel
+//
+// Args:
+//   fc:    Cutoff frequency as a fraction of the sampling rate (in (0, 0.5))
+//   beta:  Kaiser window parameter
+//   h:     Output array
+//
+void windowedsinc(float fc, float gain, int N, float *h) {
+  
+  // Compute the sinc filter.
+  float s[N];
+  for (int n = 0; n < N; n++) {
+    s[n] = (n == (N-1)/2) ? 1 : sin(2 * M_PI * fc * (n - (N - 1) / 2)) / (2 * M_PI * fc * (n - (N - 1) / 2));
+  }
+
+  float w[N];
+  // Compute the Hann window.
+  for (int n = 0; n < N; n++) {
+    w[n] = 0.5 * (1 - cos(2 * M_PI * n / (N - 1)));
+  }
+
+  // Multiply the sinc filter by the window.
+  for (int n = 0; n < N; n++) {
+    h[n] = s[n] * w[n];
+  }
+
+  // summarize the kernel to get gain.
+  float sum = 0;
+  for (int n = 0; n < N; n++) {
+    sum += h[n];
+  }
+  
+  // divide by measured gain, multiply wanted gain.
+  for (int n = 0; n < N; n++) {
+    const float factor = gain/sum;
+    h[n] *= factor;
+  }
+}
+
+
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */

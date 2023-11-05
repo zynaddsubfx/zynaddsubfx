@@ -23,7 +23,12 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+#define DEBUGPRINTf(x) printf("DEBUG - " #x " = %f\n", x)
+#define DEBUGPRINTi(x) printf("DEBUG - " #x " = %d\n", x)
+
 namespace zyn {
+
+void windowedsinc(float fc, float gain, int N, float *h);
 
 extern bool isPlugin;
 bool fileexists(const char *filename);

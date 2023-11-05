@@ -20,6 +20,12 @@
 
 namespace zyn {
 
+/**
+ * The size of the windowes sinc kernel
+ * This must be an odd number
+ */
+#define WSKERNELSIZE 161
+
 enum class FMTYPE {
     NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
 };
@@ -40,8 +46,10 @@ struct ADnoteGlobalParam {
     Stereo=1, Mono=0. */
 
     unsigned char PStereo;
-
-
+    
+    // float array for windowed sinc kernel
+    float_t* wskernel;
+    
     /******************************************
     *     FREQUENCY GLOBAL PARAMETERS        *
     ******************************************/
