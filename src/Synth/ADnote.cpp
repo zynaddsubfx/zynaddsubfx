@@ -1465,8 +1465,10 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
         vce.FMnewamplitude = 1.0f;
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
+
     if(NoteVoicePar[nvoice].FMVoice >= 0)
-        // if I use VoiceOut[] as modullator
+        // if I use VoiceOut[] as modulator
+        // copy it to tmpwave_unison[][]
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
             const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
@@ -1479,6 +1481,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             int    posloFM  = (int)(vce.oscposloFM[k]  * (1<<24));
             int    freqhiFM = vce.oscfreqhiFM[k];
             int    freqloFM = (int)(vce.oscfreqloFM[k] * (1<<24));
+
             float *tw = tmpwave_unison[k];
             const float *smps = NoteVoicePar[nvoice].FMSmp;
 
@@ -1501,24 +1504,25 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
         
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
-        // convert floating point fractional part (sample interval phase)
-        // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
-        // by multiplying with precalculated 2^24 and casting to integer:
         int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
         int    freqhi = vce.oscfreqhi[k];
-        // same for phase increment:
         int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
-        float  fmold = vce.FMoldsmp[k];
+
+        float  fmold = vce.FMoldsmp[k]; //load value from last tick
         for(int i = 0; i < synth.buffersize; ++i) {
             
-            if (tw[i]>0 && fmold <=0) {
+            // if zero is crossed on the rising slope of the modulator 
+            // reset phase at the carrier
+            const float threshold = 0.0f;
+            if ((tw[i]>threshold && fmold <=threshold) ||
+                    (tw[i]>=threshold && fmold <threshold) ) {
                 poslo = 0;
                 poshi = 0;
             }
-            fmold = tw[i];
+            fmold = tw[i]; 
             
             tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
             poslo += freqlo;                // increment fractional part (sample interval phase)
@@ -1528,6 +1532,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
         }
         vce.oscposhi[k] = poshi;
         vce.oscposlo[k] = poslo/(16777216.0f);
+        vce.FMoldsmp[k] = fmold; // store value for next tick
     }
 }
 
