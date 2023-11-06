@@ -1582,11 +1582,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 ovsmpposhi &= synth.oscilsize - 1;
                 //for resampling factor up to 40 we reduce the kernel step size down to 1.
                 // -> lower cut off frequency
-                const int stpsize = rsmpfactor>40 ? 1 : 40/rsmpfactor;
+                
+                #define minstep 8 // <-----      this factor reduces the needed multiplications  <----------------
+                                 // it's best to use integer factors of 40
+                
+                const int stpsize = rsmpfactor>40/minstep ? minstep : 40/rsmpfactor;
                 // for resampling factor above 40 start scipping oscillator samples
-                const int ovsmpfreqhi = rsmpfactor<40 ? 1 : rsmpfactor/40;
+                const int ovsmpfreqhi = rsmpfactor<minstep ? 1 : rsmpfactor/minstep;
                 // first kernel sample to be used
-                const int startposhi = (carposlo*stpsize*ovsmpfreqhi)>>24;                
+                const int startposhi = (carposlo*stpsize)>>24;                
                 // reset output value
                 float out = 0;
                 for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) { 
