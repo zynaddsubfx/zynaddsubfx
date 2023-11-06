@@ -1514,7 +1514,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
         float  fmold = vce.FMoldsmp[k];
         for(int i = 0; i < synth.buffersize; ++i) {
             
-            if (tw[i]>0 && fmold <0) {
+            if (tw[i]>0 && fmold <=0) {
                 poslo = 0;
                 poshi = 0;
             }
