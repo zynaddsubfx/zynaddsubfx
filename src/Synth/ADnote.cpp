@@ -1517,10 +1517,11 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             // if zero is crossed on the rising slope of the modulator 
             // reset phase at the carrier
             const float threshold = 0.0f;
-            if ((tw[i]>threshold && fmold <=threshold) ||
-                    (tw[i]>=threshold && fmold <threshold) ) {
-                poslo -= int(vce.FMnewamplitude*float(poslo));
-                poshi -= int(vce.FMnewamplitude*float(poshi));
+            if ( ((tw[i]>threshold && fmold <=threshold) ||
+                    (tw[i]>=threshold && fmold <threshold) )
+                && float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) {
+                poslo = 0;//int(vce.FMnewamplitude*float(poslo));
+                poshi = 0;//int(vce.FMnewamplitude*float(poshi));
             }
             fmold = tw[i]; 
             
