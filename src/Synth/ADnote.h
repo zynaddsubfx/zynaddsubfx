@@ -96,7 +96,7 @@ class ADnote:public SynthNote
          * updates tmpwave_unison*/
         inline void ComputeVoiceOscillatorMix(int nvoice);
         /**Computes the Ring Modulated Oscillator.*/
-        inline void ComputeVoiceOscillatorRingModulation(int nvoice);
+        inline void ComputeVoiceOscillatorRingModulation(int nvoice, FMTYPE FMmode);
         /**Computes the Frequency Modulated Oscillator.
          * @param FMmode modulation type 0=Phase 1=Frequency*/
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
