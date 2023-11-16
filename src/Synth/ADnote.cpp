@@ -1406,7 +1406,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
 inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice, FMTYPE FMmode)
 {
     if(FMmode == FMTYPE::SYNC2_MOD)
-        ComputeVoiceOscillatorSync(nvoice);
+        ComputeVoiceOscillatorSync(nvoice, FMmode);
     else
         ComputeVoiceOscillator_LinearInterpolation(nvoice);
 
@@ -1461,7 +1461,7 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice, FMTYPE FMmo
 /*
  * Computes the Oscillator (Oscillator Sync)
  */
-inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
+inline void ADnote::ComputeVoiceOscillatorSync(int nvoice, FMTYPE FMmode)
 {
     Voice& vce = NoteVoicePar[nvoice];
     if(vce.FMnewamplitude > 1.0f)
@@ -1520,9 +1520,12 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             // if zero is crossed on the rising slope of the modulator 
             // reset phase at the carrier
             const float threshold = 0.0f;
-            if ( ((tw[i]>threshold && fmold <=threshold) ||
+            if ( 
+                 ( (tw[i]>threshold && fmold <=threshold) ||
                     (tw[i]>=threshold && fmold <threshold) )
-                && float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) {
+                && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude)
+                    || (FMmode == FMTYPE::SYNC2_MOD))
+                ) {
                 poslo = 0;//int(vce.FMnewamplitude*float(poslo));
                 poshi = 0;//int(vce.FMnewamplitude*float(poshi));
             }
@@ -1764,7 +1767,7 @@ int ADnote::noteout(float *outl, float *outr)
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
                     case FMTYPE::SYNC_MOD:
-                        ComputeVoiceOscillatorSync(nvoice);
+                        ComputeVoiceOscillatorSync(nvoice, FMTYPE::SYNC_MOD);
                         break;
                     case FMTYPE::SYNC2_MOD:
                         ComputeVoiceOscillatorRingModulation(nvoice,
