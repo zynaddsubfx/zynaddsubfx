@@ -71,9 +71,9 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
             ((powf(10, 1.5f * pars.GlobalPar.PPunchStrength / 127.0f) - 1.0f)
              * VelF(velocity,
                     pars.GlobalPar.PPunchVelocitySensing));
-        float time =
+        const float time =
             powf(10, 3.0f * pars.GlobalPar.PPunchTime / 127.0f) / 10000.0f;   //0.1f .. 100 ms
-        float stretch = powf(440.0f / powf(2.0f, spars.note_log2_freq),
+        const float stretch = powf(440.0f / powf(2.0f, spars.note_log2_freq),
                              pars.GlobalPar.PPunchStretch / 64.0f);
         NoteGlobalPar.Punch.dt = 1.0f / (time * synth.samplerate_f * stretch);
     }
@@ -286,8 +286,8 @@ int ADnote::setupVoiceUnison(int nvoice)
             float unison_values[true_unison];
             float min = -1e-6f, max = 1e-6f;
             for(int k = 0; k < true_unison; ++k) {
-                float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
-                float val  = step + (RND * 2.0f - 1.0f) / (true_unison - 1);
+                const float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
+                const float val  = step + (RND * 2.0f - 1.0f) / (true_unison - 1);
                 unison_values[k] = val;
                 if (min > val) {
                     min = val;
@@ -974,7 +974,7 @@ void ADnote::compute_unison_freq_rap(int nvoice) {
         vce.unison_freq_rap[0] = 1.0f;
         return;
     }
-    float relbw = ctl.bandwidth.relbw * bandwidthDetuneMultiplier;
+    const float relbw = ctl.bandwidth.relbw * bandwidthDetuneMultiplier;
     for(int k = 0; k < vce.unison_size; ++k) {
         float pos  = vce.unison_vibratto.position[k];
         float step = vce.unison_vibratto.step[k];
@@ -987,7 +987,7 @@ void ADnote::compute_unison_freq_rap(int nvoice) {
             pos  = 1.0f;
             step = -step;
         }
-        float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; //make the vibratto lfo smoother
+        const float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; //make the vibratto lfo smoother
         vce.unison_freq_rap[k] = 1.0f
                                      + ((vce.unison_base_freq_rap[k]
                                          - 1.0f) + vibratto_val
@@ -1198,7 +1198,7 @@ inline void ADnote::fadein(float *smps) const
     if(n > synth.buffersize)
         n = synth.buffersize;
     for(int i = 0; i < n; ++i) { //fade-in
-        float tmp = 0.5f - cosf((float)i / (float) n * PI) * 0.5f;
+        const float tmp = 0.5f - cosf((float)i / (float) n * PI) * 0.5f;
         smps[i] *= tmp;
     }
 }
@@ -1362,7 +1362,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
@@ -1380,7 +1380,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
             float *tw = tmpwave_unison[k];
 
             for(int i = 0; i < synth.buffersize; ++i) {
-                float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
@@ -1417,7 +1417,7 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
@@ -1434,7 +1434,7 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
             float *tw = tmpwave_unison[k];
 
             for(int i = 0; i < synth.buffersize; ++i) {
-                float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
@@ -1609,7 +1609,7 @@ inline void ADnote::ComputeVoicePinkNoise(int nvoice)
         float *tw = tmpwave_unison[k];
         float *f = &vce.pinking[k > 0 ? 7 : 0];
         for(int i = 0; i < synth.buffersize; ++i) {
-            float white = (RND-0.5f)/4.0f;
+            const float white = (RND-0.5f)/4.0f;
             f[0] = 0.99886f*f[0]+white*0.0555179f;
             f[1] = 0.99332f*f[1]+white*0.0750759f;
             f[2] = 0.96900f*f[2]+white*0.1538520f;
