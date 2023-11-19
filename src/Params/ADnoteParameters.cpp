@@ -548,32 +548,20 @@ static const Ports voicePorts = {
         }
     },
 
-    //Send Messages To Oscillator Realtime Table
+    //Oscillator objects are completely non-RT, so forward all messages
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-        if(obj->OscilGn == NULL) return;
+        if(obj->OscilGn == nullptr) return;
         data.obj = obj->OscilGn;
-        if(strstr(msg, "paste"))
-        {
-            SNIP
-            OscilGen::ports.dispatch(msg, data);
-        }
-        else
-            data.forward();
+        data.forward();
         rBOIL_END},
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-        if(obj->FmGn == NULL) return;
+        if(obj->FmGn == nullptr) return;
         data.obj = obj->FmGn;
-        if(strstr(msg, "paste"))
-        {
-            SNIP
-            OscilGen::ports.dispatch(msg, data);
-        }
-        else
-            data.forward();
+        data.forward();
         rBOIL_END},
 
 };
@@ -1426,9 +1414,6 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
-    RCopy(OscilGn);
-
-
     copy(PPanning);
     copy(volume);
     copy(PVolumeminus);
@@ -1487,7 +1472,8 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
 
     RCopy(FMFreqEnvelope);
 
-    RCopy(FmGn);
+    // Note: OscilGn and FMGn are non-RT objects. Thus, MW snoop ports will
+    //       handle pasting them.
 
     if ( time ) {
         last_update_timestamp = time->time();

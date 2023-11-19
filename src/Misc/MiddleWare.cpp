@@ -2055,6 +2055,8 @@ void gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
  * BASE/part#/kit#/padpars/prepare
  * BASE/part#/kit#/padpars/oscil/\*
  */
+// These are actually also snoop ports, but separated in order to have the set
+// of all non-RT *parameters* (which is required to generate OSC savefiles)
 static rtosc::Ports nonRtParamPorts = {
     /*
         obj_store access
@@ -2119,6 +2121,34 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
     /*
         other
     */
+    // AD voice paste is RT, but its sub
+    {"part#" STRINGIFY(NUM_MIDI_PARTS)
+//      "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
+//      STRINGIFY(NUM_VOICES) "/paste:b", 0, nullptr,
+        "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/paste:b", 0, nullptr,
+        rBegin;
+        int part, kit;
+        bool res = idsFromMsg(msg, &part, &kit, nullptr);
+        assert(res);
+        ADnoteParameters &pasteApar = **(ADnoteParameters **)rtosc_argument(msg,0).b.data;
+        for (int voice = 0; voice < NUM_VOICES; ++voice)
+        {
+            ADnoteVoiceParam &objVpar = impl.master->part[part]->kit[kit].adpars->VoicePar[voice];
+            ADnoteVoiceParam &pasteVpar = pasteApar.VoicePar[voice];
+            constexpr const std::size_t oscilsPerVoice = 2;
+            struct { OscilGen* obj, * paste; } pasteObjs[2]
+                = { {objVpar.OscilGn, pasteVpar.OscilGn },
+                    {objVpar.FmGn, pasteVpar.FmGn } };
+            for (std::size_t i = 0; i < oscilsPerVoice; ++i)
+            {
+                if(pasteObjs[i].obj && pasteObjs[i].paste)
+                {
+                    pasteObjs[i].obj->paste(*pasteObjs[i].paste);
+                }
+            }
+        }
+        d.forward();
+        rEnd},
     {"bank/", 0, &bankPorts,
         rBegin;
         d.obj = &impl.master->bank;
@@ -2172,31 +2202,31 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
                 assert(false && "bad arguments");
         }},
     {"presets/paste:s:ss:si:ssi", 0, 0,
-     [](const char *msg, rtosc::RtData &d) {
-         MiddleWareImpl *impl = (MiddleWareImpl*)d.obj;
-         d.obj = (void*)impl->parent;
-         MiddleWare &mw = *impl->parent;
-         assert(d.obj);
+        [](const char *msg, rtosc::RtData &d) {
+            MiddleWareImpl *impl = (MiddleWareImpl*)d.obj;
+            d.obj = (void*)impl->parent;
+            MiddleWare &mw = *impl->parent;
+            assert(d.obj);
 
-         std::string args = rtosc_argument_string(msg);
-         d.reply(d.loc, "s", "clipboard paste...");
+            std::string args = rtosc_argument_string(msg);
+            d.reply(d.loc, "s", "clipboard paste...");
 
-         std::string url = rtosc_argument(msg, 0).s;
-         void* obj = impl->obj_store.get(url);
+            std::string url = rtosc_argument(msg, 0).s;
+            void* obj = impl->obj_store.get(url);
 
-         if(args == "s")
-             presetPaste(mw, url, "", obj);
-         else if(args == "ss")
-             presetPaste(mw, url,
-                         rtosc_argument(msg, 1).s, obj);
-         else if(args == "si")
-             presetPasteArray(mw, url,
-                         rtosc_argument(msg, 1).i, "", obj);
-         else if(args == "ssi")
-             presetPasteArray(mw, url,
-                         rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
-         else
-             assert(false && "bad arguments");
+            if(args == "s")
+                presetPaste(mw, url, "", obj);
+            else if(args == "ss")
+                presetPaste(mw, url,
+                            rtosc_argument(msg, 1).s, obj);
+            else if(args == "si")
+                presetPasteArray(mw, url,
+                            rtosc_argument(msg, 1).i, "", obj);
+            else if(args == "ssi")
+                presetPasteArray(mw, url,
+                            rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
+            else
+                assert(false && "bad arguments");
         }},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
