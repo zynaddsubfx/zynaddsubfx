@@ -502,9 +502,14 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                (param.table->mode() == wavetable_types::WtMode::freqwave_smps))
             {
                 // table is up to date: make PFMEnabled = FMenabled = table->mode()
-                wtModeHasChanged = voice.FMEnabled != param.PFMEnabled;
+                wtModeHasChanged = first_run ? false : voice.FMEnabled != param.PFMEnabled;
 #ifdef WT_DEBUG_TRANSITIONS
-                printf("1: %d,%d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)param.PFMEnabled, wtModeHasChanged);
+                if(first_run)
+                {
+                    printf("1: %d,%d,(first run) => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)param.PFMEnabled, wtModeHasChanged);
+                } else {
+                    printf("1: %d,%d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)param.PFMEnabled, wtModeHasChanged);
+                }
 #endif
                 voice.FMEnabled = param.PFMEnabled;
             }
@@ -515,9 +520,9 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 if(param.table->mode() == wavetable_types::WtMode::freqwave_smps)
                 {
                     // so, if the table says WT mod, play WT mod
-                    wtModeHasChanged = voice.FMEnabled != FMTYPE::WAVE_MOD;
+                    wtModeHasChanged = first_run ? false : voice.FMEnabled != FMTYPE::WAVE_MOD;
 #ifdef WT_DEBUG_TRANSITIONS
-                    printf("2: %d,%d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)FMTYPE::WAVE_MOD, wtModeHasChanged);
+                    printf("2: %d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)FMTYPE::WAVE_MOD, wtModeHasChanged);
 #endif
                     voice.FMEnabled = FMTYPE::WAVE_MOD;
                 }
@@ -529,7 +534,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                     if(voice.FMEnabled != FMTYPE::WAVE_MOD)
                     {
 #ifdef WT_DEBUG_TRANSITIONS
-                        printf("3: %d,%d,%d => %d (unchanged) , changed? no\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)voice.FMEnabled);
+                        printf("3: (unchanged)\n");
 #endif
                         // just keep playing
                     }
