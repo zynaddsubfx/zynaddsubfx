@@ -121,7 +121,7 @@ struct ADnoteVoiceParam {
     void add2XML(XMLwrapper& xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
-    void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson,
+    void enable(const SYNTH_T &synth, FFTwrapper *fft, const Resonance *Reson,
                 const AbsTime *time);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
