@@ -634,7 +634,7 @@ void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
 }
 
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
-                              Resonance *Reson, const AbsTime *time)
+                              const Resonance *Reson, const AbsTime *time)
 {
     OscilGn  = new OscilGen(synth, fft, Reson);
     FmGn    = new OscilGen(synth, fft, NULL);

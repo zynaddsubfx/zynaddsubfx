@@ -458,7 +458,7 @@ void OscilGenBuffers::defaults()
     oldsapars     = 0;
 }
 
-OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
+OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, const Resonance *res_)
     :Presets(),
       m_myBuffers(OscilGenBuffersCreator(fft_, synth_.oscilsize)),
       fft(fft_),
