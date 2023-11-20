@@ -2227,6 +2227,8 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
                             rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
             else
                 assert(false && "bad arguments");
+
+            d.broadcast("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
