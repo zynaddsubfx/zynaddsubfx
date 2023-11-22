@@ -113,6 +113,18 @@ void CombFilter::settype(unsigned char type_)
             gainfwd = q;
             gainbwd = q;
             break;
+        case 3:
+            gainfwd = 0.0f;
+            gainbwd = -q;
+            break;
+        case 4:
+            gainfwd = -q;
+            gainbwd = 0.0f;
+            break;
+        case 5:
+            gainfwd = -q;
+            gainbwd = -q;
+            break;
     }
 }
 
