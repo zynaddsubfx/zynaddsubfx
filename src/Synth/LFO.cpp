@@ -73,6 +73,10 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     computeNextFreqRnd(); //twice because I want incrnd & nextincrnd to be random
     z1 = 0.0;
     z2 = 0.0;
+    x = 0.5f * RND;
+    y = 0.1f * RND;
+    z = 0.1f * RND;
+    
 }
 
 LFO::~LFO()
@@ -104,6 +108,8 @@ void LFO::updatePars()
 
 float LFO::baseOut(const char waveShape, const float phase)
 {
+    beta = 25.0f*(1.0f+float(cutoff)/127.0f);
+    chua_attractor(x, y, z, alpha, beta, mu0, mu1, phaseInc);
     float lfo_out;
     switch(waveShape) {
         case LFO_TRIANGLE:
@@ -133,6 +139,9 @@ float LFO::baseOut(const char waveShape, const float phase)
             }
             return biquad(last_random);
             break;
+        case LFO_CHUA_X: return x;
+        case LFO_CHUA_Y: return y;
+        case LFO_CHUA_Z: return z;
         default:
             return cosf(phase * 2.0f * PI); //LFO_SINE
     }

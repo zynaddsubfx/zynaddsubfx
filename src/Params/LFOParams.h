@@ -27,6 +27,9 @@
 #define LFO_EXP_DOWN1 5
 #define LFO_EXP_DOWN2 6
 #define LFO_RANDOM    7
+#define LFO_CHUA_X      8
+#define LFO_CHUA_Y      9
+#define LFO_CHUA_Z      10
 
 namespace zyn {
 

@@ -72,7 +72,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pcutoff, rShort("lp"), rDefault(127),
             "RND/SQR lp-filter freq"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
-                exp1, exp2, random), rLinear(0,127), rDefault(sine), "Shape of LFO"),
+                exp1, exp2, random, chuax, chuay, chuaz), rLinear(0,127), rDefault(sine), "Shape of LFO"),
     rParamZyn(Prandomness, rShort("a.r."), rSpecial(disable), rDefault(0),
             "Amplitude Randomness (calculated uniformly at each cycle)"),
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
@@ -102,7 +102,7 @@ static const rtosc::Ports _ports = {
      }},
 
     rToggle(Pcontinous, rShort("c"), rDefault(false),
-            "Enable for global operation"),
+        "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
         "Note frequency stretch"),
     rParamZyn(numerator, rShort("num"), rLinear(0,99), rDefault(0),

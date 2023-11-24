@@ -106,6 +106,16 @@ class LFO
         float a2 = 0.0007508914611009499;
         float b1 = -1.519121359805288;
         float b2 =  0.5221249256496917;
+        
+        // variables and parameters for chua chaos attractor oscillator
+        float x=0.01f;
+        float y=0.0f;
+        float z=0.0f;
+
+        float alpha=15.6f;
+        float beta=37.5f;
+        float mu0=-0.714285714286f;
+        float mu1=-1.14285714286f;
 
         char cutoff = 127;
 
