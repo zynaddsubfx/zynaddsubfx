@@ -283,6 +283,7 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].internal);
 
         rEnd},
+    {"active::T:F",  rProp(parameter) rDefault(false) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
         if(rtosc_narguments(msg)) {
