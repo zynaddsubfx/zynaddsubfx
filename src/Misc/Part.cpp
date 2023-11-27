@@ -1021,15 +1021,15 @@ void Part::AllNotesOff()
 /*
  * Compute Part Generic Controllers and store them in the envout and lfoout
  */
-void Part::ComputePartCtrl(float& envout, float& lfoout)
+void Part::ComputePartCtrl(float& envout, float& lfoout, float& x, float& y, float& z)
 {
     for(auto &d:notePool.activeDesc()) {
         for(auto &s:notePool.activeNotes(d)) {
             auto &note = *s.note;
             ADnote *adnote = dynamic_cast<ADnote*>(&note);
             if (adnote) {
-                adnote->calcMod(envout, lfoout);
-                //~ printf("calcMod lfoout(): %f\n", lfoout);
+                adnote->calcMod(envout, lfoout, x, y, z);
+                //~ printf("calcMod envout(): %f\n", envout);
             }
         }
     }

@@ -272,8 +272,8 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"internal::i", rOptions(NONE, LFO, ENV) rDefault(NONE)
-     rProp(parameter) rMap(default, 0) rDoc("Access assigned internal mod type \n 0=NONE 1=ENV 2=LFO") , 0,
+    {"internal::i", rOptions(NONE, LFO, ENV, XYZ, X, Y, Z) rDefault(NONE)
+     rProp(parameter) rMap(default, 0) rDoc("Access assigned internal mod type \n 0=NONE 1=ENV 2=LFO 3=XYZ") , 0,
         rBegin;
         int slot = d.idx[0];
         if(rtosc_narguments(msg)) {
@@ -1301,9 +1301,14 @@ bool Master::AudioOut(float *outl, float *outr)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
 
-        part[npart]->ComputePartCtrl(genericEnvout, genericLfoout);
+        part[npart]->ComputePartCtrl(genericEnvout, genericLfoout, 
+                                    genericLfoX, genericLfoY, genericLfoZ);
         automate.handleGenericControlers(CONTROLER_TYPE_ENV, genericEnvout);
         automate.handleGenericControlers(CONTROLER_TYPE_LFO, genericLfoout);
+        automate.handleGenericControlers(CONTROLER_TYPE_X, genericLfoX);
+        automate.handleGenericControlers(CONTROLER_TYPE_Y, genericLfoY);
+        automate.handleGenericControlers(CONTROLER_TYPE_Z, genericLfoZ);
+        //~ automate.handle3DControler(genericLfoX, genericLfoY, genericLfoZ);
         part[npart]->ComputePartSmps();
     }
 

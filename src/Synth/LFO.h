@@ -36,6 +36,9 @@ class LFO
         ~LFO();
 
         float lfoout();
+        float getX();
+        float getY();
+        float getZ();
         float amplfoout();
         void releasekey();
     private:

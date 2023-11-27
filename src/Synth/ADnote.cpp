@@ -1975,7 +1975,7 @@ void ADnote::entomb(void)
     NoteGlobalPar.AmpEnvelope->forceFinish();
 }
 
-void ADnote::calcMod(float& envout, float& lfoout) {
+void ADnote::calcMod(float& envout, float& lfoout, float& x, float& y, float& z) {
 
     if(pars.GlobalPar.PGenEnvelopeEnabled)
         envout = NoteGlobalPar.GenericEnvelope->envout();
@@ -1984,6 +1984,9 @@ void ADnote::calcMod(float& envout, float& lfoout) {
 
     if(pars.GlobalPar.PGenLfoEnabled) {
         lfoout = (NoteGlobalPar.GenericLfo->lfoout()/4094.0f)+0.5f;
+        x = (NoteGlobalPar.GenericLfo->getX());
+        y = (NoteGlobalPar.GenericLfo->getY());
+        z = (NoteGlobalPar.GenericLfo->getZ());
     }
     else
         lfoout = 0.0f;

@@ -54,7 +54,7 @@ class ADnote:public SynthNote
 
         virtual SynthNote *cloneLegato(void) override;
 
-        void calcMod(float& envout, float& lfoout);
+        void calcMod(float& envout, float& lfoout, float& x, float& y, float& z);
     private:
 
         void setupVoice(int nvoice);

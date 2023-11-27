@@ -304,6 +304,21 @@ float LFO::lfoout()
     return out;
 }
 
+float LFO::getX()
+{
+    return x;
+}
+
+float LFO::getY()
+{
+    return y;
+}
+
+float LFO::getZ()
+{
+    return z;
+}
+
 /*
  * LFO out (for amplitude)
  */
