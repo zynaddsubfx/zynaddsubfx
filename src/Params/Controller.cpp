@@ -410,21 +410,21 @@ int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo)
 void Controller::setparameternumber(unsigned int type, int value)
 {
     switch(type) {
-        case C_nrpnhi:
+        case C_NRPN_MSB:
             NRPN.parhi = value;
             NRPN.valhi = -1;
             NRPN.vallo = -1; //clear the values
             break;
-        case C_nrpnlo:
+        case C_NRPN_LSB:
             NRPN.parlo = value;
             NRPN.valhi = -1;
             NRPN.vallo = -1; //clear the values
             break;
-        case C_dataentryhi:
+        case C_Data_Entry_MSB:
             if((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
                 NRPN.valhi = value;
             break;
-        case C_dataentrylo:
+        case C_Data_Entry_LSB:
             if((NRPN.parhi >= 0) && (NRPN.parlo >= 0))
                 NRPN.vallo = value;
             break;
