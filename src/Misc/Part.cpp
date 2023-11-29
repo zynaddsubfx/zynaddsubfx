@@ -781,7 +781,7 @@ void Part::SetController(unsigned int type, int par)
         case C_pitchwheel:
             ctl.setpitchwheel(par);
             break;
-        case C_expressionMSB:
+        case C_ExpressionMSB:
             ctl.setexpression(par);
             setVolumedB(Volume); //update the volume
             break;
@@ -1019,22 +1019,6 @@ void Part::AllNotesOff()
     killallnotes = true;
 }
 
-/*
- * Compute Part Generic Controllers and store them in the envout and lfoout
- */
-void Part::ComputePartCtrl(float& envout, float& lfoout, float& x, float& y, float& z)
-{
-    for(auto &d:notePool.activeDesc()) {
-        for(auto &s:notePool.activeNotes(d)) {
-            auto &note = *s.note;
-            ADnote *adnote = dynamic_cast<ADnote*>(&note);
-            if (adnote) {
-                adnote->calcMod(envout, lfoout, x, y, z);
-                //~ printf("calcMod envout(): %f\n", envout);
-            }
-        }
-    }
-}
 /*
  * Compute Part samples and store them in the partoutl[] and partoutr[]
  */

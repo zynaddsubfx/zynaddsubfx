@@ -1300,15 +1300,6 @@ bool Master::AudioOut(float *outl, float *outr)
     //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
-
-        part[npart]->ComputePartCtrl(genericEnvout, genericLfoout, 
-                                    genericLfoX, genericLfoY, genericLfoZ);
-        automate.handleGenericControlers(CONTROLER_TYPE_ENV, genericEnvout);
-        automate.handleGenericControlers(CONTROLER_TYPE_LFO, genericLfoout);
-        automate.handleGenericControlers(CONTROLER_TYPE_X, genericLfoX);
-        automate.handleGenericControlers(CONTROLER_TYPE_Y, genericLfoY);
-        automate.handleGenericControlers(CONTROLER_TYPE_Z, genericLfoZ);
-        //~ automate.handle3DControler(genericLfoX, genericLfoY, genericLfoZ);
         part[npart]->ComputePartSmps();
     }
 

@@ -33,8 +33,12 @@
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars, prefix), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
-    watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
+    :SynthNote(spars, prefix), 
+        watch_be4_add(wm, prefix, "noteout/be4_mix"), 
+        watch_after_add(wm,prefix,"noteout/after_mix"),
+        watch_punch(wm, prefix, "noteout/punch"), 
+        watch_legato(wm, prefix, "noteout/legato"), 
+        pars(*pars_)
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
@@ -94,20 +98,6 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         tmpwave_unison[k] = memory.valloc<float>(synth.buffersize);
         memset(tmpwave_unison[k], 0, synth.bufferbytes);
     }
-    //~ const float basefreq = powf(2.0f, pars.note_log2_freq);
-
-    //~ if(genericEnvelopeEnabled)
-        //~ GenericEnvelope = new Envelope(*pars.GenericEnvelope,
-                //~ basefreq, synth.dt(), wm,
-                //~ ("GenericEnvelope/").c_str);
-    //~ else
-        //~ GenericEnvelope = NULL;
-
-    //~ if(genericLfoEnabled)
-        //~ GenericLfo = new LFO(*pars.GenericLfo, basefreq, time, wm,
-                //~ (pre+"GenericLfo/").c_str);
-    //~ else
-        //~ GenericLfo = NULL;
 
     initparameters(wm, prefix);
     memory.endTransaction();
@@ -1670,7 +1660,9 @@ int ADnote::noteout(float *outl, float *outr)
         setupVoiceDetune(nvoice);
         setupVoiceMod(nvoice, false);
     }
-
+    // calculate generic modulation sources
+    calcMod();
+    
     computecurrentparameters();
 
     for(unsigned nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
@@ -1975,21 +1967,21 @@ void ADnote::entomb(void)
     NoteGlobalPar.AmpEnvelope->forceFinish();
 }
 
-void ADnote::calcMod(float& envout, float& lfoout, float& x, float& y, float& z) {
+void ADnote::calcMod() {
 
     if(pars.GlobalPar.PGenEnvelopeEnabled)
-        envout = NoteGlobalPar.GenericEnvelope->envout();
+        pars.GlobalPar.Matrix->value[MOD_ENV1] = NoteGlobalPar.GenericEnvelope->envout();
     else
-        envout = 0.0f;
+        pars.GlobalPar.Matrix->value[MOD_ENV1] = 0.0f;
 
     if(pars.GlobalPar.PGenLfoEnabled) {
-        lfoout = (NoteGlobalPar.GenericLfo->lfoout()/4094.0f)+0.5f;
-        x = (NoteGlobalPar.GenericLfo->getX());
-        y = (NoteGlobalPar.GenericLfo->getY());
-        z = (NoteGlobalPar.GenericLfo->getZ());
+        pars.GlobalPar.Matrix->value[MOD_LFO1] = (NoteGlobalPar.GenericLfo->lfoout()/4094.0f)+0.5f;
+        pars.GlobalPar.Matrix->value[MOD_LFOX] = (NoteGlobalPar.GenericLfo->getX());
+        pars.GlobalPar.Matrix->value[MOD_LFOY] = (NoteGlobalPar.GenericLfo->getY());
+        pars.GlobalPar.Matrix->value[MOD_LFOZ] = (NoteGlobalPar.GenericLfo->getZ());
     }
     else
-        lfoout = 0.0f;
+        pars.GlobalPar.Matrix->value[MOD_LFO1] = 0.0f;
 }
 
 void ADnote::Voice::releasekey()

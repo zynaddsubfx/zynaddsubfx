@@ -17,6 +17,7 @@
 #include "SynthNote.h"
 #include "Envelope.h"
 #include "LFO.h"
+#include "ModMatrix.h"
 #include "Portamento.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
@@ -54,7 +55,7 @@ class ADnote:public SynthNote
 
         virtual SynthNote *cloneLegato(void) override;
 
-        void calcMod(float& envout, float& lfoout, float& x, float& y, float& z);
+        void calcMod();
     private:
 
         void setupVoice(int nvoice);
@@ -124,13 +125,15 @@ class ADnote:public SynthNote
         float velocity;
 
         ONOFFTYPE   NoteEnabled;
+        //~ ModMatrix* mod;  
+        bool genericEnvelopeEnabled;
+        bool genericLFOEnabled;
 
 
 
-
-        /*****************************************************************/
-        /*                    GLOBAL PARAMETERS                          */
-        /*****************************************************************/
+  /*****************************************************************/
+  /*                    GLOBAL PARAMETERS                          */
+  /*****************************************************************/
 
         struct Global {
             void kill(Allocator &memory);
@@ -248,7 +251,6 @@ class ADnote:public SynthNote
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
-
 
             /****************************
             *   MODULLATOR PARAMETERS   *

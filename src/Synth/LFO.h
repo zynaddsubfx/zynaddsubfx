@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "../Misc/Time.h"
+#include "ModMatrix.h"
 #include "WatchPoint.h"
 
 
@@ -79,6 +80,7 @@ class LFO
         const AbsTime &time;
         //Delay before starting
         RelTime delayTime;
+
 
         int64_t fadeInDuration;
         //Timestamp of begin fadein

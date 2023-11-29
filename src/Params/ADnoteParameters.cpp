@@ -23,6 +23,7 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
 #include "../Synth/Resonance.h"
+#include "../Synth/ModMatrix.h"
 #include "FilterParams.h"
 
 #include <rtosc/ports.h>
@@ -338,6 +339,7 @@ static const Ports globalPorts = {
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GenericEnvelope, "Generic Envelope"),
     rRecurp(GlobalFilter, "Filter"),
+    rRecurp(Matrix,         "Modulation Matrix"),
     rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
     rToggle(PGenEnvelopeEnabled, rShort("Env enable"), rDefault(false),
     "Generic Envelope Enable"),
@@ -486,24 +488,25 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
 ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
+    Matrix = new ModMatrix();
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
     FreqEnvelope->init(ad_global_freq);
-    FreqLfo = new LFOParams(ad_global_freq, time_);
+    FreqLfo = new LFOParams(ad_global_freq, time_, Matrix);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
     AmpEnvelope->init(ad_global_amp);
-    AmpLfo = new LFOParams(ad_global_amp, time_);
+    AmpLfo = new LFOParams(ad_global_amp, time_, Matrix);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
     FilterEnvelope = new EnvelopeParams(0, 1, time_);
     FilterEnvelope->init(ad_global_filter);
-    FilterLfo = new LFOParams(ad_global_filter, time_);
+    FilterLfo = new LFOParams(ad_global_filter, time_, Matrix);
     Reson     = new Resonance();
 
     /* Generic Modulators Init */
     GenericEnvelope = new EnvelopeParams(0, 0, time_);
-    GenericEnvelope->init(loc_generic);
-    GenericLfo = new LFOParams(loc_generic, time_);
+    GenericEnvelope->init(loc_unspecified);
+    GenericLfo = new LFOParams(loc_unspecified, time_);
 }
 
 void ADnoteParameters::defaults()

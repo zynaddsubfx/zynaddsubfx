@@ -133,7 +133,6 @@ void LFOParams::setup()
 {
     switch(loc) {
         case loc_unspecified:
-        case loc_generic:
             fel = consumer_location_type_t::unspecified;
             break;
         case ad_global_freq:
@@ -159,8 +158,9 @@ void LFOParams::setup()
 }
 
 // TODO: reuse
-LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_)
+LFOParams::LFOParams(const AbsTime *time_,
+                  const ModMatrix* mod_) :
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_, mod_)
 {
 }
 
@@ -175,8 +175,10 @@ LFOParams::LFOParams(float freq_,
                      float fadeout_,
                      char Pcontinous_,
                      consumer_location_t loc,
-                     const AbsTime *time_) : loc(loc),
+                     const AbsTime *time_,
+                     const ModMatrix *mod_) : loc(loc),
                                              time(time_),
+                                             mod(mod_),
                                              last_update_timestamp(0) {
     Dfreq       = freq_;
     Dintensity  = Pintensity_;
@@ -193,8 +195,9 @@ LFOParams::LFOParams(float freq_,
 }
 
 LFOParams::LFOParams(consumer_location_t loc,
-                     const AbsTime *time_) : loc(loc),
+                     const AbsTime *time_, const ModMatrix* mod_) : loc(loc),
                                              time(time_),
+                                             mod(mod_),
                                              last_update_timestamp(0) {
 
     auto init =
@@ -221,7 +224,7 @@ LFOParams::LFOParams(consumer_location_t loc,
         case ad_voice_amp:     init(11.25, 32, 64, 0.94f); break;
         case ad_voice_freq:    init(1.19, 40,  0, 0.0f); break;
         case ad_voice_filter:  init(1.19, 20, 64, 0.0f); break;
-        case loc_generic:      init(6.49, 0, 64, 0.0f); break;
+        case loc_unspecified:      init(6.49, 0, 64, 0.0f); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 

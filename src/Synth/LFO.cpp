@@ -99,6 +99,11 @@ void LFO::updatePars()
         tempo = time.tempo;
         lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
     }
+    // apply modulation matrix sources
+    for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
+        lfofreq += lfopars.mod->value[i] 
+            * lfopars.mod->matrix[i][0];
+
     phaseInc = fabsf(lfofreq) * dt;
     
     //Limit the Frequency(or else...)
@@ -216,6 +221,9 @@ float LFO::lfoout()
                 lfointensity = powf(2, lfopars.Pintensity / 127.0f * 11.0f) - 1.0f; // [0...2047] cent
                 break;
         }
+    // apply modulation matrix sources
+    for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
+        lfointensity *= lfopars.mod->value[i] * lfopars.mod->matrix[i][1];
     }
     
     // refresh freq if tempo has changed

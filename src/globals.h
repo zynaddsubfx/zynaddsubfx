@@ -94,7 +94,6 @@ typedef std::complex<fftwf_real> fft_t;
  */
 #define PAD_MAX_SAMPLES 64
 
-
 /*
  * Number of parts
  */
@@ -259,7 +258,7 @@ enum MidiControllers {
     C_Volume = 7,
     C_Balance_MSB = 8,
     C_Pan_MSB = 10,
-    C_expressionMSB = 11,
+    C_ExpressionMSB = 11,
     C_Effect_Controller_1_MSB = 12,
     C_Effect_Controller_2_MSB = 13,
     C_Slider_Knob_Ribbon_Controller = 16,

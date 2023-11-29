@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include "../Synth/ModMatrix.h"
 #include <cstdint>
 
 namespace zyn {
@@ -103,6 +104,8 @@ struct ADnoteGlobalParam {
 
     // RESONANCE
     Resonance *Reson;
+    // Modulation Matrix
+    ModMatrix *Matrix;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
     unsigned char Hrandgrouping;
@@ -314,6 +317,7 @@ struct ADnoteVoiceParam {
 
     const AbsTime *time;
     int64_t last_update_timestamp;
+    
 
     static const rtosc::Ports &ports;
 };
