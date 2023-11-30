@@ -223,7 +223,8 @@ float LFO::lfoout()
         }
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
-        lfointensity *= lfopars.mod->value[i] * lfopars.mod->matrix[i][1];
+        lfointensity *= lfopars.mod->value[i] 
+            * lfopars.mod->matrix[i][1];
     }
     
     // refresh freq if tempo has changed
