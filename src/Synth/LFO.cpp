@@ -49,6 +49,7 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
 
     switch(lfopars.fel) {
         case consumer_location_type_t::amp:
+        case consumer_location_type_t::generic:
             lfointensity = lfopars.Pintensity / 127.0f;
             break;
         case consumer_location_type_t::filter:
@@ -102,7 +103,7 @@ void LFO::updatePars()
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
         lfofreq += lfopars.mod->value[i] 
-            * lfopars.mod->matrix[i][0];
+            * lfopars.mod->matrix[i][lfopars.loc][(int)PAR_LFO_FREQ];
 
     phaseInc = fabsf(lfofreq) * dt;
     
@@ -224,7 +225,7 @@ float LFO::lfoout()
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
         lfointensity *= lfopars.mod->value[i] 
-            * lfopars.mod->matrix[i][1];
+            * lfopars.mod->matrix[i][lfopars.loc][PAR_LFO_DEPTH];
     }
     
     // refresh freq if tempo has changed

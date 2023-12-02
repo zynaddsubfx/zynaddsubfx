@@ -177,8 +177,10 @@ class ADnote:public SynthNote
             /******************************************
             *        GENERIC MOD PARAMETERS        *
             ******************************************/
-            Envelope  *GenericEnvelope;
-            LFO       *GenericLfo;
+            Envelope  *GenericEnvelope1;
+            LFO       *GenericLfo1;
+            Envelope  *GenericEnvelope2;
+            LFO       *GenericLfo2;
 
         } NoteGlobalPar;
 

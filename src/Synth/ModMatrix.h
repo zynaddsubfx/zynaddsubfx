@@ -19,20 +19,19 @@
 
 namespace zyn {
 
-#define NUM_MODMATRIX_SOURCES 5
+//~ #define NUM_MODMATRIX_SOURCES 5
 enum {
     MOD_ENV1,
+    MOD_ENV2,
     MOD_LFO1,
-    MOD_LFOX, 
-    MOD_LFOY,    
-    MOD_LFOZ
-    
+    MOD_LFO2,
+    NUM_MODMATRIX_SOURCES
 };
 
-#define NUM_MODMATRIX_DESTINATIONS 2
 enum {
     PAR_LFO_FREQ,
-    PAR_LFO_DEPTH
+    PAR_LFO_DEPTH,
+    NUM_MODMATRIX_LFO_DESTINATIONS
 };
 
 /**Class for creating Low Frequency Oscillators*/
@@ -48,7 +47,7 @@ class ModMatrix
         ~ModMatrix();
 
         float* value;
-        float** matrix;
+        float*** matrix;
         
         static const rtosc::Ports ports;
 

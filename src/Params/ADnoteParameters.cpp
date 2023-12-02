@@ -333,18 +333,22 @@ static const Ports globalPorts = {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
-    rRecurp(GenericLfo, "Generic LFO"),
+    rRecurp(GenericLfo1, "Generic LFO 1"),
     rRecurp(FreqEnvelope, "Frequency Envelope"),
     rRecurp(AmpEnvelope, "Amplitude Envelope"),
     rRecurp(FilterEnvelope, "Filter Envelope"),
-    rRecurp(GenericEnvelope, "Generic Envelope"),
+    rRecurp(GenericEnvelope1, "Generic Envelope 1"),
     rRecurp(GlobalFilter, "Filter"),
     rRecurp(Matrix,         "Modulation Matrix"),
     rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
-    rToggle(PGenEnvelopeEnabled, rShort("Env enable"), rDefault(false),
-    "Generic Envelope Enable"),
-    rToggle(PGenLfoEnabled,      rShort("Lfo enable"), rDefault(false),
-    "Generic LFO Enable"),
+    rToggle(PGenEnvelope1Enabled, rShort("Env enable"), rDefault(false),
+    "Generic Envelope 1 Enable"),
+    rToggle(PGenLfo1Enabled,      rShort("Lfo enable"), rDefault(false),
+    "Generic LFO 1 Enable"),
+    rToggle(PGenEnvelope2Enabled, rShort("Env enable"), rDefault(false),
+    "Generic Envelope 2 Enable"),
+    rToggle(PGenLfo2Enabled,      rShort("Lfo enable"), rDefault(false),
+    "Generic LFO 2 Enable"),
     //Frequency
     //nominally -8192..8191
     rParamI(PDetune,              rShort("fine"),
@@ -504,9 +508,12 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
     Reson     = new Resonance();
 
     /* Generic Modulators Init */
-    GenericEnvelope = new EnvelopeParams(0, 0, time_);
-    GenericEnvelope->init(loc_unspecified);
-    GenericLfo = new LFOParams(loc_unspecified, time_);
+    GenericEnvelope1 = new EnvelopeParams(0, 0, time_);
+    GenericEnvelope1->init(loc_generic1);
+    GenericEnvelope2 = new EnvelopeParams(0, 0, time_);
+    GenericEnvelope2->init(loc_generic1);
+    GenericLfo1 = new LFOParams(loc_generic1, time_, Matrix);
+    GenericLfo2 = new LFOParams(loc_generic2, time_, Matrix);
 }
 
 void ADnoteParameters::defaults()
@@ -552,10 +559,14 @@ void ADnoteGlobalParam::defaults()
     FilterLfo->defaults();
     Reson->defaults();
 
-    GenericEnvelope->defaults();
-    GenericLfo->defaults();
-    PGenEnvelopeEnabled       = 0;
-    PGenLfoEnabled            = 0;
+    GenericEnvelope1->defaults();
+    GenericLfo1->defaults();
+    GenericEnvelope2->defaults();
+    GenericLfo2->defaults();
+    PGenEnvelope1Enabled       = 0;
+    PGenLfo1Enabled            = 0;
+    PGenEnvelope2Enabled       = 0;
+    PGenLfo2Enabled            = 0;
 }
 
 /*
@@ -739,8 +750,10 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
     delete FilterLfo;
     delete Reson;
 
-    delete GenericEnvelope;
-    delete GenericLfo;
+    delete GenericEnvelope1;
+    delete GenericLfo1;
+    delete GenericEnvelope2;
+    delete GenericLfo2;
 }
 
 ADnoteParameters::~ADnoteParameters()

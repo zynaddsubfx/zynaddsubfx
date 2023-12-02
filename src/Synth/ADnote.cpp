@@ -1969,16 +1969,16 @@ void ADnote::entomb(void)
 
 void ADnote::calcMod() {
 
-    if(pars.GlobalPar.PGenEnvelopeEnabled)
-        pars.GlobalPar.Matrix->value[MOD_ENV1] = NoteGlobalPar.GenericEnvelope->envout();
+    if(pars.GlobalPar.PGenEnvelope1Enabled)
+        pars.GlobalPar.Matrix->value[MOD_ENV1] = NoteGlobalPar.GenericEnvelope1->envout();
     else
         pars.GlobalPar.Matrix->value[MOD_ENV1] = 0.0f;
 
-    if(pars.GlobalPar.PGenLfoEnabled) {
-        pars.GlobalPar.Matrix->value[MOD_LFO1] = (NoteGlobalPar.GenericLfo->lfoout()/4094.0f)+0.5f;
-        pars.GlobalPar.Matrix->value[MOD_LFOX] = (NoteGlobalPar.GenericLfo->getX());
-        pars.GlobalPar.Matrix->value[MOD_LFOY] = (NoteGlobalPar.GenericLfo->getY());
-        pars.GlobalPar.Matrix->value[MOD_LFOZ] = (NoteGlobalPar.GenericLfo->getZ());
+    if(pars.GlobalPar.PGenLfo1Enabled) {
+        pars.GlobalPar.Matrix->value[MOD_LFO1] = (NoteGlobalPar.GenericLfo1->lfoout()/4094.0f)+0.5f;
+        //~ pars.GlobalPar.Matrix->value[MOD_LFOX] = (NoteGlobalPar.GenericLfo->getX());
+        //~ pars.GlobalPar.Matrix->value[MOD_LFOY] = (NoteGlobalPar.GenericLfo->getY());
+        //~ pars.GlobalPar.Matrix->value[MOD_LFOZ] = (NoteGlobalPar.GenericLfo->getZ());
     }
     else
         pars.GlobalPar.Matrix->value[MOD_LFO1] = 0.0f;
@@ -2035,9 +2035,11 @@ void ADnote::Global::kill(Allocator &memory)
     memory.dealloc(FilterLfo);
 
     //~ if(genericEnvelopeEnabled)
-         memory.dealloc(GenericEnvelope);
+         memory.dealloc(GenericEnvelope1);
+         memory.dealloc(GenericEnvelope2);
     //~ if(genericLfoEnabled)
-         memory.dealloc(GenericLfo);
+         memory.dealloc(GenericLfo1);
+         memory.dealloc(GenericLfo2);
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
@@ -2074,10 +2076,14 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);
 
-    GenericEnvelope = memory.alloc<Envelope>(*param.GenericEnvelope, basefreq,
-            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope/").c_str);
-    GenericLfo      = memory.alloc<LFO>(*param.GenericLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/GenericLfo/").c_str);
+    GenericEnvelope1 = memory.alloc<Envelope>(*param.GenericEnvelope1, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope1/").c_str);
+    GenericLfo1      = memory.alloc<LFO>(*param.GenericLfo1, basefreq, time, wm,
+                   (pre+"GlobalPar/GenericLfo1/").c_str);
+    GenericEnvelope2 = memory.alloc<Envelope>(*param.GenericEnvelope2, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope2/").c_str);
+    GenericLfo2      = memory.alloc<LFO>(*param.GenericLfo2, basefreq, time, wm,
+                   (pre+"GlobalPar/GenericLfo2/").c_str);
     {
         Filter->updateSense(velocity, param.PFilterVelocityScale,
                 param.PFilterVelocityScaleFunction);

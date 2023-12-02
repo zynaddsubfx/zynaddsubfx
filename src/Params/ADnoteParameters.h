@@ -96,11 +96,15 @@ struct ADnoteGlobalParam {
     LFOParams *FilterLfo;
 
 
-    unsigned char   PGenEnvelopeEnabled;
-    unsigned char   PGenLfoEnabled;
+    unsigned char   PGenEnvelope1Enabled;
+    unsigned char   PGenLfo1Enabled;
+    unsigned char   PGenEnvelope2Enabled;
+    unsigned char   PGenLfo2Enabled;
 
-    EnvelopeParams *GenericEnvelope;
-    LFOParams    *GenericLfo;
+    EnvelopeParams *GenericEnvelope1;
+    EnvelopeParams *GenericEnvelope2;
+    LFOParams    *GenericLfo1;
+    LFOParams    *GenericLfo2;
 
     // RESONANCE
     Resonance *Reson;
