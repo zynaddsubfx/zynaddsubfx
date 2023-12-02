@@ -1973,15 +1973,23 @@ void ADnote::calcMod() {
         pars.GlobalPar.Matrix->value[MOD_ENV1] = NoteGlobalPar.GenericEnvelope1->envout();
     else
         pars.GlobalPar.Matrix->value[MOD_ENV1] = 0.0f;
+    
+    if(pars.GlobalPar.PGenEnvelope2Enabled)
+        pars.GlobalPar.Matrix->value[MOD_ENV2] = NoteGlobalPar.GenericEnvelope2->envout();
+    else
+        pars.GlobalPar.Matrix->value[MOD_ENV2] = 0.0f;
 
     if(pars.GlobalPar.PGenLfo1Enabled) {
         pars.GlobalPar.Matrix->value[MOD_LFO1] = (NoteGlobalPar.GenericLfo1->lfoout()/4094.0f)+0.5f;
-        //~ pars.GlobalPar.Matrix->value[MOD_LFOX] = (NoteGlobalPar.GenericLfo->getX());
-        //~ pars.GlobalPar.Matrix->value[MOD_LFOY] = (NoteGlobalPar.GenericLfo->getY());
-        //~ pars.GlobalPar.Matrix->value[MOD_LFOZ] = (NoteGlobalPar.GenericLfo->getZ());
     }
     else
         pars.GlobalPar.Matrix->value[MOD_LFO1] = 0.0f;
+    
+    if(pars.GlobalPar.PGenLfo2Enabled) {
+        pars.GlobalPar.Matrix->value[MOD_LFO2] = (NoteGlobalPar.GenericLfo2->lfoout()/4094.0f)+0.5f;
+    }
+    else
+        pars.GlobalPar.Matrix->value[MOD_LFO2] = 0.0f;
 }
 
 void ADnote::Voice::releasekey()
