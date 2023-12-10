@@ -47,12 +47,11 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
             envdt[i] = bufferdt / dtstretched;
         else
             envdt[i] = 2.0f;  //any value larger than 1
-
         switch(mode) {
-            case 2:
+            case ADSR_dB:
                 envval[i] = (1.0f - pars.Penvval[i] / 127.0f) * -40;
                 break;
-            case 3:
+            case ASR_freqlfo:
                 envval[i] =
                     (powf(2, 6.0f
                           * fabsf(pars.Penvval[i]
@@ -60,12 +59,13 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
                 if(pars.Penvval[i] < 64)
                     envval[i] = -envval[i];
                 break;
-            case 4:
+            case ADSR_filter:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
                 break;
-            case 5:
+            case ASR_bw:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 10;
                 break;
+            case ADSR_lin:
             default:
                 envval[i] = pars.Penvval[i] / 127.0f;
         }
@@ -109,27 +109,29 @@ void Envelope::watch(float time, float value)
     float factor2;
     pos[0] = time;
     switch(mode) {
-        case 2:
+        case ADSR_dB:
             pos[1] = 1 - value / -40.f;
             watchOut(pos, 2);
             break;
-        case 3:
+        case ASR_freqlfo:
             factor1 = log(value/100. + 1.) / (6. * log(2));
             factor2 = log(1. - value/100.) / (6. * log(2));
             pos[1] = ((0.5 * factor1) >= 0) ? (0.5 * factor1 + 0.5) : (0.5  - factor2 * 0.5);
             watchOut(pos, 2);
             break;
-        case 4:
+        case ADSR_filter:
             pos[1] = (value + 6.) / 12.f;
             watchOut(pos, 2);
             break;
-        case 5:
+        case ASR_bw:
             pos[1] = (value + 10.) / 20.f;
             watchOut(pos, 2);
             break;
+        case ADSR_lin:
         default:
             pos[1] = value;
             watchOut(pos, 2);
+            break;
     }
 }
 
