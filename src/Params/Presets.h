@@ -62,6 +62,7 @@ class Presets
 
 #define ad_voice_fm_amp 6
 #define ad_voice_fm_freq 7
+#define ad_voice_fm_wave 13
 
 #define sub_freq 8
 #define sub_filter 9

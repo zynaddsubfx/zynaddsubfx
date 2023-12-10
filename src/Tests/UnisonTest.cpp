@@ -58,7 +58,7 @@ class UnisonTest
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            params = new ADnoteParameters(*synth, fft, time);
+            params = new ADnoteParameters(*synth, fft, time, false);
 
             //sawtooth to make things a bit more interesting
             params->VoicePar[0].OscilGn->Pcurrentbasefunc = 3;

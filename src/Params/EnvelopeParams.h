@@ -26,7 +26,8 @@ namespace zyn {
         ADSR_dB = 2,
         ASR_freqlfo = 3,
         ADSR_filter = 4,
-        ASR_bw = 5
+        ASR_bw = 5,
+        ADSR_sym = 6
     };
 
 class EnvelopeParams:public Presets
@@ -86,6 +87,7 @@ class EnvelopeParams:public Presets
     private:
 
         void ADSRinit(float A_dt, float D_dt, char S_val, float R_dt);
+        void ADSRinit_sym(float A_dt, float D_dt, char S_val, float R_dt);
         void ADSRinit_dB(float A_dt, float D_dt, char S_val, float R_dt);
         void ASRinit(char A_val, float A_dt, char R_val, float R_dt);
         void ADSRinit_filter(char A_val,
