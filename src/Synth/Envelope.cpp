@@ -245,10 +245,9 @@ float Envelope::envout_dB()
             out = v2;
         }
 
-        if(out > 0.001f)
-            envoutval = EnvelopeParams::env_rap2dB(out);
-        else
-            envoutval = MIN_ENVELOPE_DB;
+
+        envoutval = EnvelopeParams::env_rap2dB(out);
+
         out = envoutval;
     } else
         out = envout(false);
