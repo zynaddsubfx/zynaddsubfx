@@ -36,10 +36,10 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
     mode = pars.Envmode;
 
     //for amplitude envelopes
-    if((mode == 1) && !linearenvelope)
-        mode = 2;                              //change to log envelope
-    if((mode == 2) && linearenvelope)
-        mode = 1;                              //change to linear
+    if((mode == ADSR_lin) && !linearenvelope)
+        mode = ADSR_dB;                              //change to log envelope
+    if((mode == ADSR_dB) && linearenvelope)
+        mode = ADSR_lin;                              //change to linear
 
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         const float dtstretched = pars.getdt(i) * envstretch;
