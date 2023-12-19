@@ -60,10 +60,10 @@ const rtosc::Ports ModMatrix::ports = {
 
 ModMatrix::ModMatrix()
 {
-    value = new float[NUM_MODMATRIX_SOURCES];
-    matrix = new float**[NUM_MODMATRIX_SOURCES]; // Erstelle ein Array von Pointern
+    value = new float[NUM_MOD_MATRIX_SOURCES];
+    matrix = new float**[NUM_MOD_MATRIX_SOURCES]; // Erstelle ein Array von Pointern
     
-    for (int i = 0; i < NUM_MODMATRIX_SOURCES; ++i) {
+    for (int i = 0; i < NUM_MOD_MATRIX_SOURCES; ++i) {
         matrix[i] = new float*[NUM_LOCATIONS]; 
         for (int j = 0; j < NUM_LOCATIONS; ++j) {
             matrix[i][j] = new float[NUM_MODMATRIX_LFO_DESTINATIONS]; // Weise jedem Pointer ein Array zu
@@ -71,8 +71,8 @@ ModMatrix::ModMatrix()
     }
     
 
-    memset(value, 0, NUM_MODMATRIX_SOURCES * sizeof(float));
-    for (int i = 0; i < NUM_MODMATRIX_SOURCES; ++i) {
+    memset(value, 0, NUM_MOD_MATRIX_SOURCES * sizeof(float));
+    for (int i = 0; i < NUM_MOD_MATRIX_SOURCES; ++i) {
         for (int j = 0; j < NUM_LOCATIONS; ++j) {
             memset(matrix[i][j], 0, NUM_MODMATRIX_LFO_DESTINATIONS * sizeof(float));
         }
@@ -83,7 +83,7 @@ ModMatrix::~ModMatrix()
 {
     delete[] value;
     // Freigabe des Speichers für jedes Array, auf das 'matrix' zeigt
-    for (int i = 0; i < NUM_MODMATRIX_SOURCES; ++i) {
+    for (int i = 0; i < NUM_MOD_MATRIX_SOURCES; ++i) {
         delete[] matrix[i];
     }
     

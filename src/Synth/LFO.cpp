@@ -101,7 +101,7 @@ void LFO::updatePars()
         lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
     }
     // apply modulation matrix sources
-    for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
+    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
         lfofreq += lfopars.mod->value[i] 
             * lfopars.mod->matrix[i][lfopars.loc][(int)PAR_LFO_FREQ];
 
@@ -223,7 +223,7 @@ float LFO::lfoout()
                 break;
         }
     // apply modulation matrix sources
-    for(auto i = 0; i<NUM_MODMATRIX_SOURCES; i++) 
+    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
         lfointensity *= lfopars.mod->value[i] 
             * lfopars.mod->matrix[i][lfopars.loc][PAR_LFO_DEPTH];
     }
