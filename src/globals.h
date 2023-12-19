@@ -258,7 +258,7 @@ enum MidiControllers {
     C_Volume = 7,
     C_Balance_MSB = 8,
     C_Pan_MSB = 10,
-    C_ExpressionMSB = 11,
+    C_Expression_MSB = 11,
     C_Effect_Controller_1_MSB = 12,
     C_Effect_Controller_2_MSB = 13,
     C_Slider_Knob_Ribbon_Controller = 16,

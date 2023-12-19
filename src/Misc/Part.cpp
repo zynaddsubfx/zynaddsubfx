@@ -781,7 +781,7 @@ void Part::SetController(unsigned int type, int par)
         case C_pitchwheel:
             ctl.setpitchwheel(par);
             break;
-        case C_ExpressionMSB:
+        case C_Expression_MSB:
             ctl.setexpression(par);
             setVolumedB(Volume); //update the volume
             break;
