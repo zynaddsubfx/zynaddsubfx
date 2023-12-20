@@ -53,7 +53,21 @@ enum {
     NUM_MODMATRIX_LFO_DESTINATIONS
 };
 
-/**Class for creating Low Frequency Oscillators*/
+#define NUM_MODMATRIX_ANY_DESTINATIONS 8
+
+class ModulationSource {
+    
+    
+    public:
+    float getDestinationFactor(int location, int parameter);
+    
+    // public for ports:
+    float destination[NUM_MOD_MATRIX_DESTINATIONS];
+    
+    static const rtosc::Ports &ports;
+};
+
+
 class ModMatrix
 {
     public:
@@ -64,15 +78,16 @@ class ModMatrix
          */
         ModMatrix();
         ~ModMatrix();
+        
 
         float* value;
-        float*** matrix;
+        
+        class ModulationSource* source[NUM_MOD_MATRIX_SOURCES];
+        
+        unsigned char PSources;
+        unsigned char PDestinations;
         
         static const rtosc::Ports ports;
-
-    private:
-
-    
 };
 
 }

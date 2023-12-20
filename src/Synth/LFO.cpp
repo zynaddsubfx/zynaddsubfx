@@ -103,7 +103,7 @@ void LFO::updatePars()
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
         lfofreq += lfopars.mod->value[i] 
-            * lfopars.mod->matrix[i][lfopars.loc][(int)PAR_LFO_FREQ];
+            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_FREQ);
 
     phaseInc = fabsf(lfofreq) * dt;
     
@@ -226,7 +226,7 @@ float LFO::lfoout()
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
         lfointensity *= lfopars.mod->value[i] 
-            * lfopars.mod->matrix[i][lfopars.loc][PAR_LFO_DEPTH];
+            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_DEPTH);
     }
     
     // refresh freq if tempo has changed
