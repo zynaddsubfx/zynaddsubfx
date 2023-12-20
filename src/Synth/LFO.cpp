@@ -212,6 +212,7 @@ float LFO::lfoout()
         switch(lfopars.fel) {
         
             case consumer_location_type_t::amp:
+            case consumer_location_type_t::generic:
                 lfointensity = lfopars.Pintensity / 127.0f; // [0...1]
                 break;
             case consumer_location_type_t::filter:
