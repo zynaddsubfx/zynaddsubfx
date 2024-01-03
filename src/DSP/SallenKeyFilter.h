@@ -14,6 +14,7 @@
 #pragma once
 #include "Filter.h"
 #include "VAOnePoleFilter.h"
+#include "Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -31,18 +32,21 @@ public:
 private:
     float step(float input);
     float ic1eq,ic2eq;
-    float cutoff;
+    float freq;
     //float q;
     float gain;
     unsigned char ftype;
     unsigned sr;
+    
+    float input_old;
     
     CVAOnePoleFilter m_LPF1;
     CVAOnePoleFilter m_LPF2;
     CVAOnePoleFilter m_HPF1;
 
     // fn to update when UI changes
-    void updateFilters();
+    void updateFilters(float freq);
+    void singlefilterout(float *smp, unsigned int bufsize);
     
     float tanhX(const float x) const;
 
@@ -55,6 +59,9 @@ private:
 
     float m_dK;
     float m_dSaturation;
+    
+    int freqbufsize;
+    Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
     
     
     

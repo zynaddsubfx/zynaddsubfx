@@ -5,9 +5,12 @@
 #include "../Misc/Util.h"
 #include "SallenKeyFilter.h"
 
+#define smoothing_size 8
+
 namespace zyn {
 
-SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned int srate, int bufsize) : Filter(srate, bufsize), sr(srate) {
+SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned int srate, int bufsize) : 
+    Filter(srate, bufsize), sr(srate), freqbufsize(bufsize/smoothing_size) {
     setfreq_and_q(Ffreq/srate, Fq);
     m_dAlpha0 = 0.0;
     
@@ -15,6 +18,11 @@ SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, uns
     m_LPF2.m_fSampleRate = srate;
     m_HPF1.m_fSampleRate = srate;
     m_dSaturation = 1.0f;
+    input_old = 0.0f;
+    
+    
+    freq_smoothing.sample_rate(samplerate_f/8);
+    freq_smoothing.thresh(2.0f); // 2Hz
     
 }
 
@@ -22,21 +30,54 @@ SallenKeyFilter::~SallenKeyFilter() {
 }
 
 void SallenKeyFilter::filterout(float *smp) {
-    for (int i = 0; i < buffersize; i++) {
-        smp[i] = step(tanhX(smp[i]*gain));
+    
+    float freqbuf[freqbufsize];
+    
+    if ( freq_smoothing.apply( freqbuf, freqbufsize, freq ) )
+    {
+        /* in transition, need to do fine grained interpolation */
+        for(int j = 0; j < freqbufsize; ++j)
+        {
+            updateFilters(freqbuf[j]);
+            singlefilterout(&smp[j*smoothing_size], smoothing_size);
+        }
+    }
+    else
+    {
+        /* stable state, just use one coeff */
+        updateFilters(freq);
+        singlefilterout(smp, buffersize);
+    }
+    
+    
+}
+void SallenKeyFilter::singlefilterout(float *smp, unsigned int bufsize)
+{
+    for (unsigned int i = 0; i < bufsize; i++) {
+        float input = tanhX(smp[i]*gain);
+        // 2x oversampling
+        smp[i] = step((input_old+input)*0.5f );
+        smp[i] += step(input);
+        smp[i] *= 0.5f;
+        input_old = input;
+        
         smp[i] *= outgain;
     }
 }
 
-void SallenKeyFilter::setfreq(float freq) {
+void SallenKeyFilter::setfreq(float freq_) {
+    // limit frequency - with oversampling
+    freq = std::min(freq_, (float)sr*0.5f);
+}
+
+
+void SallenKeyFilter::updateFilters(float freq) {
     
-    // limit frequency
-    freq = std::min(freq, (float)sr/2.0f);
     // prewarp for BZT
     float wd = 2*PI*freq;          
-    float T  = 1.0f/(float)sr;             
-    float wa = (2.0f/T)*tan(wd*T/2.0f); 
-    float g  = wa*T/2.0f;    
+    float T  = 0.5f/(float)sr;       // 0.5 due to 2x oversampling      
+    float wa = (2.0f/T)*tan(wd*T*0.5f); 
+    float g  = wa*T*0.5f;    
 
     // G - the feedforward coeff in the VA One Pole - now with resonance compensation
     float G = g / (1.0f + g * (1.0f - 1.0f / m_dK));
