@@ -34,8 +34,8 @@ void SallenKeyFilter::setfreq(float freq) {
     float wa = (2.0f/T)*tan(wd*T/2.0f); 
     float g  = wa*T/2.0f;    
 
-    // G - the feedforward coeff in the VA One Pole
-    float G = g/(1.0 + g);
+    // G - the feedforward coeff in the VA One Pole - now with resonance compensation
+    float G = g / (1.0f + g * (1.0f - 1.0f / m_dK));
 
     // set alphas
     m_LPF1.m_fAlpha = G;
@@ -52,7 +52,7 @@ void SallenKeyFilter::setfreq(float freq) {
 }
 
 void SallenKeyFilter::setq(float q_) {
-    m_dK = q_/100.0f;
+    m_dK = q_/250.0f + 0.1f;
 
 }
 
