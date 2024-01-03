@@ -11,7 +11,7 @@ namespace zyn {
 
 SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, unsigned int srate, int bufsize) : 
     Filter(srate, bufsize), sr(srate), freqbufsize(bufsize/smoothing_size) {
-    setfreq_and_q(Ffreq/srate, Fq);
+    setfreq_and_q(Ffreq, Fq);
     m_dAlpha0 = 0.0;
     
     m_LPF1.m_fSampleRate = srate;
@@ -20,13 +20,61 @@ SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, uns
     m_dSaturation = 1.0f;
     input_old = 0.0f;
     
-    
-    freq_smoothing.sample_rate(samplerate_f/8);
+    freq_smoothing.sample_rate(samplerate_f/smoothing_size);
     freq_smoothing.thresh(2.0f); // 2Hz
     
 }
 
 SallenKeyFilter::~SallenKeyFilter() {
+}
+
+void SallenKeyFilter::setfreq(float freq_) {
+    // limit frequency - with oversampling
+    freq = 0.4877f*limit(freq_, 0.0006f,(float)sr*0.22f);
+}
+
+void SallenKeyFilter::updateFilters(float freq) {
+    
+    // prewarp for BZT
+    float wd = 2.0f*PI*freq;          
+    float T  = 1.0f/(float)sr;   
+    float wa = (2.0f/T)*tan(wd*T*0.5f); 
+    float g  = wa*T*0.5f;    
+
+    // G - the feedforward coeff in the VA One Pole with resonance compensation
+    float G = g / (1.0f + g * (1.0f - 1.0f / m_dK));
+
+    // set alphas
+    m_LPF1.m_fAlpha = G;
+    m_LPF2.m_fAlpha = G;
+    m_HPF1.m_fAlpha = G;
+
+    // set betas all are in the form of  <something>/((1 + g)
+    m_LPF2.m_fBeta = (m_dK - m_dK*G)/(1.0f + g);
+    m_HPF1.m_fBeta = -1.0f/(1.0f + g);
+
+    // set m_dAlpha0 variable
+    m_dAlpha0 = 1.0f/(1.0f - m_dK*G + m_dK*G*G);
+
+}
+
+void SallenKeyFilter::setq(float q) {
+    m_dK = cbrtf(q/1000.0f)*2.0f + 0.3f;
+}
+
+void SallenKeyFilter::setfreq_and_q(float frequency, float q)
+{
+   setq(q); 
+   setfreq(frequency);
+    
+}
+
+void SallenKeyFilter::setgain(float gain_) {
+    gain = dB2rap(gain_);
+}
+
+void SallenKeyFilter::settype(unsigned char ftype_) {
+    ftype = ftype_;
 }
 
 void SallenKeyFilter::filterout(float *smp) {
@@ -49,71 +97,21 @@ void SallenKeyFilter::filterout(float *smp) {
         singlefilterout(smp, buffersize);
     }
     
-    
 }
+
 void SallenKeyFilter::singlefilterout(float *smp, unsigned int bufsize)
 {
     for (unsigned int i = 0; i < bufsize; i++) {
-        float input = tanhX(smp[i]*gain);
+        const float input = tanhX(smp[i]*gain);
+        
+        smp[i] = step(input);
         // 2x oversampling
-        smp[i] = step((input_old+input)*0.5f );
-        smp[i] += step(input);
+        smp[i] += step((input_old+input)*0.5f);
         smp[i] *= 0.5f;
         input_old = input;
         
         smp[i] *= outgain;
     }
-}
-
-void SallenKeyFilter::setfreq(float freq_) {
-    // limit frequency - with oversampling
-    freq = std::min(freq_, (float)sr*0.5f);
-}
-
-
-void SallenKeyFilter::updateFilters(float freq) {
-    
-    // prewarp for BZT
-    float wd = 2*PI*freq;          
-    float T  = 0.5f/(float)sr;       // 0.5 due to 2x oversampling      
-    float wa = (2.0f/T)*tan(wd*T*0.5f); 
-    float g  = wa*T*0.5f;    
-
-    // G - the feedforward coeff in the VA One Pole - now with resonance compensation
-    float G = g / (1.0f + g * (1.0f - 1.0f / m_dK));
-
-    // set alphas
-    m_LPF1.m_fAlpha = G;
-    m_LPF2.m_fAlpha = G;
-    m_HPF1.m_fAlpha = G;
-
-    // set betas all are in the form of  <something>/((1 + g)
-    m_LPF2.m_fBeta = (m_dK - m_dK*G)/(1.0f + g);
-    m_HPF1.m_fBeta = -1.0f/(1.0f + g);
-
-    // set m_dAlpha0 variable
-    m_dAlpha0 = 1.0f/(1.0f - m_dK*G + m_dK*G*G);
-
-}
-
-void SallenKeyFilter::setq(float q_) {
-    m_dK = q_/250.0f + 0.1f;
-
-}
-
-void SallenKeyFilter::setfreq_and_q(float frequency, float q)
-{
-   setq(q); 
-   setfreq(frequency);
-    
-}
-
-void SallenKeyFilter::setgain(float gain_) {
-    gain = dB2rap(gain_);
-}
-
-void SallenKeyFilter::settype(unsigned char ftype_) {
-    ftype = ftype_;
 }
 
 inline float SallenKeyFilter::tanhX(const float x) const
@@ -145,7 +143,7 @@ inline float SallenKeyFilter::step(float input) {
     m_HPF1.doFilter(y);
 
     // auto-normalize
-    if(m_dK > 0)
+    if(m_dK > 0.1)
         y *= 1/m_dK;
 
     return y;

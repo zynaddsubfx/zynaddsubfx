@@ -123,7 +123,7 @@ inline float MoogFilter::tan_2(const float x) const
 void MoogFilter::setfreq(float ff)
 {
     // pre warp cutoff to map to reality
-    c = tan_2(PI * ff);    
+    c = tan_2(PI * ff)*0.9948f;  //tuned by measurement to match analog filter    
     // limit cutoff to prevent overflow
     c = limit(c,0.0006f,1.5f);
     // pre calculate some stuff outside the hot zone
