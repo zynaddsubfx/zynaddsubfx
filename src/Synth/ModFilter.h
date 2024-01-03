@@ -47,6 +47,7 @@ class ModFilter
         void anParamUpdate(AnalogFilter &an);
         void mgParamUpdate(MoogFilter &mg);
         void cbParamUpdate(CombFilter &cb);
+        void skParamUpdate(SallenKeyFilter &sk);
 
 
         const FilterParams &pars;  //Parameters to Pull Updates From

@@ -21,6 +21,7 @@
 #include "../DSP/FormantFilter.h"
 #include "../DSP/MoogFilter.h"
 #include "../DSP/CombFilter.h"
+#include "../DSP/SallenKeyFilter.h"
 #include <cassert>
 
 namespace zyn {
@@ -130,6 +131,8 @@ static int current_category(Filter *f)
         return 3;
     else if(dynamic_cast<CombFilter*>(f))
         return 4;
+    else if(dynamic_cast<SallenKeyFilter*>(f))
+        return 5;
 
     assert(false);
     return -1;
@@ -154,6 +157,8 @@ void ModFilter::paramUpdate(Filter *&f)
         anParamUpdate(*an);
     else if(auto *mg = dynamic_cast<MoogFilter*>(f))
         mgParamUpdate(*mg);
+    else if(auto *sk = dynamic_cast<SallenKeyFilter*>(f))
+        skParamUpdate(*sk);
     else if(auto *cb = dynamic_cast<CombFilter*>(f))
         cbParamUpdate(*cb);
 }
@@ -175,6 +180,12 @@ void ModFilter::mgParamUpdate(MoogFilter &mg)
 {
     mg.settype(pars.Ptype);
     mg.setgain(pars.getgain());
+}
+
+void ModFilter::skParamUpdate(SallenKeyFilter &sk)
+{
+    sk.settype(pars.Ptype);
+    sk.setgain(pars.getgain());
 }
 
 void ModFilter::cbParamUpdate(CombFilter &cb)

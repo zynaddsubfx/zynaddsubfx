@@ -21,6 +21,7 @@
 #include "SVFilter.h"
 #include "MoogFilter.h"
 #include "CombFilter.h"
+#include "SallenKeyFilter.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
@@ -60,6 +61,10 @@ Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
             break;
         case 4:
             filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
+            filter->setgain(pars->getgain());
+            break;
+        case 5:
+            filter = memory.alloc<SallenKeyFilter>(Ftype, 1000.0f, pars->getq(), srate, bufsize);
             filter->setgain(pars->getgain());
             break;
         default:

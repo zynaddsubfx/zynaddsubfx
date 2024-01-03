@@ -79,7 +79,7 @@ const rtosc::Ports FilterParams::ports = {
                      dynfilter_3, dynfilter_4),
             "location of the filter"),
     rOption(Pcategory,          rShort("class"),
-            rOptions(analog, formant, st.var., moog, comb),
+            rOptions(analog, formant, st.var., moog, comb, korg),
             rDefault(analog), rDefaultDepends(loc),
             rPreset(dynfilter_1, 2), rPreset(dynfilter_3, formant), rPreset(dynfilter_4, formant),
             "Class of filter"),
