@@ -23,11 +23,15 @@ SallenKeyFilter::~SallenKeyFilter() {
 
 void SallenKeyFilter::filterout(float *smp) {
     for (int i = 0; i < buffersize; i++) {
-        smp[i] = step(smp[i]);
+        smp[i] = step(tanhX(smp[i]*gain));
+        smp[i] *= outgain;
     }
 }
 
 void SallenKeyFilter::setfreq(float freq) {
+    
+    // limit frequency
+    freq = std::min(freq, (float)sr/2.0f);
     // prewarp for BZT
     float wd = 2*PI*freq;          
     float T  = 1.0f/(float)sr;             
