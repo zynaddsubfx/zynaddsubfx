@@ -21,6 +21,7 @@ SallenKeyFilter::SallenKeyFilter(unsigned char Ftype, float Ffreq, float Fq, uns
     input_old = 0.0f;
     
     freq_smoothing.sample_rate(samplerate_f/smoothing_size);
+    freq_smoothing.cutoff(50.0f);
     freq_smoothing.thresh(2.0f); // 2Hz
     
 }
