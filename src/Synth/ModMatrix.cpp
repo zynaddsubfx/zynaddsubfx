@@ -25,18 +25,15 @@ using rtosc::Ports;
 using rtosc::RtData;
 
 #define rObject ModulationSource
-static const Ports sourcePorts = {
+#define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
+#define rEnd }
+const Ports ModulationSource::ports = {
     rSelf(ADnoteGlobalParam::source, rEnabledBy(Penabled)),
     rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, rProp(parameter)),
 };
 
 #undef  rObject
-    
 #define rObject ModMatrix
-#define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
-#define rEnd }
-
-//~ #define N_POINTS NUM_MODMATRIX_SOURCES*NUM_MODMATRIX_DESTINATIONS
 
 const rtosc::Ports ModMatrix::ports = {
     rSelf(Matrix),
@@ -81,7 +78,5 @@ ModMatrix::~ModMatrix()
     delete[] value;
 
 }
-
-const Ports &ModulationSource::ports = sourcePorts;
 
 }
