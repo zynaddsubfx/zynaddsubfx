@@ -29,7 +29,7 @@ using rtosc::RtData;
 #define rEnd }
 const Ports ModulationSource::ports = {
     rSelf(ADnoteGlobalParam::source, rEnabledBy(Penabled)),
-    rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, rProp(parameter)),
+    rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, "Modulation Matrix Factor"),
 };
 
 #undef  rObject
