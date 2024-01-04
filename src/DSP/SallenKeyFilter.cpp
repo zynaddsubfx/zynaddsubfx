@@ -119,8 +119,11 @@ inline float SallenKeyFilter::tanhX(const float x) const
 {
     // Pade approximation of tanh(x) bound to [-1 .. +1]
     // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
-    float x2 = x*x;
-    return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
+    //float x2 = x*x;
+    //return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
+    // (1/sqrt(2) + 1/3) * 1/sqrt(2) * x - (1/sqrt(2))^3*5/30) * x*x*x
+    // TBD: konstanten vorher berechnen
+    return x>2 ? 1.0f : (x<-2 ? -1.0f : 0.7357022604f * x − 0.0589255648615f*x*x*x);
 }
 
 inline float SallenKeyFilter::step(float input) {
