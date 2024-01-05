@@ -61,6 +61,7 @@ void EffectLFO::updateparams(void)
 //Compute the shape of the LFO
 float EffectLFO::getlfoshape(float x)
 {
+    x = fmodf(x, 1.0f);
     float out;
     switch(lfotype) {
         case 1: //EffectLFO_TRIANGLE
@@ -80,31 +81,39 @@ float EffectLFO::getlfoshape(float x)
 }
 
 //LFO output
-void EffectLFO::effectlfoout(float *outl, float *outr)
+void EffectLFO::effectlfoout(float *outl, float *outr, unsigned char phaseOffset)
 {
     float out;
 
-    out = getlfoshape(xl);
+    out = getlfoshape(xl+phaseOffset);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampl1 + xl * (ampl2 - ampl1));
-    xl += incx;
-    if(xl > 1.0f) {
-        xl   -= 1.0f;
-        ampl1 = ampl2;
-        ampl2 = (1.0f - lfornd) + lfornd * RND;
-    }
     *outl = (out + 1.0f) * 0.5f;
+    // update left phase for master
+    if(phaseOffset==0.0f) {
+        xl += incx;
+        if(xl > 1.0f) {
+            xl   -= 1.0f;
+            ampl1 = ampl2;
+            ampl2 = (1.0f - lfornd) + lfornd * RND;
+        }
+    }
 
-    out = getlfoshape(xr);
+    out = getlfoshape(xr+phaseOffset);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampr1 + xr * (ampr2 - ampr1));
-    xr += incx;
-    if(xr > 1.0f) {
-        xr   -= 1.0f;
-        ampr1 = ampr2;
-        ampr2 = (1.0f - lfornd) + lfornd * RND;
-    }
     *outr = (out + 1.0f) * 0.5f;
+    
+    // update right phase for master
+    if(phaseOffset==0.0f) {
+        xr += incx;
+        if(xr > 1.0f) {
+            xr   -= 1.0f;
+            ampr1 = ampr2;
+            ampr2 = (1.0f - lfornd) + lfornd * RND;
+        }
+    }
+    
 }
 
 }
