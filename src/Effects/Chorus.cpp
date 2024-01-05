@@ -144,7 +144,7 @@ void Chorus::out(const Stereo<float *> &input)
         // third member for ensemble mode
         dlHist240 = dlNew240;
         drHist240 = drNew240;
-        lfo.effectlfoout(&lfol, &lfor, 0.66666666f);
+        lfo.effectlfoout(&lfol, &lfor, 0.6f); // shifted to make it less regular
 
         dlNew240 = getdelay(lfol);
         drNew240 = getdelay(lfor);
@@ -322,6 +322,11 @@ void Chorus::changepar(int npar, unsigned char value)
             setlrcross(value);
             break;
         case 10:
+            if (Pflangemode == ENSEMBLE && value != ENSEMBLE) 
+                lfo.Pfreq *= 1.5f;
+            if (Pflangemode != ENSEMBLE && value == ENSEMBLE) 
+                lfo.Pfreq *= 0.66666666f;
+            lfo.updateparams();
             Pflangemode = (value > 2) ? 2 : value;
             break;
         case 11:
