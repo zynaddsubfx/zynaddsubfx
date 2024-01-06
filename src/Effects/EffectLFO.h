@@ -43,7 +43,7 @@ class EffectLFO
      * @param outl Pointer to the left output channel.
      * @param outr Pointer to the right output channel.
      */
-    void effectlfoout(float *outl, float *outr, unsigned char phaseOffset = 0);
+    void effectlfoout(float *outl, float *outr, float phaseOffset = 0);
 
     /**
      * Updates the LFO parameters based on the current settings.

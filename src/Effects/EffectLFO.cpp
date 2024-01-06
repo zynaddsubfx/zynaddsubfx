@@ -82,15 +82,15 @@ float EffectLFO::getlfoshape(float x)
 }
 
 //LFO output
-void EffectLFO::effectlfoout(float *outl, float *outr, unsigned char phaseOffset)
+void EffectLFO::effectlfoout(float *outl, float *outr, float phaseOffset)
 {
     float out;
-
+    // left stereo signal
     out = getlfoshape(xl+phaseOffset);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampl1 + xl * (ampl2 - ampl1));
     *outl = (out + 1.0f) * 0.5f;
-    // update left phase for master
+    // update left phase for master lfo
     if(phaseOffset==0.0f) {
         xl += incx;
         if(xl > 1.0f) {
@@ -100,12 +100,13 @@ void EffectLFO::effectlfoout(float *outl, float *outr, unsigned char phaseOffset
         }
     }
 
+    // right stereo signal
     out = getlfoshape(xr+phaseOffset);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampr1 + xr * (ampr2 - ampr1));
     *outr = (out + 1.0f) * 0.5f;
     
-    // update right phase for master
+    // update right phase for master lfo
     if(phaseOffset==0.0f) {
         xr += incx;
         if(xr > 1.0f) {
