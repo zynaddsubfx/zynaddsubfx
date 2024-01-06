@@ -20,13 +20,15 @@
 namespace zyn {
 
 #define MODMATRIX_SOURCES \
+    PITCH,\
+    VELOCITY,\
     GEN_ENV1,\
     GEN_ENV2,\
     GEN_LFO1,\
     GEN_LFO2
 
 
-#define NUM_MOD_MATRIX_SOURCES 4
+#define NUM_MOD_MATRIX_SOURCES 6
 
 //~ // Hier wird die maximale Anzahl der Elemente im Voraus definiert
 //~ #define MAX_MODMATRIX_SOURCES 10 // Du kannst diese Zahl je nach Bedarf anpassen
