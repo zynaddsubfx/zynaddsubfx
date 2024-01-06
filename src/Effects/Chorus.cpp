@@ -124,31 +124,30 @@ inline float Chorus::getSample(float* delayline, float mdel, int dk)
 //Apply the effect
 void Chorus::out(const Stereo<float *> &input)
 {
+    // store old delay value for linear interpolation
     dlHist = dlNew;
     drHist = drNew;
+    // calculate new lfo values
     lfo.effectlfoout(&lfol, &lfor);
-
+    // calculate new delay values
     dlNew = getdelay(lfol);
     drNew = getdelay(lfor);
     
     if (Pflangemode == ENSEMBLE) // ensemble mode
     {
-        // second member for ensemble mode
+        // same for second member for ensemble mode with 120° phase offset
         dlHist120 = dlNew120;
         drHist120 = drNew120;
         lfo.effectlfoout(&lfol, &lfor, 0.33333333f);
-
         dlNew120 = getdelay(lfol);
         drNew120 = getdelay(lfor);
         
-        // third member for ensemble mode
+        // same for third member for ensemble mode with 240° phase offset
         dlHist240 = dlNew240;
         drHist240 = drNew240;
-        lfo.effectlfoout(&lfol, &lfor, 0.6f); // shifted to make it less regular
-
+        lfo.effectlfoout(&lfol, &lfor, 0.66666666f); 
         dlNew240 = getdelay(lfol);
         drNew240 = getdelay(lfor);
-    
     }
 
     for(int i = 0; i < buffersize; ++i) {
@@ -160,26 +159,32 @@ void Chorus::out(const Stereo<float *> &input)
         inR = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
 
         //Left channel
-        //compute the delay in samples using linear interpolation between the lfo delay steps
+        // reset output accumulator
         output = 0.0f;
+        // increase delay line writing position and handle turnaround
         if(++dlk >= maxdelay)
             dlk = 0;
+        // linear interpolate from old to new value over length og the buffer
         float dl = (dlHist * (buffersize - i) + dlNew * i) / buffersize_f;
+        // get sample with that delay form delay line and add to output accumulator
         output += getSample(delaySample.l, dl, dlk);
         if (Pflangemode == ENSEMBLE) // ensemble mode
         {
+            // same for second ensemble member
             dl = (dlHist120 * (buffersize - i) + dlNew120 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
+            // same for third ensemble member
             dl = (dlHist240 * (buffersize - i) + dlNew240 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
+            // reduce amplitude to match single phase modes
             output *= 0.33333333f;
         }
-        
+        // store current input + feedback to delay line at writing position
         delaySample.l[dlk] = inL + output * fb;
+        // write output to output interface
         efxoutl[i] = output;
 
         //Right channel
-        //compute the delay in samples using linear interpolation between the lfo delay steps
         output = 0.0f;
         if(++drk >= maxdelay)
             drk = 0;
@@ -322,10 +327,6 @@ void Chorus::changepar(int npar, unsigned char value)
             setlrcross(value);
             break;
         case 10:
-            if (Pflangemode == ENSEMBLE && value != ENSEMBLE) 
-                lfo.Pfreq *= 1.5f;
-            if (Pflangemode != ENSEMBLE && value == ENSEMBLE) 
-                lfo.Pfreq *= 0.66666666f;
             lfo.updateparams();
             Pflangemode = (value > 2) ? 2 : value;
             break;

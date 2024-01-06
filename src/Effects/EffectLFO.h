@@ -23,7 +23,7 @@ class EffectLFO
     public:
         EffectLFO(float srate_f, float bufsize_f);
         ~EffectLFO();
-        void effectlfoout(float *outl, float *outr, unsigned char phaseOffset = 0);
+        void effectlfoout(float *outl, float *outr, float phaseOffset = 0.0f);
         void updateparams(void);
         unsigned char Pfreq;
         unsigned char Prandomness;
