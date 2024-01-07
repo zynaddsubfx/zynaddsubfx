@@ -28,7 +28,8 @@ namespace zyn {
 #define CHORUS_MODES \
     CHORUS,\
     FLANGE,\
-    ENSEMBLE\
+    TRIPLE,\
+    DUAL\
 
 enum {
     CHORUS_MODES
@@ -108,10 +109,10 @@ class Chorus final:public Effect
         float depth, delay, fb;
         float dlHist, dlNew, lfol;
         float drHist, drNew, lfor;
-        float dlHist120, dlNew120;
-        float drHist120, drNew120;
-        float dlHist240, dlNew240;
-        float drHist240, drNew240;
+        float dlHist2, dlNew2;
+        float drHist2, drNew2;
+        float dlHist3, dlNew3;
+        float drHist3, drNew3;
         int   maxdelay;
         Stereo<float *> delaySample;
         int dlk, drk;
