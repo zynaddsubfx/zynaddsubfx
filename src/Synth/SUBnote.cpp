@@ -38,7 +38,7 @@ namespace zyn {
 
 SUBnote::SUBnote(const SUBnoteParameters *parameters, const SynthParams &spars,
     WatchManager *wm, const char *prefix) :
-    SynthNote(spars),
+    SynthNote(spars, prefix),
     watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
     watch_legato(wm, prefix, "noteout/legato"),
     pars(*parameters),

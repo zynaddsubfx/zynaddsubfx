@@ -775,7 +775,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
-    
+
     // set default tempo
     time.tempo = 120;
 
@@ -1011,8 +1011,8 @@ void Master::setController(char chan, int type, int par)
         return;
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
-    if((type == C_dataentryhi) || (type == C_dataentrylo)
-       || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
+    if((type == C_Data_Entry_MSB) || (type == C_Data_Entry_LSB)
+       || (type == C_NRPN_MSB) || (type == C_NRPN_LSB)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;
@@ -1038,7 +1038,7 @@ void Master::setController(char chan, int type, int par)
             if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
                 part[npart]->SetController(type, par);
 
-        if(type == C_allsoundsoff) { //cleanup insertion/system FX
+        if(type == C_Channel_Mute) { //cleanup insertion/system FX
             for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
                 sysefx[nefx]->cleanup();
             for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -1288,7 +1288,9 @@ bool Master::AudioOut(float *outl, float *outr)
     //Note: We do this regardless if the part is enabled or not, to allow
     //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    {
         part[npart]->ComputePartSmps();
+    }
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

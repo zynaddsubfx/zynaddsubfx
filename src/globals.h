@@ -94,7 +94,6 @@ typedef std::complex<fftwf_real> fft_t;
  */
 #define PAD_MAX_SAMPLES 64
 
-
 /*
  * Number of parts
  */
@@ -180,6 +179,13 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+/*
+ * Generic Controler Types
+ */
+#define CONTROLER_TYPE_LFO 1
+#define CONTROLER_TYPE_ENV 2
+
+
 #define MAX_PRESETTYPE_SIZE 30
 
 #define LOG_2 0.693147181f
@@ -243,16 +249,68 @@ enum ONOFFTYPE {
 };
 
 enum MidiControllers {
-    C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
-    C_aftertouch = 1002, C_pitch = 1003,
-    C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
-    C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
-    C_fmamp  = 76,
-    C_volume = 7, C_sustain = 64, C_allnotesoff = 123, C_allsoundsoff = 120,
-    C_resetallcontrollers = 121,
-    C_portamento = 65, C_resonance_center = 77, C_resonance_bandwidth = 78,
-
-    C_dataentryhi = 0x06, C_dataentrylo = 0x26, C_nrpnhi = 99, C_nrpnlo = 98
+    C_Bank_Select_MSB = 0,
+    C_Modulation_Wheel_MSB = 1,
+    C_Breath_Controller_MSB = 2,
+    C_Foot_Pedal_MSB = 4,
+    C_Portamento_Time_MSB = 5,
+    C_Data_Entry_MSB = 6,
+    C_Volume = 7,
+    C_Balance_MSB = 8,
+    C_Pan_MSB = 10,
+    C_Expression_MSB = 11,
+    C_Effect_Controller_1_MSB = 12,
+    C_Effect_Controller_2_MSB = 13,
+    C_Slider_Knob_Ribbon_Controller = 16,
+    C_Bank_Select_LSB = 32,
+    C_Modulation_Wheel_LSB = 33,
+    C_Breath_Controller_LSB = 34,
+    C_Foot_Pedal_LSB = 36,
+    C_Portamento_Time_LSB = 37,
+    C_Data_Entry_LSB = 38,
+    C_Volume_LSB = 39,
+    C_Balance_LSB = 40,
+    C_Pan_LSB = 42,
+    C_Expression_LSB = 43,
+    C_Effect_Control_1_LSB = 44,
+    C_Effect_Control_2_LSB = 45,
+    C_Sustain_Pedal = 64,
+    C_Portamento_On_Off = 65,
+    C_Sostenuto_On_Off = 66,
+    C_Soft_Pedal_On_Off = 67,
+    C_Legato_On_Off = 68,
+    C_Hold_Pedal_2 = 69,
+    C_Sound_Controller_1 = 70,
+    C_Filter_Q = 71,
+    C_Sound_Controller_3 = 72,
+    C_Sound_Controller_4 = 73,
+    C_Filter_Cutoff = 74,
+    C_Bandwidth = 75,
+    C_FM_Amp  = 76,
+    C_Resonance_Center = 77, 
+    C_Resonance_Bandwidth = 78,
+    C_General_Purpose_On_Off = 80,
+    C_Effect_1_Depth = 91,
+    C_Effect_2_Depth = 92,
+    C_Effect_3_Depth = 93,
+    C_Effect_4_Depth = 94,
+    C_Effect_5_Depth = 95,
+    C_Data_Increment_Plus_1 = 96,
+    C_Data_Increment_Minus_1 = 97,
+    C_NRPN_LSB = 98,
+    C_NRPN_MSB = 99,
+    C_RPN_LSB = 100,
+    C_RPN_MSB = 101,
+    C_Channel_Mute = 120,
+    C_Reset_All_Controllers = 121,
+    C_Local_Keyboard_On_Off = 122,
+    C_All_Notes_On_Off = 123,
+    C_OMNI_Mode_OFF = 124,
+    C_OMNI_Mode_ON = 125,
+    C_Mono_Mode = 126,
+    C_Poly_Mode = 127,
+    C_pitchwheel = 1000, C_NULL = 1001,
+    C_aftertouch = 1002, C_pitch = 1003
 };
 
 enum LegatoMsg {

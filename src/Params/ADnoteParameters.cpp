@@ -23,6 +23,7 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
 #include "../Synth/Resonance.h"
+#include "../Synth/ModMatrix.h"
 #include "FilterParams.h"
 
 #include <rtosc/ports.h>
@@ -332,13 +333,22 @@ static const Ports globalPorts = {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
+    rRecurp(GenericLfo1, "Generic LFO 1"),
     rRecurp(FreqEnvelope, "Frequency Envelope"),
-    rRecurp(AmpEnvelope, "Frequency Envelope"),
-    rRecurp(FilterEnvelope, "Frequency Envelope"),
+    rRecurp(AmpEnvelope, "Amplitude Envelope"),
+    rRecurp(FilterEnvelope, "Filter Envelope"),
+    rRecurp(GenericEnvelope1, "Generic Envelope 1"),
     rRecurp(GlobalFilter, "Filter"),
-
+    rRecurp(Matrix,         "Modulation Matrix"),
     rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
-
+    rToggle(PGenEnvelope1Enabled, rShort("Env enable"), rDefault(false),
+    "Generic Envelope 1 Enable"),
+    rToggle(PGenLfo1Enabled,      rShort("Lfo enable"), rDefault(false),
+    "Generic LFO 1 Enable"),
+    rToggle(PGenEnvelope2Enabled, rShort("Env enable"), rDefault(false),
+    "Generic Envelope 2 Enable"),
+    rToggle(PGenLfo2Enabled,      rShort("Lfo enable"), rDefault(false),
+    "Generic LFO 2 Enable"),
     //Frequency
     //nominally -8192..8191
     rParamI(PDetune,              rShort("fine"),
@@ -460,6 +470,7 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
 const Ports &ADnoteParameters::ports  = adPorts;
 const Ports &ADnoteVoiceParam::ports  = voicePorts;
 const Ports &ADnoteGlobalParam::ports = globalPorts;
+//~ const Ports &SynthNoteGlobalParam::ports = synthPorts;
 
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                                    const AbsTime *time_)
@@ -481,19 +492,28 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
 ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
+    Matrix = new ModMatrix();
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
     FreqEnvelope->init(ad_global_freq);
-    FreqLfo = new LFOParams(ad_global_freq, time_);
+    FreqLfo = new LFOParams(ad_global_freq, time_, Matrix);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
     AmpEnvelope->init(ad_global_amp);
-    AmpLfo = new LFOParams(ad_global_amp, time_);
+    AmpLfo = new LFOParams(ad_global_amp, time_, Matrix);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
     FilterEnvelope = new EnvelopeParams(0, 1, time_);
     FilterEnvelope->init(ad_global_filter);
-    FilterLfo = new LFOParams(ad_global_filter, time_);
+    FilterLfo = new LFOParams(ad_global_filter, time_, Matrix);
     Reson     = new Resonance();
+
+    /* Generic Modulators Init */
+    GenericEnvelope1 = new EnvelopeParams(0, 0, time_);
+    GenericEnvelope1->init(loc_generic1);
+    GenericEnvelope2 = new EnvelopeParams(0, 0, time_);
+    GenericEnvelope2->init(loc_generic1);
+    GenericLfo1 = new LFOParams(loc_generic1, time_, Matrix);
+    GenericLfo2 = new LFOParams(loc_generic2, time_, Matrix);
 }
 
 void ADnoteParameters::defaults()
@@ -538,6 +558,15 @@ void ADnoteGlobalParam::defaults()
     FilterEnvelope->defaults();
     FilterLfo->defaults();
     Reson->defaults();
+
+    GenericEnvelope1->defaults();
+    GenericLfo1->defaults();
+    GenericEnvelope2->defaults();
+    GenericLfo2->defaults();
+    PGenEnvelope1Enabled       = 0;
+    PGenLfo1Enabled            = 0;
+    PGenEnvelope2Enabled       = 0;
+    PGenLfo2Enabled            = 0;
 }
 
 /*
@@ -563,7 +592,7 @@ void ADnoteVoiceParam::defaults()
     Type = 0;
     Pfixedfreq    = 0;
     PfixedfreqET  = 0;
-    PBendAdjust = 88; // 64 + 24
+    PBendAdjust   = 88; // 64 + 24
     POffsetHz     = 64;
     Presonance    = 1;
     Pfilterbypass = 0;
@@ -720,6 +749,11 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
     delete FilterEnvelope;
     delete FilterLfo;
     delete Reson;
+
+    delete GenericEnvelope1;
+    delete GenericLfo1;
+    delete GenericEnvelope2;
+    delete GenericLfo2;
 }
 
 ADnoteParameters::~ADnoteParameters()

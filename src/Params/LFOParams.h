@@ -17,6 +17,7 @@
 #include <Misc/Time.h>
 #include <rtosc/ports.h>
 #include "Presets.h"
+#include "../Synth/ModMatrix.h"
 #include <cstdint>
 
 #define LFO_SINE      0
@@ -27,6 +28,9 @@
 #define LFO_EXP_DOWN1 5
 #define LFO_EXP_DOWN2 6
 #define LFO_RANDOM    7
+#define LFO_CHUA_X    8
+#define LFO_CHUA_Y    9
+#define LFO_CHUA_Z    10
 
 namespace zyn {
 
@@ -35,9 +39,11 @@ class XMLwrapper;
 class LFOParams:public Presets
 {
     public:
-        LFOParams(const AbsTime* time_ = nullptr);
+        LFOParams(const AbsTime* time_ = nullptr,
+                  const ModMatrix* mod_ = nullptr);
         LFOParams(consumer_location_t loc,
-                  const AbsTime* time_ = nullptr);
+                  const AbsTime* time_ = nullptr,
+                  const ModMatrix* mod_ = nullptr);
         LFOParams(float freq_,
                   char Pintensity_,
                   char Pstartphase_,
@@ -49,7 +55,8 @@ class LFOParams:public Presets
                   float fadeout_,
                   char Pcontinous,
                   consumer_location_t loc,
-                  const AbsTime* time_ = nullptr);
+                  const AbsTime* time_ = nullptr,
+                  const ModMatrix* mod_ = nullptr);
         ~LFOParams() override;
 
         void add2XML(XMLwrapper& xml) override;
@@ -79,6 +86,7 @@ class LFOParams:public Presets
         int loc; //!< consumer location
 
         const AbsTime *time;
+        const ModMatrix *mod;
         int64_t last_update_timestamp;
 
         static const rtosc::Ports &ports;

@@ -268,7 +268,7 @@ float Resonance::getoctavesfreq() const
 
 void Resonance::sendcontroller(MidiControllers ctl, float par)
 {
-    if(ctl == C_resonance_center)
+    if(ctl == C_Resonance_Center)
         ctlcenter = par;
     else
         ctlbw = par;

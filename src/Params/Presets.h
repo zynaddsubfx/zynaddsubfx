@@ -68,20 +68,25 @@ class Presets
 #define sub_bandwidth 10
 
 #define in_effect 11
-#define loc_unspecified 12
+#define loc_generic1 12
+#define loc_generic2 13
+#define NUM_LOCATIONS 14
 
-#define dynfilter_0 13
-#define dynfilter_1 14
-#define dynfilter_2 15
-#define dynfilter_3 16
-#define dynfilter_4 17
+// following numbers have changed - backward compatibility measures needed
+#define dynfilter_0 100
+#define dynfilter_1 101
+#define dynfilter_2 102
+#define dynfilter_3 103
+#define dynfilter_4 104
+
+
 
 //};
 using consumer_location_t = int;
 
 enum class consumer_location_type_t
 {
-    freq, amp, filter, unspecified
+    freq, amp, filter, generic, unspecified
 };
 
 }

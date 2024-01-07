@@ -15,6 +15,9 @@
 #include "../globals.h"
 #include "../Misc/Util.h"
 #include "../Containers/NotePool.h"
+#include "../Containers/ScratchString.h"
+#include "Envelope.h"
+#include "LFO.h"
 
 namespace zyn {
 
@@ -23,15 +26,21 @@ class Controller;
 class Portamento;
 struct SynthParams
 {
+    //~ SynthParams(Allocator &memory, const Controller &ctl,
+            //~ const SYNTH_T &synth, const AbsTime &time, float velocity,
+            //~ Portamento* portamento_, float note_log2_freq, bool quiet, prng_t seed);
+    //~ ~SynthParams();
     Allocator &memory;   //Memory Allocator for the Note to use
     const Controller &ctl;
     const SYNTH_T    &synth;
     const AbsTime    &time;
     float     velocity;  //Velocity of the Note
     Portamento *portamento; //Realtime portamento info
+
     float     note_log2_freq; //Floating point value of the note
     bool      quiet;     //Initial output condition for legato notes
     prng_t    seed;      //Random seed
+    int64_t last_update_timestamp;
 };
 
 struct LegatoParams
@@ -46,8 +55,8 @@ struct LegatoParams
 class SynthNote
 {
     public:
-        SynthNote(const SynthParams &pars);
-        virtual ~SynthNote() {}
+        SynthNote(const SynthParams &pars, const char *prefix);
+        ~SynthNote();
 
         /**Compute Output Samples
          * @return 0 if note is finished*/
@@ -84,7 +93,11 @@ class SynthNote
 
         //Realtime Safe Memory Allocator For notes
         class Allocator  &memory;
+
+
     protected:
+
+
         // Legato transitions
         class Legato
         {

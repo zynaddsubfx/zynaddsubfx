@@ -637,7 +637,7 @@ bool Part::NoteOnInternal(note_t note,
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
-    
+
     // in latch mode release latched notes before creating the new one
     if(Platchmode)
         notePool.releaseLatched();
@@ -776,37 +776,38 @@ void Part::PolyphonicAftertouch(note_t note,
  */
 void Part::SetController(unsigned int type, int par)
 {
+
     switch(type) {
         case C_pitchwheel:
             ctl.setpitchwheel(par);
             break;
-        case C_expression:
+        case C_Expression_MSB:
             ctl.setexpression(par);
             setVolumedB(Volume); //update the volume
             break;
-        case C_portamento:
+        case C_Portamento_On_Off:
             ctl.setportamento(par);
             break;
-        case C_panning:
+        case C_Pan_MSB:
             ctl.setpanning(par);
             setPpanning(Ppanning); //update the panning
             break;
-        case C_filtercutoff:
+        case C_Filter_Cutoff:
             ctl.setfiltercutoff(par);
             break;
-        case C_filterq:
+        case C_Filter_Q:
             ctl.setfilterq(par);
             break;
-        case C_bandwidth:
+        case C_Bandwidth:
             ctl.setbandwidth(par);
             break;
-        case C_modwheel:
+        case C_Modulation_Wheel_MSB:
             ctl.setmodwheel(par);
             break;
-        case C_fmamp:
+        case C_FM_Amp:
             ctl.setfmamp(par);
             break;
-        case C_volume:
+        case C_Volume:
             ctl.setvolume(par);
             if(ctl.volume.receive != 0)
                 setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
@@ -814,15 +815,15 @@ void Part::SetController(unsigned int type, int par)
                 /* FIXME: why do this? */
                 setVolumedB(Volume);
             break;
-        case C_sustain:
+        case C_Sustain_Pedal:
             ctl.setsustain(par);
             if(ctl.sustain.sustain == 0)
                 ReleaseSustainedKeys();
             break;
-        case C_allsoundsoff:
+        case C_Channel_Mute:
             AllNotesOff(); //Panic
             break;
-        case C_resetallcontrollers:
+        case C_Reset_All_Controllers:
             ctl.resetall();
             ReleaseSustainedKeys();
             if(ctl.volume.receive != 0)
@@ -835,33 +836,33 @@ void Part::SetController(unsigned int type, int par)
                 if(kit[item].adpars == NULL)
                     continue;
                 kit[item].adpars->GlobalPar.Reson->
-                sendcontroller(C_resonance_center, 1.0f);
+                sendcontroller(C_Resonance_Center, 1.0f);
 
                 kit[item].adpars->GlobalPar.Reson->
-                sendcontroller(C_resonance_bandwidth, 1.0f);
+                sendcontroller(C_Resonance_Bandwidth, 1.0f);
             }
             //more update to add here if I add controllers
             break;
-        case C_allnotesoff:
+        case C_All_Notes_On_Off:
             ReleaseAllKeys();
             break;
-        case C_resonance_center:
+        case C_Resonance_Center:
             ctl.setresonancecenter(par);
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
                 if(kit[item].adpars == NULL)
                     continue;
                 kit[item].adpars->GlobalPar.Reson->
-                sendcontroller(C_resonance_center,
+                sendcontroller(C_Resonance_Center,
                                ctl.resonancecenter.relcenter);
             }
             break;
-        case C_resonance_bandwidth:
+        case C_Resonance_Bandwidth:
             ctl.setresonancebw(par);
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
                 if(kit[item].adpars == NULL)
                     continue;
                 kit[item].adpars->GlobalPar.Reson->
-                sendcontroller(C_resonance_bandwidth,
+                sendcontroller(C_Resonance_Bandwidth,
                                ctl.resonancebandwidth.relbw);
             }
             break;
@@ -871,13 +872,13 @@ void Part::SetController(unsigned int type, int par)
 /*
  * Per note controllers.
  */
-void Part::SetController(unsigned int type, note_t note, float value,
+void Part::SetController(unsigned int ctype, note_t note, float value,
                          int masterkeyshift)
 {
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
 
-    switch (type) {
+    switch (ctype) {
     case C_aftertouch:
         PolyphonicAftertouch(note, floorf(value));
         break;
@@ -896,7 +897,7 @@ void Part::SetController(unsigned int type, note_t note, float value,
         }
         break;
     }
-    case C_filtercutoff:
+    case C_Filter_Cutoff:
         for(auto &d:notePool.activeDesc()) {
             if(d.note == note && d.playing())
                 for(auto &s:notePool.activeNotes(d))

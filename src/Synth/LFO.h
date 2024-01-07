@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "../Misc/Time.h"
+#include "ModMatrix.h"
 #include "WatchPoint.h"
 
 
@@ -36,6 +37,9 @@ class LFO
         ~LFO();
 
         float lfoout();
+        float getX();
+        float getY();
+        float getZ();
         float amplfoout();
         void releasekey();
     private:
@@ -77,6 +81,7 @@ class LFO
         //Delay before starting
         RelTime delayTime;
 
+
         int64_t fadeInDuration;
         //Timestamp of begin fadein
         int64_t fadeInTimestamp;
@@ -106,6 +111,16 @@ class LFO
         float a2 = 0.0007508914611009499;
         float b1 = -1.519121359805288;
         float b2 =  0.5221249256496917;
+        
+        // variables and parameters for chua chaos attractor oscillator
+        float x=0.01f;
+        float y=0.0f;
+        float z=0.0f;
+
+        float alpha=15.6f;
+        float beta=37.5f;
+        float mu0=-0.714285714286f;
+        float mu1=-1.14285714286f;
 
         char cutoff = 127;
 

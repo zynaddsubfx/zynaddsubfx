@@ -395,18 +395,18 @@ virkeys->take_focus();}
       Fl_Choice {} {
         label Controller
         callback {switch((int) o->value()+1){
-   case 1: midictl=C_modwheel; break;
-   case 2: midictl=C_volume; break;
-   case 3: midictl=C_panning; break;
-   case 4: midictl=C_expression; break;
-   case 5: midictl=C_sustain; break;
-   case 6: midictl=C_portamento; break;
-   case 7: midictl=C_filterq; break;
-   case 8: midictl=C_filtercutoff; break;
-   case 9: midictl=C_bandwidth; break;
-   case 10: midictl=C_fmamp; break;
-   case 11: midictl=C_resonance_center; break;
-   case 12: midictl=C_resonance_bandwidth; break;
+   case 1: midictl=C_Modulation_Wheel_MSB; break;
+   case 2: midictl=C_Volume; break;
+   case 3: midictl=C_Pan_MSB; break;
+   case 4: midictl=C_Expression_MSB; break;
+   case 5: midictl=C_Sustain_Pedal; break;
+   case 6: midictl=C_Portamento_On_Off; break;
+   case 7: midictl=C_Filter_Q; break;
+   case 8: midictl=C_Filter_Cutoff; break;
+   case 9: midictl=C_Bandwidth; break;
+   case 10: midictl=C_FM_Amp; break;
+   case 11: midictl=C_Resonance_Center; break;
+   case 12: midictl=C_Resonance_Bandwidth; break;
    default: midictl=C_NULL; break;
 
 };
@@ -415,7 +415,7 @@ virkeys->take_focus();}
 
 virkeys->take_focus();}
         xywh {435 105 100 15} down_box BORDER_BOX labelsize 10 align 5 when 6 textfont 1 textsize 10
-        code0 {midictl=C_filtercutoff;o->value(7);}
+        code0 {midictl=C_Filter_Cutoff;o->value(7);}
       } {
         MenuItem {} {
           label {01: Mod.Wheel}

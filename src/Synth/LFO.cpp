@@ -49,6 +49,7 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
 
     switch(lfopars.fel) {
         case consumer_location_type_t::amp:
+        case consumer_location_type_t::generic:
             lfointensity = lfopars.Pintensity / 127.0f;
             break;
         case consumer_location_type_t::filter:
@@ -73,6 +74,10 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     computeNextFreqRnd(); //twice because I want incrnd & nextincrnd to be random
     z1 = 0.0;
     z2 = 0.0;
+    x = 0.5f * RND;
+    y = 0.1f * RND;
+    z = 0.1f * RND;
+    
 }
 
 LFO::~LFO()
@@ -95,6 +100,11 @@ void LFO::updatePars()
         tempo = time.tempo;
         lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
     }
+    // apply modulation matrix sources
+    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
+        lfofreq += lfopars.mod->value[i] 
+            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_FREQ);
+
     phaseInc = fabsf(lfofreq) * dt;
     
     //Limit the Frequency(or else...)
@@ -104,6 +114,8 @@ void LFO::updatePars()
 
 float LFO::baseOut(const char waveShape, const float phase)
 {
+    beta = 25.0f*(1.0f+float(cutoff)/127.0f);
+    chua_attractor(x, y, z, alpha, beta, mu0, mu1, phaseInc);
     float lfo_out;
     switch(waveShape) {
         case LFO_TRIANGLE:
@@ -133,6 +145,9 @@ float LFO::baseOut(const char waveShape, const float phase)
             }
             return biquad(last_random);
             break;
+        case LFO_CHUA_X: return x;
+        case LFO_CHUA_Y: return y;
+        case LFO_CHUA_Z: return z;
         default:
             return cosf(phase * 2.0f * PI); //LFO_SINE
     }
@@ -197,6 +212,7 @@ float LFO::lfoout()
         switch(lfopars.fel) {
         
             case consumer_location_type_t::amp:
+            case consumer_location_type_t::generic:
                 lfointensity = lfopars.Pintensity / 127.0f; // [0...1]
                 break;
             case consumer_location_type_t::filter:
@@ -207,6 +223,10 @@ float LFO::lfoout()
                 lfointensity = powf(2, lfopars.Pintensity / 127.0f * 11.0f) - 1.0f; // [0...2047] cent
                 break;
         }
+    // apply modulation matrix sources
+    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
+        lfointensity *= lfopars.mod->value[i] 
+            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_DEPTH);
     }
     
     // refresh freq if tempo has changed
@@ -293,6 +313,21 @@ float LFO::lfoout()
     watchOut(watch_data, 2);
 
     return out;
+}
+
+float LFO::getX()
+{
+    return x;
+}
+
+float LFO::getY()
+{
+    return y;
+}
+
+float LFO::getZ()
+{
+    return z;
 }
 
 /*
