@@ -272,17 +272,6 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"internal::i", rOptions(NONE, LFO, ENV, XYZ, X, Y, Z) rDefault(NONE)
-     rProp(parameter) rMap(default, 0) rDoc("Access assigned internal mod type \n 0=NONE 1=ENV 2=LFO 3=XYZ") , 0,
-        rBegin;
-        int slot = d.idx[0];
-        if(rtosc_narguments(msg)) {
-            a.slots[slot].internal = rtosc_argument(msg, 0).i;
-            d.broadcast(d.loc, "i", a.slots[slot].internal);
-        } else
-            d.reply(d.loc, "i", a.slots[slot].internal);
-
-        rEnd},
     {"active::T:F",  rProp(parameter) rDefault(false) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
