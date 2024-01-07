@@ -64,7 +64,7 @@ rtosc::Ports Chorus::ports = {
             rPresets(64, 64, 90, 90, 31, 62, 109, 54, 97, 17), "Feedback"),
     rEffPar(Plrcross, 9, rShort("l/r"), rPresets(119, 19, 127, 127, 127),
             rDefault(0), "Left/Right Crossover"),
-    rEffParOpt(Pflangemode, 10, rShort("flange"), rDefault(chorus),rOptions(CHORUS_MODES),
+    rEffParOpt(Pflangemode, 10, rShort("mode"), rDefault(CHORUS),rOptions(CHORUS_MODES),
               "Chorus Mode"),
     rEffParTF(Poutsub, 11, rShort("sub"),
               rPreset(4, true), rPreset(7, true), rPreset(9, true),
@@ -179,16 +179,14 @@ void Chorus::out(const Stereo<float *> &input)
         float dl = (dlHist * (buffersize - i) + dlNew * i) / buffersize_f;
         // get sample with that delay form delay line and add to output accumulator
         output += getSample(delaySample.l, dl, dlk);
-        if (Pflangemode == DUAL) // ensemble mode
-        {
-            // same for second ensemble member
+        switch (Pflangemode) {
+            case DUAL:
+            // calculate and apply delay for second ensemble member
             dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
-
-        }
-        if (Pflangemode == TRIPLE) // ensemble mode
-        {
-            // same for second ensemble member
+                break;
+            case TRIPLE:
+            // calculate and apply delay for second ensemble member
             dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
             // same for third ensemble member
@@ -196,6 +194,10 @@ void Chorus::out(const Stereo<float *> &input)
             output += getSample(delaySample.l, dl, dlk);
             // reduce amplitude to match single phase modes
             output *= 0.85f;
+                break;
+            default:
+                // nothing to do for standard chorus
+                break;
         }
         // store current input + feedback to delay line at writing position
         delaySample.l[dlk] = inL + output * fb;
@@ -208,19 +210,25 @@ void Chorus::out(const Stereo<float *> &input)
             drk = 0;
         float dr = (drHist * (buffersize - i) + drNew * i) / buffersize_f;
         output += getSample(delaySample.r, dr, drk);
-        if (Pflangemode == DUAL) // ensemble mode
-        {
-            // same for second ensemble member
-            dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
-            output += getSample(delaySample.r, dr, drk);
-        }
-        else if (Pflangemode == TRIPLE) // ensemble mode
-        {
-            dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
-            output += getSample(delaySample.r, dr, drk);
-            dr = (drHist3 * (buffersize - i) + drNew3 * i) / buffersize_f;
-            output += getSample(delaySample.r, dr, drk);
-            output *= 0.85;
+        switch (Pflangemode) {
+            case DUAL:
+                // calculate and apply delay for second ensemble member
+                dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                break;
+            case TRIPLE:
+                // calculate and apply delay for second ensemble member
+                dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                // same for third ensemble member
+                dr = (drHist3 * (buffersize - i) + drNew3 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                // reduce amplitude to match single phase modes
+                output *= 0.85f;
+                break;
+            default:
+                // nothing to do for standard chorus
+                break;
         }
         
         delaySample.r[drk] = inR + output * fb;
