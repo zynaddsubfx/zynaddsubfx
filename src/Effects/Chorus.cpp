@@ -28,7 +28,8 @@ namespace zyn {
 rtosc::Ports Chorus::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Chorus1, Chorus2, Chorus3, Celeste1, Celeste2,
-                           Flange1, Flange2, Flange3, Flange4, Flange5)
+                           Flange1, Flange2, Flange3, Flange4, Flange5,
+                           Triple, Dual)
                   rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
@@ -133,21 +134,31 @@ void Chorus::out(const Stereo<float *> &input)
     dlNew = getdelay(lfol);
     drNew = getdelay(lfor);
     
-    if (Pflangemode == ENSEMBLE) // ensemble mode
+    if (Pflangemode == DUAL) // ensemble mode
     {
         // same for second member for ensemble mode with 120° phase offset
-        dlHist120 = dlNew120;
-        drHist120 = drNew120;
+        dlHist2 = dlNew2;
+        drHist2 = drNew2;
+        lfo.effectlfoout(&lfol, &lfor, 0.5f);
+        dlNew2 = getdelay(lfol);
+        drNew2 = getdelay(lfor);
+    }
+    
+    if (Pflangemode == TRIPLE) // ensemble mode
+    {
+        // same for second member for ensemble mode with 120° phase offset
+        dlHist2 = dlNew2;
+        drHist2 = drNew2;
         lfo.effectlfoout(&lfol, &lfor, 0.33333333f);
-        dlNew120 = getdelay(lfol);
-        drNew120 = getdelay(lfor);
+        dlNew2 = getdelay(lfol);
+        drNew2 = getdelay(lfor);
         
         // same for third member for ensemble mode with 240° phase offset
-        dlHist240 = dlNew240;
-        drHist240 = drNew240;
+        dlHist3 = dlNew3;
+        drHist3 = drNew3;
         lfo.effectlfoout(&lfol, &lfor, 0.66666666f); 
-        dlNew240 = getdelay(lfol);
-        drNew240 = getdelay(lfor);
+        dlNew3 = getdelay(lfol);
+        drNew3 = getdelay(lfor);
     }
 
     for(int i = 0; i < buffersize; ++i) {
@@ -168,16 +179,23 @@ void Chorus::out(const Stereo<float *> &input)
         float dl = (dlHist * (buffersize - i) + dlNew * i) / buffersize_f;
         // get sample with that delay form delay line and add to output accumulator
         output += getSample(delaySample.l, dl, dlk);
-        if (Pflangemode == ENSEMBLE) // ensemble mode
+        if (Pflangemode == DUAL) // ensemble mode
         {
             // same for second ensemble member
-            dl = (dlHist120 * (buffersize - i) + dlNew120 * i) / buffersize_f;
+            dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
+            output += getSample(delaySample.l, dl, dlk);
+
+        }
+        if (Pflangemode == TRIPLE) // ensemble mode
+        {
+            // same for second ensemble member
+            dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
             // same for third ensemble member
-            dl = (dlHist240 * (buffersize - i) + dlNew240 * i) / buffersize_f;
+            dl = (dlHist3 * (buffersize - i) + dlNew3 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
             // reduce amplitude to match single phase modes
-            output *= 0.33333333f;
+            output *= 0.85f;
         }
         // store current input + feedback to delay line at writing position
         delaySample.l[dlk] = inL + output * fb;
@@ -190,13 +208,19 @@ void Chorus::out(const Stereo<float *> &input)
             drk = 0;
         float dr = (drHist * (buffersize - i) + drNew * i) / buffersize_f;
         output += getSample(delaySample.r, dr, drk);
-        if (Pflangemode == ENSEMBLE) // ensemble mode
+        if (Pflangemode == DUAL) // ensemble mode
         {
-            dr = (drHist120 * (buffersize - i) + drNew120 * i) / buffersize_f;
+            // same for second ensemble member
+            dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
             output += getSample(delaySample.r, dr, drk);
-            dr = (drHist240 * (buffersize - i) + drNew240 * i) / buffersize_f;
+        }
+        else if (Pflangemode == TRIPLE) // ensemble mode
+        {
+            dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
             output += getSample(delaySample.r, dr, drk);
-            output *= 0.33333333f;
+            dr = (drHist3 * (buffersize - i) + drNew3 * i) / buffersize_f;
+            output += getSample(delaySample.r, dr, drk);
+            output *= 0.85;
         }
         
         delaySample.r[drk] = inR + output * fb;
@@ -251,7 +275,7 @@ void Chorus::setvolume(unsigned char _Pvolume)
 unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define	PRESET_SIZE 12
-#define	NUM_PRESETS 10
+#define	NUM_PRESETS 12
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Chorus1
         {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0},
@@ -272,7 +296,11 @@ unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
         //Flange4
         {64, 64, 40, 0,   1, 62, 12,  19, 97,  0,   0, 0},
         //Flange5
-        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1}
+        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1},
+        //Ensemble
+        {127, 64, 68, 25, 1, 24, 35,  55, 64,  0,   TRIPLE, 0},
+        //Dual
+        {127, 64, 55, 25, 1, 24, 32,  55, 64,  0,   DUAL, 0}
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         return presets[npreset][npar];
@@ -328,7 +356,7 @@ void Chorus::changepar(int npar, unsigned char value)
             break;
         case 10:
             lfo.updateparams();
-            Pflangemode = (value > 2) ? 2 : value;
+            Pflangemode = (value > 3) ? 3 : value;
             break;
         case 11:
             Poutsub = (value > 1) ? 1 : value;
