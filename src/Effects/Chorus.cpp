@@ -300,7 +300,7 @@ unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
         //Ensemble
         {127, 64, 68, 25, 1, 24, 35,  55, 64,  0,   TRIPLE, 0},
         //Dual
-        {127, 64, 55, 25, 1, 24, 32,  55, 64,  0,   DUAL, 0}
+        {127, 64, 55, 25, 1, 24, 32,  55, 80,  0,   DUAL, 0}
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         return presets[npreset][npar];
