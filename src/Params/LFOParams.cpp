@@ -181,6 +181,7 @@ LFOParams::LFOParams(float freq_,
                                              time(time_),
                                              mod(mod_),
                                              last_update_timestamp(0) {
+    assert(mod != nullptr);
     Dfreq       = freq_;
     Dintensity  = Pintensity_;
     Dstartphase = Pstartphase_;

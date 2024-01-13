@@ -100,6 +100,9 @@ void LFO::updatePars()
         tempo = time.tempo;
         lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
     }
+    
+    assert(lfopars.mod != nullptr);
+    assert(lfopars.mod->value != nullptr);
     // apply modulation matrix sources
     for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
         lfofreq += lfopars.mod->value[i] 
