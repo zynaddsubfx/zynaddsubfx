@@ -133,7 +133,7 @@ void Chorus::out(const Stereo<float *> &input)
     // calculate new delay values
     dlNew = getdelay(lfol);
     drNew = getdelay(lfor);
-    
+    float fbComp = fb;
     if (Pflangemode == DUAL) // ensemble mode
     {
         // same for second member for ensemble mode with 120° phase offset
@@ -142,6 +142,7 @@ void Chorus::out(const Stereo<float *> &input)
         lfo.effectlfoout(&lfol, &lfor, 0.5f);
         dlNew2 = getdelay(lfol);
         drNew2 = getdelay(lfor);
+        fbComp /= 2.0f;
     }
     
     if (Pflangemode == TRIPLE) // ensemble mode
@@ -159,6 +160,7 @@ void Chorus::out(const Stereo<float *> &input)
         lfo.effectlfoout(&lfol, &lfor, 0.66666666f); 
         dlNew3 = getdelay(lfol);
         drNew3 = getdelay(lfor);
+        fbComp /= 3.0f;
     }
 
     for(int i = 0; i < buffersize; ++i) {
@@ -200,7 +202,7 @@ void Chorus::out(const Stereo<float *> &input)
                 break;
         }
         // store current input + feedback to delay line at writing position
-        delaySample.l[dlk] = inL + output * fb;
+        delaySample.l[dlk] = inL + output * fbComp;
         // write output to output interface
         efxoutl[i] = output;
 
@@ -231,7 +233,7 @@ void Chorus::out(const Stereo<float *> &input)
                 break;
         }
         
-        delaySample.r[drk] = inR + output * fb;
+        delaySample.r[drk] = inR + output * fbComp;
         efxoutr[i] = output;
     }
 
