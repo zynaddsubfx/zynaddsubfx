@@ -132,7 +132,7 @@ struct ADnoteVoiceParam {
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
     void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson,
-                const AbsTime *time);
+                const AbsTime *time, ModMatrix *Matrix);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
     /** If the voice is enabled */

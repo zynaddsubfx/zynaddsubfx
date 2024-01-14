@@ -659,27 +659,27 @@ void ADnoteVoiceParam::defaults()
 void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
                                    const AbsTime *time)
 {
-    VoicePar[nvoice].enable(synth, fft, GlobalPar.Reson, time);
+    VoicePar[nvoice].enable(synth, fft, GlobalPar.Reson, time, GlobalPar.Matrix);
 }
 
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
-                              Resonance *Reson, const AbsTime *time)
+                              Resonance *Reson, const AbsTime *time, ModMatrix *Matrix)
 {
     OscilGn  = new OscilGen(synth, fft, Reson);
     FmGn    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time);
     AmpEnvelope->init(ad_voice_amp);
-    AmpLfo = new LFOParams(ad_voice_amp, time);
+    AmpLfo = new LFOParams(ad_voice_amp, time, Matrix);
 
     FreqEnvelope = new EnvelopeParams(0, 0, time);
     FreqEnvelope->init(ad_voice_freq);
-    FreqLfo = new LFOParams(ad_voice_freq, time);
+    FreqLfo = new LFOParams(ad_voice_freq, time, Matrix);
 
     VoiceFilter    = new FilterParams(ad_voice_filter, time);
     FilterEnvelope = new EnvelopeParams(0, 0, time);
     FilterEnvelope->init(ad_voice_filter);
-    FilterLfo = new LFOParams(ad_voice_filter, time);
+    FilterLfo = new LFOParams(ad_voice_filter, time, Matrix);
 
     FMFreqEnvelope = new EnvelopeParams(0, 0, time);
     FMFreqEnvelope->init(ad_voice_fm_freq);
