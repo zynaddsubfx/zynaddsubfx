@@ -20,8 +20,8 @@
 namespace zyn {
 
 #define MODMATRIX_SOURCES \
-    PITCH,\
-    VELOCITY,\
+    MOD_PITCH,\
+    MOD_VEL,\
     GEN_ENV1,\
     GEN_ENV2,\
     GEN_LFO1,\
@@ -86,12 +86,17 @@ class ModulationSource {
     
     
     public:
+    ModulationSource();
     float getDestinationFactor(int location, int parameter);
+    void setDestinationFactor(int location, int parameter, float value);
     
     // public for ports:
     float destination[NUM_MOD_MATRIX_DESTINATIONS];
     
     static const rtosc::Ports ports;
+    
+    private:
+    int getIndex(int location, int parameter);
 };
 
 

@@ -54,6 +54,9 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
     initial_seed = spars.seed;
     current_prng_state = spars.seed;
     stereo = pars.GlobalPar.PStereo;
+    
+    pars.GlobalPar.Matrix->value[MOD_VEL] = velocity;
+    pars.GlobalPar.Matrix->value[MOD_PITCH] = powf(2.0f, note_log2_freq)/440.0f;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
@@ -1969,6 +1972,7 @@ void ADnote::entomb(void)
 
 void ADnote::calcMod() {
 
+    
     if(pars.GlobalPar.PGenEnvelope1Enabled)
         pars.GlobalPar.Matrix->value[GEN_ENV1] = NoteGlobalPar.GenericEnvelope1->envout();
     else

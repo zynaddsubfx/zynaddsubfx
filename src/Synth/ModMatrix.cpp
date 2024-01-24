@@ -27,9 +27,23 @@ using rtosc::RtData;
 #define rObject ModulationSource
 #define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
 #define rEnd }
+
+#undef rArrayFCb
+#define rArrayFCb(name) rBOILS_BEGIN \
+        if(!strcmp("", args)) {\
+            data.reply(loc, "f", obj->name[idx]); \
+        } else { \
+            float var = rtosc_argument(msg, 0).f; \
+            rLIMIT(var, atof) \
+            printf("rtosc_argument_string(msg): %s\n", rtosc_argument_string(msg)); \
+            printf("var: %f\n", var); \
+            rAPPLY(name[idx], f) \
+            data.broadcast(loc, "f", obj->name[idx]);\
+        } rBOILS_END
+        
 const Ports ModulationSource::ports = {
     rSelf(ADnoteGlobalParam::source, rEnabledBy(Penabled)),
-    rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, "Modulation Matrix Factor"),
+    rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, rLinear(0.0f,100.0f), rDefault(0.0f), rUnit(%), "Modulation Matrix Factor"),
 };
 
 #undef  rObject
@@ -60,7 +74,15 @@ ModMatrix::ModMatrix()
     }
 }
 
-float ModulationSource::getDestinationFactor(int location, int parameter)
+ModulationSource::ModulationSource()
+{
+    for(auto i = 0; i < NUM_MOD_MATRIX_DESTINATIONS; i++)
+    {
+        destination [i] = 0.0f;
+    }
+}
+
+int ModulationSource::getIndex(int location, int parameter)
 {
     int index; 
     if (location<NUM_LOCATIONS)
@@ -70,7 +92,18 @@ float ModulationSource::getDestinationFactor(int location, int parameter)
     else
         index = 0;
         
-    return destination[index];
+    return index;
+}
+
+float ModulationSource::getDestinationFactor(int location, int parameter)
+{
+    printf("location: %d, par: %d, val: %f\n", location, parameter, destination[getIndex(location, parameter)]);
+    return destination[getIndex(location, parameter)];
+}
+
+void ModulationSource::setDestinationFactor(int location, int parameter, float value)
+{
+    destination[getIndex(location, parameter)] = value;
 }
 
 ModMatrix::~ModMatrix()
