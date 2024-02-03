@@ -70,17 +70,21 @@ class Presets
 #define in_effect 11
 #define loc_generic1 12
 #define loc_generic2 13
-#define NUM_LOCATIONS 14
 
-// following numbers have changed - backward compatibility measures needed
-#define dynfilter_0 100
-#define dynfilter_1 101
-#define dynfilter_2 102
-#define dynfilter_3 103
-#define dynfilter_4 104
+#define NUM_MOD_LOCATIONS 14
+// Define the locations list for modmatrix
+#define MOD_LOCATIONS \
+    ad_global_amp, ad_global_freq, ad_global_filter, \
+    ad_voice_amp, ad_voice_freq, ad_voice_filter, ad_voice_fm_amp, ad_voice_fm_freq, \
+    sub_freq, sub_filter, sub_bandwidth, \
+    in_effect, loc_generic1, loc_generic2
 
 
-
+#define dynfilter_0 14
+#define dynfilter_1 15
+#define dynfilter_2 16
+#define dynfilter_3 17
+#define dynfilter_4 18
 //};
 using consumer_location_t = int;
 
