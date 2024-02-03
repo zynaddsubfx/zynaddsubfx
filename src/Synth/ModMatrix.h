@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "../Misc/Time.h"
+#include "../Params/Presets.h"
 
 namespace zyn {
 
@@ -27,26 +28,29 @@ namespace zyn {
     GEN_LFO1,\
     GEN_LFO2
 
-
 #define NUM_MOD_MATRIX_SOURCES 6
 
 enum {
     MODMATRIX_SOURCES
 };
 
+#define MOD_LOCATION_PARAMS \
+DIRECT, \
+PAR_LFO_FREQ, \
+PAR_LFO_DEPTH, \
+PAR_ENV_A, \
+PAR_ENV_D, \
+PAR_ENV_S, \
+PAR_ENV_R, \
+PAR_ENV_SPEED, \
+PAR_ENV_DEPTH
 
+#define NUM_LOCATION_PARAMS 9
 
-#define MODMATRIX_DESTINATIONS \
-    LFO1_FREQ,\
-    LFO1_DEPTH,\
-    LFO2_FREQ,\
-    LFO2_DEPTH,\
-    AMPLFO_FREQ,\
-    AMPLFO_DEPTH,\
-    FREQLFO_FREQ,\
-    FREQLFO_DEPTH,\
-    FILTLFO_FREQ,\
-    FILTLFO_DEPTH\
+enum {
+    MOD_LOCATION_PARAMS
+};
+
 
 #define NUM_MOD_MATRIX_DESTINATIONS 10
 
@@ -54,13 +58,22 @@ enum {
     MODMATRIX_DESTINATIONS
 };
 
-enum {
-    PAR_LFO_FREQ,
-    PAR_LFO_DEPTH,
-    NUM_MODMATRIX_LFO_DESTINATIONS
-};
 
-#define NUM_MODMATRIX_ANY_DESTINATIONS 8
+#define NUM_MODMATRIX_GLOBAL_DESTINATIONS 8
+
+#define APPLY_MODMATRIX_FACTOR_IMPL(param) \
+    const float f_##param = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc, param); \
+    if (modValue[i] && f_##param) param *= modValue[i] * f_##param;
+
+#define APPLY_MODMATRIX_FACTOR(p1, p2, param) APPLY_MODMATRIX_FACTOR_IMPL(param)
+
+#define APPLY_MODMATRIX_FACTORS(...) \
+    if (modValue != NULL) \
+        for (auto i = 0; i < NUM_MOD_MATRIX_SOURCES; i++) \
+        { \
+            MAC_EACH(APPLY_MODMATRIX_FACTOR, _, __VA_ARGS__) \
+        }
+
 
 class ModulationSource {
     

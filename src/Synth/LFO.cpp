@@ -218,25 +218,10 @@ float LFO::lfoout()
     }
     
     updatePars();
-    if(modValue!=NULL)
-        // apply modulation matrix sources
-        for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
-        {
-            
-            const float factorDepth = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_DEPTH);
-            if(modValue[i] && factorDepth)
-            {
-                //~ printf("lfopars.mod->value[%d]: %f \n", i, modValue[i]);
-                lfointensity *= modValue[i] * factorDepth;
-            }
 
-            const float factorFreq = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_FREQ);
-            if(modValue[i] && factorFreq)
-            {
-                printf("modValue[%d]: %f \n", i, modValue[i]);
-                lfofreq *= modValue[i] * factorFreq;
-            }
-        }
+    APPLY_MODMATRIX_FACTORS(lfointensity, lfofreq)
+
+
     phaseInc = fabsf(lfofreq) * dt;
     
     //Limit the Frequency(or else...)

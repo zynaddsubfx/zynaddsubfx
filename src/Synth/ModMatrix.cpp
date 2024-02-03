@@ -70,11 +70,16 @@ ModulationSource::ModulationSource()
 
 int ModulationSource::getIndex(int location, int parameter)
 {
+    // location is the combination of indices of:
+    // location : add_filter_amp, add_filter_freq, ... (from presets.h)
+    // modulator type: LFO, ENV, DIRECT
+    // parameter: some env and lfo parameters
+    
     int index; 
-    if (location<NUM_LOCATIONS)
-        index = (location * NUM_MODMATRIX_PARAMS) + parameter;
-    else if (parameter < NUM_LOCATIONS + NUM_MODMATRIX_GLOBAL_DESTINATIONS)
-        index = NUM_LOCATIONS + parameter;
+    if (location<NUM_MOD_LOCATIONS)
+        index = (location * NUM_MOD_LOCATIONS) + parameter;
+    else if (parameter < NUM_MOD_LOCATIONS + NUM_MODMATRIX_GLOBAL_DESTINATIONS)
+        index = NUM_MOD_LOCATIONS + parameter;
     else
         index = 0;
         
