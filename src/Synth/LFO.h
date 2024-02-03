@@ -33,7 +33,7 @@ class LFO
          * @param basefreq base frequency of LFO
          */
         LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchManager *m=0,
-                const char *watch_prefix=0);
+                const char *watch_prefix=0, float* modValue_=NULL);
         ~LFO();
 
         float lfoout();
@@ -66,6 +66,8 @@ class LFO
         float incrnd, nextincrnd;
         //Amplitude Randomness
         float amp1, amp2;
+        
+        float lfofreq;
 
         // RND mode
         int first_half;
@@ -127,6 +129,8 @@ class LFO
         VecWatchPoint watchOut;
 
         void computeNextFreqRnd(void);
+        
+        float* modValue;
 };
 
 }

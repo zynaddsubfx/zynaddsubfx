@@ -22,7 +22,7 @@
 namespace zyn {
 
 LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchManager *m,
-        const char *watch_prefix)
+        const char *watch_prefix, float* modValue_)
     :first_half(-1),
     time(t),
     delayTime(t, lfopars_.delay), //0..4 sec
@@ -30,6 +30,7 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     dt(t.dt()),
     lfopars(lfopars_), 
     basefreq(basefreq_),
+    modValue(modValue_),
     watchOut(m, watch_prefix, "out")
 {
     updatePars();
@@ -93,7 +94,6 @@ void LFO::updatePars()
     // stretch max 2x/octave
     const float lfostretch = powf(basefreq / 440.0f, (stretch - 64.0f) / 63.0f);
 
-    float lfofreq;
     if (!lfopars.numerator || !lfopars.denominator) {
         lfofreq = lfopars.freq * lfostretch;   
     } else {
@@ -102,17 +102,6 @@ void LFO::updatePars()
     }
     
     assert(lfopars.mod != nullptr);
-    assert(lfopars.mod->value != nullptr);
-    // apply modulation matrix sources
-    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
-        lfofreq += lfopars.mod->value[i] 
-            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_FREQ);
-
-    phaseInc = fabsf(lfofreq) * dt;
-    
-    //Limit the Frequency(or else...)
-    if(phaseInc > 0.49999999f)
-        phaseInc = 0.499999999f;
 }
 
 float LFO::baseOut(const char waveShape, const float phase)
@@ -226,18 +215,34 @@ float LFO::lfoout()
                 lfointensity = powf(2, lfopars.Pintensity / 127.0f * 11.0f) - 1.0f; // [0...2047] cent
                 break;
         }
-    // apply modulation matrix sources
-    for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
-        lfointensity *= lfopars.mod->value[i] 
-            * lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_DEPTH);
     }
     
-    // refresh freq if tempo has changed
-    if (lfopars.numerator && lfopars.denominator && tempo != time.tempo) {
-        tempo = time.tempo;
-        float lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
-        phaseInc = fabsf(lfofreq) * dt;
-    }
+    updatePars();
+    if(modValue!=NULL)
+        // apply modulation matrix sources
+        for(auto i = 0; i<NUM_MOD_MATRIX_SOURCES; i++) 
+        {
+            
+            const float factorDepth = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_DEPTH);
+            if(modValue[i] && factorDepth)
+            {
+                //~ printf("lfopars.mod->value[%d]: %f \n", i, modValue[i]);
+                lfointensity *= modValue[i] * factorDepth;
+            }
+
+            const float factorFreq = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc,PAR_LFO_FREQ);
+            if(modValue[i] && factorFreq)
+            {
+                printf("modValue[%d]: %f \n", i, modValue[i]);
+                lfofreq *= modValue[i] * factorFreq;
+            }
+        }
+    phaseInc = fabsf(lfofreq) * dt;
+    
+    //Limit the Frequency(or else...)
+    if(phaseInc > 0.49999999f)
+        phaseInc = 0.499999999f;
+    
     float phaseWithStartphase = fmod(phase + (lfopars.Pstartphase + 63.0f) / 127.0f, 1.0f);
     float out = baseOut(waveShape, phaseWithStartphase);
     if(waveShape == LFO_SINE || waveShape == LFO_TRIANGLE)

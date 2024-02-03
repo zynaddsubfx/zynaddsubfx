@@ -27,19 +27,6 @@ using rtosc::RtData;
 #define rObject ModulationSource
 #define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
 #define rEnd }
-
-#undef rArrayFCb
-#define rArrayFCb(name) rBOILS_BEGIN \
-        if(!strcmp("", args)) {\
-            data.reply(loc, "f", obj->name[idx]); \
-        } else { \
-            float var = rtosc_argument(msg, 0).f; \
-            rLIMIT(var, atof) \
-            printf("rtosc_argument_string(msg): %s\n", rtosc_argument_string(msg)); \
-            printf("var: %f\n", var); \
-            rAPPLY(name[idx], f) \
-            data.broadcast(loc, "f", obj->name[idx]);\
-        } rBOILS_END
         
 const Ports ModulationSource::ports = {
     rSelf(ADnoteGlobalParam::source, rEnabledBy(Penabled)),
@@ -56,7 +43,7 @@ const rtosc::Ports ModMatrix::ports = {
           rOptions(MODMATRIX_SOURCES),
           "Modulation Matrix Source"),
     rOption(PDestinations,   rShort("dest"),
-          rOptions(MODMATRIX_DESTINATIONS),
+          rOptions(MODMATRIX_DESTINATIONS, MODMATRIX_GLOBAL_DESTINATIONS),
           "Modulation Matrix Source"),
 };
 #undef rBegin
@@ -66,7 +53,6 @@ const rtosc::Ports ModMatrix::ports = {
 
 ModMatrix::ModMatrix()
 {
-    value = new float[NUM_MOD_MATRIX_SOURCES];    
     
     for(int nsource = 0; nsource < NUM_MOD_MATRIX_SOURCES; ++nsource)
     {
@@ -86,9 +72,9 @@ int ModulationSource::getIndex(int location, int parameter)
 {
     int index; 
     if (location<NUM_LOCATIONS)
-        index = NUM_MODMATRIX_ANY_DESTINATIONS + (location * NUM_MODMATRIX_LFO_DESTINATIONS) + parameter;
-    else if (parameter < NUM_MODMATRIX_ANY_DESTINATIONS)
-        index = parameter;
+        index = (location * NUM_MODMATRIX_PARAMS) + parameter;
+    else if (parameter < NUM_LOCATIONS + NUM_MODMATRIX_GLOBAL_DESTINATIONS)
+        index = NUM_LOCATIONS + parameter;
     else
         index = 0;
         
@@ -97,8 +83,7 @@ int ModulationSource::getIndex(int location, int parameter)
 
 float ModulationSource::getDestinationFactor(int location, int parameter)
 {
-    printf("location: %d, par: %d, val: %f\n", location, parameter, destination[getIndex(location, parameter)]);
-    return destination[getIndex(location, parameter)];
+    return destination[getIndex(location, parameter)] * 0.01f;
 }
 
 void ModulationSource::setDestinationFactor(int location, int parameter, float value)
@@ -108,7 +93,6 @@ void ModulationSource::setDestinationFactor(int location, int parameter, float v
 
 ModMatrix::~ModMatrix()
 {
-    delete[] value;
 
 }
 

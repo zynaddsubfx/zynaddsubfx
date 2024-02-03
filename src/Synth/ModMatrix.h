@@ -30,26 +30,6 @@ namespace zyn {
 
 #define NUM_MOD_MATRIX_SOURCES 6
 
-//~ // Hier wird die maximale Anzahl der Elemente im Voraus definiert
-//~ #define MAX_MODMATRIX_SOURCES 10 // Du kannst diese Zahl je nach Bedarf anpassen
-
-//~ // Makro zur Generierung einer Warnung zur Überprüfung der Anzahl der Elemente
-//~ #define WARN_IF_NE(x, y) WARN_IF_NE_IMPL(x, y)
-//~ #define WARN_IF_NE_IMPL(x, y) #warning Warnung: x != y
-
-//~ // Berechnung der Anzahl der Elemente im MODMATRIX_SOURCES-Macro
-//~ #if defined(__GNUC__) || defined(__clang__) // Für GCC oder Clang
-    //~ #pragma message(WARN_IF_NE(NUM_MOD_MATRIX_SOURCES, MAX_MODMATRIX_SOURCES))
-//~ #elif defined(_MSC_VER) // Für Visual Studio
-    //~ #pragma message(WARN_IF_NE(NUM_MOD_MATRIX_SOURCES, MAX_MODMATRIX_SOURCES))
-//~ #else // Andere Compiler: keine direkte Unterstützung für Warnungen
-    //~ #warning Anzahl der Elemente im MODMATRIX_SOURCES-Macro überprüfen
-//~ #endif
-
-//~ #define NUM_MOD_MATRIX_SOURCES ARG_COUNT_HELPER(MODMATRIX_SOURCES)
-//~ #define ARG_COUNT_HELPER(...) ARG_COUNT_HELPER_(__VA_ARGS__, MODMATRIX_SEVEN, MODMATRIX_SIX, MODMATRIX_FIVE, MODMATRIX_FOUR, MODMATRIX_THREE, MODMATRIX_TWO, MODMATRIX_ONE, 0)
-//~ #define ARG_COUNT_HELPER_(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
-
 enum {
     MODMATRIX_SOURCES
 };
@@ -110,9 +90,6 @@ class ModMatrix
          */
         ModMatrix();
         ~ModMatrix();
-        
-
-        float* value;
         
         class ModulationSource* source[NUM_MOD_MATRIX_SOURCES];
         

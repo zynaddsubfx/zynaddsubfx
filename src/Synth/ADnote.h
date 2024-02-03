@@ -55,7 +55,7 @@ class ADnote:public SynthNote
 
         virtual SynthNote *cloneLegato(void) override;
 
-        void calcMod();
+        
     private:
 
         void setupVoice(int nvoice);
@@ -137,7 +137,7 @@ class ADnote:public SynthNote
 
         struct Global {
             void kill(Allocator &memory);
-            void initparameters(const ADnoteGlobalParam &param,
+            void initparameters(const ADnoteGlobalParam &param_,
                                 const SYNTH_T &synth,
                                 const AbsTime &time,
                                 class Allocator &memory,
@@ -145,6 +145,7 @@ class ADnote:public SynthNote
                                 bool stereo,
                                 WatchManager *wm,
                                 const char *prefix);
+            const ADnoteGlobalParam* globalParam;
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
@@ -181,6 +182,9 @@ class ADnote:public SynthNote
             LFO       *GenericLfo1;
             Envelope  *GenericEnvelope2;
             LFO       *GenericLfo2;
+            
+            float* modValue;
+            void calcMod();
 
         } NoteGlobalPar;
 

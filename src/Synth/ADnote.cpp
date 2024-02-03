@@ -55,8 +55,9 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
     current_prng_state = spars.seed;
     stereo = pars.GlobalPar.PStereo;
     
-    pars.GlobalPar.Matrix->value[MOD_VEL] = velocity;
-    pars.GlobalPar.Matrix->value[MOD_PITCH] = powf(2.0f, note_log2_freq)/440.0f;
+    NoteGlobalPar.modValue = new float[NUM_MOD_MATRIX_SOURCES];
+    NoteGlobalPar.modValue[MOD_VEL] = velocity;
+    NoteGlobalPar.modValue[MOD_PITCH] = powf(2.0f, note_log2_freq)/440.0f;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
@@ -101,6 +102,8 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         tmpwave_unison[k] = memory.valloc<float>(synth.buffersize);
         memset(tmpwave_unison[k], 0, synth.bufferbytes);
     }
+    
+    
 
     initparameters(wm, prefix);
     memory.endTransaction();
@@ -789,6 +792,7 @@ void ADnote::KillNote()
     NoteGlobalPar.kill(memory);
 
     NoteEnabled = OFF;
+    
 }
 
 ADnote::~ADnote()
@@ -876,7 +880,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
-                    (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str);
+                    (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str, NoteGlobalPar.modValue);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
@@ -1664,7 +1668,7 @@ int ADnote::noteout(float *outl, float *outr)
         setupVoiceMod(nvoice, false);
     }
     // calculate generic modulation sources
-    calcMod();
+    NoteGlobalPar.calcMod();
     
     computecurrentparameters();
 
@@ -1970,30 +1974,30 @@ void ADnote::entomb(void)
     NoteGlobalPar.AmpEnvelope->forceFinish();
 }
 
-void ADnote::calcMod() {
+void ADnote::Global::calcMod() {
 
     
-    if(pars.GlobalPar.PGenEnvelope1Enabled)
-        pars.GlobalPar.Matrix->value[GEN_ENV1] = NoteGlobalPar.GenericEnvelope1->envout();
+    if(globalParam->PGenEnvelope1Enabled)
+        modValue[GEN_ENV1] = GenericEnvelope1->envout();
     else
-        pars.GlobalPar.Matrix->value[GEN_ENV1] = 0.0f;
+        modValue[GEN_ENV1] = 0.0f;
     
-    if(pars.GlobalPar.PGenEnvelope2Enabled)
-        pars.GlobalPar.Matrix->value[GEN_ENV2] = NoteGlobalPar.GenericEnvelope2->envout();
+    if(globalParam->PGenEnvelope2Enabled)
+        modValue[GEN_ENV2] = GenericEnvelope2->envout();
     else
-        pars.GlobalPar.Matrix->value[GEN_ENV2] = 0.0f;
+        modValue[GEN_ENV2] = 0.0f;
 
-    if(pars.GlobalPar.PGenLfo1Enabled) {
-        pars.GlobalPar.Matrix->value[GEN_LFO1] = (NoteGlobalPar.GenericLfo1->lfoout()/4094.0f)+0.5f;
+    if(globalParam->PGenLfo1Enabled) {
+        modValue[GEN_LFO1] = (GenericLfo1->lfoout()/4094.0f)+0.5f;
     }
     else
-        pars.GlobalPar.Matrix->value[GEN_LFO1] = 0.0f;
+        modValue[GEN_LFO1] = 0.0f;
     
-    if(pars.GlobalPar.PGenLfo2Enabled) {
-        pars.GlobalPar.Matrix->value[GEN_LFO2] = (NoteGlobalPar.GenericLfo2->lfoout()/4094.0f)+0.5f;
+    if(globalParam->PGenLfo2Enabled) {
+        modValue[GEN_LFO2] = (GenericLfo2->lfoout()/4094.0f)+0.5f;
     }
     else
-        pars.GlobalPar.Matrix->value[GEN_LFO2] = 0.0f;
+        modValue[GEN_LFO2] = 0.0f;
 }
 
 void ADnote::Voice::releasekey()
@@ -2052,6 +2056,9 @@ void ADnote::Global::kill(Allocator &memory)
     //~ if(genericLfoEnabled)
          memory.dealloc(GenericLfo1);
          memory.dealloc(GenericLfo2);
+    
+    delete[] modValue;
+         
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
@@ -2063,11 +2070,12 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     WatchManager *wm,
                                     const char *prefix)
 {
+    globalParam = &param;
     ScratchString pre = prefix;
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str);
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/FreqLfo/").c_str);
+                   (pre+"GlobalPar/FreqLfo/").c_str, modValue);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
