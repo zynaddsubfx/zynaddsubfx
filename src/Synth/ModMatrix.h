@@ -34,6 +34,15 @@ enum {
     MODMATRIX_SOURCES
 };
 
+#define NUM_MOD_LOCATIONS 15
+// Define the locations list for modmatrix. 
+//ATTENTION: the order must be the same as the numbering in presets.h
+#define MOD_LOCATIONS \
+    AD_GLOBAL_AMP, AD_GLOBAL_FREQ, AD_GLOBAL_FILTER, \
+    AD_VOICE_AMP, AD_VOICE_FREQ, AD_VOICE_FILTER, AD_VOICE_FM_AMP, AD_VOICE_FM_FREQ, \
+    SUB_FREQ, SUB_FILTER, SUB_BANDWIDTH, \
+    IN_EFFECT, LOC_GENERIC1, LOC_GENERIC2, GLOBAL
+
 #define MOD_LOCATION_PARAMS \
 DIRECT, \
 PAR_LFO_FREQ, \
@@ -45,21 +54,22 @@ PAR_ENV_R, \
 PAR_ENV_SPEED, \
 PAR_ENV_DEPTH
 
+// place for location independent parameters
+#define MOD_GLOBAL_PARAMS \
+PAR_1, \
+PAR_2, \
+PAR_3, \
+PAR_4, \
+PAR_5, \
+PAR_6, \
+PAR_7, \
+PAR_8, \
+PAR_9
+
 #define NUM_LOCATION_PARAMS 9
 
-enum {
-    MOD_LOCATION_PARAMS
-};
+#define NUM_MOD_MATRIX_DESTINATIONS NUM_MOD_LOCATIONS*NUM_LOCATION_PARAMS
 
-
-#define NUM_MOD_MATRIX_DESTINATIONS 10
-
-enum {
-    MODMATRIX_DESTINATIONS
-};
-
-
-#define NUM_MODMATRIX_GLOBAL_DESTINATIONS 8
 
 #define APPLY_MODMATRIX_FACTOR_IMPL(param) \
     const float f_##param = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc, param); \
@@ -107,7 +117,8 @@ class ModMatrix
         class ModulationSource* source[NUM_MOD_MATRIX_SOURCES];
         
         unsigned char PSources;
-        unsigned char PDestinations;
+        unsigned char PDestLocations;
+        unsigned char PDestParameters;
         
         static const rtosc::Ports ports;
 };

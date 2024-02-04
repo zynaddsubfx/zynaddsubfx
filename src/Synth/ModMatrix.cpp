@@ -42,9 +42,12 @@ const rtosc::Ports ModMatrix::ports = {
     rOption(PSources,   rShort("source"),
           rOptions(MODMATRIX_SOURCES),
           "Modulation Matrix Source"),
-    rOption(PDestinations,   rShort("dest"),
-          rOptions(MODMATRIX_DESTINATIONS, MODMATRIX_GLOBAL_DESTINATIONS),
-          "Modulation Matrix Source"),
+    rOption(PDestLocations,   rShort("loc"),
+          rOptions(MOD_LOCATIONS),
+          "Modulation Matrix Destination Locations"),
+    rOption(PDestParameters,   rShort("par"),
+          rOptions(MOD_LOCATION_PARAMS),
+          "Modulation Matrix Destination Parameters"),
 };
 #undef rBegin
 #undef rEnd    
@@ -78,8 +81,6 @@ int ModulationSource::getIndex(int location, int parameter)
     int index; 
     if (location<NUM_MOD_LOCATIONS)
         index = (location * NUM_MOD_LOCATIONS) + parameter;
-    else if (parameter < NUM_MOD_LOCATIONS + NUM_MODMATRIX_GLOBAL_DESTINATIONS)
-        index = NUM_MOD_LOCATIONS + parameter;
     else
         index = 0;
         
