@@ -14,7 +14,6 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
-#include <Misc/Time.h>
 #include <rtosc/ports.h>
 #include "Presets.h"
 #include "../Synth/ModMatrix.h"
