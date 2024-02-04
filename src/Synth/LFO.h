@@ -125,12 +125,12 @@ class LFO
         float mu1=-1.14285714286f;
 
         char cutoff = 127;
-
+        float* modValue;
         VecWatchPoint watchOut;
 
         void computeNextFreqRnd(void);
         
-        float* modValue;
+        
 };
 
 }

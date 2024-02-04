@@ -204,7 +204,7 @@ void PADnote::setup(float velocity_,
 SynthNote *PADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
-                   portamento, legato.param.note_log2_freq, true, legato.param.seed};
+                   portamento, legato.param.note_log2_freq, true, legato.param.seed, 0};
     return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 

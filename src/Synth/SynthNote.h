@@ -56,7 +56,7 @@ class SynthNote
 {
     public:
         SynthNote(const SynthParams &pars, const char *prefix);
-        ~SynthNote();
+        virtual ~SynthNote();
 
         /**Compute Output Samples
          * @return 0 if note is finished*/

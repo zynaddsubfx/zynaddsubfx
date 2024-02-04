@@ -94,7 +94,7 @@ class UnisonTest
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng(), 0};
             ADnote* note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(values[0], outL[80], 1.9e-5);

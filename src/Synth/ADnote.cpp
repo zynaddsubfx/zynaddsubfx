@@ -513,7 +513,7 @@ SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
                 portamento, legato.param.note_log2_freq, true,
-                initial_seed };
+                initial_seed, 0};
     return memory.alloc<ADnote>(&pars, sp);
 }
 

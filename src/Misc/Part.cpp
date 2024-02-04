@@ -650,7 +650,7 @@ bool Part::NoteOnInternal(note_t note,
             continue;
 
         SynthParams pars{memory, ctl, synth, time, vel,
-            portamentoptr, note_log2_freq, false, prng()};
+            portamentoptr, note_log2_freq, false, prng(), 0};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         // Enforce voice limit, before we trigger new note
