@@ -23,10 +23,10 @@ namespace zyn {
 #define MODMATRIX_SOURCES \
     MOD_PITCH,\
     MOD_VEL,\
-    GEN_ENV1,\
-    GEN_ENV2,\
-    GEN_LFO1,\
-    GEN_LFO2
+    MOD_ENV1,\
+    MOD_ENV2,\
+    MOD_LFO1,\
+    MOD_LFO2
 
 #define NUM_MOD_MATRIX_SOURCES 6
 
@@ -34,25 +34,25 @@ enum {
     MODMATRIX_SOURCES
 };
 
-#define NUM_MOD_LOCATIONS 15
+#define NUM_MOD_MATRIX_LOCATIONS 15
 // Define the locations list for modmatrix. 
 //ATTENTION: the order must be the same as the numbering in presets.h
 #define MOD_LOCATIONS \
     AD_GLOBAL_AMP, AD_GLOBAL_FREQ, AD_GLOBAL_FILTER, \
-    AD_VOICE_AMP, AD_VOICE_FREQ, AD_VOICE_FILTER, AD_VOICE_FM_AMP, AD_VOICE_FM_FREQ, \
+    AD_VCE8_FM_AMP, AD_VCE8_FM_FREQ, \
     SUB_FREQ, SUB_FILTER, SUB_BANDWIDTH, \
-    IN_EFFECT, LOC_GENERIC1, LOC_GENERIC2, GLOBAL
+    LOC_GENERIC1, LOC_GENERIC2, GLOBAL
 
 #define MOD_LOCATION_PARAMS \
 DIRECT, \
-PAR_LFO_FREQ, \
-PAR_LFO_DEPTH, \
-PAR_ENV_A, \
-PAR_ENV_D, \
-PAR_ENV_S, \
-PAR_ENV_R, \
-PAR_ENV_SPEED, \
-PAR_ENV_DEPTH
+LFO_FREQ, \
+LFO_DEPTH, \
+ENV_A, \
+ENV_D, \
+ENV_S, \
+ENV_R, \
+ENV_SPEED, \
+ENV_DEPTH
 
 // place for location independent parameters
 #define MOD_GLOBAL_PARAMS \
@@ -66,13 +66,10 @@ PAR_7, \
 PAR_8, \
 PAR_9
 
-#define NUM_LOCATION_PARAMS 9
-
-#define NUM_MOD_MATRIX_DESTINATIONS NUM_MOD_LOCATIONS*NUM_LOCATION_PARAMS
-
+#define NUM_MOD_MATRIX_PARAMETERS 9
 
 #define APPLY_MODMATRIX_FACTOR_IMPL(param) \
-    const float f_##param = lfopars.mod->source[i]->getDestinationFactor(lfopars.loc, param); \
+    const float f_##param = PARS.mod->source[i]->getDestinationFactor(PARS.loc, param); \
     if (modValue[i] && f_##param) param *= modValue[i] * f_##param;
 
 #define APPLY_MODMATRIX_FACTOR(p1, p2, param) APPLY_MODMATRIX_FACTOR_IMPL(param)
@@ -85,21 +82,37 @@ PAR_9
         }
 
 
+class ModulationLocation {
+    
+    public:
+    ModulationLocation();
+    float getFactor(int parameter);
+    void setFactor(int parameter, float value);
+    
+    // public for ports:
+    float parameter[NUM_MOD_MATRIX_PARAMETERS];
+    
+    static const rtosc::Ports ports;
+
+};
+
 class ModulationSource {
     
     
     public:
     ModulationSource();
+    ~ModulationSource();
     float getDestinationFactor(int location, int parameter);
     void setDestinationFactor(int location, int parameter, float value);
     
     // public for ports:
-    float destination[NUM_MOD_MATRIX_DESTINATIONS];
+    class  ModulationLocation* location[NUM_MOD_MATRIX_LOCATIONS];
     
     static const rtosc::Ports ports;
     
     private:
     int getIndex(int location, int parameter);
+    int getLocationIndex(int location);
 };
 
 

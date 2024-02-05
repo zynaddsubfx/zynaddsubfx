@@ -24,13 +24,21 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
-#define rObject ModulationSource
+#define rObject ModulationLocation
 #define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
 #define rEnd }
         
+const Ports ModulationLocation::ports = {
+    rSelf(ModulationLocation::location),
+    rArrayF(parameter, NUM_MOD_MATRIX_PARAMETERS, rLinear(0.0f,100.0f), rDefault(0.0f), rUnit(%), "Modulation Matrix Factor"),
+};
+
+#undef  rObject
+#define rObject ModulationSource
+        
 const Ports ModulationSource::ports = {
-    rSelf(ADnoteGlobalParam::source, rEnabledBy(Penabled)),
-    rArrayF(destination, NUM_MOD_MATRIX_DESTINATIONS, rLinear(0.0f,100.0f), rDefault(0.0f), rUnit(%), "Modulation Matrix Factor"),
+    rSelf(ModulationSource::source),
+    rRecursp(location, NUM_MOD_MATRIX_LOCATIONS, "Location"),
 };
 
 #undef  rObject
@@ -57,44 +65,69 @@ const rtosc::Ports ModMatrix::ports = {
 ModMatrix::ModMatrix()
 {
     
-    for(int nsource = 0; nsource < NUM_MOD_MATRIX_SOURCES; ++nsource)
+    for(int i = 0; i < NUM_MOD_MATRIX_SOURCES; i++)
     {
-        source[nsource] = new ModulationSource();
+        source[i] = new ModulationSource();
     }
 }
 
 ModulationSource::ModulationSource()
 {
-    for(auto i = 0; i < NUM_MOD_MATRIX_DESTINATIONS; i++)
+    for(auto i = 0; i < NUM_MOD_MATRIX_LOCATIONS; i++)
     {
-        destination [i] = 0.0f;
+        location [i] = new ModulationLocation();
     }
 }
 
-int ModulationSource::getIndex(int location, int parameter)
+ModulationSource::~ModulationSource()
 {
-    // location is the combination of indices of:
-    // location : add_filter_amp, add_filter_freq, ... (from presets.h)
-    // modulator type: LFO, ENV, DIRECT
-    // parameter: some env and lfo parameters
-    
-    int index; 
-    if (location<NUM_MOD_LOCATIONS)
-        index = (location * NUM_MOD_LOCATIONS) + parameter;
-    else
-        index = 0;
-        
+    for(auto i = 0; i < NUM_MOD_MATRIX_LOCATIONS; i++)
+    {
+        delete location[i];
+    }
+
+    delete[] location;
+}
+
+ModulationLocation::ModulationLocation()
+{
+    for(auto i = 0; i < NUM_MOD_MATRIX_PARAMETERS; i++)
+    {
+        parameter [i] = 0.0f;
+    }
+}
+
+
+int ModulationSource::getLocationIndex(int location)
+{
+    int index;
+    if (location < 3) index = location;
+    else if (location < 6 ) index = -1;
+    else if (location < 12 ) index = location-3;
+    else if (location < 13 ) index = -1;
+    else if (location < NUM_MOD_MATRIX_LOCATIONS) index = location-4;
     return index;
+    
 }
 
-float ModulationSource::getDestinationFactor(int location, int parameter)
+float ModulationLocation::getFactor(int par)
 {
-    return destination[getIndex(location, parameter)] * 0.01f;
+    return parameter[par] * 0.01f;
 }
 
-void ModulationSource::setDestinationFactor(int location, int parameter, float value)
+void ModulationLocation::setFactor(int par, float value)
 {
-    destination[getIndex(location, parameter)] = value;
+    parameter[par] = value;
+}
+
+float ModulationSource::getDestinationFactor(int loc, int par)
+{
+    return location[loc]->getFactor(par);
+}
+
+void ModulationSource::setDestinationFactor(int loc, int par, float value)
+{
+    location[loc]->setFactor(par, value);
 }
 
 ModMatrix::~ModMatrix()

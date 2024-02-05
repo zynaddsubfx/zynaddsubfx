@@ -1978,26 +1978,26 @@ void ADnote::Global::calcMod() {
 
     
     if(globalParam->PGenEnvelope1Enabled)
-        modValue[GEN_ENV1] = GenericEnvelope1->envout();
+        modValue[MOD_ENV1] = GenericEnvelope1->envout();
     else
-        modValue[GEN_ENV1] = 0.0f;
+        modValue[MOD_ENV1] = 0.0f;
     
     if(globalParam->PGenEnvelope2Enabled)
-        modValue[GEN_ENV2] = GenericEnvelope2->envout();
+        modValue[MOD_ENV2] = GenericEnvelope2->envout();
     else
-        modValue[GEN_ENV2] = 0.0f;
+        modValue[MOD_ENV2] = 0.0f;
 
     if(globalParam->PGenLfo1Enabled) {
-        modValue[GEN_LFO1] = (GenericLfo1->lfoout()/4094.0f)+0.5f;
+        modValue[MOD_LFO1] = (GenericLfo1->lfoout()/4094.0f)+0.5f;
     }
     else
-        modValue[GEN_LFO1] = 0.0f;
+        modValue[MOD_LFO1] = 0.0f;
     
     if(globalParam->PGenLfo2Enabled) {
-        modValue[GEN_LFO2] = (GenericLfo2->lfoout()/4094.0f)+0.5f;
+        modValue[MOD_LFO2] = (GenericLfo2->lfoout()/4094.0f)+0.5f;
     }
     else
-        modValue[GEN_LFO2] = 0.0f;
+        modValue[MOD_LFO2] = 0.0f;
 }
 
 void ADnote::Voice::releasekey()

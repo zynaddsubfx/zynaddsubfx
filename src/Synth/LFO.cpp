@@ -219,7 +219,9 @@ float LFO::lfoout()
     
     updatePars();
 
+    #define PARS lfopars
     APPLY_MODMATRIX_FACTORS(lfointensity, lfofreq)
+    #undef PARS
 
 
     phaseInc = fabsf(lfofreq) * dt;
