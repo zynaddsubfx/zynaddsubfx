@@ -102,8 +102,6 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         tmpwave_unison[k] = memory.valloc<float>(synth.buffersize);
         memset(tmpwave_unison[k], 0, synth.bufferbytes);
     }
-    
-    
 
     initparameters(wm, prefix);
     memory.endTransaction();
@@ -880,7 +878,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
-                    (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str, NoteGlobalPar.modValue);
+                    (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
@@ -1988,13 +1986,13 @@ void ADnote::Global::calcMod() {
         modValue[MOD_ENV2] = 0.0f;
 
     if(globalParam->PGenLfo1Enabled) {
-        modValue[MOD_LFO1] = (GenericLfo1->lfoout()/4094.0f)+0.5f;
+        modValue[MOD_LFO1] = (GenericLfo1->lfoout()/4094.0f);
     }
     else
         modValue[MOD_LFO1] = 0.0f;
     
     if(globalParam->PGenLfo2Enabled) {
-        modValue[MOD_LFO2] = (GenericLfo2->lfoout()/4094.0f)+0.5f;
+        modValue[MOD_LFO2] = (GenericLfo2->lfoout()/4094.0f);
     }
     else
         modValue[MOD_LFO2] = 0.0f;
@@ -2080,7 +2078,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/AmpLfo/").c_str);
+                   (pre+"GlobalPar/AmpLfo/").c_str, modValue);
 
     Volume = dB2rap(param.Volume)
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -2091,7 +2089,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str);
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/FilterLfo/").c_str);
+                   (pre+"GlobalPar/FilterLfo/").c_str, modValue);
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);

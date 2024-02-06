@@ -34,7 +34,7 @@ enum {
     MODMATRIX_SOURCES
 };
 
-#define NUM_MOD_MATRIX_LOCATIONS 15
+#define NUM_MOD_MATRIX_LOCATIONS 11
 // Define the locations list for modmatrix. 
 //ATTENTION: the order must be the same as the numbering in presets.h
 #define MOD_LOCATIONS \
@@ -54,6 +54,12 @@ ENV_R, \
 ENV_SPEED, \
 ENV_DEPTH
 
+#define NUM_MOD_MATRIX_PARAMETERS 9
+
+enum {
+    MOD_LOCATION_PARAMS
+};
+
 // place for location independent parameters
 #define MOD_GLOBAL_PARAMS \
 PAR_1, \
@@ -66,21 +72,12 @@ PAR_7, \
 PAR_8, \
 PAR_9
 
-#define NUM_MOD_MATRIX_PARAMETERS 9
-
-#define APPLY_MODMATRIX_FACTOR_IMPL(param) \
-    const float f_##param = PARS.mod->source[i]->getDestinationFactor(PARS.loc, param); \
-    if (modValue[i] && f_##param) param *= modValue[i] * f_##param;
-
-#define APPLY_MODMATRIX_FACTOR(p1, p2, param) APPLY_MODMATRIX_FACTOR_IMPL(param)
-
-#define APPLY_MODMATRIX_FACTORS(...) \
+#define APPLY_MODMATRIX_FACTOR(PARS, paramVar, paramInd) \
     if (modValue != NULL) \
         for (auto i = 0; i < NUM_MOD_MATRIX_SOURCES; i++) \
-        { \
-            MAC_EACH(APPLY_MODMATRIX_FACTOR, _, __VA_ARGS__) \
-        }
-
+        { const float f_##paramVar = PARS.mod->source[i]->getDestinationFactor(PARS.loc, paramInd); \
+            printf("PARS.loc: %d \n", PARS.loc); \
+          if (modValue[i] && f_##paramVar) paramVar *= 1.0f + (modValue[i] * f_##paramVar); }
 
 class ModulationLocation {
     
@@ -103,7 +100,6 @@ class ModulationSource {
     ModulationSource();
     ~ModulationSource();
     float getDestinationFactor(int location, int parameter);
-    void setDestinationFactor(int location, int parameter, float value);
     
     // public for ports:
     class  ModulationLocation* location[NUM_MOD_MATRIX_LOCATIONS];
