@@ -304,8 +304,9 @@ const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
                                unsigned char Pforcedrelease_,
-                               const AbsTime *time_):
-        time(time_), last_update_timestamp(0)
+                               const AbsTime *time_, 
+                               const ModMatrix* mod_):
+        time(time_), mod(mod_), last_update_timestamp(0)
 {
     A_dt  = 0.009;
     D_dt  = 0.009;
