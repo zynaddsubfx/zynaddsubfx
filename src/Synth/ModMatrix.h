@@ -43,18 +43,18 @@ enum {
     SUB_FREQ, SUB_FILTER, SUB_BANDWIDTH, \
     LOC_GENERIC1, LOC_GENERIC2, GLOBAL
 
+enum {
+    MOD_LOCATIONS
+};
+
 #define MOD_LOCATION_PARAMS \
 DIRECT, \
 LFO_FREQ, \
 LFO_DEPTH, \
-ENV_A, \
-ENV_D, \
-ENV_S, \
-ENV_R, \
 ENV_SPEED, \
 ENV_DEPTH
 
-#define NUM_MOD_MATRIX_PARAMETERS 9
+#define NUM_MOD_MATRIX_PARAMETERS 5
 
 enum {
     MOD_LOCATION_PARAMS
@@ -76,8 +76,12 @@ PAR_9
     if (modValue != NULL) \
         for (auto i = 0; i < NUM_MOD_MATRIX_SOURCES; i++) \
         { const float f_##paramVar = PARS.mod->source[i]->getDestinationFactor(PARS.loc, paramInd); \
-            printf("PARS.loc: %d \n", PARS.loc); \
           if (modValue[i] && f_##paramVar) paramVar *= 1.0f + (modValue[i] * f_##paramVar); }
+
+#define APPLY_MODMATRIX_DIRECT(MODMAT, LOC, paramVar) \
+    for (auto i = 0; i < NUM_MOD_MATRIX_SOURCES; i++) \
+        { const float f_##paramVar = MODMAT->source[i]->location[LOC]->getFactor(0); \
+          if (NoteGlobalPar.modValue[i] && f_##paramVar) paramVar *= 1.0f + (NoteGlobalPar.modValue[i] * f_##paramVar); }
 
 class ModulationLocation {
     

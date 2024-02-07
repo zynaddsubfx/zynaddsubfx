@@ -1098,7 +1098,10 @@ void ADnote::computecurrentparameters()
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
-
+    
+    APPLY_MODMATRIX_DIRECT(pars.GlobalPar.Matrix, AD_GLOBAL_AMP, globalnewamplitude);
+    
+    
     NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
     //compute the portamento, if it is used by this note
