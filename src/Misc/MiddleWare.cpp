@@ -2027,6 +2027,28 @@ void save_cb(const char *msg, RtData &d)
     }
 }
 
+void pasteOscilGensOfVoice(MiddleWareImpl& impl, const char* msg, int voice)
+{
+    int part, kit;
+    bool res = idsFromMsg(msg, &part, &kit, nullptr);
+    assert(res);
+    ADnoteParameters &pasteApar = **(ADnoteParameters **)rtosc_argument(msg,0).b.data;
+    
+    ADnoteVoiceParam &objVpar = impl.master->part[part]->kit[kit].adpars->VoicePar[voice];
+    ADnoteVoiceParam &pasteVpar = pasteApar.VoicePar[voice];
+    constexpr const std::size_t oscilsPerVoice = 2;
+    struct { OscilGen* obj, * paste; } pasteObjs[2]
+        = { {objVpar.OscilGn, pasteVpar.OscilGn },
+           {objVpar.FmGn, pasteVpar.FmGn } };
+    for (std::size_t i = 0; i < oscilsPerVoice; ++i)
+    {
+        if(pasteObjs[i].obj && pasteObjs[i].paste)
+        {
+            pasteObjs[i].obj->paste(*pasteObjs[i].paste);
+        }
+    }
+}
+
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
 #pragma GCC push_options
 #pragma GCC optimize("O0")
@@ -2121,31 +2143,20 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
     /*
         other
     */
-    // AD voice paste is RT, but its sub
-    {"part#" STRINGIFY(NUM_MIDI_PARTS)
-//      "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
-//      STRINGIFY(NUM_VOICES) "/paste:b", 0, nullptr,
-        "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/paste:b", 0, nullptr,
+    // AD (voice) paste is RT, but its sub OscilGen objects are non-RT
+    {"part#" STRINGIFY(NUM_MIDI_PARTS) "/kit#" STRINGIFY(NUM_KIT_ITEMS)
+        "/adpars/paste-array:bi", 0, nullptr,
         rBegin;
-        int part, kit;
-        bool res = idsFromMsg(msg, &part, &kit, nullptr);
-        assert(res);
-        ADnoteParameters &pasteApar = **(ADnoteParameters **)rtosc_argument(msg,0).b.data;
+        int voice = rtosc_argument(msg,1).i;
+        pasteOscilGensOfVoice(impl, msg, voice);
+        d.forward();
+        rEnd},
+    {"part#" STRINGIFY(NUM_MIDI_PARTS) "/kit#" STRINGIFY(NUM_KIT_ITEMS)
+        "/adpars/paste:b", 0, nullptr,
+        rBegin;
         for (int voice = 0; voice < NUM_VOICES; ++voice)
         {
-            ADnoteVoiceParam &objVpar = impl.master->part[part]->kit[kit].adpars->VoicePar[voice];
-            ADnoteVoiceParam &pasteVpar = pasteApar.VoicePar[voice];
-            constexpr const std::size_t oscilsPerVoice = 2;
-            struct { OscilGen* obj, * paste; } pasteObjs[2]
-                = { {objVpar.OscilGn, pasteVpar.OscilGn },
-                    {objVpar.FmGn, pasteVpar.FmGn } };
-            for (std::size_t i = 0; i < oscilsPerVoice; ++i)
-            {
-                if(pasteObjs[i].obj && pasteObjs[i].paste)
-                {
-                    pasteObjs[i].obj->paste(*pasteObjs[i].paste);
-                }
-            }
+            pasteOscilGensOfVoice(impl, msg, voice);
         }
         d.forward();
         rEnd},
