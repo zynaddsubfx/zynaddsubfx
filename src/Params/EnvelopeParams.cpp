@@ -401,11 +401,11 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
     switch(loc = _loc)
     {
-        case ad_global_amp:    ADSRinit_dB(0.0001f, 0.127f, 127, 0.041f); break;
+        case ad_global_amp:    ADSRinit_dB(0.0f, 0.127f, 127, 0.041f); break;
         case ad_global_freq:   ASRinit(64, 0.254f, 64, 0.499f); break;
         case ad_global_filter:
         case sub_filter:       ADSRinit_filter(64, 0.127f, 64, 0.970f, 0.499f, 64); break;
-        case ad_voice_amp:     ADSRinit_dB(0.0001f, 6.978f, 127, 6.978f); break;
+        case ad_voice_amp:     ADSRinit_dB(0.0f, 6.978f, 127, 6.978f); break;
         case ad_voice_freq:    ASRinit(30, 0.127f, 64, 0.499f); break;
         case ad_voice_filter:  ADSRinit_filter(90, 0.970f, 40, 0.970f, 0.009f, 40); break;
         case ad_voice_fm_freq: ASRinit(20, 3.620f, 40, 1.876f); break;
@@ -625,11 +625,8 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
 
     if(!xml.hasparreal("A_dt")) {
         A_dt = dTREAL(xml.getpar127("A_dt", 0));
-        if (A_dt == 0.0f) A_dt= 0.0001f;
         D_dt = dTREAL(xml.getpar127("D_dt", 0));
-        if (D_dt == 0.0f) D_dt= 0.0001f;
         R_dt = dTREAL(xml.getpar127("R_dt", 0));
-        if (R_dt == 0.0f) R_dt= 0.0001f;
     } else {
         A_dt  = xml.getparreal("A_dt", A_dt);
         D_dt  = xml.getparreal("D_dt", D_dt);
