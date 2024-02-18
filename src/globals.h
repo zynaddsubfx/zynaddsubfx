@@ -204,7 +204,7 @@ typedef std::complex<fftwf_real> fft_t;
  * Envelope Limits
  */
 #define MAX_ENVELOPE_POINTS 40
-#define MAX_ENVELOPE_CPOINTS 80
+#define MAX_ENVELOPE_CPOINTS MAX_ENVELOPE_POINTS * 2
 #define MIN_ENVELOPE_DB -400
 
 /*
