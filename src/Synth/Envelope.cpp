@@ -15,6 +15,8 @@
 #include "Envelope.h"
 #include "../Params/EnvelopeParams.h"
 
+#include <assert.h>
+
 namespace zyn {
 
 Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
@@ -148,15 +150,23 @@ void Envelope::watch(float time, float value)
 
 inline float bezier3(float a, float bRel, float cRel, float d, float t)
 {
-    const float t2 = t*t;
-    const float t3 = t2*t;
-
     const float mt = 1.0f-t;
+ 
+    const float t2 = t*t;
     const float mt2 = mt*mt;
+ 
+    const float t3 = t2*t;
     const float mt3 = mt2*mt;
 
-    const float b = (3.0f*a+d)*0.25f + 4.0f*bRel;
-    const float c = (a+3.0f*d)*0.25f + 4.0f*cRel;
+    // Calculate the first control point (P1) for linear slope
+    const float b0 = a + (d - a) / 3.0f;
+
+    // Calculate the second control point (P2) for linear slope
+    const float c0 = a + 2.0f * (d - a) / 3.0f;
+
+    // add offset 
+    const float b = b0 + bRel;
+    const float c = c0 + cRel;
 
     return mt3*a + 3.0f*mt2*t*b + 3.0f*mt*t2*c + t3*d;
 }
@@ -218,9 +228,8 @@ float Envelope::envout(bool doWatch)
 
     if(t >= 1.0f) // if we reached the next point
         out = envval[currentpoint];
-    else { // if we have to interpolate between points
+    else // if we have to interpolate between points
         out = bezier3(envval[currentpoint - 1], envcpy[currentpoint*2-1], envcpy[currentpoint*2], envval[currentpoint], t);
-    }
 
     t += inct;
 
