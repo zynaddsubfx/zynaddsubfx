@@ -252,7 +252,7 @@ static const rtosc::Ports localPorts = {
             }
         }
         rEnd},
-    {"envcpy:", rShort("bezier y") rProp(parameter) rDefault([0.0 ...]) rDoc("Envelope Control Points"), NULL,
+    {"envcpy", rShort("bezier") rDefault([0.0 ...]) rDoc("Envelope Bezier Control Points"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_CPOINTS;
         const int M = rtosc_narguments(msg);
