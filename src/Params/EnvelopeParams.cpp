@@ -252,7 +252,25 @@ static const rtosc::Ports localPorts = {
             }
         }
         rEnd},
-    {"envcpy", rShort("bezier") rDefault([0.0 ...]) rDoc("Envelope Bezier Control Points"), NULL,
+    {"envcpy::b", rShort("bezier") rProp(parameter)
+            rBlobType(f) rDefault([0.f 0.f ...])
+            rDoc("Envelope Bezier Control Points"), NULL,
+            rBegin;
+        const int N = MAX_ENVELOPE_CPOINTS;
+        if(rtosc_narguments(msg) == 0) {
+            d.reply(d.loc, "b", N * sizeof(float), env->envcpy);
+        } else {
+            const rtosc_blob_t blob = rtosc_argument(msg, 0).b;
+            const float* buf = (float*) blob.data;
+            const int M = blob.len/sizeof(float);
+            for(int i=0; i<N && i<M; ++i) {
+                env->envcpy[i] = buf[i];
+            }
+            d.broadcast(d.loc, "b", N * sizeof(float), env->envcpy); // broadcast to all clients
+        }
+        rEnd},
+    {"envcpy", rShort("bezier") rDefault([0.0 ...]) rProp(alias)
+            rDoc("Envelope Bezier Control Points"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_CPOINTS;
         const int M = rtosc_narguments(msg);
