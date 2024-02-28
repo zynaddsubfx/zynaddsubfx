@@ -270,7 +270,7 @@ static const rtosc::Ports localPorts = {
         }
         rEnd},
     {"envcpy", rShort("bezier") rDefault([0.0 ...]) rProp(alias)
-            rDoc("Envelope Bezier Control Points"), NULL,
+        rDoc("Envelope Bezier Control Points"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_CPOINTS;
         const int M = rtosc_narguments(msg);
@@ -287,12 +287,6 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->envcpy[i] = rtosc_argument(msg,i).f;
             }
-            // read back data for broadcast
-            for(int i=0; i<N; ++i) {
-                args[i].f    = env->envcpy[i];
-                arg_types[i] = 'f';
-            }
-            d.broadcast(d.loc, arg_types, args); // broadcast to all clients
         }
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
