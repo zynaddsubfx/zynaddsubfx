@@ -15,8 +15,6 @@
 #include "Envelope.h"
 #include "../Params/EnvelopeParams.h"
 
-#include <assert.h>
-
 namespace zyn {
 
 Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
