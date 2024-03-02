@@ -41,6 +41,9 @@ quick_test(WatchTest        ${test_lib})
 quick_test(WaveTableTest    ${test_lib})
 quick_test(XMLwrapperTest   ${test_lib})
 
+set(NSM_WORKAROUND ${CMAKE_SOURCE_DIR}/src/UI/NSM.C ${CMAKE_SOURCE_DIR}/src/UI/NSM/Client.C)
+add_library(zynaddsubfx_gui_stub STATIC ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
+
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
@@ -75,20 +78,21 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     endif()
 
     add_executable(save-osc SaveOSC.cpp)
+    target_compile_definitions(save-osc PRIVATE -DNO_UI=1)
     if(LIBGIT2_FOUND)
         target_include_directories(save-osc PRIVATE ${LIBGIT2_INCLUDE_DIRS})
         target_link_libraries(save-osc
             zynaddsubfx_core zynaddsubfx_nio
-            zynaddsubfx_gui_bridge
-            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            zynaddsubfx_gui_stub
+            ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
             ${LIBGIT2_LIBRARIES}
             ${PLATFORM_LIBRARIES})
     else()
         target_compile_definitions(save-osc PRIVATE -DZYN_GIT_WORKTREE="${CMAKE_SOURCE_DIR}")
         target_link_libraries(save-osc
             zynaddsubfx_core zynaddsubfx_nio
-            zynaddsubfx_gui_bridge
-            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            zynaddsubfx_gui_stub
+            ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
             ${PLATFORM_LIBRARIES})
     endif()
     # test all presets
