@@ -279,7 +279,7 @@ float LFO::lfoout()
         phase += phaseInc;
     else {
         const float tmp = (incrnd * (1.0f - phase) + nextincrnd * phase);
-        phase += phaseInc * limit(tmp, 0.0f, 1.0f);
+        phase += phaseInc * tmp;
     }
     if(phase >= 1) {
         phase    = fmod(phase, 1.0f);
@@ -309,7 +309,13 @@ void LFO::computeNextFreqRnd()
     if(deterministic)
         return;
     incrnd     = nextincrnd;
-    nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
+    lfofreqrnd = powf(lfopars.Pfreqrand / 127.0f, 2.0f) * 4.0f;
+    // old implementation:
+    // nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
+    // problem with that old implementation is that it changes the center frequency.
+    // the new one doesn't
+    const float rndValue = lfofreqrnd*(RND*2.0f - 1.0);
+    nextincrnd = powf(2.0f, rndValue);
 }
 
 }
