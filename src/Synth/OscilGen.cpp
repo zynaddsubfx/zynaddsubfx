@@ -177,6 +177,7 @@ const rtosc::Ports OscilGen::ports = {
                 data.reply(loc, "b", bufsize*sizeof(float), tmpbuf);
                 delete[] tmpbuf;
             } else {
+                // set+broadcast
                 rtosc_blob_t blob = rtosc_argument(msg, 0).b;
                 float* buf = (float*) blob.data;
                 int len = blob.len/sizeof(float);
@@ -186,17 +187,15 @@ const rtosc::Ports OscilGen::ports = {
                     obj->myBuffers().basefuncFFTfreqs[i+1] =
                         fft_t(buf[2*i], buf[2*i+1]);
                 }
-                // TODO: Simplify this code section when merging with WT branch
-                char  repath[128];
-                strcpy(repath, data.loc);
-                char *edit   = strrchr(repath, '/')+1;
-                strcpy(edit, "prepare");
+                data.broadcast(loc, "b", bufsize*sizeof(float), buf);
+                //prepare OscilGen
                 FFTfreqBuffer freqs = obj->fft->allocFreqBuf();
                 OscilGenBuffers& bfrs = obj->myBuffers();
                 obj->prepare(bfrs, freqs);
-                data.chain(repath, "b", sizeof(fft_t*), &freqs.data);
                 bfrs.pendingfreqs = freqs.data;
-                data.broadcast(loc, "b", bufsize*sizeof(float), buf);
+                delete[] bfrs.oscilFFTfreqs.data;
+                bfrs.oscilFFTfreqs.data = freqs.data;
+                ++obj->m_change_stamp;
             }
         rBOIL_END
         },
