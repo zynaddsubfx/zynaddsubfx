@@ -20,6 +20,7 @@
 #endif
 #include <string>
 #include <semaphore.h>
+#include <queue>
 
 namespace zyn {
 
@@ -35,6 +36,7 @@ class OutMgr
 
         /**Execute a tick*/
         Stereo<float *> tick(unsigned int frameSize) REALTIME;
+        void setMidiParameterFeedbackQueue (std::queue<std::tuple<char, int, int>> *midiQueue);
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)

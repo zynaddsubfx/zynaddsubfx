@@ -2365,6 +2365,7 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 {
+
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
@@ -2402,6 +2403,7 @@ void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
             //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
             //}
             uToB->raw_write(msg);
+            midi_mapper.snoop(msg);
         }
     } else {
         //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
