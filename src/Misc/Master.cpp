@@ -499,7 +499,12 @@ static const Ports master_ports = {
     {"virtual_midi_cc:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
-            M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+            const int chan = rtosc_argument(m, 0).i;
+            const int type = rtosc_argument(m, 2).i;
+            const int val = rtosc_argument(m, 1).i;
+            //~ M->setController(chan,type,val);
+            M->sendCC(chan,type,val);
+            }},
     {"setController:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
@@ -1005,6 +1010,17 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 /*
  * Controllers
  */
+ 
+// Function to add a MIDI Control Change message to the queue
+void Master::sendCC(char chan, int type, int val) {
+    midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
+}
+
+void Master::setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue)
+{
+    midiParamFeedbackQueue = midiQueue;
+}
+
 void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
@@ -1255,6 +1271,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
+   
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");

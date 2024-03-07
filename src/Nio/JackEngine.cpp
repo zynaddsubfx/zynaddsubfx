@@ -51,8 +51,16 @@ JackEngine::JackEngine(const SYNTH_T &synth)
         audio.portBuffs[i] = NULL;
     }
     midi.inport = NULL;
+    midi.outport = NULL;
     midi.jack_sync = false;
     osc.oscport = NULL;
+    
+    midiParameterFeedbackQueue = new std::queue<std::tuple<char, int, int>>;
+}
+
+JackEngine::~JackEngine(void)
+{
+    delete midiParameterFeedbackQueue;
 }
 
 bool JackEngine::connectServer(string server)
@@ -269,15 +277,24 @@ bool JackEngine::openMidi()
     midi.inport = jack_port_register(jackClient, "midi_input",
                                      JACK_DEFAULT_MIDI_TYPE,
                                      JackPortIsInput | JackPortIsTerminal, 0);
-    return midi.inport;
+                                     
+    midi.outport = jack_port_register(jackClient, "midi_output",
+                                     JACK_DEFAULT_MIDI_TYPE,
+                                     JackPortIsOutput | JackPortIsTerminal, 0);
+    setMidiParameterFeedbackQueue();
+    return midi.inport || midi.outport;
 }
 
 void JackEngine::stopMidi()
 {
-    jack_port_t *port = midi.inport;
+    jack_port_t *inport = midi.inport;
+    jack_port_t *ouport = midi.outport;
     midi.inport = NULL;
-    if(port)
-        jack_port_unregister(jackClient, port);
+    midi.outport = NULL;
+    if(inport)
+        jack_port_unregister(jackClient, inport);
+    if(ouport)
+        jack_port_unregister(jackClient, ouport);
 
     if(!getAudioEn())
         disconnectJack();
@@ -387,6 +404,7 @@ int JackEngine::bufferSizeCallback(jack_nframes_t nframes)
     return 0;
 }
 
+
 void JackEngine::handleMidi(unsigned long frames)
 {
     if(!midi.inport)
@@ -420,6 +438,47 @@ void JackEngine::handleMidi(unsigned long frames)
 
         }
     }
+    
+    void * midi_out_buf = jack_port_get_buffer(midi.outport, frames);
+    jack_midi_clear_buffer(midi_out_buf);
+    
+    while (!midiParameterFeedbackQueue->empty()) {
+        // Get parameters from the front of the queue
+        auto params = midiParameterFeedbackQueue->front();
+        char chan = std::get<0>(params);
+        int type = std::get<1>(params);
+        int val = std::get<2>(params);
+        
+        // Print debug message
+        printf("cc sending chan: %d type: %d val:%d)...\n", chan, type, val);
+
+        // Attempt to reserve space in the MIDI buffer
+        
+        printf("Master: midi_out_buf: %p\n", (void*)midi_out_buf);
+        unsigned char* midi_out_buffer = jack_midi_event_reserve(midi_out_buf, 0, 3);
+        if (midi_out_buffer) {
+            printf("midi_out_buffer (Adresse: %p):", (void*)midi_out_buffer);
+            for (int i = 0; i < 3; ++i) {
+                printf(" %02X", midi_out_buffer[i]); // Print each byte as hexadecimal
+            }
+            printf(")\n\n");
+            
+        } else {
+            printf("midi_out_buffer is NULL\n\n");
+        }
+
+        // If buffer allocation was successful, fill it with MIDI data
+        if (midi_out_buffer) {
+            midi_out_buffer[0] = 0xb0 | chan;
+            midi_out_buffer[1] = type;
+            midi_out_buffer[2] = val;
+        }
+
+        // Remove the processed message from the queue
+        midiParameterFeedbackQueue->pop();
+    }
+    
+    
 }
 
 }

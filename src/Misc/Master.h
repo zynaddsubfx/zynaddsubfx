@@ -18,6 +18,7 @@
 #include "Microtonal.h"
 #include <atomic>
 #include <set>
+#include <queue>
 #include <rtosc/automations.h>
 #include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
@@ -101,7 +102,7 @@ class Master
         /**put all data from the *data array to zynaddsubfx parameters (used for plugin)*/
         void putalldata(const char *data);
 
-        //Midi IN
+        //Midi
         void noteOn(char chan, note_t note, char velocity) {
             noteOn(chan, note, velocity, note / 12.0f);
         };
@@ -109,6 +110,10 @@ class Master
         void noteOff(char chan, note_t note);
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
+        void sendCC(char chan, int type, int val);
+        
+        std::queue<std::tuple<char, int, int>> *midiParamFeedbackQueue;
+        
         void setController(char chan, int type, note_t note, float value);
         //void NRPN...
 
@@ -132,6 +137,7 @@ class Master
 
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
+        
         /**Audio Output (for callback mode).
          * This allows the program to be controlled by an external program*/
         void GetAudioOutSamples(size_t nsamples,
@@ -140,6 +146,7 @@ class Master
                                 float *outr) REALTIME;
 
 
+        void setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue);
         void partonoff(int npart, int what);
 
         //Set callback to run when master changes
