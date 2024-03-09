@@ -839,6 +839,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     mastercb = 0;
     mastercb_ptr = 0;
+    
+    midiParamFeedbackQueue = 0;
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
@@ -1013,12 +1015,14 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
  
 // Function to add a MIDI Control Change message to the queue
 void Master::sendCC(char chan, int type, int val) {
-    midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
+    if (midiParamFeedbackQueue)
+        midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
 }
 
 void Master::setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue)
 {
     midiParamFeedbackQueue = midiQueue;
+    printf("Master - midiParameterFeedbackQueue: %p \n", (void *) midiParamFeedbackQueue);
 }
 
 void Master::setController(char chan, int type, int par)
