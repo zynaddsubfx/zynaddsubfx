@@ -85,8 +85,6 @@ class JackEngine:public AudioOut, MidiIn
         } midi;
 
         void handleMidi(unsigned long frames);
-        
-        
 };
 
 }
