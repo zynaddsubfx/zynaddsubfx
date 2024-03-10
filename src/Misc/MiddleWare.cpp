@@ -2272,6 +2272,8 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
  */
 void MiddleWareImpl::bToUhandle(const char *rtmsg)
 {
+    midi_mapper.snoop_bToU(rtmsg);
+    
     //Verify Message isn't a known corruption bug
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
@@ -2403,7 +2405,7 @@ void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
             //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
             //}
             uToB->raw_write(msg);
-            midi_mapper.snoop(msg);
+            midi_mapper.snoop_uToB(msg);
         }
     } else {
         //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));

@@ -448,37 +448,19 @@ void JackEngine::handleMidi(unsigned long frames)
         char chan = std::get<0>(params);
         int type = std::get<1>(params);
         int val = std::get<2>(params);
-        
-        // Print debug message
-        printf("cc sending chan: %d type: %d val:%d)...\n", chan, type, val);
 
         // Attempt to reserve space in the MIDI buffer
-        
-        printf("Master: midi_out_buf: %p\n", (void*)midi_out_buf);
         unsigned char* midi_out_buffer = jack_midi_event_reserve(midi_out_buf, 0, 3);
-        if (midi_out_buffer) {
-            printf("midi_out_buffer (Adresse: %p):", (void*)midi_out_buffer);
-            for (int i = 0; i < 3; ++i) {
-                printf(" %02X", midi_out_buffer[i]); // Print each byte as hexadecimal
-            }
-            printf(")\n\n");
-            
-        } else {
-            printf("midi_out_buffer is NULL\n\n");
-        }
-
-        // If buffer allocation was successful, fill it with MIDI data
         if (midi_out_buffer) {
             midi_out_buffer[0] = 0xb0 | chan;
             midi_out_buffer[1] = type;
             midi_out_buffer[2] = val;
         }
-
-        // Remove the processed message from the queue
-        midiParameterFeedbackQueue->pop();
+    // Remove the processed message from the queue
+    midiParameterFeedbackQueue->pop();
     }
-    
-    
+
+
 }
 
 }
