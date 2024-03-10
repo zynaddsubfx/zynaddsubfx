@@ -1275,7 +1275,6 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
-   
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");

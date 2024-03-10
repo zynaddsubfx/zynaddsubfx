@@ -137,7 +137,6 @@ class Master
 
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
-        
         /**Audio Output (for callback mode).
          * This allows the program to be controlled by an external program*/
         void GetAudioOutSamples(size_t nsamples,

@@ -2272,6 +2272,7 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
  */
 void MiddleWareImpl::bToUhandle(const char *rtmsg)
 {
+    //Send messages to midimapper for parameter feedback
     midi_mapper.snoop_bToU(rtmsg);
     
     //Verify Message isn't a known corruption bug
@@ -2367,7 +2368,6 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 {
-
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);

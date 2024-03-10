@@ -404,7 +404,6 @@ int JackEngine::bufferSizeCallback(jack_nframes_t nframes)
     return 0;
 }
 
-
 void JackEngine::handleMidi(unsigned long frames)
 {
     if(!midi.inport)
