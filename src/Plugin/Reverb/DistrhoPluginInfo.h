@@ -14,9 +14,10 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_BRAND "ZynAddSubFX"
-#define DISTRHO_PLUGIN_NAME  "ZynReverb"
-#define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net/fx#Reverb"
+#define DISTRHO_PLUGIN_BRAND   "ZynAddSubFX"
+#define DISTRHO_PLUGIN_NAME    "ZynReverb"
+#define DISTRHO_PLUGIN_URI     "http://zynaddsubfx.sourceforge.net/fx#Reverb"
+#define DISTRHO_PLUGIN_CLAP_ID "zynaddsubfx.fx.reverb"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
 #define DISTRHO_PLUGIN_IS_RT_SAFE    1

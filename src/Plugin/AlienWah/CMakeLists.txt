@@ -1,40 +1,21 @@
+dpf_add_plugin(ZynAlienWah
+    TARGETS clap lv2 vst2 vst3
+    FILES_DSP
+        AlienWah.cpp
+)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho .)
+target_include_directories(ZynAlienWah PUBLIC .)
 
-add_library(ZynAlienWah_lv2 SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp AlienWah.cpp)
-add_library(ZynAlienWah_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp AlienWah.cpp)
+target_link_libraries(ZynAlienWah PRIVATE zynaddsubfx_core)
 
-set_target_properties(ZynAlienWah_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
-set_target_properties(ZynAlienWah_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynAlienWah_lv2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynAlienWah_lv2 PROPERTIES OUTPUT_NAME "ZynAlienWah")
-set_target_properties(ZynAlienWah_lv2 PROPERTIES PREFIX "")
-
-set_target_properties(ZynAlienWah_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST2")
-set_target_properties(ZynAlienWah_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynAlienWah_vst PROPERTIES RUNTIME_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynAlienWah_vst PROPERTIES OUTPUT_NAME "ZynAlienWah")
-set_target_properties(ZynAlienWah_vst PROPERTIES PREFIX "")
-
-if(APPLE)
-    target_link_libraries(ZynAlienWah_lv2 zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_lv2_descriptor" "-Wl,-exported_symbol,_lv2_generate_ttl")
-    target_link_libraries(ZynAlienWah_vst zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_VSTPluginMain")
-else()
-    target_link_libraries(ZynAlienWah_lv2 zynaddsubfx_core ${OS_LIBRARIES})
-    target_link_libraries(ZynAlienWah_vst zynaddsubfx_core ${OS_LIBRARIES})
-endif()
-
-install(TARGETS ZynAlienWah_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAlienWah.lv2/)
-install(TARGETS ZynAlienWah_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
-
-add_custom_command(TARGET ZynAlienWah_lv2 POST_BUILD
-    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynAlienWah_lv2>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
-
-add_dependencies(ZynAlienWah_lv2 lv2-ttl-generator)
+dpf__determine_vst3_package_architecture(vst3_arch)
+install(TARGETS ZynAlienWah-lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAlienWah.lv2/)
+install(TARGETS ZynAlienWah-vst2 LIBRARY DESTINATION ${PluginLibDir}/vst/)
+install(TARGETS ZynAlienWah-vst3 LIBRARY DESTINATION ${PluginLibDir}/vst3/ZynAlienWah.vst3/Contents/${vst3_arch}/)
+install(TARGETS ZynAlienWah-clap LIBRARY DESTINATION ${PluginLibDir}/clap/)
 
 install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAlienWah.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynAlienWah.lv2/manifest.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynAlienWah.lv2/presets.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynAlienWah.lv2/ZynAlienWah_dsp.ttl
 	DESTINATION ${PluginLibDir}/lv2/ZynAlienWah.lv2/)
