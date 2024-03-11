@@ -31,7 +31,7 @@ class JackEngine:public AudioOut, MidiIn
 {
     public:
         JackEngine(const SYNTH_T &synth);
-        ~JackEngine() { }
+        ~JackEngine();
 
         bool Start();
         void Stop();
@@ -80,6 +80,7 @@ class JackEngine:public AudioOut, MidiIn
         } osc;
         struct midi {
             jack_port_t *inport;
+            jack_port_t *outport;
             bool         jack_sync;
         } midi;
 
