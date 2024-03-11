@@ -17,9 +17,23 @@
 #include "EffectLFO.h"
 #include "../Misc/Stereo.h"
 
-#define MAX_CHORUS_DELAY 250.0f //ms
+
+
+
 
 namespace zyn {
+
+#define MAX_CHORUS_DELAY 250.0f //ms
+
+#define CHORUS_MODES \
+    CHORUS,\
+    FLANGE,\
+    TRIPLE,\
+    DUAL\
+
+enum {
+    CHORUS_MODES
+};
 
 /**Chorus and Flange effects*/
 class Chorus final:public Effect
@@ -73,6 +87,8 @@ class Chorus final:public Effect
 
         static rtosc::Ports ports;
     private:
+        inline float getSample(float* delayline, float mdel, int dk);
+        
         //Chorus Parameters
         unsigned char Pvolume;
         unsigned char Pdepth;      //the depth of the Chorus(ms)
@@ -91,11 +107,18 @@ class Chorus final:public Effect
 
         //Internal Values
         float depth, delay, fb;
-        float dl1, dl2, dr1, dr2, lfol, lfor;
+        float dlHist, dlNew, lfol;
+        float drHist, drNew, lfor;
+        float dlHist2, dlNew2;
+        float drHist2, drNew2;
+        float dlHist3, dlNew3;
+        float drHist3, drNew3;
         int   maxdelay;
         Stereo<float *> delaySample;
-        int dlk, drk, dlhi;
+        int dlk, drk;
         float getdelay(float xlfo);
+        
+        float output;
 };
 
 }

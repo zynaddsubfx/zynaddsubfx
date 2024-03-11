@@ -28,7 +28,8 @@ namespace zyn {
 rtosc::Ports Chorus::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Chorus1, Chorus2, Chorus3, Celeste1, Celeste2,
-                           Flange1, Flange2, Flange3, Flange4, Flange5)
+                           Flange1, Flange2, Flange3, Flange4, Flange5,
+                           Triple, Dual)
                   rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
@@ -63,8 +64,8 @@ rtosc::Ports Chorus::ports = {
             rPresets(64, 64, 90, 90, 31, 62, 109, 54, 97, 17), "Feedback"),
     rEffPar(Plrcross, 9, rShort("l/r"), rPresets(119, 19, 127, 127, 127),
             rDefault(0), "Left/Right Crossover"),
-    rEffParTF(Pflangemode, 10, rShort("flange"), rDefault(false),
-              "Flange Mode"),
+    rEffParOpt(Pflangemode, 10, rShort("mode"), rDefault(CHORUS),rOptions(CHORUS_MODES),
+              "Chorus Mode"),
     rEffParTF(Poutsub, 11, rShort("sub"),
               rPreset(4, true), rPreset(7, true), rPreset(9, true),
               rDefault(false), "Output Subtraction"),
@@ -84,8 +85,8 @@ Chorus::Chorus(EffectParams pars)
     setpreset(Ppreset);
     changepar(1, 64);
     lfo.effectlfoout(&lfol, &lfor);
-    dl2 = getdelay(lfol);
-    dr2 = getdelay(lfor);
+    dlNew = getdelay(lfol);
+    drNew = getdelay(lfor);
     cleanup();
 }
 
@@ -99,7 +100,7 @@ Chorus::~Chorus()
 float Chorus::getdelay(float xlfo)
 {
     float result =
-        (Pflangemode) ? 0 : (delay + xlfo * depth) * samplerate_f;
+        (Pflangemode==FLANGE) ? 0 : (delay + xlfo * depth) * samplerate_f;
 
     //check if delay is too big (caused by bad setdelay() and setdepth()
     if((result + 0.5f) >= maxdelay) {
@@ -112,15 +113,55 @@ float Chorus::getdelay(float xlfo)
     return result;
 }
 
+// sample
+
+inline float Chorus::getSample(float* delayline, float mdel, int dk)
+{
+    float samplePos = dk - mdel + float(maxdelay * 2); //where should I get the sample from
+    return cinterpolate(delayline, maxdelay, samplePos);
+
+}
+
 //Apply the effect
 void Chorus::out(const Stereo<float *> &input)
 {
-    dl1 = dl2;
-    dr1 = dr2;
+    // store old delay value for linear interpolation
+    dlHist = dlNew;
+    drHist = drNew;
+    // calculate new lfo values
     lfo.effectlfoout(&lfol, &lfor);
-
-    dl2 = getdelay(lfol);
-    dr2 = getdelay(lfor);
+    // calculate new delay values
+    dlNew = getdelay(lfol);
+    drNew = getdelay(lfor);
+    float fbComp = fb;
+    if (Pflangemode == DUAL) // ensemble mode
+    {
+        // same for second member for ensemble mode with 120° phase offset
+        dlHist2 = dlNew2;
+        drHist2 = drNew2;
+        lfo.effectlfoout(&lfol, &lfor, 0.5f);
+        dlNew2 = getdelay(lfol);
+        drNew2 = getdelay(lfor);
+        fbComp /= 2.0f;
+    }
+    
+    if (Pflangemode == TRIPLE) // ensemble mode
+    {
+        // same for second member for ensemble mode with 120° phase offset
+        dlHist2 = dlNew2;
+        drHist2 = drNew2;
+        lfo.effectlfoout(&lfol, &lfor, 0.33333333f);
+        dlNew2 = getdelay(lfol);
+        drNew2 = getdelay(lfor);
+        
+        // same for third member for ensemble mode with 240° phase offset
+        dlHist3 = dlNew3;
+        drHist3 = drNew3;
+        lfo.effectlfoout(&lfol, &lfor, 0.66666666f); 
+        dlNew3 = getdelay(lfol);
+        drNew3 = getdelay(lfor);
+        fbComp /= 3.0f;
+    }
 
     for(int i = 0; i < buffersize; ++i) {
         float inL = input.l[i];
@@ -131,41 +172,69 @@ void Chorus::out(const Stereo<float *> &input)
         inR = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
 
         //Left channel
-
-        //compute the delay in samples using linear interpolation between the lfo delays
-        float mdel =
-            (dl1 * (buffersize - i) + dl2 * i) / buffersize_f;
+        // reset output accumulator
+        output = 0.0f;
+        // increase delay line writing position and handle turnaround
         if(++dlk >= maxdelay)
             dlk = 0;
-        float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
-
-        dlhi  = (int) tmp;
-        dlhi %= maxdelay;
-
-        float dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
-        float dllo  = 1.0f + floorf(tmp) - tmp;
-        efxoutl[i] = cinterpolate(delaySample.l, maxdelay, dlhi2) * dllo
-                     + cinterpolate(delaySample.l, maxdelay,
-                                    dlhi) * (1.0f - dllo);
-        delaySample.l[dlk] = inL + efxoutl[i] * fb;
+        // linear interpolate from old to new value over length og the buffer
+        float dl = (dlHist * (buffersize - i) + dlNew * i) / buffersize_f;
+        // get sample with that delay form delay line and add to output accumulator
+        output += getSample(delaySample.l, dl, dlk);
+        switch (Pflangemode) {
+            case DUAL:
+            // calculate and apply delay for second ensemble member
+            dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
+            output += getSample(delaySample.l, dl, dlk);
+                break;
+            case TRIPLE:
+            // calculate and apply delay for second ensemble member
+            dl = (dlHist2 * (buffersize - i) + dlNew2 * i) / buffersize_f;
+            output += getSample(delaySample.l, dl, dlk);
+            // same for third ensemble member
+            dl = (dlHist3 * (buffersize - i) + dlNew3 * i) / buffersize_f;
+            output += getSample(delaySample.l, dl, dlk);
+            // reduce amplitude to match single phase modes
+            output *= 0.85f;
+                break;
+            default:
+                // nothing to do for standard chorus
+                break;
+        }
+        // store current input + feedback to delay line at writing position
+        delaySample.l[dlk] = inL + output * fbComp;
+        // write output to output interface
+        efxoutl[i] = output;
 
         //Right channel
-
-        //compute the delay in samples using linear interpolation between the lfo delays
-        mdel = (dr1 * (buffersize - i) + dr2 * i) / buffersize_f;
+        output = 0.0f;
         if(++drk >= maxdelay)
             drk = 0;
-        tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
-
-        dlhi  = (int) tmp;
-        dlhi %= maxdelay;
-
-        dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0f + floorf(tmp) - tmp;
-        efxoutr[i] = cinterpolate(delaySample.r, maxdelay, dlhi2) * dllo
-                     + cinterpolate(delaySample.r, maxdelay,
-                                    dlhi) * (1.0f - dllo);
-        delaySample.r[dlk] = inR + efxoutr[i] * fb;
+        float dr = (drHist * (buffersize - i) + drNew * i) / buffersize_f;
+        output += getSample(delaySample.r, dr, drk);
+        switch (Pflangemode) {
+            case DUAL:
+                // calculate and apply delay for second ensemble member
+                dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                break;
+            case TRIPLE:
+                // calculate and apply delay for second ensemble member
+                dr = (drHist2 * (buffersize - i) + drNew2 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                // same for third ensemble member
+                dr = (drHist3 * (buffersize - i) + drNew3 * i) / buffersize_f;
+                output += getSample(delaySample.r, dr, drk);
+                // reduce amplitude to match single phase modes
+                output *= 0.85f;
+                break;
+            default:
+                // nothing to do for standard chorus
+                break;
+        }
+        
+        delaySample.r[drk] = inR + output * fbComp;
+        efxoutr[i] = output;
     }
 
     if(Poutsub)
@@ -216,7 +285,7 @@ void Chorus::setvolume(unsigned char _Pvolume)
 unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define	PRESET_SIZE 12
-#define	NUM_PRESETS 10
+#define	NUM_PRESETS 12
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Chorus1
         {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0},
@@ -237,7 +306,11 @@ unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
         //Flange4
         {64, 64, 40, 0,   1, 62, 12,  19, 97,  0,   0, 0},
         //Flange5
-        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1}
+        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1},
+        //Ensemble
+        {127, 64, 68, 25, 1, 24, 35,  55, 64,  0,   TRIPLE, 0},
+        //Dual
+        {127, 64, 55, 25, 1, 24, 32,  55, 80,  0,   DUAL, 0}
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         return presets[npreset][npar];
@@ -292,7 +365,8 @@ void Chorus::changepar(int npar, unsigned char value)
             setlrcross(value);
             break;
         case 10:
-            Pflangemode = (value > 1) ? 1 : value;
+            lfo.updateparams();
+            Pflangemode = (value > 3) ? 3 : value;
             break;
         case 11:
             Poutsub = (value > 1) ? 1 : value;
