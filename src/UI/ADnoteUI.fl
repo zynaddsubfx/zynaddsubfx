@@ -521,7 +521,7 @@ o->redraw();}
               xywh {90 90 100 20} labelfont 1
             }
             MenuItem {} {
-              label PWM-Sync
+              label PWM
               xywh {100 100 100 20} labelfont 1
             }
           }
