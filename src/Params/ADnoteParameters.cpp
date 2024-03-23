@@ -175,8 +175,8 @@ static const Ports voicePorts = {
 
 
     //Modulator Stuff
-    rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
-                frequency, pulse), rLinear(0,127), rDefault(none), "Modulator mode"),
+    rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, am, PM,
+                FM, PWM), rLinear(0,127), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
     rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
@@ -200,8 +200,8 @@ static const Ports voicePorts = {
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
-
-
+    rToggle(PsyncEnabled,               rShort("sync"),  rDefault(false),
+            "Oscillator Hard Sync"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
@@ -494,6 +494,10 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
+    
+    wskernel = new float[WSKERNELSIZE];
+    windowedsinc(0.00625, 1.0f, WSKERNELSIZE, wskernel);
+    
 }
 
 void ADnoteParameters::defaults()
@@ -604,6 +608,8 @@ void ADnoteVoiceParam::defaults()
     PFMFreqEnvelopeEnabled   = 0;
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
+    
+    PsyncEnabled = false;
 
     OscilGn->defaults();
     FmGn->defaults();
@@ -720,6 +726,7 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
     delete FilterEnvelope;
     delete FilterLfo;
     delete Reson;
+    delete [] wskernel;
 }
 
 ADnoteParameters::~ADnoteParameters()
@@ -855,7 +862,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         }
         xml.endbranch();
     }
-
+    xml.addparbool("sync_enabled", PsyncEnabled);
     if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
        || (!xml.minimal)) {
         xml.beginbranch("FM_PARAMETERS");
@@ -1188,8 +1195,8 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMDetuneType);
     copy(PFMFreqEnvelopeEnabled);
 
-
     RCopy(FMFreqEnvelope);
+    copy(PsyncEnabled);
 
     RCopy(FmGn);
 
@@ -1359,7 +1366,9 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         }
         xml.exitbranch();
     }
-
+    
+    PsyncEnabled     = (bool)xml.getparbool("sync_enabled", (int)PsyncEnabled);
+    
     if(xml.enterbranch("FM_PARAMETERS")) {
         const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
             (xml.getparreal("volume", -1) < 0);

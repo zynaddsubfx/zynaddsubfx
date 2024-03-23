@@ -25,6 +25,8 @@
 
 namespace zyn {
 
+void windowedsinc(float fc, float gain, int N, float *h);
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 

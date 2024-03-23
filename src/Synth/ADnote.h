@@ -87,21 +87,17 @@ class ADnote:public SynthNote
         /**Compute the Oscillator's samples.
          * Affects tmpwave_unison and updates oscposhi/oscposlo
          * @todo remove this declaration if it is commented out*/
-        inline void ComputeVoiceOscillator_SincInterpolation(int nvoice);
-        /**Compute the Oscillator's samples.
-         * Affects tmpwave_unison and updates oscposhi/oscposlo
-         * @todo remove this declaration if it is commented out*/
         inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
         /**Computes the Oscillator samples with mixing.
          * updates tmpwave_unison*/
         inline void ComputeVoiceOscillatorMix(int nvoice);
         /**Computes the Ring Modulated Oscillator.*/
-        inline void ComputeVoiceOscillatorRingModulation(int nvoice);
+        inline void ComputeVoiceOscillatorRingModulation(int nvoice, FMTYPE FMmode);
         /**Computes the Frequency Modulated Oscillator.
          * @param FMmode modulation type 0=Phase 1=Frequency*/
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode);
-        //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+        inline void ComputeVoiceOscillatorSync(int nvoice, FMTYPE FMmode);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
@@ -259,6 +255,10 @@ class ADnote:public SynthNote
 
             Envelope *FMFreqEnvelope;
             Envelope *FMAmpEnvelope;
+            
+            
+            /* if Oscillator Sync is enabled */
+            bool syncEnabled;
 
             /********************************************************/
             /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */
