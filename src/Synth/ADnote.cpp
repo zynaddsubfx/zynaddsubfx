@@ -1245,7 +1245,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
         float out = 0;
         for(int i = 0; i < synth.buffersize; ++i) {
 
-            if(NoteVoicePar[nvoice].AAEnabled) { 
+            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 2.0f) { 
                 // resampling factor
                 const int rsmpfactor = (freqhi>40) ? 40 : (freqhi<1) ? 1 : freqhi;
                 // offset of the oscillator sample to be multplied with first kernel position
@@ -1256,14 +1256,16 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
                 // step size in the filter kernel
                 const int stpsize = 40/rsmpfactor;
                 // first kernel sample to be used
-                const int startposhi = poslo*stpsize/(1<<24);
+                const int startpos = (((1<<24)-poslo) * stpsize);
+                const int startposhi = startpos>>24;                
+                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;         
 
                 // reset output value
                 out = 0;
                 for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
                     const float factor = 
-                        (pars.GlobalPar.wskernel[l] * ((1<<24) - poslo) +
-                        pars.GlobalPar.wskernel[l+1] * poslo)/(1.0f*(1<<24));
+                        (pars.GlobalPar.wskernel[l] * ((1<<24) - kernelposlo) +
+                        pars.GlobalPar.wskernel[l+1] * kernelposlo)/(1.0f*(1<<24));
                         
                     out += factor*smps[ovsmpposhi];
 
@@ -1630,7 +1632,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-            if(NoteVoicePar[nvoice].AAEnabled) { 
+            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 4.0f) { 
+            //if(NoteVoicePar[nvoice].AAEnabled) { 
                 // carrier frequency
                 const int carfreqhi = (FMmode == FMTYPE::FREQ_MOD) ? tw[i]+freqhi : freqhi;
                 // resampling factor
@@ -1650,13 +1653,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 // for resampling factor above 40 start scipping oscillator samples
                 const int ovsmpfreqhi = rsmpfactor<minstep ? 1 : rsmpfactor/minstep;
                 // first kernel sample to be used
-                const int startposhi = (carposlo*stpsize)>>24;                
+                const int startpos = (((1<<24)-carposlo) * stpsize);
+                const int startposhi = startpos>>24;                
+                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;                
                 // reset output value
                 float out = 0;
                 for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) { 
                     const float kernelsample = 
-                        (pars.GlobalPar.wskernel[l] * ((1<<24) - carposlo) +
-                        pars.GlobalPar.wskernel[l+1] * carposlo)/(1.0f*(1<<24));
+                        (pars.GlobalPar.wskernel[l] * ((1<<24) - kernelposlo) +
+                        pars.GlobalPar.wskernel[l+1] * kernelposlo)/(1.0f*(1<<24));
                         
                     out += kernelsample*smps[ovsmpposhi];
 
