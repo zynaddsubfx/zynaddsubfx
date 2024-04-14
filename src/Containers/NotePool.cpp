@@ -52,6 +52,13 @@ NotePool::NotePool(void)
     memset(sdesc, 0, sizeof(sdesc));
 }
 
+NotePool::NoteDescriptor* NotePool::newest_nd = nullptr;
+
+bool NotePool::NoteDescriptor::newest(void) const
+{
+    return (this == NotePool::newest_nd);
+}
+
 bool NotePool::NoteDescriptor::playing(void) const
 {
     return (status&NOTE_MASK) == KEY_PLAYING;
@@ -209,6 +216,7 @@ void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, Por
     ndesc[desc_id].status              = KEY_PLAYING;
     ndesc[desc_id].legatoMirror        = legato;
     ndesc[desc_id].portamentoRealtime  = portamento_realtime;
+    NotePool::newest_nd = &ndesc[desc_id];
 
     sdesc[sdesc_id] = desc;
     return;
