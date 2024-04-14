@@ -798,8 +798,7 @@ void Part::SetController(unsigned int type, int par)
                                 cents *= ctl.pitchwheel.bendrange_down;
                             else
                                 cents *= ctl.pitchwheel.bendrange;
-                            
-                            float value = float(d.note) * par;
+                            float value = float(d.note) + cents / 1200.0f; // seems to be wrong
                             s.note->setPitch(value);
                         }
             }
