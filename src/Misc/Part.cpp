@@ -123,7 +123,7 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::i:c:S", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+    {"polyType::i:c:S", rProp(parameter) rOptions(Poly, Mono, Legato, Latch, Bend)
         rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
@@ -155,18 +155,28 @@ static const Ports partPorts = {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
                 p->Platchmode = 0;
+                p->Pbendmode = 0;
             } else if(i==1) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 0;
                 p->Platchmode = 0;
+                p->Pbendmode = 0;
             } else if(i==2) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
                 p->Platchmode = 0;
-            } else {
+                p->Pbendmode = 0;
+            } else if(i==3)  {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
                 p->Platchmode = 1;
+                p->Pbendmode = 0;
+            } else {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+                p->Platchmode = 0;
+                p->Pbendmode = 1;
+                
             }
             d.broadcast(d.loc, "i", get_polytype());
         }
@@ -778,7 +788,22 @@ void Part::SetController(unsigned int type, int par)
 {
     switch(type) {
         case C_pitchwheel:
-            ctl.setpitchwheel(par);
+            if (Pbendmode) {
+                for(auto &d:notePool.activeDesc())
+                    if(d.newest() && d.playing())
+                        for(auto &s:notePool.activeNotes(d)) {
+                            
+                            float cents = float(par) / 8192.0f;
+                            if(ctl.pitchwheel.is_split && cents < 0)
+                                cents *= ctl.pitchwheel.bendrange_down;
+                            else
+                                cents *= ctl.pitchwheel.bendrange;
+                            float value = float(d.note) + cents / 1200.0f; // seems to be wrong
+                            s.note->setPitch(value);
+                        }
+            }
+            else
+                ctl.setpitchwheel(par);
             break;
         case C_expression:
             ctl.setexpression(par);
