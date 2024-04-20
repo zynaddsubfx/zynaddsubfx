@@ -333,7 +333,7 @@ void waveShapeSmps(int n,
                 smps[i] -= offsetCompensation;
             }
             break;
-        case 18: //tan
+        case 18: //dual cos
         // f(x) = tan(x)
         {
             ws = 0.1f + (ws * 2.0f);
@@ -360,34 +360,37 @@ void waveShapeSmps(int n,
             }
             break;
         }
-        case 19: //dual tanh "hysteresis" function
-        // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
-        // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
-            par = (6.0f) * par * par + (0.1f) * par + 0.25f;
-            ws = ws * 25.0f + 0.1f;
-
-            // precalc function value at zero crossing (independent of sample)
-            const float yOffset = YehAbelSmith(ws,par);
-
+        case 19: //corecitivity function
+        {
+            ws = 0.1f + (ws * 0.9f);
+            par = par * 0.66f;
+            
             // precalc offset with distortion function applied
-            offsetCompensation = ( offs > 0 ?
-                (YehAbelSmith(2.0f*ws*offs-ws, par) + yOffset) :
-                (YehAbelSmith(2.0f*ws*offs+ws, par) - yOffset) ) * 0.5f;
+            // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+            offsetCompensation = offs * (0.5f - 0.5f * par * cos(offs * PI));;
 
             for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal for drive
                 smps[i] += offs; // add dc offset
-                smps[i] *= 2.0f * ws;// multiply signal to drive it in the saturation of the function
-
-                if(smps[i]>0) // upper right quadrant
-                    smps[i] = (YehAbelSmith(smps[i]-ws, par)+yOffset)*0.5f;
-                else // lower left quadrant
-                    smps[i] = (YehAbelSmith(smps[i]+ws, par)-yOffset)*0.5f;
+                // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+                if (smps[i] > 1.0f)
+                    smps[i] = 1.0f;
+                else if (smps[i] < -1.0f)
+                    smps[i] = -1.0f;
+                else
+                    if (fabs(smps[i])<par) 
+                        smps[i] = 0.0f;
+                    else {
+                        float smpTmp = (smps[i] + (smps[i]>0.0f) ? -par : par)/(1.0f-par);
+                        smps[i] = smpTmp * (0.5f - 0.5f * cos(smpTmp * PI));
+                    }
 
                 //subtract offset with distortion function applied
                 smps[i] -= offsetCompensation;
+                smps[i] /= ws;
             }
             break;
-
+        }
     }
 }
 
