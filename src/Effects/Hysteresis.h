@@ -17,7 +17,7 @@
 #include "Effect.h"
 #include "../Misc/Stereo.h"
 #include "PreisachHysteresis.h"
-#include "JilesAtherton.h"
+//~ #include "JilesAtherton.h"
 
 namespace zyn {
 
@@ -64,9 +64,9 @@ class Hysteresis:public Effect
     private:
         //Parameters
         unsigned char Pvolume;        /**<#1 Volume or Dry/Wetness*/
-        unsigned char Pdrive;         /**<#3 remanence of the hysteresis*/
-        unsigned char Premanence;     /**<#4 remanence of the hysteresis*/
-        unsigned char Pcoercivity;    /**<#5 coercivity of hysteresis loop*/
+        float drive;         /**<#3 remanence of the hysteresis*/
+        float remanence;     /**<#4 remanence of the hysteresis*/
+        float coercivity;    /**<#5 coercivity of hysteresis loop*/
 
         void setvolume(unsigned char _Pvolume);
         void setdrive(unsigned char _Pdrive);
@@ -75,8 +75,8 @@ class Hysteresis:public Effect
         //~ void setalpha(unsigned char _Palpha);
         //~ void setbeta(unsigned char _Pbeta);
         
-        JilesAtherton* hyst_l;
-        JilesAtherton* hyst_r;
+        float state_l;
+        float state_r;
 };
 
 }

@@ -54,17 +54,17 @@ rtosc::Ports Hysteresis::ports = {
 Hysteresis::Hysteresis(EffectParams pars)
     :Effect(pars),
       Pvolume(50),
-      Premanence(64),
-      Pcoercivity(64)
+      remanence(0.5f),
+      coercivity(0.5f)
 {
-    hyst_l = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
-    hyst_r = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
+    //~ hyst_l = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
+    //~ hyst_r = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
 }
 
 Hysteresis::~Hysteresis()
 {
-    memory.devalloc(hyst_l);
-    memory.devalloc(hyst_r);
+    //~ memory.devalloc(hyst_l);
+    //~ memory.devalloc(hyst_r);
 }
 
 //Initialize the delays
@@ -73,17 +73,35 @@ void Hysteresis::init(void)
     //~ hyst_l->init();
     //~ hyst_r->init();
 }
-
-//Effect output
+#define ALPHA 0.1f
+#define BETA 0.2f
 void Hysteresis::out(const Stereo<float *> &input)
 {
     for(int i = 0; i < buffersize; ++i) {
-        efxoutl[i] = hyst_l->applyHysteresis(input.l[i]*float(Pdrive)/32.0f);
-        efxoutr[i] = hyst_r->applyHysteresis(input.r[i]*float(Pdrive)/32.0f);
+        
+        // Vorverarbeitung des Eingangssignals unter Berücksichtigung von Remanenz und Koerzitivität
+        float processed_input_l = input.l[i];
+        if (fabs(input.l[i]) > coercivity) {
+            if(input.l[i] > 0)
+                processed_input_l = input.l[i] + remanence * tanh(drive * input.l[i] - coercivity);
+            else
+                processed_input_l = input.l[i] + remanence * tanh(drive * input.l[i] + coercivity);
+        }
+        float processed_input_r = input.r[i];
+        if (fabs(input.r[i]) > coercivity) {
+            if(input.r[i] > 0)
+                processed_input_r = input.r[i] + remanence * tanh(input.r[i] - coercivity);
+            else
+                processed_input_r = input.r[i] + remanence * tanh(input.r[i] + coercivity);
+        }
+
+
+       // Aktualisierung der Zustände mit dem vorverarbeiteten Eingang
+       state_l = ALPHA * state_l + BETA * tanh(processed_input_l);
+       state_r = ALPHA * state_r + BETA * tanh(processed_input_r);
+       efxoutl[i] = state_l;
+       efxoutr[i] = state_r;
     }
-    //~ printf("-----i: %d\n", buffersize-1);
-    //~ printf("input.l[i]: %f\n", input.l[ buffersize-1]);
-    //~ printf("efxoutl[i]: %f\n", efxoutl[ buffersize-1]);
 }
 
 
@@ -104,23 +122,23 @@ void Hysteresis::setvolume(unsigned char _Pvolume)
         volume = outvolume = Pvolume / 127.0f;
 }
 
-void Hysteresis::setdrive(unsigned char _Pdrive)
+void Hysteresis::setdrive(unsigned char Pdrive)
 {
-    Pdrive   = _Pdrive;
+    drive   = Pdrive / 64.0f;
 }
 
-void Hysteresis::setremanence(unsigned char _Premanence)
+void Hysteresis::setremanence(unsigned char Premanence)
 {
-    Premanence   = _Premanence;
-    hyst_l->setMr(float(Premanence+3)/32.0f);
-    hyst_r->setMr(float(Premanence+3)/32.0f);
+    remanence   = Premanence / 127.0f;
+    //~ hyst_l->setMr(float(Premanence+3)/32.0f);
+    //~ hyst_r->setMr(float(Premanence+3)/32.0f);
 }
 
-void Hysteresis::setcoercivity(unsigned char _Pcoercivity)
+void Hysteresis::setcoercivity(unsigned char Pcoercivity)
 {
-    Pcoercivity   = _Pcoercivity;
-    hyst_l->setHc(float((Pcoercivity+2)/8.0f));
-    hyst_r->setHc(float((Pcoercivity+2)/8.0f));
+    coercivity   = Pcoercivity / 1270.0f;
+    //~ hyst_l->setHc(float((Pcoercivity+2)/8.0f));
+    //~ hyst_r->setHc(float((Pcoercivity+2)/8.0f));
 }
 
 // Add the setter functions for alpha and beta
@@ -188,9 +206,9 @@ unsigned char Hysteresis::getpar(int npar) const
     switch(npar) {
         case 0:  return Pvolume;
         case 1:  return Ppanning;
-        case 2:  return Pdrive;
-        case 3:  return Premanence;
-        case 4:  return Pcoercivity;
+        case 2:  return int(drive*64.0f);
+        case 3:  return int(remanence*127.0f);
+        case 4:  return int(coercivity*1270.0f);
         default: return 0; // in case of bogus parameter number
     }
 }
