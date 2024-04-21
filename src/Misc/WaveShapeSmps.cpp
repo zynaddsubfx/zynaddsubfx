@@ -381,7 +381,7 @@ void waveShapeSmps(int n,
                     if (fabs(smps[i])<par) 
                         smps[i] = 0.0f;
                     else {
-                        float smpTmp = (smps[i] + (smps[i]>0.0f) ? -par : par)/(1.0f-par);
+                        float smpTmp = ((smps[i]>0.0f) ? smps[i]-par : smps[i]+par )/(1.0f-par);
                         smps[i] = smpTmp * (0.5f - 0.5f * cos(smpTmp * PI));
                     }
 

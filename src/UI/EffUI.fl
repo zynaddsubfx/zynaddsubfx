@@ -907,11 +907,11 @@ if (filterwindow!=NULL){
           xywh {125 125 100 20} labelfont 1 labelsize 10
         }
         MenuItem {} {
-          label Tan
+          label DualCos
           xywh {135 135 100 20} labelfont 1 labelsize 10
         }
         MenuItem {} {
-          label Hyst
+          label Coerc
           xywh {145 145 100 20} labelfont 1 labelsize 10
         }
       }
@@ -1938,11 +1938,11 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
           xywh {125 125 100 20} labelfont 1 labelsize 10
         }
         MenuItem {} {
-          label Tan
+          label DualCos
           xywh {135 135 100 20} labelfont 1 labelsize 10
         }
         MenuItem {} {
-          label Hyst
+          label Coerc
           xywh {145 145 100 20} labelfont 1 labelsize 10
         }
       }
