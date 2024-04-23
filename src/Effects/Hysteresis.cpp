@@ -2,10 +2,8 @@
   ZynAddSubFX - a software synthesizer
 
   Hysteresis.cpp - Hysteresis effect
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Copyright (C) 2009-2010 Mark McCurry
-  Author: Nasca Octavian Paul
-          Mark McCurry
+  Copyright (C) 2024 Michael Kirchner
+  Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -45,6 +43,8 @@ rtosc::Ports Hysteresis::ports = {
             "Remanence of Hysteresis"),
     rEffPar(Pcoercivity,  4, rShort("coerc"),
             "Coercivity of Hysteresis"),
+        rEffParTF(Pstereo, 5, rShort("stereo"),
+              , "Stereo"),
 
 };
 #undef rBegin
@@ -54,53 +54,58 @@ rtosc::Ports Hysteresis::ports = {
 Hysteresis::Hysteresis(EffectParams pars)
     :Effect(pars),
       Pvolume(50),
+      Pstereo(1),
       remanence(0.5f),
       coercivity(0.5f)
 {
-    //~ hyst_l = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
-    //~ hyst_r = memory.alloc<JilesAtherton>(float(Pcoercivity)*8.0f, float(Premanence)/128.0f);
+
 }
 
 Hysteresis::~Hysteresis()
 {
-    //~ memory.devalloc(hyst_l);
-    //~ memory.devalloc(hyst_r);
+
 }
 
 //Initialize the delays
 void Hysteresis::init(void)
 {
-    //~ hyst_l->init();
-    //~ hyst_r->init();
+    state_l = 0.0f;
+    state_r = 0.0f;
 }
-#define ALPHA 0.1f
-#define BETA 0.2f
+
+inline float dualCos(float x, float drive, float par)
+{
+    float y;
+    x *= drive;
+    if (x > 1.0f)
+        y = 1.0f;
+    else if (x < -1.0f)
+        y = -1.0f;
+    else if (fabs(x)<par) 
+            y = 0.0f;
+        else {
+            if (x>0)
+            {
+                const float smpTmp = (x-par)/(1.0f-par);
+                y = 0.5 + 0.5 * cos(smpTmp*PI-PI);
+            }
+            else
+            {
+                const float smpTmp = (x+par)/(1.0f-par);
+                y = -0.5 - 0.5 * cos(smpTmp*PI-PI);
+            }
+        }
+    return y/drive;
+}
+
 void Hysteresis::out(const Stereo<float *> &input)
 {
     for(int i = 0; i < buffersize; ++i) {
-        
-        // Vorverarbeitung des Eingangssignals unter Berücksichtigung von Remanenz und Koerzitivität
-        float processed_input_l = input.l[i];
-        if (fabs(input.l[i]) > coercivity) {
-            if(input.l[i] > 0)
-                processed_input_l = input.l[i] + remanence * tanh(drive * input.l[i] - coercivity);
-            else
-                processed_input_l = input.l[i] + remanence * tanh(drive * input.l[i] + coercivity);
-        }
-        float processed_input_r = input.r[i];
-        if (fabs(input.r[i]) > coercivity) {
-            if(input.r[i] > 0)
-                processed_input_r = input.r[i] + remanence * tanh(input.r[i] - coercivity);
-            else
-                processed_input_r = input.r[i] + remanence * tanh(input.r[i] + coercivity);
-        }
 
-
-       // Aktualisierung der Zustände mit dem vorverarbeiteten Eingang
-       state_l = ALPHA * state_l + BETA * tanh(processed_input_l);
-       state_r = ALPHA * state_r + BETA * tanh(processed_input_r);
-       efxoutl[i] = state_l;
-       efxoutr[i] = state_r;
+        state_l += dualCos(input.l[i] - state_l, drive, coercivity);
+        if(Pstereo != 0) state_r += dualCos(input.r[i] - state_r, drive, coercivity);
+        efxoutl[i] = state_l;
+        if(Pstereo != 0) efxoutr[i] = state_r;
     }
 }
 
@@ -124,33 +129,21 @@ void Hysteresis::setvolume(unsigned char _Pvolume)
 
 void Hysteresis::setdrive(unsigned char Pdrive)
 {
-    drive   = Pdrive / 64.0f;
+    drive   = 0.1f + Pdrive / 16.0f;
 }
 
 void Hysteresis::setremanence(unsigned char Premanence)
 {
-    remanence   = Premanence / 127.0f;
-    //~ hyst_l->setMr(float(Premanence+3)/32.0f);
-    //~ hyst_r->setMr(float(Premanence+3)/32.0f);
+    remanence   = Premanence / 1270.0f;
+
 }
 
 void Hysteresis::setcoercivity(unsigned char Pcoercivity)
 {
-    coercivity   = Pcoercivity / 1270.0f;
-    //~ hyst_l->setHc(float((Pcoercivity+2)/8.0f));
-    //~ hyst_r->setHc(float((Pcoercivity+2)/8.0f));
+    coercivity   = Pcoercivity / 512.0f;
 }
 
-// Add the setter functions for alpha and beta
-//~ void Hysteresis::setalpha(unsigned char Palpha) {
-    //~ hyst_l->setAlpha(float(Palpha)/128.0f);
-    //~ hyst_r->setAlpha(float(Palpha)/128.0f);
-//~ }
 
-//~ void Hysteresis::setbeta(unsigned char Pbeta) {
-    //~ hyst_l->setBeta(float(Pbeta)/128.0f);
-    //~ hyst_r->setBeta(float(Pbeta)/128.0f);
-//~ }
 
 unsigned char Hysteresis::getpresetpar(unsigned char npreset, unsigned int npar)
 {
@@ -197,6 +190,9 @@ void Hysteresis::changepar(int npar, unsigned char value)
         case 4:
             setcoercivity(value);
             break;
+        case 5:
+            Pstereo = (value > 1) ? 1 : value;
+            break;
 
     }
 }
@@ -206,9 +202,10 @@ unsigned char Hysteresis::getpar(int npar) const
     switch(npar) {
         case 0:  return Pvolume;
         case 1:  return Ppanning;
-        case 2:  return int(drive*64.0f);
-        case 3:  return int(remanence*127.0f);
-        case 4:  return int(coercivity*1270.0f);
+        case 2:  return int((drive-0.1)*16.0f);
+        case 3:  return int(remanence*1270.0f);
+        case 4:  return int(coercivity*512.0f);
+        case 5:  return Pstereo;
         default: return 0; // in case of bogus parameter number
     }
 }

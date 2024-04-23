@@ -2,8 +2,8 @@
   ZynAddSubFX - a software synthesizer
 
   Hysteresis.h - Hysteresis Effect
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Copyright (C) 2024 Michael Kirchner
+  Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -16,8 +16,6 @@
 
 #include "Effect.h"
 #include "../Misc/Stereo.h"
-#include "PreisachHysteresis.h"
-//~ #include "JilesAtherton.h"
 
 namespace zyn {
 
@@ -64,6 +62,7 @@ class Hysteresis:public Effect
     private:
         //Parameters
         unsigned char Pvolume;        /**<#1 Volume or Dry/Wetness*/
+        unsigned char Pstereo;       //0=mono, 1=stereo
         float drive;         /**<#3 remanence of the hysteresis*/
         float remanence;     /**<#4 remanence of the hysteresis*/
         float coercivity;    /**<#5 coercivity of hysteresis loop*/
@@ -72,8 +71,6 @@ class Hysteresis:public Effect
         void setdrive(unsigned char _Pdrive);
         void setremanence(unsigned char _Premanence);
         void setcoercivity(unsigned char _Pcoercivity);
-        //~ void setalpha(unsigned char _Palpha);
-        //~ void setbeta(unsigned char _Pbeta);
         
         float state_l;
         float state_r;

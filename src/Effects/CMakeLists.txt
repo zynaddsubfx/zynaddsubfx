@@ -13,7 +13,5 @@ set(zynaddsubfx_effect_SRCS
 	Effects/Reverb.cpp
 	Effects/Sympathetic.cpp
 	Effects/Hysteresis.cpp
-	Effects/PreisachHysteresis.cpp
-	Effects/JilesAtherton.cpp
     PARENT_SCOPE
 )
