@@ -53,7 +53,7 @@ rtosc::Ports Hysteresis::ports = {
 
 Hysteresis::Hysteresis(EffectParams pars)
     :Effect(pars),
-      Pvolume(50),
+      Pvolume(64),
       Pstereo(1),
       remanence(0.5f),
       coercivity(0.5f)
@@ -100,13 +100,22 @@ inline float dualCos(float x, float drive, float par)
 
 void Hysteresis::out(const Stereo<float *> &input)
 {
+    if(Pstereo) //Stereo
     for(int i = 0; i < buffersize; ++i) {
-
-        state_l += dualCos(input.l[i] - state_l, drive, coercivity);
-        if(Pstereo != 0) state_r += dualCos(input.r[i] - state_r, drive, coercivity);
+        const float input_l = input.l[i] * pangainL;
+        state_l += dualCos(input_l - state_l, drive, coercivity);
         efxoutl[i] = state_l;
-        if(Pstereo != 0) efxoutr[i] = state_r;
+        
+        const float input_r = input.r[i] * pangainR;
+        state_r += dualCos(input_r - state_r, drive, coercivity);
+        efxoutr[i] = state_r;
     }
+    else //Mono
+        for(int i = 0; i < buffersize; ++i) {
+            const float input_l = (input.l[i] * pangainL + input.r[i] * pangainR);
+            state_l += dualCos(input_l - state_l, drive, coercivity);
+            efxoutl[i] = state_l;
+        }
 }
 
 
