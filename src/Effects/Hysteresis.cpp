@@ -55,8 +55,12 @@ Hysteresis::Hysteresis(EffectParams pars)
     :Effect(pars),
       Pvolume(64),
       Pstereo(1),
+      drive(1.0f),
       remanence(0.5f),
-      coercivity(0.5f)
+      coercivity(0.5f),
+      state_l(0.0f),
+      state_r(0.0f)
+      
 {
 
 }
@@ -66,12 +70,7 @@ Hysteresis::~Hysteresis()
 
 }
 
-//Initialize the delays
-void Hysteresis::init(void)
-{
-    state_l = 0.0f;
-    state_r = 0.0f;
-}
+
 
 inline float dualCos(float x, float drive, float par)
 {
@@ -100,7 +99,7 @@ inline float dualCos(float x, float drive, float par)
 
 void Hysteresis::out(const Stereo<float *> &input)
 {
-    if(Pstereo) //Stereo
+    if(Pstereo>0) //Stereo
     for(int i = 0; i < buffersize; ++i) {
         const float input_l = input.l[i] * pangainL;
         state_l += dualCos(input_l - state_l, drive, coercivity);
@@ -115,6 +114,7 @@ void Hysteresis::out(const Stereo<float *> &input)
             const float input_l = (input.l[i] * pangainL + input.r[i] * pangainR);
             state_l += dualCos(input_l - state_l, drive, coercivity);
             efxoutl[i] = state_l;
+            efxoutr[i] = state_l;
         }
 }
 
@@ -138,7 +138,7 @@ void Hysteresis::setvolume(unsigned char _Pvolume)
 
 void Hysteresis::setdrive(unsigned char Pdrive)
 {
-    drive   = 0.1f + Pdrive / 16.0f;
+    drive   = 0.1f + float(Pdrive);
 }
 
 void Hysteresis::setremanence(unsigned char Premanence)
@@ -149,7 +149,7 @@ void Hysteresis::setremanence(unsigned char Premanence)
 
 void Hysteresis::setcoercivity(unsigned char Pcoercivity)
 {
-    coercivity   = Pcoercivity / 512.0f;
+    coercivity   = Pcoercivity / 256.0f;
 }
 
 
@@ -211,9 +211,9 @@ unsigned char Hysteresis::getpar(int npar) const
     switch(npar) {
         case 0:  return Pvolume;
         case 1:  return Ppanning;
-        case 2:  return int((drive-0.1)*16.0f);
+        case 2:  return int((drive-0.1));
         case 3:  return int(remanence*1270.0f);
-        case 4:  return int(coercivity*512.0f);
+        case 4:  return int(coercivity*256.0f);
         case 5:  return Pstereo;
         default: return 0; // in case of bogus parameter number
     }

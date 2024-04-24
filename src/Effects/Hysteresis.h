@@ -56,7 +56,6 @@ class Hysteresis:public Effect
          */
         unsigned char getpar(int npar) const;
         int getnumparams(void);
-        void init(void);
 
         static rtosc::Ports ports;
     private:
