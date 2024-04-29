@@ -19,6 +19,15 @@
 
 namespace zyn {
 
+struct Hyst {
+            float xLast;
+            float y;
+            float xLastGradient;
+            float xOffset;
+            float yOffset;
+            float yFactor;
+        };
+
 /**Hysteresis Effect*/
 class Hysteresis:public Effect
 {
@@ -70,9 +79,9 @@ class Hysteresis:public Effect
         void setdrive(unsigned char _Pdrive);
         void setremanence(unsigned char _Premanence);
         void setcoercivity(unsigned char _Pcoercivity);
+        void calcHysteresis(float* input, float* output, int length, Hyst* hyst);
         
-        float state_l;
-        float state_r;
+        Hyst *hyst_port, *hyst_l, *hyst_r;
 };
 
 }
