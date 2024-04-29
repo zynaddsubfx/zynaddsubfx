@@ -45,6 +45,8 @@ rtosc::Ports Hysteresis::ports = {
             "Coercivity of Hysteresis"),
     rEffParTF(Pstereo, 5, rShort("stereo"),
           , "Stereo"),
+    rEffPar(Plevel,   6, rShort("output"),
+            "Output amplification"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
     {
         Hysteresis  &dd = *(Hysteresis*)d.obj;
@@ -66,7 +68,8 @@ rtosc::Ports Hysteresis::ports = {
         for(int i=0; i<320; i++) {
             arg_str[i] = 'f';
             args[i].f  = (dd.Pvolume * output[i] + (127.0f - dd.Pvolume) * orig[i]) / 127.0f;
-            if(abs(i-192)<3 || abs(i-64)<3) printf("i: %d  x: %f  y: %f\n",i, orig[i], output[i]);
+            //~ if(abs(i-192)<3 || abs(i-64)<3) printf("i: %d  x: %f  y: %f\n",i, orig[i], output[i]);
+            //~ if(abs(i-64)<3) printf("i: %d  x: %f  y: %f\n",i, orig[i], output[i]);
         }
 
         d.replyArray(d.loc, arg_str, args);
@@ -84,7 +87,8 @@ Hysteresis::Hysteresis(EffectParams pars)
       Pstereo(1),
       drive(1.0f),
       remanence(0.5f),
-      coercivity(0.5f)
+      coercivity(0.5f),
+      level(1.0f)
 {
 
     hyst_port = new Hyst;
@@ -124,7 +128,7 @@ inline float dualCos(float x, float drive, float par)
                 y = -0.5 - 0.5 * cos(smpTmp*PI-PI);
             }
         }
-    return y/drive;
+    return y;
 }
 
 
@@ -136,41 +140,66 @@ inline float YehAbelSmith(float x, float exp)
 }
 
 void Hysteresis::calcHysteresis(float* input, float* output, int length, Hyst* hyst) {
-    // Calculate parameter for YehAbelSmith function based on remanence
-    float par = (6.0f) * remanence * remanence + (0.1f) * remanence + 0.25f;
-    
+
     for(int i = 0; i < length; ++i) {
         const float x = input[i]*drive;
         const float xGradient = x - hyst->xLast;
         // Check for change of direction in input gradient
-        if(xGradient * hyst->xLastGradient < 0.0f) { // change of direction
-            
+        if(xGradient * hyst->dxLast < 0.0f) { 
             // Determine offset and scaling factor based on input direction
-            if (hyst->xLastGradient>0) {
-                // Shift YehAbelSmith function to the right for positive input values
-                const float xMax = (1.0f+coercivity)*drive;
-                // Calculate offset for X and Y axes
-                hyst->xOffset = xMax - x;
-                const float yMax = YehAbelSmith(xMax, par);
-                hyst->yFactor = 0.5f * (yMax + hyst->y);
-                hyst->yOffset = 0.5f * ( yMax - hyst->y);
+            if (hyst->dxLast>0) {
+                // Shift YehAbelSmith function to the right end if dx changed from pos to neg
+                const float xRight = (1.0f+coercivity)*drive;
+                // get the corresponing y value
+                const float yRight = YehAbelSmith(xRight, par);
+                
+                // Calculate offset for current x to xMax
+                hyst->xOffset = xRight - x;
+
+                // Calculate y factor and offset to compensate the change due to offsetting x
+                // set factor to hit the y value between current and yMax
+                hyst->yFactor = 0.5f * (yRight + hyst->y);
+                // set the y offset to bridge the gap above and keep the other end of the curve at -yMax
+                hyst->yOffset = (yRight*hyst->yFactor - hyst->y);
+                
+                // Print debugging information
+                //~ printf("i: %d\n", i);
+                //~ printf("drive: %f\n", drive);
+                //~ printf("xLast: %f\n", hyst->xLast);
+                //~ printf("dxLast: %f\n", hyst->dxLast);
+                //~ printf("dx: %f\n", x - hyst->xLast);
+                //~ printf("x: %f\n", x);
+                //~ printf("y: %f\n", hyst->y);
+                //~ printf("coercivity: %f\n", coercivity);
+                //~ printf("xRight: %f\n", xRight);
+                //~ printf("yRight: %f\n", yRight);
+                //~ printf("xOffset: %f\n", hyst->xOffset);
+                //~ printf("yFactor: %f\n", hyst->yFactor);
+                //~ printf("yOffset: %f\n", hyst->yOffset);
+                
             }
             else {
-                // Shift YehAbelSmith function to the left for negative input values
-                const float xMax = (-1.0f-coercivity)*drive;
-                // Calculate offset for X and Y axes
-                hyst->xOffset = xMax - x;
-                const float yMax = YehAbelSmith(xMax, par);
-                hyst->yFactor = -0.5f * (yMax + hyst->y);
-                hyst->yOffset = 0.5f * (yMax - hyst->y);
+                // Shift YehAbelSmith function to the left end if dx changed from neg to pos
+                const float xLeft = (-1.0f-coercivity)*drive;
+                // get the corresponing y value
+                const float yLeft = YehAbelSmith(xLeft, par);
+                
+                // Calculate offset for current x to xMax
+                hyst->xOffset = xLeft - x;
+                
+                // Calculate y factor and offset to compensate the change due to offsetting x
+                // set factor to hit the y value between current and yMax
+                hyst->yFactor = -0.5f * (yLeft + hyst->y);
+                // set the y offset to bridge the gap above and keep the other end of the curve at yMax
+                hyst->yOffset = (yLeft*hyst->yFactor - hyst->y);
             }
         }
         
         // Calculate YehAbelSmith output for current input and apply scaling and offset
-        hyst->y = (YehAbelSmith(x+hyst->xOffset, par) * hyst->yFactor - hyst->yOffset);
+        hyst->y = (YehAbelSmith((x + hyst->xOffset), par)) * hyst->yFactor - hyst->yOffset;
         
         // Calculate input gradient and update last input value
-        hyst->xLastGradient = x - hyst->xLast;
+        hyst->dxLast = x - hyst->xLast;
         hyst->xLast = x;
         
         // Store calculated output in the output array
@@ -184,8 +213,8 @@ void Hysteresis::out(const Stereo<float *> &input)
     float output[buffersize];
     calcHysteresis(input.l, output, buffersize, hyst_l);
     for(int i = 0; i < buffersize; ++i) {
-        efxoutl[i] = output[i];
-        efxoutr[i] = output[i];
+        efxoutl[i] = output[i]*level;
+        efxoutr[i] = output[i]*level;
     }
 }
 
@@ -215,6 +244,8 @@ void Hysteresis::setdrive(unsigned char Pdrive)
 void Hysteresis::setremanence(unsigned char Premanence)
 {
     remanence   = Premanence / 127.0f;
+    // Calculate parameter for YehAbelSmith function based on remanence
+    par = (6.0f) * remanence * remanence + (0.1f) * remanence + 0.25f;
 
 }
 
@@ -273,6 +304,9 @@ void Hysteresis::changepar(int npar, unsigned char value)
         case 5:
             Pstereo = (value > 1) ? 1 : value;
             break;
+        case 6:
+            level = float(value)/4.0f;
+            break;
 
     }
 }
@@ -286,6 +320,7 @@ unsigned char Hysteresis::getpar(int npar) const
         case 3:  return int(remanence*127.0f);
         case 4:  return int(coercivity*127.0f);
         case 5:  return Pstereo;
+        case 6:  return int(level*4.0f);
         default: return 0; // in case of bogus parameter number
     }
 }

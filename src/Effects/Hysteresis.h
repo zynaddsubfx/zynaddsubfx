@@ -22,7 +22,7 @@ namespace zyn {
 struct Hyst {
             float xLast;
             float y;
-            float xLastGradient;
+            float dxLast;
             float xOffset;
             float yOffset;
             float yFactor;
@@ -74,6 +74,8 @@ class Hysteresis:public Effect
         float drive;         /**<#3 remanence of the hysteresis*/
         float remanence;     /**<#4 remanence of the hysteresis*/
         float coercivity;    /**<#5 coercivity of hysteresis loop*/
+        float level;
+        float par;
 
         void setvolume(unsigned char _Pvolume);
         void setdrive(unsigned char _Pdrive);
