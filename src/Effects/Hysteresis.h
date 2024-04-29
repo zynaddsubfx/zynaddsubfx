@@ -65,12 +65,17 @@ class Hysteresis:public Effect
          */
         unsigned char getpar(int npar) const;
         int getnumparams(void);
+        
+        void cleanup(void);
+        void applyfilters(float *efxoutl, float *efxoutr);
 
         static rtosc::Ports ports;
     private:
         //Parameters
         unsigned char Pvolume;        /**<#1 Volume or Dry/Wetness*/
         unsigned char Pstereo;       //0=mono, 1=stereo
+        unsigned char Plpf;          //lowpass filter
+        unsigned char Phpf;          //highpass filter
         float drive;         /**<#3 remanence of the hysteresis*/
         float remanence;     /**<#4 remanence of the hysteresis*/
         float coercivity;    /**<#5 coercivity of hysteresis loop*/
@@ -81,9 +86,13 @@ class Hysteresis:public Effect
         void setdrive(unsigned char _Pdrive);
         void setremanence(unsigned char _Premanence);
         void setcoercivity(unsigned char _Pcoercivity);
+        void setlpf(unsigned char _Plpf);
+        void sethpf(unsigned char _Phpf);
+        
         void calcHysteresis(float* input, float* output, int length, Hyst* hyst);
         
         Hyst *hyst_port, *hyst_l, *hyst_r;
+        class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
 };
 
 }
