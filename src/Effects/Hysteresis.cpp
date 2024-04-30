@@ -49,7 +49,7 @@ rtosc::Ports Hysteresis::ports = {
     rEffPar(Plevel,   6, rShort("output"),
             "Output amplification"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
-    rEffPar(Phpf, 8, rShort("hpf"), rDefault(1), "High Pass Cutoff"),
+    rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
     {
         Hysteresis  &dd = *(Hysteresis*)d.obj;
@@ -88,15 +88,17 @@ Hysteresis::Hysteresis(EffectParams pars)
     :Effect(pars),
       Pvolume(64),
       Pstereo(1),
+      Plpf(127),
+      Phpf(0),
       drive(1.0f),
       remanence(0.5f),
       coercivity(0.5f),
       level(1.0f)
 {
 
-    hyst_port = new Hyst;
-    hyst_l = new Hyst;
-    hyst_r = new Hyst;
+    hyst_port = memory.alloc<Hyst>();
+    hyst_l = memory.alloc<Hyst>();
+    hyst_r = memory.alloc<Hyst>();
     
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -107,9 +109,9 @@ Hysteresis::Hysteresis(EffectParams pars)
 
 Hysteresis::~Hysteresis()
 {
-    delete hyst_port;
-    delete hyst_l;
-    delete hyst_r;
+    memory.dealloc(hyst_port);
+    memory.dealloc(hyst_l);
+    memory.dealloc(hyst_r);
     
     memory.dealloc(lpfl);
     memory.dealloc(lpfr);
@@ -124,16 +126,26 @@ void Hysteresis::cleanup(void)
     hpfl->cleanup();
     lpfr->cleanup();
     hpfr->cleanup();
+    
+    hyst_port->xLast = 0.0f;
+    hyst_l->xLast = 0.0f;
+    hyst_r->xLast = 0.0f;
+    
+    hyst_port->y = 0.0f;
+    hyst_l->y = 0.0f;
+    hyst_r->y = 0.0f;
+    
+    
 }
 
 //Apply the filters
 void Hysteresis::applyfilters(float *efxoutl, float *efxoutr)
 {
     if(Plpf!=127) lpfl->filterout(efxoutl);
-    if(Phpf!=0) hpfl->filterout(efxoutl);
+    hpfl->filterout(efxoutl);
     if(Pstereo != 0) { //stereo
         if(Plpf!=127) lpfr->filterout(efxoutr);
-        if(Phpf!=0) hpfr->filterout(efxoutr);
+        hpfr->filterout(efxoutr);
     }
 }
 // Function calculates Yeh Abel Smith equation for given input x and exponent exp
@@ -164,21 +176,6 @@ void Hysteresis::calcHysteresis(float* input, float* output, int length, Hyst* h
                 hyst->yFactor = 0.5f * (yRight + hyst->y);
                 // set the y offset to bridge the gap above and keep the other end of the curve at -yMax
                 hyst->yOffset = (yRight*hyst->yFactor - hyst->y);
-                
-                // Print debugging information
-                //~ printf("i: %d\n", i);
-                //~ printf("drive: %f\n", drive);
-                //~ printf("xLast: %f\n", hyst->xLast);
-                //~ printf("dxLast: %f\n", hyst->dxLast);
-                //~ printf("dx: %f\n", x - hyst->xLast);
-                //~ printf("x: %f\n", x);
-                //~ printf("y: %f\n", hyst->y);
-                //~ printf("coercivity: %f\n", coercivity);
-                //~ printf("xRight: %f\n", xRight);
-                //~ printf("yRight: %f\n", yRight);
-                //~ printf("xOffset: %f\n", hyst->xOffset);
-                //~ printf("yFactor: %f\n", hyst->yFactor);
-                //~ printf("yOffset: %f\n", hyst->yOffset);
                 
             }
             else {
@@ -223,14 +220,15 @@ void Hysteresis::out(const Stereo<float *> &input)
             input_l[i] = input.l[i] * pangainL;
             input_r[i] = input.r[i] * pangainR;
         }
-        calcHysteresis(input_l, output_l, buffersize, hyst_l);
-        calcHysteresis(input_r, output_r, buffersize, hyst_r);
     }
     else {//Mono
         for(int i = 0; i < buffersize; ++i)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
-        calcHysteresis(input_l, output_l, buffersize, hyst_l);
     }
+    
+    calcHysteresis(input_l, output_l, buffersize, hyst_l);
+    calcHysteresis(input_r, output_r, buffersize, hyst_r);
+    
 
     for(int i = 0; i < buffersize; ++i) 
         efxoutl[i] = output_l[i]*level;
@@ -239,7 +237,8 @@ void Hysteresis::out(const Stereo<float *> &input)
         for(int i = 0; i < buffersize; ++i) 
             efxoutr[i] = output_r[i]*level;
     else
-        memcpy(efxoutr, efxoutl, bufferbytes);
+        for(int i = 0; i < buffersize; ++i) 
+            efxoutr[i] = output_l[i]*level;
         
     applyfilters(efxoutl, efxoutr);
     
@@ -292,7 +291,7 @@ void Hysteresis::setlpf(unsigned char _Plpf)
 void Hysteresis::sethpf(unsigned char _Phpf)
 {
     Phpf = _Phpf;
-    float fr = expf(sqrtf(Phpf / 127.0f) * logf(25000.0f)) + 20.0f;
+    float fr = expf(sqrtf((Phpf+1) / 128.0f) * logf(25000.0f)) + 20.0f;
     hpfl->setfreq(fr);
     hpfr->setfreq(fr);
 }
@@ -346,7 +345,7 @@ void Hysteresis::changepar(int npar, unsigned char value)
             Pstereo = (value > 1) ? 1 : value;
             break;
         case 6:
-            level = float(value)/4.0f;
+            level = float(value)/2.0f;
             break;
         case 7:
             setlpf(value);
@@ -367,7 +366,7 @@ unsigned char Hysteresis::getpar(int npar) const
         case 3:  return int(remanence*127.0f);
         case 4:  return int(coercivity*127.0f);
         case 5:  return Pstereo;
-        case 6:  return int(level*4.0f);
+        case 6:  return int(level*2.0f);
         case 7:  return Plpf;
         case 8:  return Phpf;
         default: return 0; // in case of bogus parameter number
