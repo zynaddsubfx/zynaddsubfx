@@ -93,7 +93,7 @@ Hysteresis::Hysteresis(EffectParams pars)
       drive(1.0f),
       remanence(0.5f),
       coercivity(0.5f),
-      level(1.0f)
+      level(16.0f)
 {
 
     hyst_port = memory.alloc<Hyst>();
@@ -264,7 +264,7 @@ void Hysteresis::setvolume(unsigned char _Pvolume)
 
 void Hysteresis::setdrive(unsigned char Pdrive)
 {
-    drive   = 0.1f + Pdrive/8.0f;
+    drive   = 0.5f + Pdrive/8.0f;
 }
 
 void Hysteresis::setremanence(unsigned char Premanence)
@@ -345,7 +345,7 @@ void Hysteresis::changepar(int npar, unsigned char value)
             Pstereo = (value > 1) ? 1 : value;
             break;
         case 6:
-            level = float(value)/2.0f;
+            level = float(value)/4.0f;
             break;
         case 7:
             setlpf(value);
@@ -362,11 +362,11 @@ unsigned char Hysteresis::getpar(int npar) const
     switch(npar) {
         case 0:  return Pvolume;
         case 1:  return Ppanning;
-        case 2:  return int((drive-0.1)*8.0f);
+        case 2:  return int((drive-0.5)*8.0f);
         case 3:  return int(remanence*127.0f);
         case 4:  return int(coercivity*127.0f);
         case 5:  return Pstereo;
-        case 6:  return int(level*2.0f);
+        case 6:  return int(level*4.0f);
         case 7:  return Plpf;
         case 8:  return Phpf;
         default: return 0; // in case of bogus parameter number
