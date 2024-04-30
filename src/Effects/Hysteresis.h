@@ -81,6 +81,12 @@ class Hysteresis:public Effect
         float coercivity;    /**<#5 coercivity of hysteresis loop*/
         float level;
         float par;
+        
+        float xRight;
+        float yRight;
+        float xLeft;
+        float yLeft;
+        
 
         void setvolume(unsigned char _Pvolume);
         void setdrive(unsigned char _Pdrive);
@@ -88,6 +94,7 @@ class Hysteresis:public Effect
         void setcoercivity(unsigned char _Pcoercivity);
         void setlpf(unsigned char _Plpf);
         void sethpf(unsigned char _Phpf);
+        void updatePar();
         
         void calcHysteresis(float* input, float* output, int length, Hyst* hyst);
         

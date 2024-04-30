@@ -154,6 +154,19 @@ inline float YehAbelSmith(float x, float exp)
     return x / (powf((1+powf(fabsf(x),exp)),(1/exp)));
 }
 
+inline void Hysteresis::updatePar()
+{
+    // Shift YehAbelSmith function to the right end if dx changed from pos to neg
+    xRight = (1.0f+coercivity)*drive;
+    // get the corresponing y value
+    yRight = YehAbelSmith(xRight, par);
+    
+    // Shift YehAbelSmith function to the left end if dx changed from neg to pos
+    xLeft = (-1.0f-coercivity)*drive;
+    // get the corresponing y value
+    yLeft = YehAbelSmith(xLeft, par);
+}
+
 void Hysteresis::calcHysteresis(float* input, float* output, int length, Hyst* hyst) {
 
     for(int i = 0; i < length; ++i) {
@@ -163,10 +176,6 @@ void Hysteresis::calcHysteresis(float* input, float* output, int length, Hyst* h
         if(xGradient * hyst->dxLast < 0.0f) { 
             // Determine offset and scaling factor based on input direction
             if (hyst->dxLast>0) {
-                // Shift YehAbelSmith function to the right end if dx changed from pos to neg
-                const float xRight = (1.0f+coercivity)*drive;
-                // get the corresponing y value
-                const float yRight = YehAbelSmith(xRight, par);
                 
                 // Calculate offset for current x to xMax
                 hyst->xOffset = xRight - x;
@@ -179,10 +188,6 @@ void Hysteresis::calcHysteresis(float* input, float* output, int length, Hyst* h
                 
             }
             else {
-                // Shift YehAbelSmith function to the left end if dx changed from neg to pos
-                const float xLeft = (-1.0f-coercivity)*drive;
-                // get the corresponing y value
-                const float yLeft = YehAbelSmith(xLeft, par);
                 
                 // Calculate offset for current x to xMax
                 hyst->xOffset = xLeft - x;
@@ -265,6 +270,7 @@ void Hysteresis::setvolume(unsigned char _Pvolume)
 void Hysteresis::setdrive(unsigned char Pdrive)
 {
     drive   = 0.5f + Pdrive/8.0f;
+    updatePar();
 }
 
 void Hysteresis::setremanence(unsigned char Premanence)
@@ -272,12 +278,14 @@ void Hysteresis::setremanence(unsigned char Premanence)
     remanence   = Premanence / 127.0f;
     // Calculate parameter for YehAbelSmith function based on remanence
     par = (6.0f) * remanence * remanence + (0.1f) * remanence + 0.25f;
+    updatePar();
 
 }
 
 void Hysteresis::setcoercivity(unsigned char Pcoercivity)
 {
     coercivity   = Pcoercivity / 127.0f;
+    updatePar();
 }
 
 void Hysteresis::setlpf(unsigned char _Plpf)
