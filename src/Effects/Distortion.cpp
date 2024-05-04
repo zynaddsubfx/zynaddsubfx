@@ -54,7 +54,7 @@ rtosc::Ports Distortion::ports = {
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
                      Inverse Limiter, Clip, Asym2, Pow2, Sigmoid, Tanh,
-                     Cubic, Square, DualCos, Coerc), rLinear(0,127),
+                     Cubic, Square, DualCos, Coerc, DualTanh), rLinear(0,127),
             rPresets(Arctangent, Asymmetric, Zigzag,
                      Asymmetric, Pow, Quantisize),
             "Distortion Shape"),
@@ -281,8 +281,8 @@ void Distortion::changepar(int npar, unsigned char value)
             Plevel = value;
             break;
         case 5:
-            if(value > 18)
-                Ptype = 18;  //this must be increased if more distortion types are added
+            if(value > 20)
+                Ptype = 20;  //this must be increased if more distortion types are added
             else
                 Ptype = value;
             break;
