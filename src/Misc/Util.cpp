@@ -231,10 +231,10 @@ float interpolate(const float *data, size_t len, float pos)
 float cinterpolate(const float *data, size_t len, float pos)
 {
     const unsigned int i_pos = pos,
-                       l_pos = i_pos % len,
-                       r_pos = l_pos + 1 < len ? l_pos + 1 : 0;
-    const float leftness = pos - i_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+                       lower_pos = i_pos % len,
+                       upper_pos = (lower_pos + 1) < len ? lower_pos + 1 : 0;
+    const float upness = pos - (float)i_pos;
+    return data[lower_pos] * (1.0f - upness) + data[upper_pos] * upness;
 }
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
