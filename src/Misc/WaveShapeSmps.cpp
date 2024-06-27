@@ -12,6 +12,7 @@
 */
 
 #include "WaveShapeSmps.h"
+#include "../globals.h"
 #include <cmath>
 
 namespace zyn {
@@ -63,6 +64,13 @@ float polyblampres(float smp, float ws, float dMax)
     return res*dMax/2.0f;
 }
 
+// f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+// Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+static float YehAbelSmith(float x, float exp)
+{
+    return x / (powf((1+powf(fabsf(x),exp)),(1/exp)));
+}
+
 void waveShapeSmps(int n,
                    float *smps,
                    unsigned char type,
@@ -75,14 +83,20 @@ void waveShapeSmps(int n,
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
-
+    float tmpo;
+    float offsetCompensation = 0.0f;
+    //float tanWsInv = 0.0f;
+    //float wsComp = 0.0f;
+    float resOffset = 0.0f;
     switch(type) {
         case 1:
             ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
+            offsetCompensation = atanf(offs * ws) / atanf(ws);
             for(i = 0; i < n; ++i) {
                 smps[i] += offs;
-                smps[i] = atanf(smps[i] * ws) / atanf(ws);
-                smps[i] -= offs;
+                smps[i] *= ws;
+                smps[i] = atanf(smps[i]) / atanf(ws);
+                smps[i] -= offsetCompensation;
             }
             break;
         case 2:
@@ -135,6 +149,13 @@ void waveShapeSmps(int n,
             ws = powf(2.0f, -ws * ws * 8.0f); //Limiter
             par = par/4;
             if (par > ws - 0.01) par = ws - 0.01;
+
+            // precalc offset with distortion function applied
+            resOffset = polyblampres(offs, ws, par);
+            offsetCompensation = offs>=0 ?
+                ( offs >= ws ? ws-resOffset : offs-resOffset ) :
+                ( offs <= -ws ? -ws+resOffset : offs+resOffset ) ;
+
             for(i = 0; i < n; ++i) {
                 // add the offset: x = smps[i] + offs
                 smps[i] += offs;
@@ -144,12 +165,9 @@ void waveShapeSmps(int n,
                     smps[i] = ( smps[i] > ws ? ws-res : smps[i]-res );
                 else
                     smps[i] = ( smps[i] < -ws ? -ws+res : smps[i]+res );
+
                 // and subtract the polyblamp-limited offset again: smps[i] = y - f(offs)
-                res = polyblampres(offs, ws, par);
-                if (offs>=0)
-                    smps[i] -= ( offs >= ws ? ws-res : offs-res );
-                else
-                    smps[i] -= ( offs <= -ws ? -ws+res : offs+res );
+                smps[i] -= offsetCompensation;
                 // divide through the drive factor: prevents limited signals to get low
                 smps[i] /= ws;
 
@@ -176,6 +194,13 @@ void waveShapeSmps(int n,
         case 10:
             ws = (powf(2.0f, ws * 6.0f) - 1.0f) / powf(2.0f, 6.0f); //Inverse Limiter
             if (par > ws - 0.01) par = ws - 0.01;
+
+            // precalc offset with distortion function applied
+            resOffset = polyblampres(offs, ws, par);
+            offsetCompensation = offs>=0 ?
+                (offs > ws ? offs-ws+resOffset : resOffset) :
+                (offs < -ws ? offs+ws-resOffset : -resOffset);
+
             for(i = 0; i < n; ++i) {
                 smps[i] += offs;
                 float res = polyblampres(smps[i], ws, par);
@@ -183,7 +208,8 @@ void waveShapeSmps(int n,
                     smps[i] = ( smps[i] > ws ? smps[i]-ws+res : res );
                 else
                     smps[i] = ( smps[i] < -ws ? smps[i]+ws-res : -res );
-                smps[i] -= offs;
+
+                smps[i] -= offsetCompensation;
             }
             break;
         case 11:
@@ -230,6 +256,17 @@ void waveShapeSmps(int n,
                 tmpv = 0.5f;
             else
                 tmpv = 0.5f - 1.0f / (expf(ws) + 1.0f);
+
+            // precalc offset with distortion function applied
+            tmpo = offs * ws;
+            if(tmpo < -10.0f)
+                tmpo = -10.0f;
+            else
+            if(tmpo > 10.0f)
+                tmpo = 10.0f;
+            tmpo     = 0.5f - 1.0f / (expf(tmpo) + 1.0f);
+            offsetCompensation = tmpo / tmpv;
+
             for(i = 0; i < n; ++i) {
                 smps[i] += offs; //add offset
                 // calculate sigmoid function
@@ -240,17 +277,9 @@ void waveShapeSmps(int n,
                 if(tmp > 10.0f)
                     tmp = 10.0f;
                 tmp     = 0.5f - 1.0f / (expf(tmp) + 1.0f);
-                // calculate the same for offset value
-                float tmpo = offs * ws;
-                if(tmpo < -10.0f)
-                    tmpo = -10.0f;
-                else
-                if(tmpo > 10.0f)
-                    tmpo = 10.0f;
-                tmpo     = 0.5f - 1.0f / (expf(tmpo) + 1.0f);
 
                 smps[i] = tmp / tmpv;
-                smps[i] -= tmpo / tmpv; // subtract offset
+                smps[i] -= offsetCompensation;
             }
             break;
         case 15: // tanh soft limiter
@@ -258,11 +287,13 @@ void waveShapeSmps(int n,
             // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
             par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
             ws = ws * ws * 35.0f + 1.0f;
+            // precalc offset with distortion function applied
+            offsetCompensation = YehAbelSmith(offs, par);
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;// multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
-                smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par);
-                smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
+                smps[i] = YehAbelSmith(smps[i], par);
+                smps[i] -= offsetCompensation;
             }
             break;
         case 16: //cubic distortion
@@ -270,6 +301,9 @@ void waveShapeSmps(int n,
             // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
             // modified with factor 1.5 to go through [1,1] and [-1,-1]
             ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+            // precalc offset with distortion function applied
+            offsetCompensation = 1.5 * (offs - (offs*offs*offs / 3.0));
+
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
@@ -278,13 +312,16 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distortion function applied
-                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
+                smps[i] -= offsetCompensation;
             }
             break;
         case 17: //square distortion
         // f(x) = x*(2-abs(x))
         // Formula of cubic changed to square but still going through [1,1] and [-1,-1]
             ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
+            // precalc offset with distortion function applied
+            offsetCompensation = offs*(2-fabsf(offs));
+
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
@@ -293,9 +330,111 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distortion function applied
-                smps[i] -= offs*(2-fabsf(offs));
+                smps[i] -= offsetCompensation;
             }
             break;
+        case 18: //dual cos
+        // f(x) = tan(x)
+        {
+            ws = 0.1f + (ws * 2.0f);
+            par = par * 0.5f;
+            
+            // precalc offset with distortion function applied
+            // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+            if (fabs(offs)<par)
+                offsetCompensation = 0.0f;
+            else if (offs>0)  
+                offsetCompensation = (0.5 + 0.5 * cos((offs-par)/(1.0f-par)*PI-PI));
+            else
+                offsetCompensation = (-0.5 - 0.5 * cos((offs-par)/(1.0f-par)*PI-PI));
+
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal for drive
+                smps[i] += offs; // add dc offset
+                // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+                if (smps[i] > 1.0f)
+                    smps[i] = 1.0f;
+                else if (smps[i] < -1.0f)
+                    smps[i] = -1.0f;
+                else if (fabs(smps[i])<par) 
+                        smps[i] = 0.0f;
+                    else {
+                        if (smps[i]>0)
+                        {
+                            float smpTmp = (smps[i]-par)/(1.0f-par);
+                            smps[i] = 0.5 + 0.5 * cos(smpTmp*PI-PI);
+                        }
+                        else
+                        {
+                            float smpTmp = (smps[i]+par)/(1.0f-par);
+                            smps[i] = -0.5 - 0.5 * cos(smpTmp*PI-PI);
+                        }
+                    }
+
+                //subtract offset with distortion function applied
+                smps[i] -= offsetCompensation;
+                smps[i] /= ws;
+            }
+            break;
+        }
+        case 19: //corecitivity function
+        {
+            ws = 0.1f + (ws * 0.9f);
+            par = par * 0.66f;
+            
+            // precalc offset with distortion function applied
+            // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+            offsetCompensation = offs * (0.5f - 0.5f * par * cos(offs * PI));;
+
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal for drive
+                smps[i] += offs; // add dc offset
+                // f(x) = x * (0.5 - 0.5 * cos(x * pi))
+                if (smps[i] > 1.0f)
+                    smps[i] = 1.0f;
+                else if (smps[i] < -1.0f)
+                    smps[i] = -1.0f;
+                else
+                    if (fabs(smps[i])<par) 
+                        smps[i] = 0.0f;
+                    else {
+                        float smpTmp = ((smps[i]>0.0f) ? smps[i]-par : smps[i]+par )/(1.0f-par);
+                        smps[i] = smpTmp * (0.5f - 0.5f * cos(smpTmp * PI));
+                    }
+
+                //subtract offset with distortion function applied
+                smps[i] -= offsetCompensation;
+                smps[i] /= ws;
+            }
+            break;
+        case 20: //dual tanh "hysteresis" function
+        // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+        // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+            par = (6.0f) * par * par + (0.1f) * par + 0.25f;
+            ws = ws * 25.0f + 0.1f;
+
+            // precalc function value at zero crossing (independent of sample)
+            const float yOffset = YehAbelSmith(ws,par);
+
+            // precalc offset with distortion function applied
+            float offsetCompensation = ( offs > 0 ?
+                (YehAbelSmith(2.0f*ws*offs-ws, par) + yOffset) :
+                (YehAbelSmith(2.0f*ws*offs+ws, par) - yOffset) ) * 0.5f;
+
+            for(i = 0; i < n; ++i) {
+                smps[i] += offs; // add dc offset
+                smps[i] *= 2.0f * ws;// multiply signal to drive it in the saturation of the function
+
+                if(smps[i]>0) // upper right quadrant
+                    smps[i] = (YehAbelSmith(smps[i]-ws, par)+yOffset)*0.5f;
+                else // lower left quadrant
+                    smps[i] = (YehAbelSmith(smps[i]+ws, par)-yOffset)*0.5f;
+
+                //subtract offset with distortion function applied
+                smps[i] -= offsetCompensation;
+            }
+            break;
+        }
     }
 }
 
