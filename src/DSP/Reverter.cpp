@@ -86,25 +86,6 @@ void Reverter::filterout(float *smp)
         // apply phase offset
         pos -= phase_offset;
         
-        // Debugging-Ausgabe
-        if (pos > mem_size || pos < 0)
-        {
-            printf("Invalid position detected!\n");
-            printf("mem_size: %d\n", mem_size);
-            printf("buffersize: %d\n", buffersize);
-           
-            printf("max_delay: %f\n", max_delay);
-            printf("fading_samples: %d\n", fading_samples);
-            printf("delay: %f\n", delay);
-            printf("phase_offset: %f\n", phase_offset);
-            
-            printf("i: %d\n", i);
-            printf("reverse_offset: %f\n", reverse_offset);
-            printf("reverse_pos: %f\n", reverse_pos);
-            
-            printf("pos: %f\n", pos);
-        }
-        assert(pos >= 0 && pos < mem_size);
         
         if(fade_counter <= fading_samples) // inside fading segment
         {
@@ -115,20 +96,6 @@ void Reverter::filterout(float *smp)
             fade_counter++;
             // fade in the newer sampleblock + fade out the older samples
             smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos - 1.0f*delay);
-            
-            if (pos-1.0f*delay<=0)
-            {
-                printf("Invalid position detected!\n");
-                printf("pos: %f\n", pos);
-                printf("mem_size: %d\n", mem_size);
-                printf("buffersize: %d\n", buffersize);
-                printf("reverse_pos: %f\n", reverse_pos);
-                printf("max_delay: %f\n", max_delay);
-                printf("reverse_offset: %f\n", reverse_offset);
-                printf("delay: %f\n", delay);
-                printf("phase_offset: %f\n", phase_offset);
-                printf("i: %d\n", i);
-            }
             
             assert(pos-1.0f*delay>0);
         }
