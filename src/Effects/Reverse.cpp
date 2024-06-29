@@ -17,6 +17,7 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 #include "../Misc/Allocator.h"
+#include "../Misc/Util.h"
 #include "Reverse.h"
 
 #define MAX_DELAY 2
@@ -104,7 +105,7 @@ void Reverse::setvolume(unsigned char _Pvolume)
 
 void Reverse::setdelay(unsigned char _Pdelay)
 {
-    Pdelay = _Pdelay;
+    Pdelay = limit( _Pdelay,static_cast<unsigned char>(0),static_cast<unsigned char>(127));
     reverterL->setdelay(float(Pdelay+1)/85.3333333333f);
     reverterR->setdelay(float(Pdelay+1)/85.3333333333f);
 }
