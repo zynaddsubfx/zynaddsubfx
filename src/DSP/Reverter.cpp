@@ -12,26 +12,26 @@
 
 namespace zyn{
 
-Reverter::Reverter(Allocator *alloc, float delay,
+Reverter::Reverter(Allocator *alloc, float delay_,
     unsigned int srate, int bufsize, float tRef)
     :input(nullptr),
     gain(1.0f),
-    delay(0.5f),
+    delay(delay_),
     phase(0.0f),
     buffercounter(0),
     reverse_offset(0.0f),
     phase_offset(0.0f),
     reverse_pos_hist(0.0f),
-    fading_samples((int)srate/25),
+    fading_samples((int)srate/4),
     fade_counter(0),
-    memory(*alloc),
-    samplerate(srate),
-    buffersize(bufsize)
+    memory(*alloc)
 {
-    
+    samplerate = srate;
+    buffersize = bufsize;
+    max_delay = srate * 1.5f;
     // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 
-    //  --> mem_size = maxdelay + maxphase + 2*fading_samples + buffersize
-    mem_size = (int)ceilf((float)srate*2.25f) + 2*fading_samples + buffersize + 1; // 40bpm -> 1.5s phase 1.5s/2 
+    //  --> mem_size > maxdelay + maxphase + 2*fading_samples + buffersize
+    mem_size = (int)ceilf(max_delay*4.0f + fading_samples) + 1; // 40bpm -> 1.5s phase 1.5s/2 
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
 
@@ -46,19 +46,16 @@ Reverter::~Reverter(void)
 }
 
 
-inline float Reverter::tanhX(const float x)
-{
-    // Pade approximation of tanh(x) bound to [-1 .. +1]
-    // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
-    const float x2 = x*x;
-    return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2)); //
-}
 
 inline float Reverter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos; // integer part (pos >= 0)
     float poslo = pos - (float) poshi; // decimal part
     // linear interpolation between samples
     return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
+}
+
+inline float hanningWindow(float x) {
+    return 0.5f * (1.0f - cos(1.0f * M_PI * x));
 }
 
 void Reverter::filterout(float *smp)
@@ -71,12 +68,10 @@ void Reverter::filterout(float *smp)
     for (int i = 0; i < buffersize; i ++)
     {
         // calculate the current relative position inside the "reverted" buffer
-        const float reverse_pos = fmodf((reverse_offset+i),delay);
-        // reading head starts at the end of the last buffer and goes backwards
-        float pos = (mem_size-1-buffersize)-reverse_pos; // 
-        assert(pos>0);
+        const float reverse_pos = fmodf((reverse_offset+i+delay),delay);
+
         
-        // crossfade for a few samples whenever reverse_pos restarts
+        // turnaround detection
         if(reverse_pos<reverse_pos_hist) {
             fade_counter = 0;  // reset fade counter
         }
@@ -84,17 +79,58 @@ void Reverter::filterout(float *smp)
         // store reverse_pos for turnaround detection
         reverse_pos_hist = reverse_pos; 
         
-        // apply phase offset after turnaround detection
-        assert(pos>phase_offset);
+        // reading head
+        float pos = mem_size - 2.0f * delay + fading_samples - reverse_pos ; //
+        assert(pos>0);
+        
+        // apply phase offset
         pos -= phase_offset;
+        
+        // Debugging-Ausgabe
+        if (pos > mem_size || pos < 0)
+        {
+            printf("Invalid position detected!\n");
+            printf("mem_size: %d\n", mem_size);
+            printf("buffersize: %d\n", buffersize);
+           
+            printf("max_delay: %f\n", max_delay);
+            printf("fading_samples: %d\n", fading_samples);
+            printf("delay: %f\n", delay);
+            printf("phase_offset: %f\n", phase_offset);
+            
+            printf("i: %d\n", i);
+            printf("reverse_offset: %f\n", reverse_offset);
+            printf("reverse_pos: %f\n", reverse_pos);
+            
+            printf("pos: %f\n", pos);
+        }
+        assert(pos >= 0 && pos < mem_size);
         
         if(fade_counter <= fading_samples) // inside fading segment
         {
-            const float fadein = (float)fade_counter++ / (float)fading_samples; // 0 -> 1
+            //~ const float windowValue = hanningWindow(); // 0 -> 1
+            
+            const float fadein = float(fade_counter)/float(fading_samples);  // 0 -> 1
             const float fadeout = 1.0f - fadein;               // 1 -> 0
+            fade_counter++;
             // fade in the newer sampleblock + fade out the older samples
-            smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos-delay);
-            assert(pos-delay>0);
+            smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos - 1.0f*delay);
+            
+            if (pos-1.0f*delay<=0)
+            {
+                printf("Invalid position detected!\n");
+                printf("pos: %f\n", pos);
+                printf("mem_size: %d\n", mem_size);
+                printf("buffersize: %d\n", buffersize);
+                printf("reverse_pos: %f\n", reverse_pos);
+                printf("max_delay: %f\n", max_delay);
+                printf("reverse_offset: %f\n", reverse_offset);
+                printf("delay: %f\n", delay);
+                printf("phase_offset: %f\n", phase_offset);
+                printf("i: %d\n", i);
+            }
+            
+            assert(pos-1.0f*delay>0);
         }
         else { // outside fading segment
             smp[i] = sampleLerp( input, pos);
@@ -112,10 +148,11 @@ void Reverter::filterout(float *smp)
 
 void Reverter::setdelay(float _delay)
 {
-    delay = _delay;
+    delay = _delay*float(samplerate);
+    
     // limit fading_samples to be < 1/3 delay length
-    if (delay > 0.12f ) fading_samples = samplerate/25;
-    else fading_samples = (int)(delay*float(samplerate))/3.0f;
+    if (delay > samplerate/2 ) fading_samples = samplerate/4;
+    else fading_samples = (int)(delay)/2.0f;
     
     // update phase_offset
     const float phase_offset_new = (phase-0.5f)*delay;
@@ -144,7 +181,7 @@ void Reverter::setgain(float dBgain)
 
 void Reverter::reset()
 {
-    memset(input, 0, mem_size*sizeof(float));
+    memset(input, 0, Reverter::mem_size*sizeof(float));
 }
 
 };

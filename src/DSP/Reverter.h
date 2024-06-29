@@ -17,6 +17,7 @@
 
 namespace zyn {
 
+
 class Reverter
 {
     public:
@@ -53,6 +54,7 @@ class Reverter
         int mem_size;
         int samplerate;
         int buffersize;
+        float max_delay;
 
 };
 
