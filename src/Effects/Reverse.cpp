@@ -30,19 +30,21 @@ rtosc::Ports Reverse::ports = {
     rPresetForVolume,
     rEffParVol(),
     rEffParPan(),
-    rEffPar(Pdelay,   2, rShort("length"), rLinear(0, 127), rDefault(25),
+    rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127), rDefault(31),
             "Length of Reversed Segment"),
     rEffParTF(Pstereo,3, rShort("stereo"),
               "Stereo"),
     rEffPar(Pphase,   4, rShort("phase"), rLinear(0, 127), rDefault(64),
             "Phase offset for Reversed Segment"),
+    rEffPar(Pcrossfade,5, rShort("fade"), rLinear(0, 127), rDefault(16),
+            "Cross Fade Time between Reversed Segments 1/100s"),
 };
 #undef rBegin
 #undef rEnd
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(41),Pstereo(0),time(time_)
+    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef);
@@ -115,6 +117,13 @@ void Reverse::setphase(unsigned char _Pphase)
     reverterR->setphase(float(Pphase)/127.0f);
 }
 
+void Reverse::setcrossfade(unsigned char value)
+{
+    Pcrossfade = value;
+    reverterL->setcrossfade(float(value)/100.0f);
+    reverterR->setcrossfade(float(value)/100.0f);
+}
+
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 {
     return 0;
@@ -143,6 +152,9 @@ void Reverse::changepar(int npar, unsigned char value)
         case 4:
             setphase(value);
             break;
+        case 5:
+            setcrossfade(value);
+            break;
     }
 }
 
@@ -154,6 +166,7 @@ unsigned char Reverse::getpar(int npar) const
         case 2:  return Pdelay;
         case 3:  return Pstereo;
         case 4:  return Pphase;
+        case 5:  return Pcrossfade;
         default: return 0; // in case of bogus parameter number
     }
 }

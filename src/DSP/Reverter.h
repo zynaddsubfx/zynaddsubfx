@@ -28,6 +28,7 @@ class Reverter
         void filterout(float *smp);
         void setdelay(float delay);
         void setphase(float phase);
+        void setcrossfade(float crossfade);
         void setgain(float dBgain);
         void reset();
 
@@ -42,6 +43,7 @@ class Reverter
         
         float delay;  
         float phase;
+        float crossfade;
            
         int buffercounter;      
         float reverse_offset;

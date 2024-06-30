@@ -62,12 +62,14 @@ class Reverse final:public Effect
         //Parameters
         unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
         unsigned char Pdelay;   /**<#2 Length of reversed segment 127 = 1.5s*/
-        unsigned char Pstereo;
         unsigned char Pphase;
+        unsigned char Pcrossfade;
+        unsigned char Pstereo;
 
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
         void setphase(unsigned char _Pphase);
+        void setcrossfade(unsigned char value);
         
         const AbsTime *time;
 
