@@ -131,15 +131,18 @@ static const rtosc::Ports local_ports = {
                 if (val>=0) {
                     eff->numerator = val;
                     int Pdelay, Pfreq;
-                    float freq;
+                    float freq, delay;
                     if(eff->denominator) {
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
                             // invert:
-                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
-                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
-                                                 ((float)eff->numerator / (float)eff->denominator));
+                            // delay = (Pdelay / 127.0f * MAX_REV_DELAY_SECONDS); //0 .. x sec
+                            // Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS
+                            // delay = 60 / tempo * 4 * numerator / denominator
+                            delay = 60.0f / (float)eff->time->tempo * 4.0f * 
+                                                ((float)eff->numerator / (float)eff->denominator);
+                            Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS;
                             if (eff->numerator&&eff->denominator)
                                 eff->seteffectparrt(2, Pdelay);
                             break;
@@ -180,15 +183,14 @@ static const rtosc::Ports local_ports = {
                 if (val > 0) {
                     eff->denominator = val;
                     int Pdelay, Pfreq;
-                    float freq;
+                    float freq, delay;
                     if(eff->numerator) {
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
-                            // invert:
-                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
-                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
-                                                 ((float)eff->numerator / (float)eff->denominator));
+                            delay = 60.0f / (float)eff->time->tempo * 4.0f * 
+                                                ((float)eff->numerator / (float)eff->denominator);
+                            Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS;
                             if (eff->numerator&&eff->denominator)
                                 eff->seteffectparrt(2, Pdelay);
                             break;

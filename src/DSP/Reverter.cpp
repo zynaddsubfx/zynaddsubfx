@@ -28,10 +28,10 @@ Reverter::Reverter(Allocator *alloc, float delay_,
 {
     samplerate = srate;
     buffersize = bufsize;
-    max_delay = srate * 1.5f;
+    max_delay = srate * MAX_REV_DELAY_SECONDS;
     // (mem_size-1-buffersize)-(maxdelay-1)-2*fading_samples-maxphase > 0 
     //  --> mem_size > maxdelay + maxphase + 2*fading_samples + buffersize
-    mem_size = (int)ceilf(max_delay*4.0f + fading_samples) + 1; // 40bpm -> 1.5s phase 1.5s/2 
+    mem_size = (int)ceilf(max_delay*4.0f + fading_samples) + 1; // TBD: calc real factor instead of 4.0
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
 
@@ -81,7 +81,28 @@ void Reverter::filterout(float *smp)
         
         // reading head
         float pos = mem_size - 2.0f * delay + fading_samples - reverse_pos ; //
-        assert(pos>0);
+
+
+        // Debugging-Ausgabe
+        if (pos > mem_size || pos < 0)
+        {
+            printf("Invalid position detected!\n");
+            printf("mem_size: %d\n", mem_size);
+            printf("buffersize: %d\n", buffersize);
+           
+            printf("max_delay: %f\n", max_delay);
+            printf("fading_samples: %d\n", fading_samples);
+            printf("delay: %f\n", delay);
+            printf("phase_offset: %f\n", phase_offset);
+            
+            printf("i: %d\n", i);
+            printf("reverse_offset: %f\n", reverse_offset);
+            printf("reverse_pos: %f\n", reverse_pos);
+            
+            printf("pos: %f\n", pos);
+        }
+        assert(pos >= 0 && pos < mem_size);
+        
         
         // apply phase offset
         pos -= phase_offset;
@@ -118,8 +139,8 @@ void Reverter::setdelay(float _delay)
     delay = _delay*float(samplerate);
     
     // limit fading_samples to be < 1/3 delay length
-    if (delay > samplerate/2 ) fading_samples = samplerate/4;
-    else fading_samples = (int)(delay)/2.0f;
+    if (delay > samplerate/2 ) fading_samples = samplerate/16;
+    else fading_samples = (int)(delay)/4.0f;
     
     // update phase_offset
     const float phase_offset_new = (phase-0.5f)*delay;
@@ -148,7 +169,7 @@ void Reverter::setgain(float dBgain)
 
 void Reverter::reset()
 {
-    memset(input, 0, Reverter::mem_size*sizeof(float));
+    memset(input, 0, mem_size*sizeof(float));
 }
 
 };
