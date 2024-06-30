@@ -26,9 +26,9 @@ class Reverter
                 unsigned int srate, int bufsize, float tRef=0.0f);
         ~Reverter();
         void filterout(float *smp);
-        void setdelay(float delay);
-        void setphase(float phase);
-        void setcrossfade(float crossfade);
+        void setdelay(float value);
+        void setphase(float value);
+        void setcrossfade(float value);
         void setgain(float dBgain);
         void reset();
 
@@ -44,11 +44,12 @@ class Reverter
         float delay;  
         float phase;
         float crossfade;
-           
-        int buffercounter;      
+        
+        float tRef;   
         float reverse_offset;
+        float reverse_index;
         float phase_offset;
-        float reverse_pos_hist;
+        float reverse_index_hist;
         int fading_samples;  
         int fade_counter; 
         

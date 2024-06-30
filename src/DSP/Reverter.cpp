@@ -13,30 +13,30 @@
 namespace zyn{
 
 Reverter::Reverter(Allocator *alloc, float delay_,
-    unsigned int srate, int bufsize, float tRef)
+    unsigned int srate, int bufsize, float tRef_)
     :input(nullptr),
     gain(1.0f),
     delay(delay_),
     phase(0.0f),
     crossfade(0.16f),
-    buffercounter(0),
+    tRef(tRef_),
     reverse_offset(0.0f),
+    reverse_index(0),
     phase_offset(0.0f),
-    reverse_pos_hist(0.0f),
+    reverse_index_hist(0.0f),
     fade_counter(0),
     memory(*alloc)
 {
     samplerate = srate;
     buffersize = bufsize;
-    fading_samples = (int)(srate*crossfade),
+    fading_samples = (int)(float(srate)*crossfade),
     max_delay = srate * MAX_REV_DELAY_SECONDS;
-    mem_size = (int)ceilf(max_delay*4.0f + 1.27f * samplerate) + 1; // TBD: calc real factor instead of 4.0
+    mem_size = (int)ceilf(max_delay*6.0f + 1.27f * samplerate) + 1; // TBD: calc real factor instead of 4.0
     input = (float*)memory.alloc_mem(mem_size*sizeof(float));
     reset();
 
     setdelay(delay);
     reverse_offset = fmodf(tRef, delay);
-    reverse_pos_hist = -1;
 }
 
 Reverter::~Reverter(void)
@@ -66,20 +66,23 @@ void Reverter::filterout(float *smp)
     
     for (int i = 0; i < buffersize; i ++)
     {
+        reverse_index = fmodf(reverse_index+1, delay);
         // calculate the current relative position inside the "reverted" buffer
-        const float reverse_pos = fmodf((reverse_offset+i+delay),delay);
+        const float reverse_pos = reverse_offset + reverse_index;
 
         
         // turnaround detection
-        if(reverse_pos<reverse_pos_hist) {
+        if(reverse_index<reverse_index_hist) {
             fade_counter = 0;  // reset fade counter
+            reverse_offset = fmodf(tRef, delay); // reset reverse offset
         }
         
         // store reverse_pos for turnaround detection in next tick
-        reverse_pos_hist = reverse_pos; 
+        reverse_index_hist = reverse_index; 
         
         // reading head
-        float pos = mem_size - 2.0f * delay + fading_samples - reverse_pos ;
+        //~ float pos = mem_size - 2.0f * delay + fading_samples + 1 - reverse_pos ;
+        float pos = mem_size - 2.0f * delay - reverse_pos ;
 
 
         // Debugging-Ausgabe
@@ -144,22 +147,23 @@ void Reverter::filterout(float *smp)
         smp[i] *= gain;
     }
     // increase the offset
-    reverse_offset += 2*buffersize; // + 1*buffersize because of the leftshifting 
-                                    // + 1*buffersize because i turns from buffersize-1 to 0
+    reverse_offset += buffersize; // + 1*buffersize because of the leftshifting 
+    
     // prevent overflow - no effect on reverse_pos in the next cycle
-    if (reverse_offset > delay) reverse_offset = fmodf(reverse_offset, delay);
+    //~ if (reverse_offset > delay) reverse_offset -= delay;
 }
 
-void Reverter::setdelay(float _delay)
+void Reverter::setdelay(float value)
 {
-    delay = _delay*float(samplerate);
+    delay = value*float(samplerate);
     
-    // limit fading_samples to be < 1/3 delay length
+    // limit fading_samples to be < 1/2 delay length
     fading_samples = int(crossfade * float(samplerate));
-    if (delay < 3 * fading_samples)
+    if (delay < 2.0f * float(fading_samples))
         fading_samples = int(delay*0.5f);
     
-    printf("setdelay: fading_samples: %d\n", fading_samples);
+    //~ printf("setdelay: delay: %f\n", delay);
+    //~ printf("setdelay: fading_samples: %d\n", fading_samples);
     
     // update phase_offset
     const float phase_offset_new = (phase-0.5f)*delay;
@@ -170,9 +174,9 @@ void Reverter::setdelay(float _delay)
     
 }
 
-void Reverter::setphase(float _phase)
+void Reverter::setphase(float value)
 {
-    phase = _phase;
+    phase = value;
     // update phase_offset
     const float phase_offset_new = (phase-0.5f)*delay;
     if(phase_offset_new != phase_offset) {
@@ -180,13 +184,13 @@ void Reverter::setphase(float _phase)
         phase_offset = phase_offset_new;
     }
 }
-void Reverter::setcrossfade(float _crossfade)
+void Reverter::setcrossfade(float value)
 {
-    crossfade = _crossfade;
+    crossfade = value;
     fading_samples = int(crossfade * float(samplerate));
-    if (delay < 3 * fading_samples)
+    if (delay < 2.0f * float(fading_samples))
         fading_samples = int(delay*0.5f);
-    printf("setcrossfade: fading_samples: %d\n", fading_samples);
+    //~ printf("setcrossfade: fading_samples: %d\n", fading_samples);
 
 }
 
