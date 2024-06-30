@@ -142,7 +142,7 @@ static const rtosc::Ports local_ports = {
                             // delay = 60 / tempo * 4 * numerator / denominator
                             delay = 60.0f / (float)eff->time->tempo * 4.0f * 
                                                 ((float)eff->numerator / (float)eff->denominator);
-                            Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS;
+                            Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             if (eff->numerator&&eff->denominator)
                                 eff->seteffectparrt(2, Pdelay);
                             break;
@@ -190,7 +190,7 @@ static const rtosc::Ports local_ports = {
                         case 10: // Reverse
                             delay = 60.0f / (float)eff->time->tempo * 4.0f * 
                                                 ((float)eff->numerator / (float)eff->denominator);
-                            Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS;
+                            Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             if (eff->numerator&&eff->denominator)
                                 eff->seteffectparrt(2, Pdelay);
                             break;
