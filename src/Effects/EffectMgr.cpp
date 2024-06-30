@@ -137,8 +137,8 @@ static const rtosc::Ports local_ports = {
                         case 2: // Echo
                         case 10: // Reverse
                             // invert:
-                            // delay = (Pdelay / 127.0f * MAX_REV_DELAY_SECONDS); //0 .. x sec
-                            // Pdelay = delay * 127.0f / MAX_REV_DELAY_SECONDS
+                            // delay = ((Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS); //0 .. x sec
+                            // Pdelay = (delay * 128.0f / MAX_REV_DELAY_SECONDS) -1
                             // delay = 60 / tempo * 4 * numerator / denominator
                             delay = 60.0f / (float)eff->time->tempo * 4.0f * 
                                                 ((float)eff->numerator / (float)eff->denominator);
