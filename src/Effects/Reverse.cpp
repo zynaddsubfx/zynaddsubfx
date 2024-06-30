@@ -20,8 +20,6 @@
 #include "../Misc/Util.h"
 #include "Reverse.h"
 
-#define MAX_DELAY 2
-
 namespace zyn {
 
 #define rObject Reverse
@@ -47,8 +45,8 @@ Reverse::Reverse(EffectParams pars, const AbsTime *time_)
     :Effect(pars),Pvolume(50),Pdelay(41),Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
-    reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/85.6666666667f, samplerate, buffersize, tRef);
-    reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/85.6666666667f, samplerate, buffersize, tRef);
+    reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef);
+    reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef);
     setpanning(64);
 }
 
@@ -106,8 +104,8 @@ void Reverse::setvolume(unsigned char _Pvolume)
 void Reverse::setdelay(unsigned char _Pdelay)
 {
     Pdelay = limit( _Pdelay,static_cast<unsigned char>(0),static_cast<unsigned char>(127));
-    reverterL->setdelay(float(Pdelay+1)/85.3333333333f);
-    reverterR->setdelay(float(Pdelay+1)/85.3333333333f);
+    reverterL->setdelay(float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS);
+    reverterR->setdelay(float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS);
 }
 
 void Reverse::setphase(unsigned char _Pphase)
