@@ -47,6 +47,7 @@ Reverse::Reverse(EffectParams pars, const AbsTime *time_)
     :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
+    printf("tRef: %f\n", tRef);
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef);
     reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef);
     setpanning(64);
@@ -103,16 +104,16 @@ void Reverse::setvolume(unsigned char _Pvolume)
         cleanup();
 }
 
-void Reverse::setdelay(unsigned char _Pdelay)
+void Reverse::setdelay(unsigned char value)
 {
-    Pdelay = limit( _Pdelay,static_cast<unsigned char>(0),static_cast<unsigned char>(127));
+    Pdelay = limit(value,static_cast<unsigned char>(0),static_cast<unsigned char>(127));
     reverterL->setdelay(float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS);
     reverterR->setdelay(float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS);
 }
 
-void Reverse::setphase(unsigned char _Pphase)
+void Reverse::setphase(unsigned char value)
 {
-    Pphase = _Pphase;
+    Pphase = value;
     reverterL->setphase(float(Pphase)/127.0f);
     reverterR->setphase(float(Pphase)/127.0f);
 }
