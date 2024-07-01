@@ -45,11 +45,12 @@ class Reverter
         float phase;
         float crossfade;
         
-        float tRef;   
-        float reverse_offset;
+        float tRef;  
+        int buffer_offset; 
+        int buffer_counter;
+        float global_offset;
         float reverse_index;
         float phase_offset;
-        float reverse_index_hist;
         int fading_samples;  
         int fade_counter; 
         
@@ -58,6 +59,8 @@ class Reverter
         int samplerate;
         int buffersize;
         float max_delay;
+             
+        float i_hist;
 
 };
 
