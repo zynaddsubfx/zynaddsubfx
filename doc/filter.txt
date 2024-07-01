@@ -23,6 +23,8 @@ cutoff, resonance, filter stages, and the filter type.
 The basic 'analog' filters that ZynAddSubFX offers are shown below, with the
 center frequency being marked by the red line.
 The 'state variable' filters should look quite similar.
+For more warmth and to serve the hype there is also a 'moog', that does the 
+same as 'analog' but with a special character.
 
 image:images/filter0.png[]
 
@@ -32,7 +34,7 @@ below.
 
 TIP: For many classical analog sounds, high Q values were used on sweeping
 filters. A simple high Q low pass filter modulated by a strong envelope is
-usually sufficient to get a good sound.
+usually sufficient to get a good sound. 
 
 image:images/filter1.png[]
 
@@ -63,6 +65,16 @@ _AnalogFilter::computefiltercoefs()_ sets the coefficients (depending on the
 filter type), and _AnalogFilter::singlefilterout()_ shows the whole polynomial
 (in a formula where no quotient is needed).
 ********************************************************************
+
+A special class of filter is the COMB Filter. It creates a spectrum with regular 
+spaced notches like a comb. It can 'simulate' the effect of the reflections
+of a surface next to a microphone using the type FWD. Or it can 'simulate' reflections
+that are created at the end of a string using type BWD or BOTH together.
+In the BWD setting with high Q setting the comb filter can self oscillate.
+Excited with a transient noise it can produce string like sounds.
+
+TIP: When using it in a voice make sure the Envelope doesn't sustain at 0 to prevent 
+the voice being killed while the filter is still making nice sounds. 
 
 User Interface
 ~~~~~~~~~~~~~~
