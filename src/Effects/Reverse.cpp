@@ -88,6 +88,7 @@ void Reverse::out(const Stereo<float *> &input)
         reverterL->sync(syncPos);
         if(Pstereo) reverterR->sync(syncPos);
     }
+    tick_hist = time->tick;
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
     else memcpy(efxoutr, efxoutl, bufferbytes);

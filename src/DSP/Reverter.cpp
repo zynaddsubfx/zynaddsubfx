@@ -126,6 +126,7 @@ void Reverter::filterout(float *smp)
 
 void Reverter::sync(float pos)
 {
+    printf("sync to pos: %f\n", pos);
     syncPos = pos;
     doSync = true;
 }

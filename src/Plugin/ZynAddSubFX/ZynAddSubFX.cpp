@@ -165,7 +165,7 @@ protected:
     */
     const char* getMaker() const noexcept override
     {
-        return "ZynAddSubFX Team";
+        return "ZynAddSubFX Team (friedolino test)";
     }
 
    /**
@@ -345,7 +345,6 @@ protected:
         
         // Zeitposition vom Host abfragen
         const TimePosition& timePosition = getTimePosition();
-
         
         if (! mutex.tryLock())
         {
@@ -374,20 +373,10 @@ protected:
 
             if (midiEvent.frame > framesOffset)
             {
-                        // Beispiel: Ausgabe der aktuellen Beat-Position und BPM
-                if (timePosition.bbt.valid) 
-                    master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
-                                                                         outputs[0]+framesOffset,
-                                                                         outputs[1]+framesOffset,
-                                                                         timePosition.bbt.bar,
-                                                                         timePosition.bbt.beat,
-                                                                         timePosition.bbt.tick,
-                                                                         timePosition.bbt.beatsPerMinute);
-                else
-                    master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
+                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
                                                                          outputs[0]+framesOffset,
                                                                          outputs[1]+framesOffset);
-                
+
                 framesOffset = midiEvent.frame;
             }
 
@@ -459,10 +448,20 @@ protected:
             } break;
             }
         }
-
-        if (frames > framesOffset)
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, outputs[0]+framesOffset,
-                                                                              outputs[1]+framesOffset);
+        
+        if (timePosition.bbt.valid) 
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, 
+                                                                 outputs[0]+framesOffset,
+                                                                 outputs[1]+framesOffset,
+                                                                 timePosition.bbt.bar,
+                                                                 timePosition.bbt.beat,
+                                                                 timePosition.bbt.tick,
+                                                                 timePosition.bbt.beatsPerMinute);
+                                                                 
+        else
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, 
+                                                                 outputs[0]+framesOffset,
+                                                                 outputs[1]+framesOffset);
 
         mutex.unlock();
     }
