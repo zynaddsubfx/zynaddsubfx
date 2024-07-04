@@ -25,9 +25,14 @@ class AbsTime
         void operator++(int){frames++;};
         int64_t time() const {return frames;};
         unsigned int tempo;
+        int bar;
+        int beat;
+        float tick;
+        float bpm;
         float dt() const { return s.dt(); }
         float framesPerSec() const { return 1/s.dt();}
         int   samplesPerFrame() const {return s.buffersize;}
+        int   samplerate() const {return s.buffersize / s.dt();}
     private:
         int64_t frames;
         const SYNTH_T &s;

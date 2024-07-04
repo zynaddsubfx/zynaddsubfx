@@ -141,7 +141,6 @@ public:
 protected:
    /* --------------------------------------------------------------------------------------------------------
     * Information */
-
    /**
       Get the plugin label.
       This label is a short restricted name consisting of only _, a-z, A-Z and 0-9 characters.
@@ -343,6 +342,11 @@ protected:
     */
     void run(const float**, float** outputs, uint32_t frames, const MidiEvent* midiEvents, uint32_t midiEventCount) override
     {
+        
+        // Zeitposition vom Host abfragen
+        const TimePosition& timePosition = getTimePosition();
+
+        
         if (! mutex.tryLock())
         {
             //if (! isOffline())
@@ -370,8 +374,20 @@ protected:
 
             if (midiEvent.frame > framesOffset)
             {
-                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, outputs[0]+framesOffset,
-                                                                                           outputs[1]+framesOffset);
+                        // Beispiel: Ausgabe der aktuellen Beat-Position und BPM
+                if (timePosition.bbt.valid) 
+                    master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
+                                                                         outputs[0]+framesOffset,
+                                                                         outputs[1]+framesOffset,
+                                                                         timePosition.bbt.bar,
+                                                                         timePosition.bbt.beat,
+                                                                         timePosition.bbt.tick,
+                                                                         timePosition.bbt.beatsPerMinute);
+                else
+                    master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
+                                                                         outputs[0]+framesOffset,
+                                                                         outputs[1]+framesOffset);
+                
                 framesOffset = midiEvent.frame;
             }
 

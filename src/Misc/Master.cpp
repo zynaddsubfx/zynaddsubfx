@@ -1255,6 +1255,8 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
+    
+    
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
@@ -1464,8 +1466,18 @@ bool Master::AudioOut(float *outl, float *outr)
 void Master::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr)
+                                float *outr,
+                                int bar,
+                                int beat,
+                                float tick,
+                                float bpm)
 {
+    
+    time.bar = bar;
+    time.beat = beat;
+    time.tick = tick;
+    time.bpm = bpm;
+    
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job

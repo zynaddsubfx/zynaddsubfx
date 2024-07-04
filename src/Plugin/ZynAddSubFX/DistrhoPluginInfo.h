@@ -42,6 +42,7 @@
 #define DISTRHO_PLUGIN_WANT_PROGRAMS    1
 #define DISTRHO_PLUGIN_WANT_STATE       1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE  1
+#define DISTRHO_PLUGIN_WANT_TIMEPOS     1
 
 enum Parameters {
     kParamSlot1,

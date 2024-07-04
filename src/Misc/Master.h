@@ -137,7 +137,11 @@ class Master
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr) REALTIME;
+                                float *outr,
+                                int bar=0,
+                                int beat=0,
+                                float tick=0.0f,
+                                float bpm=0.0f) REALTIME;
 
 
         void partonoff(int npart, int what);
