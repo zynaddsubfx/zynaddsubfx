@@ -442,12 +442,6 @@ if (filterwindow!=NULL){
         code0 {o->init("parameter9");}
         class Fl_Osc_Dial
       }
-      Fl_Check_Button {} {
-        label Flange
-        xywh {120 10 55 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10 hide deactivate
-        code0 {o->init("parameter10");}
-        class Fl_Osc_Check
-      }
       Fl_Check_Button chorusp11 {
         label Subtract
         tooltip {inverts the output} xywh {185 10 70 20} box THIN_UP_BOX down_box DOWN_BOX color 51 labelsize 10
@@ -469,6 +463,29 @@ if (filterwindow!=NULL){
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
       }
+      Fl_Choice chorusp10 {
+        label {Mode}
+        tooltip {LFO function} xywh {270 15 80 15} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 8
+        code0 {o->init("parameter10");}
+        class Fl_Osc_Choice
+      } {
+        MenuItem {} {
+          label CHORUS
+          xywh {15 15 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label FLANGE
+          xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label TRIPLE
+          xywh {35 35 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label DUAL
+          xywh {45 45 100 20} labelfont 1 labelsize 10
+        }
+      }    
     }
   }
   Function {make_phaser_window()} {} {
