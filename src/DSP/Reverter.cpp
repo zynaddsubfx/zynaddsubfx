@@ -13,7 +13,7 @@
 namespace zyn{
 
 Reverter::Reverter(Allocator *alloc, float delay_,
-    unsigned int srate, int bufsize, float tRef_)
+    unsigned int srate, int bufsize, float tRef_, const AbsTime *time_)
     :syncMode(AUTO),
     input(nullptr),
     gain(1.0f),
@@ -26,6 +26,7 @@ Reverter::Reverter(Allocator *alloc, float delay_,
     reverse_index(0.0f),
     phase_offset(0.0f),
     fade_counter(0),
+    time(time_),
     memory(*alloc)
 {
     samplerate = srate;
@@ -68,14 +69,19 @@ void Reverter::filterout(float *smp)
     for (int i = 0; i < buffersize; i ++)
     {
         
-        reverse_index = fmodf(reverse_index+1, delay);
+        if (syncMode == AUTO)
+            reverse_index = fmodf(reverse_index+1, delay);
+        else
+            reverse_index += 1; 
+        
         const float phase_samples = fmodf(global_offset+phase_offset, delay);
         // turnaround detection
         if((syncMode == AUTO && reverse_index==0) 
-        || (syncMode == HOST && doSync && reverse_index == syncPos) 
-        || (mem_size - phase_samples - delay - (buffer_offset + reverse_index))<0.0f 
-        ) // prevent oor
+        || (syncMode == HOST && doSync && reverse_index >= syncPos) 
+        || reverse_index >= max_delay
+        )
         {
+            printf("syncMode: %d\n", syncMode);
             doSync = false;
             reverse_index = 0;
             fade_counter = 0;  // reset fade counter
