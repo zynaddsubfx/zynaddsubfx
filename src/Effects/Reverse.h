@@ -64,17 +64,21 @@ class Reverse final:public Effect
         unsigned char Pdelay;   /**<#2 Length of reversed segment 127 = 1.5s*/
         unsigned char Pphase;
         unsigned char Pcrossfade;
+        unsigned char PsyncMode;
         unsigned char Pstereo;
 
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
         void setphase(unsigned char _Pphase);
         void setcrossfade(unsigned char value);
+        void setsyncMode(unsigned char value);
         
         const AbsTime *time;
 
         Reverter* reverterL;
         Reverter* reverterR;
+        
+        float tick_hist;
 };
 
 }

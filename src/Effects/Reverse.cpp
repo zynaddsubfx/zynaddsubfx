@@ -38,13 +38,16 @@ rtosc::Ports Reverse::ports = {
             "Phase offset for Reversed Segment"),
     rEffPar(Pcrossfade,5, rShort("fade"), rLinear(0, 127), rDefault(16),
             "Cross Fade Time between Reversed Segments 1/100s"),
+    rEffParOpt(Psyncmode,    6, rShort("sync"),
+            rOptions(SYNCMODES), rLinear(0,127), 
+            "Sync Mode"),
 };
 #undef rBegin
 #undef rEnd
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), Pstereo(0),time(time_)
+    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), PsyncMode(AUTO), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
     printf("tRef: %f\n", tRef);
@@ -79,6 +82,12 @@ void Reverse::out(const Stereo<float *> &input)
         for(int i = 0; i < buffersize; ++i)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
+    if (time->bpm && time->beat==0 && time->tick < tick_hist)
+    {
+        const float syncPos = float(buffersize) - ((time->tick/1920.0f)*(60.0f/time->bpm)*(float)(time->samplerate()));
+        reverterL->sync(syncPos);
+        if(Pstereo) reverterR->sync(syncPos);
+    }
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
     else memcpy(efxoutr, efxoutl, bufferbytes);
@@ -125,6 +134,13 @@ void Reverse::setcrossfade(unsigned char value)
     reverterR->setcrossfade(float(value)/100.0f);
 }
 
+void Reverse::setsyncMode(unsigned char value)
+{
+    PsyncMode = value;
+    reverterL->setsyncMode((SyncMode)value);
+    reverterR->setsyncMode((SyncMode)value);
+}
+
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 {
     return 0;
@@ -156,6 +172,9 @@ void Reverse::changepar(int npar, unsigned char value)
         case 5:
             setcrossfade(value);
             break;
+        case 6:
+            setsyncMode(value);
+            break;
     }
 }
 
@@ -168,6 +187,7 @@ unsigned char Reverse::getpar(int npar) const
         case 3:  return Pstereo;
         case 4:  return Pphase;
         case 5:  return Pcrossfade;
+        case 6:  return PsyncMode;
         default: return 0; // in case of bogus parameter number
     }
 }

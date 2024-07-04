@@ -17,10 +17,24 @@
 
 namespace zyn {
 
+#define SYNCMODES   AUTO,\
+                    MIDI,\
+                    HOST,\
+                    NOTEON
+
+        enum SyncMode 
+        { 
+            SYNCMODES
+        };
 
 class Reverter
 {
     public:
+
+
+        SyncMode syncMode;  
+    
+    
         //! @param Fq resonance, range [0.1,1000], logscale
         Reverter(Allocator *alloc, float delay,
                 unsigned int srate, int bufsize, float tRef=0.0f);
@@ -29,8 +43,10 @@ class Reverter
         void setdelay(float value);
         void setphase(float value);
         void setcrossfade(float value);
-        void setgain(float dBgain);
+        void setgain(float value);
+        void setsyncMode(SyncMode value);
         void reset();
+        void sync(float pos);
 
     private:
     
@@ -60,7 +76,8 @@ class Reverter
         int buffersize;
         float max_delay;
              
-        float i_hist;
+        float i_hist, syncPos;
+        bool doSync;
 
 };
 

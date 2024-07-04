@@ -14,7 +14,8 @@ namespace zyn{
 
 Reverter::Reverter(Allocator *alloc, float delay_,
     unsigned int srate, int bufsize, float tRef_)
-    :input(nullptr),
+    :syncMode(AUTO),
+    input(nullptr),
     gain(1.0f),
     delay(delay_),
     phase(0.0f),
@@ -68,17 +69,19 @@ void Reverter::filterout(float *smp)
     {
         
         reverse_index = fmodf(reverse_index+1, delay);
-        
+        const float phase_samples = fmodf(global_offset+phase_offset, delay);
         // turnaround detection
-        if(reverse_index==0) {
+        if((syncMode == AUTO && reverse_index==0) 
+        || (syncMode == HOST && doSync && reverse_index == syncPos) 
+        || (mem_size - phase_samples - delay - (buffer_offset + reverse_index))<0.0f 
+        ) // prevent oor
+        {
+            doSync = false;
+            reverse_index = 0;
             fade_counter = 0;  // reset fade counter
             buffer_counter = 0; // reset buffer counter
-            
-            const int drift = i - i_hist;
+            global_offset -= i - i_hist;
             i_hist = i;
-            
-            global_offset -= (drift);
-            
         }
         
         buffer_offset = buffer_counter*buffersize;
@@ -87,10 +90,7 @@ void Reverter::filterout(float *smp)
         const float reverse_pos = buffer_offset + reverse_index;
         
         // reading head
-        float pos = mem_size - delay - reverse_pos ;
-
-        // apply phase offset
-        pos -= fmodf(global_offset+phase_offset, delay);
+        const float pos = mem_size - delay - reverse_pos - phase_samples;
 
         assert(pos >= 0 && pos < mem_size);
         
@@ -116,6 +116,12 @@ void Reverter::filterout(float *smp)
     }
     // increase the offset
     buffer_counter++;
+}
+
+void Reverter::sync(float pos)
+{
+    syncPos = pos;
+    doSync = true;
 }
 
 void Reverter::setdelay(float value)
@@ -149,9 +155,14 @@ void Reverter::setcrossfade(float value)
 
 }
 
-void Reverter::setgain(float dBgain)
+void Reverter::setgain(float value)
 {
-    gain = dB2rap(dBgain);
+    gain = dB2rap(value);
+}
+
+void Reverter::setsyncMode(SyncMode value)
+{
+    syncMode = value;
 }
 
 void Reverter::reset()
