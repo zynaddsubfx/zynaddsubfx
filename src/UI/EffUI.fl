@@ -914,6 +914,10 @@ if (filterwindow!=NULL){
           label Coerc
           xywh {145 145 100 20} labelfont 1 labelsize 10
         }
+        MenuItem {} {
+          label DualTanh
+          xywh {155 155 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Check_Button distp6 {
         label {Neg.}
@@ -1944,6 +1948,10 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
         MenuItem {} {
           label Coerc
           xywh {145 145 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label DualTanh
+          xywh {155 155 100 20} labelfont 1 labelsize 10
         }
       }
     }
