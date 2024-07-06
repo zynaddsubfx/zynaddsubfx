@@ -34,11 +34,14 @@ Reverter::Reverter(Allocator *alloc, float delay_,
     fading_samples = (int)(float(srate)*crossfade),
     max_delay = srate * MAX_REV_DELAY_SECONDS;
     mem_size = (int)(ceilf(max_delay*4.0f)) + 1.27f * samplerate + 2;
-    input = (float*)memory.alloc_mem(mem_size*sizeof(float));
+    input = (float*)memory.alloc_mem((mem_size+buffersize)*sizeof(float));
     reset();
 
     setdelay(delay);
     global_offset = fmodf(tRef, delay);
+    
+    pos_writer = 0;
+    pos_start = 0;
     
 }
 
@@ -61,44 +64,35 @@ inline float hanningWindow(float x) {
 
 void Reverter::filterout(float *smp)
 {
-    // shift the buffer content to the left
-    memmove(&input[0], &input[buffersize], (mem_size-buffersize)*sizeof(float));
     // copy new input samples to the right end of the buffer
-    memcpy(&input[mem_size-buffersize], smp, buffersize*sizeof(float));
+    memcpy(&input[pos_writer], smp, buffersize*sizeof(float));
+    const int copysamples = pos_writer - mem_size + buffersize;
+    if (copysamples > 0) memcpy(&input[0], &input[mem_size], copysamples*sizeof(float));
     
     for (int i = 0; i < buffersize; i ++)
     {
+        reverse_index++; 
         
-        if (syncMode == AUTO)
-            reverse_index = fmodf(reverse_index+1, delay);
-        else
-            reverse_index += 1; 
-        
-        const float phase_samples = fmodf(global_offset+phase_offset, delay);
         // turnaround detection
-        if((syncMode == AUTO && reverse_index==0) 
+        if((syncMode == AUTO && reverse_index>delay) 
         || (syncMode == HOST && doSync && reverse_index >= syncPos) 
-        || reverse_index >= max_delay
+        || reverse_index >= max_delay // just in case
         )
         {
-            printf("syncMode: %d\n", syncMode);
             doSync = false;
             reverse_index = 0;
+            
+            // position to start the reverse playing from
+            pos_start = pos_writer + buffersize;   
+            
+            const float pos_next = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
+            delta_crossfade = pos_reader - 1.0 - pos_next;
+                    
             fade_counter = 0;  // reset fade counter
-            buffer_counter = 0; // reset buffer counter
-            global_offset -= i - i_hist;
-            i_hist = i;
         }
         
-        buffer_offset = buffer_counter*buffersize;
-        
-        // calculate the current relative position inside the "reverted" buffer
-        const float reverse_pos = buffer_offset + reverse_index;
-        
-        // reading head
-        const float pos = mem_size - delay - reverse_pos - phase_samples;
-
-        assert(pos >= 0 && pos < mem_size);
+        // pos_reader
+        pos_reader = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
         
         if(fade_counter < fading_samples) // inside fading segment
         {
@@ -107,27 +101,28 @@ void Reverter::filterout(float *smp)
             const float fadeout = 1.0f - fadein;               // 1 -> 0
             fade_counter++;
 
-            assert(pos-delay>=0);
-
             // fade in the newer sampleblock + fade out the older samples
-            smp[i] = fadein*sampleLerp( input, pos) + fadeout*sampleLerp( input, pos - 2*delay);
+            smp[i] = fadein*sampleLerp(input, pos_reader) + fadeout*sampleLerp(input, fmodf(pos_reader + delta_crossfade, mem_size));
             
         }
         else { // outside fading segment
-            smp[i] = sampleLerp( input, pos);
+            smp[i] = sampleLerp(input, pos_reader);
         }
         
         // apply output gain
         smp[i] *= gain;
     }
-    // increase the offset
-    buffer_counter++;
+    
+        // increment writing position
+    pos_writer += buffersize;
+    pos_writer %= mem_size;
+    
 }
 
 void Reverter::sync(float pos)
 {
-    printf("sync to pos: %f\n", pos);
-    syncPos = pos;
+    
+    syncPos = pos+reverse_index;
     doSync = true;
 }
 

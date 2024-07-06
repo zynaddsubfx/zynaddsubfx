@@ -57,7 +57,7 @@ class Reverter
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
         
-        float delay;  
+        float delay;   
         float phase;
         float crossfade;
         
@@ -73,13 +73,16 @@ class Reverter
         const AbsTime *time;
         
         Allocator &memory;
-        int mem_size;
+        unsigned int mem_size;
         int samplerate;
         int buffersize;
         float max_delay;
              
-        float i_hist, syncPos;
+        unsigned int pos_start;
+        float syncPos, pos_reader, delta_crossfade;
         bool doSync;
+        
+        unsigned int pos_writer = 0;
 
 };
 
