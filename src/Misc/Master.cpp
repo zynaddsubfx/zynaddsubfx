@@ -1473,11 +1473,12 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 float bpm)
 {
     
-    time.bar = bar;
-    time.beat = beat;
-    time.tick = tick;
-    time.bpm = bpm;
-    
+    if(bpm) {
+        time.bar = bar;
+        time.beat = beat;
+        time.tick = tick;
+        time.tempo = bpm;
+    }
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job

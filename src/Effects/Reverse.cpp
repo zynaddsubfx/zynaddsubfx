@@ -82,9 +82,10 @@ void Reverse::out(const Stereo<float *> &input)
         for(int i = 0; i < buffersize; ++i)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
-    if (time->bpm && time->beat==1 && time->tick < tick_hist)
+
+    if (time->tempo && time->tick < tick_hist)
     {
-        const float syncPos = (time->tick/1920.0f)*(60.0f/time->bpm)*(float)(time->samplerate());
+        const float syncPos = (time->tick/1920.0f)*(60.0f/time->tempo)*(float)(time->samplerate());
         printf("syncPos: %f\n", syncPos);
         reverterL->sync(syncPos);
         if(Pstereo) reverterR->sync(syncPos);

@@ -24,7 +24,8 @@ Reverter::Reverter(Allocator *alloc, float delay_,
     buffer_offset(0),
     buffer_counter(0),
     reverse_index(0.0f),
-    phase_offset(0.0f),
+    phase_offset_old(0.0f),
+    phase_offset_fade(0.0f),
     fade_counter(0),
     time(time_),
     memory(*alloc)
@@ -68,10 +69,14 @@ void Reverter::filterout(float *smp)
     memcpy(&input[pos_writer], smp, buffersize*sizeof(float));
     const int copysamples = pos_writer - mem_size + buffersize;
     if (copysamples > 0) memcpy(&input[0], &input[mem_size], copysamples*sizeof(float));
-    
+    //~ printf("phase_offset_old: %f\n", phase_offset_old);
+    //~ printf("phase_offset_fade: %f\n", phase_offset_fade);
+    float phase_offset;
     for (int i = 0; i < buffersize; i ++)
     {
         reverse_index++; 
+        
+        phase_offset = phase_offset_old + (float(i) * phase_offset_fade);
         
         // turnaround detection
         if((syncMode == AUTO && reverse_index>delay) 
@@ -92,6 +97,7 @@ void Reverter::filterout(float *smp)
         }
         
         // pos_reader
+
         pos_reader = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
         
         if(fade_counter < fading_samples) // inside fading segment
@@ -101,8 +107,10 @@ void Reverter::filterout(float *smp)
             const float fadeout = 1.0f - fadein;               // 1 -> 0
             fade_counter++;
 
+            assert(pos_reader<mem_size && pos_reader >= 0.0f);
+            
             // fade in the newer sampleblock + fade out the older samples
-            smp[i] = fadein*sampleLerp(input, pos_reader) + fadeout*sampleLerp(input, fmodf(pos_reader + delta_crossfade, mem_size));
+            smp[i] = fadein*sampleLerp(input, pos_reader) + fadeout*sampleLerp(input, fmodf(pos_reader + mem_size + delta_crossfade, mem_size));
             
         }
         else { // outside fading segment
@@ -113,7 +121,10 @@ void Reverter::filterout(float *smp)
         smp[i] *= gain;
     }
     
-        // increment writing position
+    phase_offset_old = phase_offset;
+    phase_offset_fade = 0.0f;
+    
+    // increment writing position
     pos_writer += buffersize;
     pos_writer %= mem_size;
     
@@ -126,6 +137,14 @@ void Reverter::sync(float pos)
     doSync = true;
 }
 
+void inline Reverter::update_phase(float value)
+{
+    // update phase_offset
+    const float phase_offset_new = value * delay;
+    phase_offset_fade = (phase_offset_new - phase_offset_old) / (float)buffersize;    
+}
+
+
 void Reverter::setdelay(float value)
 {
     delay = value*float(samplerate);
@@ -135,17 +154,15 @@ void Reverter::setdelay(float value)
     if (delay < 2.0f * float(fading_samples))
         fading_samples = int(delay*0.5f);
     
-    // update phase_offset
-    phase_offset = phase*delay;
     global_offset = fmodf(tRef, delay);
-    
+        
+    update_phase(phase);
 }
 
 void Reverter::setphase(float value)
 {
     phase = value;
-    // update phase_offset
-    phase_offset = phase*delay;
+    update_phase(phase);
     
 }
 void Reverter::setcrossfade(float value)

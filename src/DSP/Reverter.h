@@ -47,9 +47,12 @@ class Reverter
         void setsyncMode(SyncMode value);
         void reset();
         void sync(float pos);
+        
 
     private:
     
+        void inline update_phase(float phase);
+        
         float* input;
         float gain;
 
@@ -66,7 +69,8 @@ class Reverter
         int buffer_counter;
         float global_offset;
         float reverse_index;
-        float phase_offset;
+        float phase_offset_old;
+        float phase_offset_fade;
         int fading_samples;  
         int fade_counter; 
         
