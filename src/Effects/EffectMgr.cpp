@@ -133,7 +133,7 @@ static const rtosc::Ports local_ports = {
                     int Pdelay, Pfreq;
                     float freq, delay;
                     if (eff->numerator&&eff->denominator) {
-                        eff->efx->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
+                        eff->efx->speedfactor = (float)eff->denominator / (4.0f *(float)eff->numerator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
@@ -141,7 +141,7 @@ static const rtosc::Ports local_ports = {
                             // delay = ((Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS); //0 .. x sec
                             // Pdelay = (delay * 128.0f / MAX_REV_DELAY_SECONDS) -1
                             // delay = 60 / tempo * 4 * numerator / denominator
-                            delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
+                            delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             eff->seteffectparrt(2, Pdelay);                                
                             break;
@@ -149,7 +149,7 @@ static const rtosc::Ports local_ports = {
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                            freq =  (float)eff->time->tempo * 60.0 / eff->speedfactor;
+                            freq =  (float)eff->time->tempo * 60.0 * eff->efx->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
@@ -180,11 +180,11 @@ static const rtosc::Ports local_ports = {
                     int Pdelay, Pfreq;
                     float freq, delay;
                     if (eff->numerator&&eff->denominator) {
-                        eff->efx->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
+                        eff->efx->speedfactor = (float)eff->denominator / (4.0f *(float)eff->numerator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
-                            delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
+                            delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             eff->seteffectparrt(2, Pdelay);
                             break;
@@ -192,7 +192,7 @@ static const rtosc::Ports local_ports = {
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                            freq =  (float)eff->time->tempo * 60.0 / eff->speedfactor;
+                            freq =  (float)eff->time->tempo * 60.0 * eff->efx->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);

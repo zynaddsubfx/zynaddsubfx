@@ -76,7 +76,7 @@ class EffectMgr:public Presets
         
         int numerator;
         int denominator;
-        float speedfactor;
+        //~ float speedfactor;
         
     private:
 
