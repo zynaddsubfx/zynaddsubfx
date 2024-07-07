@@ -22,10 +22,19 @@ namespace zyn {
                     HOST,\
                     NOTEON
 
-        enum SyncMode 
-        { 
-            SYNCMODES
-        };
+enum SyncMode 
+{ 
+    SYNCMODES
+};
+
+#define STATE   RECORDING,\
+                PLAYING,\
+                IDLE
+
+enum State 
+{ 
+    STATE
+};
 
 class Reverter
 {
@@ -37,7 +46,7 @@ class Reverter
     
         //! @param Fq resonance, range [0.1,1000], logscale
         Reverter(Allocator *alloc, float delay,
-                unsigned int srate, int bufsize, float tRef=0.0f, const AbsTime *time_=nullptr);
+                unsigned int srate, int bufsize, float tRef=0.0f, AbsTime *time_=nullptr);
         ~Reverter();
         void filterout(float *smp);
         void setdelay(float value);
@@ -48,6 +57,7 @@ class Reverter
         void reset();
         void sync(float pos);
         
+        State state;
 
     private:
     
@@ -74,7 +84,7 @@ class Reverter
         int fading_samples;  
         int fade_counter; 
         
-        const AbsTime *time;
+        AbsTime *time;
         
         Allocator &memory;
         unsigned int mem_size;
@@ -87,6 +97,8 @@ class Reverter
         bool doSync;
         
         unsigned int pos_writer = 0;
+        
+        
 
 };
 

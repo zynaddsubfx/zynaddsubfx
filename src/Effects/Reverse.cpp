@@ -46,11 +46,10 @@ rtosc::Ports Reverse::ports = {
 #undef rEnd
 #undef rObject
 
-Reverse::Reverse(EffectParams pars, const AbsTime *time_)
+Reverse::Reverse(EffectParams pars, AbsTime *time_)
     :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), PsyncMode(AUTO), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
-    printf("tRef: %f\n", tRef);
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     setpanning(64);
@@ -73,6 +72,7 @@ void Reverse::cleanup(void)
 //Effect output
 void Reverse::out(const Stereo<float *> &input)
 {
+    // prepare the brocessing buffers
     if(Pstereo) //Stereo
         for(int i = 0; i < buffersize; ++i) {
             efxoutl[i] = input.l[i] * pangainL;
@@ -83,6 +83,7 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
 
+    // process external timecode to sync
     
     unsigned int beat_new;
     if (time->tempo && speedfactor && PsyncMode == HOST)
@@ -91,16 +92,26 @@ void Reverse::out(const Stereo<float *> &input)
         const unsigned int delay_ticks = int(1920.0f * speedfactor);
         beat_new = tick/delay_ticks;
         const unsigned int phase_ticks = tick%delay_ticks;
-        
+    
         if(beat_new!=beat_new_hist) {
-            
             const float syncPos = (phase_ticks/delay_ticks)*(60.0f/time->tempo)*(float)(time->samplerate());
-            printf("syncPos: %f\n", syncPos);
             reverterL->sync(syncPos);
             if(Pstereo) reverterR->sync(syncPos);
         }
+    
+    
     }
+    // store beat_new for next cycle
     beat_new_hist = beat_new;
+    
+    // process noteon trigger
+    if(PsyncMode == NOTEON && time->trigger) {
+        time->trigger = false;
+        reverterL->sync(0.0f);
+        if(Pstereo) reverterR->sync(0.0f);
+    }
+    
+    // do the actual processing
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
     else memcpy(efxoutr, efxoutl, bufferbytes);

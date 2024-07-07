@@ -261,7 +261,7 @@ static const rtosc::Ports local_ports = {
 const rtosc::Ports &EffectMgr::ports = local_ports;
 
 EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
-                     const bool insertion_, const AbsTime *time_)
+                     const bool insertion_, AbsTime *time_)
     :insertion(insertion_),
       efxoutl(new float[synth_.buffersize]),
       efxoutr(new float[synth_.buffersize]),

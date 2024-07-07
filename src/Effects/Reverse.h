@@ -25,7 +25,7 @@ namespace zyn {
 class Reverse final:public Effect
 {
     public:
-        Reverse(EffectParams pars, const AbsTime *time_);
+        Reverse(EffectParams pars, AbsTime *time_);
         ~Reverse();
 
         void out(const Stereo<float *> &input);
@@ -73,7 +73,7 @@ class Reverse final:public Effect
         void setcrossfade(unsigned char value);
         void setsyncMode(unsigned char value);
         
-        const AbsTime *time;
+        AbsTime *time;
 
         Reverter* reverterL;
         Reverter* reverterR;

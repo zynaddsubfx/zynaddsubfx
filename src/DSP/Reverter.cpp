@@ -13,7 +13,7 @@
 namespace zyn{
 
 Reverter::Reverter(Allocator *alloc, float delay_,
-    unsigned int srate, int bufsize, float tRef_, const AbsTime *time_)
+    unsigned int srate, int bufsize, float tRef_, AbsTime *time_)
     :syncMode(AUTO),
     input(nullptr),
     gain(1.0f),
@@ -69,8 +69,6 @@ void Reverter::filterout(float *smp)
     memcpy(&input[pos_writer], smp, buffersize*sizeof(float));
     const int copysamples = pos_writer - mem_size + buffersize;
     if (copysamples > 0) memcpy(&input[0], &input[mem_size], copysamples*sizeof(float));
-    //~ printf("phase_offset_old: %f\n", phase_offset_old);
-    //~ printf("phase_offset_fade: %f\n", phase_offset_fade);
     float phase_offset;
     for (int i = 0; i < buffersize; i ++)
     {
@@ -78,17 +76,19 @@ void Reverter::filterout(float *smp)
         
         phase_offset = phase_offset_old + (float(i) * phase_offset_fade);
         
-        // turnaround detection
+        // switch to next buffer
         if((syncMode == AUTO && reverse_index>delay) 
         || (syncMode == HOST && doSync && reverse_index >= syncPos) 
-        || reverse_index >= max_delay // just in case
+        || (reverse_index >= max_delay && state==PLAYING) // just in case
         )
         {
             doSync = false;
+            state = PLAYING;
+            printf("XXX\n");
             reverse_index = 0;
             
             // position to start the reverse playing from
-            pos_start = pos_writer + buffersize;   
+            pos_start = pos_writer + buffersize + delay/2.0f;   
             
             const float pos_next = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
             delta_crossfade = pos_reader - 1.0 - pos_next;
@@ -96,25 +96,49 @@ void Reverter::filterout(float *smp)
             fade_counter = 0;  // reset fade counter
         }
         
+        if(syncMode == NOTEON && reverse_index > delay && state!=IDLE){
+            
+            reverse_index = 0;
+            fade_counter = 0;  // reset fade counter
+            
+            if (state==RECORDING) {
+                state = PLAYING;
+                printf("syncMode: NOTEON state: PLAYING  delay: %f\n", delay);
+                // position to start the reverse playing from
+                pos_start = pos_writer + buffersize + delay/2.0f;   
+            } else if (state==PLAYING) {
+                state = IDLE;
+                const float pos_next = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
+                delta_crossfade = pos_reader - 1.0 - pos_next;
+                printf("syncMode: NOTEON state: IDLE\n");
+            }
+        }
+                
         // pos_reader
-
         pos_reader = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
         
-        if(fade_counter < fading_samples) // inside fading segment
+        if(fade_counter < fading_samples) // inside cross fading segment
         {
             const float slope = float(fade_counter)/float(fading_samples);  // 0 -> 1
             const float fadein = hanningWindow(slope);
-            const float fadeout = 1.0f - fadein;               // 1 -> 0
+            const float fadeout = 1.0f - fadein;      // 1 -> 0
             fade_counter++;
 
             assert(pos_reader<mem_size && pos_reader >= 0.0f);
             
-            // fade in the newer sampleblock + fade out the older samples
-            smp[i] = fadein*sampleLerp(input, pos_reader) + fadeout*sampleLerp(input, fmodf(pos_reader + mem_size + delta_crossfade, mem_size));
-            
+            // fadeing after switching segments
+            if(state == IDLE) // only fade out
+                smp[i] = fadeout*sampleLerp(input, fmodf(pos_reader + mem_size + delta_crossfade, mem_size));
+            if(state == PLAYING) {
+                if (syncMode == NOTEON) // only fade in
+                    smp[i] = fadein*sampleLerp(input, pos_reader);
+                else // cross fade
+                    smp[i] = fadein*sampleLerp(input, pos_reader) + fadeout*sampleLerp(input, fmodf(pos_reader + mem_size + delta_crossfade, mem_size));
+            }
         }
-        else { // outside fading segment
-            smp[i] = sampleLerp(input, pos_reader);
+        else { // outside cross fading segment
+            if(state == PLAYING)
+                smp[i] = sampleLerp(input, pos_reader);
         }
         
         // apply output gain
@@ -131,10 +155,18 @@ void Reverter::filterout(float *smp)
 }
 
 void Reverter::sync(float pos)
-{
+{  
+    if(state==IDLE) {
+        state = RECORDING;
+        reverse_index = 0;
+        printf("syncing to noteon state: RECORDING\n");
+    }
+    else {
+        syncPos = pos+reverse_index;
+        doSync = true;
+    }
     
-    syncPos = pos+reverse_index;
-    doSync = true;
+    
 }
 
 void inline Reverter::update_phase(float value)
@@ -181,7 +213,22 @@ void Reverter::setgain(float value)
 
 void Reverter::setsyncMode(SyncMode value)
 {
-    syncMode = value;
+    if (value != syncMode)
+    {
+        syncMode = value;
+        
+        switch(syncMode)
+        {
+            case NOTEON:
+                state = IDLE;
+                break;
+            default:
+                state = PLAYING;
+                break;
+        }
+        printf("setting syncMode: %d state: %d\n", syncMode, state);
+        
+    }
 }
 
 void Reverter::reset()

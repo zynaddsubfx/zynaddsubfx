@@ -29,6 +29,7 @@ class AbsTime
         int beat;
         float tick;
         float bpm;
+        bool trigger;
         float dt() const { return s.dt(); }
         float framesPerSec() const { return 1/s.dt();}
         int   samplesPerFrame() const {return s.buffersize;}
