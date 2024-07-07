@@ -133,7 +133,7 @@ static const rtosc::Ports local_ports = {
                     int Pdelay, Pfreq;
                     float freq, delay;
                     if (eff->numerator&&eff->denominator) {
-                        eff->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
+                        eff->efx->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
@@ -180,7 +180,7 @@ static const rtosc::Ports local_ports = {
                     int Pdelay, Pfreq;
                     float freq, delay;
                     if (eff->numerator&&eff->denominator) {
-                        eff->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
+                        eff->efx->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse

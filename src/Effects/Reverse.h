@@ -78,7 +78,8 @@ class Reverse final:public Effect
         Reverter* reverterL;
         Reverter* reverterR;
         
-        float tick_hist;
+        unsigned int tick;
+        unsigned int beat_new_hist;
 };
 
 }

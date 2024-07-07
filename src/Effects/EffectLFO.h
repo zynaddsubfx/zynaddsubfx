@@ -45,6 +45,8 @@ class EffectLFO
         float buffersize_f;
         
         const AbsTime *time;
+        unsigned int numerator;
+        unsigned int denominator;
 };
 
 }

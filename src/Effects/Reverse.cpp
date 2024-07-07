@@ -83,14 +83,24 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
     
 
-    if (time->tempo && time->tick < tick_hist)
+    
+    unsigned int beat_new;
+    if (time->tempo && speedfactor)
     {
-        const float syncPos = (time->tick/1920.0f)*(60.0f/time->tempo)*(float)(time->samplerate());
-        printf("syncPos: %f\n", syncPos);
-        reverterL->sync(syncPos);
-        if(Pstereo) reverterR->sync(syncPos);
+        tick = (time->beat-1)*1920 + time->tick;
+        const unsigned int delay_ticks = int(1920.0f * speedfactor);
+        beat_new = tick/delay_ticks;
+        const unsigned int phase_ticks = tick%delay_ticks;
+        
+        if(beat_new!=beat_new_hist) {
+            
+            const float syncPos = (phase_ticks/delay_ticks)*(60.0f/time->tempo)*(float)(time->samplerate());
+            printf("syncPos: %f\n", syncPos);
+            reverterL->sync(syncPos);
+            if(Pstereo) reverterR->sync(syncPos);
+        }
     }
-    tick_hist = time->tick;
+    beat_new_hist = beat_new;
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
     else memcpy(efxoutr, efxoutl, bufferbytes);
