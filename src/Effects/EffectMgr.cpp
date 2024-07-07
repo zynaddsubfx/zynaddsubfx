@@ -143,7 +143,7 @@ static const rtosc::Ports local_ports = {
                             // delay = 60 / tempo * 4 * numerator / denominator
                             delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            //eff->seteffectparrt(2, Pdelay);                                
+                            eff->seteffectparrt(2, Pdelay);                                
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
@@ -153,7 +153,7 @@ static const rtosc::Ports local_ports = {
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            //eff->seteffectparrt(2, Pfreq);
+                            eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
@@ -186,7 +186,7 @@ static const rtosc::Ports local_ports = {
                         case 10: // Reverse
                             delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            //eff->seteffectparrt(2, Pdelay);
+                            eff->seteffectparrt(2, Pdelay);
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
@@ -196,7 +196,7 @@ static const rtosc::Ports local_ports = {
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            //eff->seteffectparrt(2, Pfreq);
+                            eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
