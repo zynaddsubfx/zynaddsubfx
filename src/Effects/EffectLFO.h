@@ -14,6 +14,8 @@
 #ifndef EFFECT_LFO_H
 #define EFFECT_LFO_H
 
+#include "../Misc/Time.h"
+
 namespace zyn {
 
 /**LFO for some of the Effect objects
@@ -21,7 +23,7 @@ namespace zyn {
 class EffectLFO
 {
     public:
-        EffectLFO(float srate_f, float bufsize_f);
+        EffectLFO(float srate_f, float bufsize_f, const AbsTime *time = nullptr);
         ~EffectLFO();
         void effectlfoout(float *outl, float *outr);
         void updateparams(void);
@@ -31,7 +33,7 @@ class EffectLFO
         unsigned char Pstereo; // 64 is centered
     private:
         float getlfoshape(float x);
-
+        
         float xl, xr;
         float incx;
         float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
@@ -41,6 +43,8 @@ class EffectLFO
         // current setup
         float samplerate_f;
         float buffersize_f;
+        
+        const AbsTime *time;
 };
 
 }
