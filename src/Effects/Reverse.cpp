@@ -85,7 +85,7 @@ void Reverse::out(const Stereo<float *> &input)
 
     
     unsigned int beat_new;
-    if (time->tempo && speedfactor)
+    if (time->tempo && speedfactor && PsyncMode == HOST)
     {
         tick = (time->beat-1)*1920 + time->tick;
         const unsigned int delay_ticks = int(1920.0f * speedfactor);
