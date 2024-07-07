@@ -132,7 +132,8 @@ static const rtosc::Ports local_ports = {
                     eff->numerator = val;
                     int Pdelay, Pfreq;
                     float freq, delay;
-                    if(eff->denominator) {
+                    if (eff->numerator&&eff->denominator) {
+                        eff->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
@@ -140,25 +141,19 @@ static const rtosc::Ports local_ports = {
                             // delay = ((Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS); //0 .. x sec
                             // Pdelay = (delay * 128.0f / MAX_REV_DELAY_SECONDS) -1
                             // delay = 60 / tempo * 4 * numerator / denominator
-                            delay = 60.0f / (float)eff->time->tempo * 4.0f * 
-                                                ((float)eff->numerator / (float)eff->denominator);
+                            delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pdelay);
+                            //eff->seteffectparrt(2, Pdelay);                                
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                        
-                            freq =  ((float)eff->time->tempo * 
-                                     (float)eff->denominator / 
-                                     (240.0f * (float)eff->numerator));
+                            freq =  (float)eff->time->tempo * 60.0 / eff->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pfreq);
+                            //eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
@@ -184,28 +179,24 @@ static const rtosc::Ports local_ports = {
                     eff->denominator = val;
                     int Pdelay, Pfreq;
                     float freq, delay;
-                    if(eff->numerator) {
+                    if (eff->numerator&&eff->denominator) {
+                        eff->speedfactor = 4.0f * ((float)eff->numerator / (float)eff->denominator);
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
-                            delay = 60.0f / (float)eff->time->tempo * 4.0f * 
-                                                ((float)eff->numerator / (float)eff->denominator);
+                            delay = 60.0f / (float)eff->time->tempo * eff->speedfactor;
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pdelay);
+                            //eff->seteffectparrt(2, Pdelay);
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                            freq =  ((float)eff->time->tempo * 
-                                     (float)eff->denominator / 
-                                     (240.0f * (float)eff->numerator));
+                            freq =  (float)eff->time->tempo * 60.0 / eff->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pfreq);
+                            //eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
