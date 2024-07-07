@@ -142,6 +142,8 @@ void Reverter::filterout(float *smp)
         else { // outside cross fading segment
             if(state == PLAYING)
                 smp[i] = sampleLerp(input, pos_reader);
+            else
+                smp[i] = 0.0f;
         }
         
         // apply output gain
