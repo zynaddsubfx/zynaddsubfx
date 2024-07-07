@@ -76,6 +76,27 @@ void Reverter::filterout(float *smp)
         
         phase_offset = phase_offset_old + (float(i) * phase_offset_fade);
         
+        
+        // special cases first
+        if(syncMode == NOTEON && reverse_index >= delay && state!=IDLE){
+            
+            reverse_index = 0;
+            fade_counter = 0;  // reset fade counter
+            
+            if (state==RECORDING) {
+                state = PLAYING;
+                printf("syncMode: NOTEON state: PLAYING  delay: %f\n", delay);
+                // position to start the reverse playing from
+                pos_start = pos_writer + buffersize + delay/2.0f;   
+            } else if (state==PLAYING) {
+                state = IDLE;
+                const float pos_next = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
+                delta_crossfade = pos_reader - 1.0 - pos_next;
+                printf("syncMode: NOTEON state: IDLE\n");
+            }
+        }
+        
+        
         // switch to next buffer
         if((syncMode == AUTO && reverse_index>delay) 
         || (syncMode == HOST && doSync && reverse_index >= syncPos) 
@@ -95,24 +116,6 @@ void Reverter::filterout(float *smp)
                     
             fade_counter = 0;  // reset fade counter
         }
-        
-        if(syncMode == NOTEON && reverse_index > delay && state!=IDLE){
-            
-            reverse_index = 0;
-            fade_counter = 0;  // reset fade counter
-            
-            if (state==RECORDING) {
-                state = PLAYING;
-                printf("syncMode: NOTEON state: PLAYING  delay: %f\n", delay);
-                // position to start the reverse playing from
-                pos_start = pos_writer + buffersize + delay/2.0f;   
-            } else if (state==PLAYING) {
-                state = IDLE;
-                const float pos_next = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
-                delta_crossfade = pos_reader - 1.0 - pos_next;
-                printf("syncMode: NOTEON state: IDLE\n");
-            }
-        }
                 
         // pos_reader
         pos_reader = fmodf(float(pos_start+mem_size) - (reverse_index + phase_offset), mem_size);
@@ -124,7 +127,7 @@ void Reverter::filterout(float *smp)
             const float fadeout = 1.0f - fadein;      // 1 -> 0
             fade_counter++;
 
-            assert(pos_reader<mem_size && pos_reader >= 0.0f);
+            if(state != IDLE) assert(pos_reader<mem_size && pos_reader >= 0.0f);
             
             // fadeing after switching segments
             if(state == IDLE) // only fade out
