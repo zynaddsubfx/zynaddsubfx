@@ -1016,10 +1016,15 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 // Function to add a MIDI Control Change message to the queue
 void Master::sendCC(char chan, int type, int val) {
     if (midiParamFeedbackQueue)
-        midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
+    {
+        if(!midiParamFeedbackQueue->full())
+            midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
+        else
+            printf("Warning: midiParamFeedbackQueue full. Feedback message dropped \n");
+    }
 }
 
-void Master::setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue)
+void Master::setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue)
 {
     midiParamFeedbackQueue = midiQueue;
     printf("Master - midiParameterFeedbackQueue: %p \n", (void *) midiParamFeedbackQueue);

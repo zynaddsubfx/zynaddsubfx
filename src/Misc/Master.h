@@ -18,7 +18,7 @@
 #include "Microtonal.h"
 #include <atomic>
 #include <set>
-#include <queue>
+#include "../Containers/RtQueue.h"
 #include <rtosc/automations.h>
 #include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
@@ -112,7 +112,7 @@ class Master
         void setController(char chan, int type, int par);
         void sendCC(char chan, int type, int val);
         
-        std::queue<std::tuple<char, int, int>> *midiParamFeedbackQueue;
+        RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiParamFeedbackQueue;
         
         void setController(char chan, int type, note_t note, float value);
         //void NRPN...
@@ -145,7 +145,7 @@ class Master
                                 float *outr) REALTIME;
 
 
-        void setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue);
+        void setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue);
         void partonoff(int npart, int what);
 
         //Set callback to run when master changes

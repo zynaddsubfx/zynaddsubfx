@@ -13,6 +13,7 @@
 #define OUTMGR_H
 
 #include "../Misc/Stereo.h"
+#include "../Containers/RtQueue.h"
 #include "../globals.h"
 #include <list>
 #if HAVE_BG_SYNTH_THREAD
@@ -36,7 +37,7 @@ class OutMgr
 
         /**Execute a tick*/
         Stereo<float *> tick(unsigned int frameSize) REALTIME;
-        void setMidiParameterFeedbackQueue (std::queue<std::tuple<char, int, int>> *midiQueue);
+        void setMidiParameterFeedbackQueue (RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue);
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)

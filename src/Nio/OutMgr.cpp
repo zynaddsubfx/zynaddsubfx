@@ -147,7 +147,7 @@ void OutMgr::refillSmps(unsigned int smpsLimit)
  * 7) Lets wait for another tick
  */
  
- void OutMgr::setMidiParameterFeedbackQueue(std::queue<std::tuple<char, int, int>> *midiQueue)
+ void OutMgr::setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue)
  {
      master->setMidiParameterFeedbackQueue(midiQueue);
  }

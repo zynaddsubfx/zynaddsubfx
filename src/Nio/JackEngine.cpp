@@ -55,7 +55,7 @@ JackEngine::JackEngine(const SYNTH_T &synth)
     midi.jack_sync = false;
     osc.oscport = NULL;
     
-    midiParameterFeedbackQueue = new std::queue<std::tuple<char, int, int>>;
+    midiParameterFeedbackQueue = new RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH>;
 }
 
 JackEngine::~JackEngine(void)
@@ -458,8 +458,6 @@ void JackEngine::handleMidi(unsigned long frames)
     // Remove the processed message from the queue
     midiParameterFeedbackQueue->pop();
     }
-
-
 }
 
 }
