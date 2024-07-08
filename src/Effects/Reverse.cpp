@@ -105,7 +105,7 @@ void Reverse::out(const Stereo<float *> &input)
     beat_new_hist = beat_new;
     
     // process noteon trigger
-    if(PsyncMode == NOTEON && time->trigger) {
+    if( (PsyncMode == NOTEON || PsyncMode == NOTEONOFF)  && time->trigger ) {
         time->trigger = false;
         reverterL->sync(0.0f);
         if(Pstereo) reverterR->sync(0.0f);

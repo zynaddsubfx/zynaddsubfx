@@ -20,7 +20,8 @@ namespace zyn {
 #define SYNCMODES   AUTO,\
                     MIDI,\
                     HOST,\
-                    NOTEON
+                    NOTEON,\
+                    NOTEONOFF
 
 enum SyncMode 
 { 
@@ -61,7 +62,8 @@ class Reverter
 
     private:
     
-        void inline update_phase(float phase);
+        void update_phase(float phase);
+        void switchBuffers(float offset);
         
         float* input;
         float gain;
@@ -83,6 +85,7 @@ class Reverter
         float phase_offset_fade;
         int fading_samples;  
         int fade_counter; 
+        float rms_hist;
         
         AbsTime *time;
         
@@ -93,10 +96,13 @@ class Reverter
         float max_delay;
              
         unsigned int pos_start;
+        float phase_offset, recorded_samples;
         float syncPos, pos_reader, delta_crossfade;
         bool doSync;
         
         unsigned int pos_writer = 0;
+        
+        
         
         
 
