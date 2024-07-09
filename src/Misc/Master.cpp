@@ -1256,8 +1256,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
-    
-    
+
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
@@ -1272,12 +1271,10 @@ bool Master::AudioOut(float *outl, float *outr)
     if(!runOSC(outl, outr, false))
         return false;
 
-
     //Handle watch points
     if(bToU)
         watcher.write_back = bToU;
     watcher.tick();
-
 
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -1301,7 +1298,6 @@ bool Master::AudioOut(float *outl, float *outr)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
-
 
     float gainbuf[synth.buffersize];
 
@@ -1473,7 +1469,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 float tick,
                                 float bpm)
 {
-    
+
     if(bpm) {
         time.bar = bar;
         time.beat = beat;

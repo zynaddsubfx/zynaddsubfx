@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Echo.h - Echo Effect
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Reverse.h - Reverse Delay Effect
+  Copyright (C) 2023-2024 Michael Kirchner
+  Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -72,12 +72,12 @@ class Reverse final:public Effect
         void setphase(unsigned char _Pphase);
         void setcrossfade(unsigned char value);
         void setsyncMode(unsigned char value);
-        
+
         AbsTime *time;
 
         Reverter* reverterL;
         Reverter* reverterR;
-        
+
         unsigned int tick;
         unsigned int beat_new_hist;
 };

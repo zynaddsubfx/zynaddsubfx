@@ -163,7 +163,6 @@ class Effect
                           * Master Output only.*/
 
         float volume;
-        
         float speedfactor;
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
@@ -185,9 +184,8 @@ class Effect
 
         //Allocator
         Allocator &memory;
-        
+
         AbsTime *time;
-        
 
         // current setup
         unsigned int samplerate;

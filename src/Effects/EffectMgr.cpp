@@ -143,7 +143,7 @@ static const rtosc::Ports local_ports = {
                             // delay = 60 / tempo * 4 * numerator / denominator
                             delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            eff->seteffectparrt(2, Pdelay);                                
+                            eff->seteffectparrt(2, Pdelay);
                             break;
                         case 3: // Chorus
                         case 4: // Phaser

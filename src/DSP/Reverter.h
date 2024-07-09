@@ -1,8 +1,8 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Reverter.h - Several analog filters 
-  Copyright (C) 2021-2021 Michael Kirchner
+  Reverter.h - Reverse Delay
+  Copyright (C) 2023-2024 Michael Kirchner
   Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
@@ -23,8 +23,8 @@ namespace zyn {
                     NOTEON,\
                     NOTEONOFF
 
-enum SyncMode 
-{ 
+enum SyncMode
+{
     SYNCMODES
 };
 
@@ -32,8 +32,8 @@ enum SyncMode
                 PLAYING,\
                 IDLE
 
-enum State 
-{ 
+enum State
+{
     STATE
 };
 
@@ -41,10 +41,8 @@ class Reverter
 {
     public:
 
+        SyncMode syncMode;
 
-        SyncMode syncMode;  
-    
-    
         //! @param Fq resonance, range [0.1,1000], logscale
         Reverter(Allocator *alloc, float delay,
                 unsigned int srate, int bufsize, float tRef=0.0f, AbsTime *time_=nullptr);
@@ -57,55 +55,50 @@ class Reverter
         void setsyncMode(SyncMode value);
         void reset();
         void sync(float pos);
-        
+
         State state;
 
     private:
-    
+
         void update_phase(float phase);
         void switchBuffers(float offset);
-        
+
         float* input;
         float gain;
 
         float step(float x);
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
-        
-        float delay;   
+
+        float delay;
         float phase;
         float crossfade;
-        
-        float tRef;  
-        int buffer_offset; 
+
+        float tRef;
+        int buffer_offset;
         int buffer_counter;
         float global_offset;
         float reverse_index;
         float phase_offset_old;
         float phase_offset_fade;
-        int fading_samples;  
-        int fade_counter; 
+        int fading_samples;
+        int fade_counter;
         float rms_hist;
-        
+
         AbsTime *time;
-        
+
         Allocator &memory;
         unsigned int mem_size;
         int samplerate;
         int buffersize;
         float max_delay;
-             
+
         unsigned int pos_start;
         float phase_offset, recorded_samples;
         float syncPos, pos_reader, delta_crossfade;
         bool doSync;
-        
-        unsigned int pos_writer = 0;
-        
-        
-        
-        
 
+        unsigned int pos_writer = 0;
 };
 
 }

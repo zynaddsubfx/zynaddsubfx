@@ -1,11 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Echo.cpp - Echo effect
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Copyright (C) 2009-2010 Mark McCurry
-  Author: Nasca Octavian Paul
-          Mark McCurry
+  Reverse.cpp - Reverse Delay Effect
+  Copyright (C) 2023-2024 Michael Kirchner
+  Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -39,7 +37,7 @@ rtosc::Ports Reverse::ports = {
     rEffPar(Pcrossfade,5, rShort("fade"), rLinear(0, 127), rDefault(16),
             "Cross Fade Time between Reversed Segments 1/100s"),
     rEffParOpt(Psyncmode,    6, rShort("sync"),
-            rOptions(SYNCMODES), rLinear(0,127), 
+            rOptions(SYNCMODES), rLinear(0,127),
             "Sync Mode"),
 };
 #undef rBegin
@@ -81,10 +79,9 @@ void Reverse::out(const Stereo<float *> &input)
     else //Mono
         for(int i = 0; i < buffersize; ++i)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
-    
 
     // process external timecode to sync
-    
+
     unsigned int beat_new;
     if (time->tempo && speedfactor && PsyncMode == HOST)
     {
@@ -92,25 +89,23 @@ void Reverse::out(const Stereo<float *> &input)
         const unsigned int delay_ticks = int(1920.0f * speedfactor);
         beat_new = tick/delay_ticks;
         const unsigned int phase_ticks = tick%delay_ticks;
-    
+
         if(beat_new!=beat_new_hist) {
             const float syncPos = (phase_ticks/delay_ticks)*(60.0f/time->tempo)*(float)(time->samplerate());
             reverterL->sync(syncPos);
             if(Pstereo) reverterR->sync(syncPos);
         }
-    
-    
     }
     // store beat_new for next cycle
     beat_new_hist = beat_new;
-    
+
     // process noteon trigger
     if( (PsyncMode == NOTEON || PsyncMode == NOTEONOFF)  && time->trigger ) {
         time->trigger = false;
         reverterL->sync(0.0f);
         if(Pstereo) reverterR->sync(0.0f);
     }
-    
+
     // do the actual processing
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);

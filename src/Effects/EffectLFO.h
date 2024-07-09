@@ -33,7 +33,7 @@ class EffectLFO
         unsigned char Pstereo; // 64 is centered
     private:
         float getlfoshape(float x);
-        
+
         float xl, xr;
         float incx;
         float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
@@ -43,7 +43,7 @@ class EffectLFO
         // current setup
         float samplerate_f;
         float buffersize_f;
-        
+
         const AbsTime *time;
         unsigned int numerator;
         unsigned int denominator;

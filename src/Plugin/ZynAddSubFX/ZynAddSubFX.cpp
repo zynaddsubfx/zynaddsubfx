@@ -342,10 +342,10 @@ protected:
     */
     void run(const float**, float** outputs, uint32_t frames, const MidiEvent* midiEvents, uint32_t midiEventCount) override
     {
-        
+
         // Zeitposition vom Host abfragen
         const TimePosition& timePosition = getTimePosition();
-        
+
         if (! mutex.tryLock())
         {
             //if (! isOffline())
@@ -354,7 +354,6 @@ protected:
                 std::memset(outputs[1], 0, sizeof(float)*frames);
                 return;
             }
-
             mutex.lock();
         }
 
@@ -448,18 +447,18 @@ protected:
             } break;
             }
         }
-        
-        if (timePosition.bbt.valid) 
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, 
+
+        if (timePosition.bbt.valid)
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
                                                                  outputs[0]+framesOffset,
                                                                  outputs[1]+framesOffset,
                                                                  timePosition.bbt.bar,
                                                                  timePosition.bbt.beat,
                                                                  timePosition.bbt.tick,
                                                                  timePosition.bbt.beatsPerMinute);
-                                                                 
+
         else
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, 
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
                                                                  outputs[0]+framesOffset,
                                                                  outputs[1]+framesOffset);
 
