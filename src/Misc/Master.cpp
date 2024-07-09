@@ -778,6 +778,11 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     
     // set default tempo
     time.tempo = 120;
+    time.bar = 0;
+    time.beat = 0;
+    time.tick = 0.0f;
+    time.bpm = 0.0f;
+    time.trigger = false;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
