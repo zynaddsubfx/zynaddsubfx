@@ -215,7 +215,7 @@ void Reverter::sync(float pos)
     if(state==IDLE) {
         state = RECORDING;
         printf("syncing to noteon state: RECORDING reverse_index: %f\n", reverse_index);
-        reverse_index = 0.0f;
+        switchBuffers();
         // reset mav
         mav = 1.0f;
     }
