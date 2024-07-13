@@ -15,6 +15,8 @@
 #include "Filter.h"
 #include "Value_Smoothing_Filter.h"
 
+#define MAX_CROSSFADE_SECONDS 1.27f
+
 namespace zyn {
 
 #define SYNCMODES   AUTO,\
@@ -61,7 +63,7 @@ class Reverter
     private:
 
         void update_phase(float phase);
-        void switchBuffers(float offset);
+        void switchBuffers();
 
         float* input;
         float gain;
@@ -83,7 +85,7 @@ class Reverter
         float phase_offset_fade;
         int fading_samples;
         int fade_counter;
-        float rms_hist;
+        float mav;
 
         AbsTime *time;
 
@@ -95,7 +97,7 @@ class Reverter
 
         unsigned int pos_start;
         float phase_offset, recorded_samples;
-        float syncPos, pos_reader, delta_crossfade;
+        float syncPos, pos_reader, crossfade_offset;
         bool doSync;
 
         unsigned int pos_writer = 0;
