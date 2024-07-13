@@ -449,18 +449,16 @@ protected:
         }
 
         if (timePosition.bbt.valid)
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
-                                                                 outputs[0]+framesOffset,
-                                                                 outputs[1]+framesOffset,
-                                                                 timePosition.bbt.bar,
-                                                                 timePosition.bbt.beat,
-                                                                 timePosition.bbt.tick,
-                                                                 timePosition.bbt.beatsPerMinute);
+            master->UpdateExternalTiming(timePosition.bbt.bar,
+                                         timePosition.bbt.beat,
+                                         timePosition.bbt.tick,
+                                         timePosition.bbt.beatsPerMinute,
+                                         timePosition.playing);
 
-        else
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
-                                                                 outputs[0]+framesOffset,
-                                                                 outputs[1]+framesOffset);
+
+        master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
+                                                 outputs[0]+framesOffset,
+                                                 outputs[1]+framesOffset);
 
         mutex.unlock();
     }

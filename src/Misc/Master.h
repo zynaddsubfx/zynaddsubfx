@@ -134,14 +134,17 @@ class Master
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
          * This allows the program to be controlled by an external program*/
+        void UpdateExternalTiming(int bar,
+                                int beat,
+                                float tick,
+                                float bpm,
+                                bool playing);
+
+
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr,
-                                int bar=0,
-                                int beat=0,
-                                float tick=0.0f,
-                                float bpm=0.0f) REALTIME;
+                                float *outr) REALTIME;
 
 
         void partonoff(int npart, int what);

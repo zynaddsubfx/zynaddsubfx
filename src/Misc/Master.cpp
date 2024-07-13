@@ -1463,24 +1463,30 @@ bool Master::AudioOut(float *outl, float *outr)
     return true;
 }
 
-//TODO review the respective code from yoshimi for this
-//If memory serves correctly, libsamplerate was used
-void Master::GetAudioOutSamples(size_t nsamples,
-                                unsigned samplerate,
-                                float *outl,
-                                float *outr,
+void Master::UpdateExternalTiming(
                                 int bar,
                                 int beat,
                                 float tick,
-                                float bpm)
+                                float bpm,
+                                bool playing)
 {
-
-    if(bpm) {
+	    if(playing) {
         time.bar = bar;
         time.beat = beat;
         time.tick = tick;
         time.tempo = bpm;
     }
+}
+
+
+//TODO review the respective code from yoshimi for this
+//If memory serves correctly, libsamplerate was used
+void Master::GetAudioOutSamples(size_t nsamples,
+                                unsigned samplerate,
+                                float *outl,
+                                float *outr)
+{
+
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
