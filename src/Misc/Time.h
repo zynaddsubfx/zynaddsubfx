@@ -19,14 +19,15 @@ class AbsTime
 {
     public:
         AbsTime(const SYNTH_T &synth)
-            :frames(0),
-            s(synth),
+            :
             tempo(120),
             bar(0),
             beat(0),
             tick(0.0f),
             bpm(120.0f),
-            trigger(false) {};
+            trigger(false),
+            frames(0),
+            s(synth) {};
         void operator++(){++frames;};
         void operator++(int){frames++;};
         int64_t time() const {return frames;};
@@ -43,6 +44,7 @@ class AbsTime
     private:
         int64_t frames;
         const SYNTH_T &s;
+
         
 };
 
