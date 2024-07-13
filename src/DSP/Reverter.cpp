@@ -186,7 +186,7 @@ void Reverter::filterout(float *smp)
 
             if(state != IDLE) assert(pos_reader<mem_size && pos_reader >= 0.0f);
             // fadeing after switching segments
-            if(state == IDLE) // only fade out
+            if(state == IDLE || state == RECORDING) // only fade out
                 smp[i] = fadeout*sampleLerp(input, fmodf(pos_reader + mem_size + crossfade_offset, mem_size));
             if(state == PLAYING) {
                 if (syncMode == NOTEON || syncMode == NOTEONOFF) // only fade in
