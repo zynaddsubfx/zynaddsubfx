@@ -1470,12 +1470,14 @@ void Master::UpdateExternalTiming(
                                 float bpm,
                                 bool playing)
 {
-	    if(playing) {
+    if(playing) {
         time.bar = bar;
         time.beat = beat;
         time.tick = tick;
-        time.tempo = bpm;
     }
+    time.tempo = bpm;
+    time.playing = playing;
+    
 }
 
 
