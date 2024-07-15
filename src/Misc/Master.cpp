@@ -1477,7 +1477,6 @@ void Master::UpdateExternalTiming(
     }
     time.tempo = bpm;
     time.playing = playing;
-    
 }
 
 

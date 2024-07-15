@@ -46,7 +46,7 @@ Reverter::Reverter(Allocator *alloc, float delay_,
     fading_samples = (int)(float(srate)*crossfade),
     max_delay = srate * MAX_REV_DELAY_SECONDS;
     const int max_fading_samples = srate * MAX_CROSSFADE_SECONDS;
-    
+
     //                                             <> <-buffersize
     // t  |<-delay->|<-delay->|<-delay->|<-delay->|--
     // 0  |---------|---------|---------|---------|--
@@ -55,9 +55,8 @@ Reverter::Reverter(Allocator *alloc, float delay_,
     //        /\  /\                  <-  ->
     //      phase ||             reading  writing
     //        cross-fade
-    
+
     mem_size = (int)(ceilf(max_delay*4.0f)) + max_fading_samples + 2;
-    
     input = (float*)memory.alloc_mem((mem_size+buffersize)*sizeof(float));
     reset();
 
@@ -98,7 +97,7 @@ inline void Reverter::switchBuffers() {
     // offset between new position and crossfade position
     crossfade_offset = pos_crossfade - pos_next;
     // reset fade counter
-    fade_counter = 0;  
+    fade_counter = 0;
 }
 
 void Reverter::filterout(float *smp)
@@ -107,7 +106,7 @@ void Reverter::filterout(float *smp)
     memcpy(&input[pos_writer], smp, buffersize*sizeof(float));
     // increment writing position
     pos_writer += buffersize;
-    
+
     // number of samples to copy to make the turnaround of pos_writer
     const int copysamples = pos_writer - mem_size;
     if (copysamples > 0) {
