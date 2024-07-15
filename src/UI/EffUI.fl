@@ -485,7 +485,7 @@ if (filterwindow!=NULL){
           label DUAL
           xywh {45 45 100 20} labelfont 1 labelsize 10
         }
-      }    
+      }
     }
   }
   Function {make_phaser_window()} {} {
