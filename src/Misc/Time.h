@@ -27,6 +27,8 @@ class AbsTime
             tick(0.0f),
             bpm(120.0f),
             ppq(1920.0f),
+            playing(false),
+            source(INTERNAL),
             frames(0),
             samplingInterval(dt_),
             buffersize(buffersize_) {};
@@ -43,6 +45,7 @@ class AbsTime
         float bpm;
         float ppq;
         bool playing;
+        SyncSource source;
         float dt() const { return samplingInterval; }
         float framesPerSec() const { return 1.0f/samplingInterval;}
         int   samplesPerFrame() const {return buffersize;}

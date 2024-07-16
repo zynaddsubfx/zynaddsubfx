@@ -282,6 +282,8 @@ class Master
 
         Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
         Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
+
+        SyncSource syncSource;
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t
