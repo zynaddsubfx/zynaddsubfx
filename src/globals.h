@@ -255,6 +255,15 @@ enum MidiControllers {
     C_dataentryhi = 0x06, C_dataentrylo = 0x26, C_nrpnhi = 99, C_nrpnlo = 98
 };
 
+#define SYNCSOURCES INTERNAL,\
+                    HOST,\
+                    MIDI\
+
+enum SyncSource {
+    SYNCSOURCES,
+    NUM_SYNC_SOURCES
+};
+
 enum LegatoMsg {
     LM_Norm, LM_FadeIn, LM_FadeOut, LM_CatchUp, LM_ToNorm
 };
