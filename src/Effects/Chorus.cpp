@@ -137,16 +137,9 @@ void Chorus::out(const Stereo<float *> &input)
             (dl1 * (buffersize - i) + dl2 * i) / buffersize_f;
         if(++dlk >= maxdelay)
             dlk = 0;
-        float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
+        const float posL = dlk - mdel + maxdelay; //where should I get the sample from
 
-        dlhi  = (int) tmp;
-        dlhi %= maxdelay;
-
-        float dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
-        float dllo  = 1.0f + floorf(tmp) - tmp;
-        efxoutl[i] = cinterpolate(delaySample.l, maxdelay, dlhi2) * dllo
-                     + cinterpolate(delaySample.l, maxdelay,
-                                    dlhi) * (1.0f - dllo);
+        efxoutl[i] = cinterpolate(delaySample.l, maxdelay, posL);
         delaySample.l[dlk] = inL + efxoutl[i] * fb;
 
         //Right channel
@@ -155,17 +148,10 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dr1 * (buffersize - i) + dr2 * i) / buffersize_f;
         if(++drk >= maxdelay)
             drk = 0;
-        tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
+        const float posR = drk - mdel + maxdelay; //where should I get the sample from
 
-        dlhi  = (int) tmp;
-        dlhi %= maxdelay;
-
-        dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0f + floorf(tmp) - tmp;
-        efxoutr[i] = cinterpolate(delaySample.r, maxdelay, dlhi2) * dllo
-                     + cinterpolate(delaySample.r, maxdelay,
-                                    dlhi) * (1.0f - dllo);
-        delaySample.r[dlk] = inR + efxoutr[i] * fb;
+        efxoutr[i] = cinterpolate(delaySample.r, maxdelay, posR);
+        delaySample.r[drk] = inR + efxoutr[i] * fb;
     }
 
     if(Poutsub)
