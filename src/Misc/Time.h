@@ -19,8 +19,8 @@ class AbsTime
 {
     public:
         AbsTime(const SYNTH_T &synth)
-            :frames(0),
-            source(INTERNAL),
+            :source(INTERNAL),
+            frames(0),
             s(synth){};
         void operator++(){++frames;};
         void operator++(int){frames++;};
