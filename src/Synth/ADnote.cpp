@@ -224,6 +224,7 @@ void ADnote::setupVoice(int nvoice)
 
     setupVoiceMod(nvoice);
 
+    voice.syncEnabled = param.PsyncEnabled;
     voice.FMVoice = param.PFMVoice;
     voice.FMFreqEnvelope = NULL;
     voice.FMAmpEnvelope  = NULL;
@@ -435,7 +436,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     voice.FMFreqFixed  = param.PFMFixedFreq;
 
     //Triggers when a user enables modulation on a running voice
-    if(!first_run && voice.FMEnabled != FMTYPE::NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
+    if(!first_run && (voice.FMEnabled != FMTYPE::NONE || voice.syncEnabled) && voice.FMSmp == NULL && voice.FMVoice < 0) {
         param.FmGn->newrandseed(prng());
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
@@ -1405,8 +1406,11 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
  */
 inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
 {
-    ComputeVoiceOscillator_LinearInterpolation(nvoice);
-
+    if(NoteVoicePar[nvoice].syncEnabled)
+        ComputeVoiceOscillatorSync(nvoice);
+    else
+        ComputeVoiceOscillator_LinearInterpolation(nvoice);
+    
     Voice& vce = NoteVoicePar[nvoice];
     if(vce.FMnewamplitude > 1.0f)
         vce.FMnewamplitude = 1.0f;
@@ -1454,6 +1458,91 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
             vce.oscposloFM[k] = posloFM;
         }
 }
+
+
+/*
+ * Computes the Oscillator (Oscillator Sync)
+ */
+inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
+{
+    Voice& vce = NoteVoicePar[nvoice];
+    if(vce.FMnewamplitude > 1.0f)
+        vce.FMnewamplitude = 1.0f;
+    if(vce.FMoldamplitude > 1.0f)
+        vce.FMoldamplitude = 1.0f;
+
+    if(NoteVoicePar[nvoice].FMVoice >= 0)
+        // if I use VoiceOut[] as modulator
+        // copy it to tmpwave_unison[][]
+        for(int k = 0; k < vce.unison_size; ++k) {
+            float *tw = tmpwave_unison[k];
+            const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
+            memcpy(tw, smps, synth.bufferbytes);
+        }
+    else{
+        //Compute the modulator and store it in tmpwave_unison[][]
+        for(int k = 0; k < vce.unison_size; ++k) {
+            int    poshiFM  = vce.oscposhiFM[k];
+            int    posloFM  = (int)(vce.oscposloFM[k]  * (1<<24));
+            int    freqhiFM = vce.oscfreqhiFM[k];
+            int    freqloFM = (int)(vce.oscfreqloFM[k] * (1<<24));
+
+            float *tw = tmpwave_unison[k];
+            const float *smps = NoteVoicePar[nvoice].FMSmp;
+
+            for(int i = 0; i < synth.buffersize; ++i) {
+                tw[i] = (smps[poshiFM] * ((1<<24) - posloFM)
+                         + smps[poshiFM + 1] * posloFM) / (1.0f*(1<<24));
+
+                posloFM += freqloFM;
+                if(posloFM >= (1<<24)) {
+                    posloFM &= 0xffffff;//fmod(posloFM, 1.0f);
+                    poshiFM++;
+                }
+                poshiFM += freqhiFM;
+                poshiFM &= synth.oscilsize - 1;
+            }
+            vce.oscposhiFM[k] = poshiFM;
+            vce.oscposloFM[k] = posloFM/((1<<24)*1.0f);
+        }
+    }
+
+    for(int k = 0; k < vce.unison_size; ++k) {
+        int    poshi  = vce.oscposhi[k];
+        int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
+        int    freqhi = vce.oscfreqhi[k];
+        int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
+        float *smps   = NoteVoicePar[nvoice].OscilSmp;
+        float *tw     = tmpwave_unison[k];
+        assert(vce.oscfreqlo[k] < 1.0f);
+
+        float  fmold = vce.FMoldsmp[k]; //load value from last tick
+        for(int i = 0; i < synth.buffersize; ++i) {
+
+            // if zero is crossed on the rising slope of the modulator
+            // reset phase at the carrier
+            if (
+                 ( (tw[i]>0.0f && fmold <=0.0f) ||
+                    (tw[i]>=0.0f && fmold <0.0f) )
+                && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude))
+                ) {
+                poslo = 0;
+                poshi = 0;
+            }
+            fmold = tw[i];
+
+            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
+            poslo += freqlo;                // increment fractional part (sample interval phase)
+            poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
+            poslo &= 0xffffff;              // remove overflow from poslo
+            poshi &= synth.oscilsize - 1;   // remove overflow
+        }
+        vce.oscposhi[k] = poshi;
+        vce.oscposlo[k] = poslo/(16777216.0f);
+        vce.FMoldsmp[k] = fmold; // store value for next tick
+    }
+}
+
 
 /*
  * Computes the Oscillator (Phase Modulation or Frequency Modulation)
@@ -1548,12 +1637,22 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
     for(int k = 0; k < vce.unison_size; ++k) {
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
+        float  fmold = vce.FMoldsmp[k];
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
 
         for(int i = 0; i < synth.buffersize; ++i) {
+
+            if(NoteVoicePar[nvoice].syncEnabled &&
+                        ( (tw[i]>0.0f && fmold <=0.0f) ||
+                        (tw[i]>=0.0f && fmold <0.0f) )) {
+                poshi = 0.0f;
+                poslo = 0.0f;
+            }
+            fmold = tw[i];
+
             int FMmodfreqhi = 0;
             F2I(tw[i], FMmodfreqhi);
             float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
@@ -1679,9 +1778,13 @@ int ADnote::noteout(float *outl, float *outr)
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
                     default:
-                        if(NoteVoicePar[nvoice].AAEnabled) ComputeVoiceOscillator_SincInterpolation(nvoice);
-                        else ComputeVoiceOscillator_LinearInterpolation(nvoice);
-                        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+                        if(NoteVoicePar[nvoice].AAEnabled) 
+                            ComputeVoiceOscillator_SincInterpolation(nvoice);
+                        else 
+                            if(NoteVoicePar[nvoice].syncEnabled)
+                                ComputeVoiceOscillatorSync(nvoice);
+                            else
+                                ComputeVoiceOscillator_LinearInterpolation(nvoice);
                 }
                 break;
             case 1:
