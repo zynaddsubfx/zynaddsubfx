@@ -176,7 +176,7 @@ class MessageTest
         void testMidiLearn(void)
         {
             mw->transmitMsg("/learn", "s", "/Pkeyshift");
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
+            mw->transmitMsg("/setController", "iii", 0, 23, 108);
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 64);
 
             //Perform a learning operation
@@ -187,19 +187,19 @@ class MessageTest
 
 
             //Verify that the learning actually worked
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 13);
+            mw->transmitMsg("/setController", "iii", 0, 23, 13);
             run_realtime();
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 13);
 
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 2);
+            mw->transmitMsg("/setController", "iii", 0, 23, 2);
             run_realtime();
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 2);
 
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 0);
+            mw->transmitMsg("/setController", "iii", 0, 23, 0);
             run_realtime();
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 0);
 
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 127);
+            mw->transmitMsg("/setController", "iii", 0, 23, 127);
             run_realtime();
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 127);
         }
@@ -207,7 +207,7 @@ class MessageTest
         void testMidiLearnSave(void)
         {
             mw->transmitMsg("/learn", "s", "/Pkeyshift");
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
+            mw->transmitMsg("/setController", "iii", 0, 23, 108);
 
             //param is at default until rt-thread is run
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 64);
@@ -237,7 +237,7 @@ class MessageTest
             //Clear out state
             mw->transmitMsg("/clear_xlz", "");
             //Send dummy message
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 27);
+            mw->transmitMsg("/setController", "iii", 0, 23, 27);
             run_realtime();
 
             //Verify automation table is clear
@@ -246,7 +246,7 @@ class MessageTest
             printf("# Loading automation\n");
             mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
             //Send message
-            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 28);
+            mw->transmitMsg("/setController", "iii", 0, 23, 28);
             run_realtime();
 
             //Verify automation table is restored
