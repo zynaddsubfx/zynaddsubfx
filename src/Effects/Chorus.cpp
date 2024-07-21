@@ -115,7 +115,7 @@ float Chorus::getdelay(float xlfo)
 
 // sample
 
-inline float Chorus::getSample(float* delayline, float mdel, int dk)
+inline float Chorus::getSample(const float* delayline, const float mdel, const int dk) const
 {
     float samplePos = dk - mdel + float(maxdelay * 2); //where should I get the sample from
     return cinterpolate(delayline, maxdelay, samplePos);

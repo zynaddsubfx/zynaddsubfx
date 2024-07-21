@@ -87,7 +87,7 @@ class Chorus final:public Effect
 
         static rtosc::Ports ports;
     private:
-        inline float getSample(float* delayline, float mdel, int dk);
+        inline float getSample(const float* delayline, const float mdel, const int dk) const;
 
         //Chorus Parameters
         unsigned char Pvolume;
