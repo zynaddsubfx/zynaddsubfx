@@ -79,50 +79,16 @@ bool PresetsStore::presetstruct::operator<(const presetstruct &b) const
 void PresetsStore::scanforpresets()
 {
     clearpresets();
-    string ftype = ".xpz";
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
-        if(config.cfg.presetsDirList[i].empty())
-            continue;
-
-        //open directory
-        string dirname = config.cfg.presetsDirList[i];
-        DIR   *dir     = opendir(dirname.c_str());
-        if(dir == NULL)
-            continue;
-        struct dirent *fn;
-
-        //check all files in directory
-        while((fn = readdir(dir))) {
-            string filename = fn->d_name;
-            if(filename.find(ftype) == string::npos)
-                continue;
-
-            //ensure proper path is formed
-            char tmpc = dirname[dirname.size() - 1];
-            const char *tmps;
-            if((tmpc == '/') || (tmpc == '\\'))
-                tmps = "";
-            else
-                tmps = "/";
-
-            string location = "" + dirname + tmps + filename;
-
-            //trim file type off of name
-            string name_type = filename.substr(0, filename.find(ftype));
-
-            size_t tmp  = name_type.find_last_of(".");
-            if(tmp == string::npos)
-                continue;
-            string type = name_type.substr(tmp+1);
-            string name = name_type.substr(0, tmp);
-
-            //put on list
-            presets.push_back(presetstruct{location, name, type});
-        }
-
-        closedir(dir);
-    }
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
+        if(!config.cfg.presetsDirList[i].empty())
+            scanrootdir(config.cfg.presetsDirList[i]);
+#ifdef ZYN_DATADIR
+    scanrootdir(ZYN_DATADIR "/presets");
+#else
+    scanrootdir("/usr/share/zynaddsubfx/presets");
+    scanrootdir("/usr/local/share/zynaddsubfx/presets");
+#endif
 
     //sort the presets
     sort(presets.begin(), presets.end());
@@ -182,6 +148,49 @@ void PresetsStore::deletepreset(std::string filename)
             return;
         }
     }
+}
+
+
+// private stuff
+
+void PresetsStore::scanrootdir(std::string rootdir)
+{
+    string ftype = ".xpz";
+    DIR   *dir     = opendir(rootdir.c_str());
+    if(dir == NULL)
+        return;
+    struct dirent *fn;
+
+    //check all files in directory
+    while((fn = readdir(dir))) {
+        string filename = fn->d_name;
+        if(filename.find(ftype) == string::npos)
+            continue;
+
+        //ensure proper path is formed
+        char tmpc = rootdir[rootdir.size() - 1];
+        const char *tmps;
+        if((tmpc == '/') || (tmpc == '\\'))
+            tmps = "";
+        else
+            tmps = "/";
+
+        string location = "" + rootdir + tmps + filename;
+
+        //trim file type off of name
+        string name_type = filename.substr(0, filename.find(ftype));
+
+        size_t tmp  = name_type.find_last_of(".");
+        if(tmp == string::npos)
+            continue;
+        string type = name_type.substr(tmp+1);
+        string name = name_type.substr(0, tmp);
+
+        //put on list
+        presets.push_back(presetstruct{location, name, type});
+    }
+
+    closedir(dir);
 }
 
 }

@@ -54,6 +54,10 @@ class PresetsStore
         } clipboard;
 
         void clearpresets();
+
+    private:
+
+        void scanrootdir(std::string rootdir);
 };
 
 //extern PresetsStore presetsstore;

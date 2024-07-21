@@ -380,6 +380,12 @@ void Bank::rescanforbanks()
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!config->cfg.bankRootDirList[i].empty())
             scanrootdir(config->cfg.bankRootDirList[i]);
+#ifdef ZYN_DATADIR
+    scanrootdir(ZYN_DATADIR "/banks");
+#else
+    scanrootdir("/usr/share/zynaddsubfx/banks");
+    scanrootdir("/usr/local/share/zynaddsubfx/banks");
+#endif
 #ifdef WIN32
     {
         //Search the VST Directory for banks/preset/etc
