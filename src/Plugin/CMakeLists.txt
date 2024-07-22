@@ -5,17 +5,17 @@ add_executable(lv2-ttl-generator ${CMAKE_SOURCE_DIR}/DPF/utils/lv2-ttl-generator
 CHECK_LIBRARY_EXISTS(dl dlopen "" LIBDL_FOUND)
 
 IF(LIBDL_FOUND)
-target_link_libraries(lv2-ttl-generator "dl")
+    target_link_libraries(lv2-ttl-generator "dl")
 ELSE(LIBDL_FOUND)
-# FreeBSD has dlopen as part of LibC
-CHECK_LIBRARY_EXISTS(c dlopen "" LIBDL_FOUND)
+    # FreeBSD has dlopen as part of LibC
+    CHECK_LIBRARY_EXISTS(c dlopen "" LIBDL_FOUND)
 ENDIF(LIBDL_FOUND)
 
 CHECK_LIBRARY_EXISTS(pthread pthread_create "" LIBPTHREAD_FOUND)
 
 IF(LIBPTHREAD_FOUND)
-# Some X11 libGL libraries require -lpthread on FreeBSD
-target_link_libraries(lv2-ttl-generator "pthread")
+    # Some X11 libGL libraries require -lpthread on FreeBSD
+    target_link_libraries(lv2-ttl-generator "pthread")
 ENDIF(LIBPTHREAD_FOUND)
 
 IF(LIBDL_FOUND)
