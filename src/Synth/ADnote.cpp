@@ -704,7 +704,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
         }
 
         /* Voice Modulation Parameters Init */
-        if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE)
+        if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE || NoteVoicePar[nvoice].syncEnabled)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
             pars.VoicePar[nvoice].FmGn->newrandseed(prng());
 
