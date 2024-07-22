@@ -657,7 +657,19 @@ redrawoscil();}
             }
             MenuItem {} {
               label Square
-              xywh {205 125 100 20} labelfont 1 labelsize 10
+              xywh {125 125 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label DualCos
+              xywh {135 135 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Coerc
+              xywh {145 145 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label DualTanh
+              xywh {155 155 100 20} labelfont 1 labelsize 10
             }
           }
           Fl_Dial wshpar {
