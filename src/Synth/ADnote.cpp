@@ -1156,7 +1156,7 @@ void ADnote::computecurrentparameters()
             /***************/
 
 
-            if(NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE) {
+            if(NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE || NoteVoicePar[nvoice].syncEnabled) {
                 FMrelativepitch = NoteVoicePar[nvoice].FMDetune / 100.0f;
                 if(NoteVoicePar[nvoice].FMFreqEnvelope)
                     FMrelativepitch +=
