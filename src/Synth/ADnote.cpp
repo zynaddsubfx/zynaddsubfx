@@ -1366,8 +1366,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
-                tw[i] = tw[i]
-                    * (1.0f - amp) + amp * NoteVoicePar[FMVoice].VoiceOut[i];
+                tw[i] = tw[i] + amp * (NoteVoicePar[FMVoice].VoiceOut[i] - tw[i]);
             }
         }
     }
