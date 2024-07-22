@@ -410,6 +410,11 @@ int PADnote::noteout(float *outl, float *outr)
 
     watch_punch(outl,synth.buffersize);
 
+#ifndef USE_COMPATIBLE_MIXING
+    const float pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
+    const float pan_r = sqrtf(NoteGlobalPar.Panning);
+#endif
+
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
         for(int i = 0; i < synth.buffersize; ++i) {
@@ -417,13 +422,23 @@ int PADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
+#ifdef USE_COMPATIBLE_MIXING
             outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
             outr[i] *= tmpvol * NoteGlobalPar.Panning;
+#else
+            outl[i] *= tmpvol * pan_l;
+            outr[i] *= tmpvol * pan_r;
+#endif
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
+#ifdef USE_COMPATIBLE_MIXING
             outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
             outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
+#else
+            outl[i] *= globalnewamplitude * pan_l;
+            outr[i] *= globalnewamplitude * pan_r;
+#endif
         }
 
     watch_amp_int(outl,synth.buffersize);
