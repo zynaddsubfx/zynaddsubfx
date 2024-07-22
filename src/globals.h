@@ -79,6 +79,10 @@ class  Sync;
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
+// uncomment next line to switch ot backward compatible mixing
+// #define USE_COMPATIBLE_MIXING
+
+
 /**
  * The number of harmonics of additive synth
  * This must be smaller than OSCIL_SIZE/2
