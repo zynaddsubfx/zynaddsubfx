@@ -1844,6 +1844,7 @@ int ADnote::noteout(float *outl, float *outr)
                 float panning = (stereo_pos + 1.0f) * 0.5f;
 
 
+#ifdef USE_COMPATIBLE_MIXING
                 float lvol = (1.0f - panning) * 2.0f;
                 if(lvol > 1.0f)
                     lvol = 1.0f;
@@ -1851,6 +1852,10 @@ int ADnote::noteout(float *outl, float *outr)
                 float rvol = panning * 2.0f;
                 if(rvol > 1.0f)
                     rvol = 1.0f;
+#else
+                float lvol = sqrtf(1.0f - panning);
+                float rvol = sqrtf(panning);
+#endif
 
                 if(vce.unison_invert_phase[k]) {
                     lvol = -lvol;
