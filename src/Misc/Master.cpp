@@ -1316,13 +1316,15 @@ bool Master::AudioOut(float *outl, float *outr)
         Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
+#ifdef USE_COMPATIBLE_MIXING
         if(pan < 0.5f)
             newvol.r *= pan * 2.0f;
         else
             newvol.l *= (1.0f - pan) * 2.0f;
-        //if(npart==0)
-        //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
-
+#else
+        newvol.r *= sqrtf(pan);
+        newvol.l *= sqrtf(1.0f - pan);
+#endif
 
 
         /* This is where the part volume (and pan) smoothing and application happens */
