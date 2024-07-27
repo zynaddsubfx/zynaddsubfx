@@ -579,10 +579,12 @@ int SUBnote::noteout(float *outl, float *outr)
         }
         firsttick = false;
     }
-#ifndef USE_COMPATIBLE_MIXING
-    const float pan_l = sqrtf(1.0f - panning);
-    const float pan_r = sqrtf(panning);
-#endif
+    float pan_l, pan_r;
+    if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    {
+        pan_l = sqrtf(1.0f - panning);
+        pan_r = sqrtf(panning);
+    }
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
         // Amplitude interpolation
@@ -591,24 +593,30 @@ int SUBnote::noteout(float *outl, float *outr)
                                                  newamplitude,
                                                  i,
                                                  synth.buffersize);
-#ifdef USE_COMPATIBLE_MIXING
-            outl[i] *= tmpvol * (1.0f - panning);
-            outr[i] *= tmpvol * panning;
-#else
-            outl[i] *= tmpvol * pan_l;
-            outr[i] *= tmpvol * pan_r;
-#endif
+            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            {
+                outl[i] *= tmpvol * pan_l;
+                outr[i] *= tmpvol * pan_r;
+            } else 
+            {
+                outl[i] *= tmpvol * (1.0f - panning);
+                outr[i] *= tmpvol * panning;
+            }
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-#ifdef USE_COMPATIBLE_MIXING
-            outl[i] *= newamplitude * (1.0f - panning);
-            outr[i] *= newamplitude * panning;
-#else
-            outl[i] *= newamplitude * pan_l;
-            outr[i] *= newamplitude * pan_r;
-#endif
+            
+            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            {
+                outl[i] *= newamplitude * pan_l;
+                outr[i] *= newamplitude * pan_r;
+            } else
+            {
+                outl[i] *= newamplitude * (1.0f - panning);
+                outr[i] *= newamplitude * panning;
+            }
         }
+        
 
     watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;
