@@ -409,11 +409,12 @@ int PADnote::noteout(float *outl, float *outr)
         }
 
     watch_punch(outl,synth.buffersize);
-
-#ifndef USE_COMPATIBLE_MIXING
-    const float pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
-    const float pan_r = sqrtf(NoteGlobalPar.Panning);
-#endif
+    float pan_l, pan_r;
+    if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    {
+        pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
+        pan_r = sqrtf(NoteGlobalPar.Panning);
+    }
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
@@ -422,23 +423,28 @@ int PADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
-#ifdef USE_COMPATIBLE_MIXING
-            outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
-            outr[i] *= tmpvol * NoteGlobalPar.Panning;
-#else
-            outl[i] *= tmpvol * pan_l;
-            outr[i] *= tmpvol * pan_r;
-#endif
+
+            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            {
+                outl[i] *= tmpvol * pan_l;
+                outr[i] *= tmpvol * pan_r;
+            } else 
+            {
+                outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+                outr[i] *= tmpvol * NoteGlobalPar.Panning;
+            }
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-#ifdef USE_COMPATIBLE_MIXING
-            outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
-            outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-#else
-            outl[i] *= globalnewamplitude * pan_l;
-            outr[i] *= globalnewamplitude * pan_r;
-#endif
+            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            {
+                outl[i] *= globalnewamplitude * pan_l;
+                outr[i] *= globalnewamplitude * pan_r;
+            } else
+            {
+                outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+                outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
+            }
         }
 
     watch_amp_int(outl,synth.buffersize);
