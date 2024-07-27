@@ -68,6 +68,7 @@ MiddleWare *middleware;
 
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
+int       cpowmix = 0; //1 for const power mixing
 bool      compr = false; // enables output audio compressor
 
 // forward declarations of namespace zyn
@@ -242,6 +243,7 @@ int main(int argc, char *argv[])
     synth.buffersize = config.cfg.SoundBufferSize;
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
+    synth.compatibitity &= (config.cfg.ConstPowerMixing?1:0)<<BIT_CONSTPOWMIX;
     compr = config.cfg.AudioOutputCompressor;
 
     Nio::preferredSampleRate(synth.samplerate);
