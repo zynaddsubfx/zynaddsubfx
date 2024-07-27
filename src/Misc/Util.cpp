@@ -255,4 +255,36 @@ char *rtosc_splat(const char *path, std::set<std::string> v)
     return buf;
 }
 
+void expanddirname(std::string &dirname) {
+    if (dirname.empty())
+        return;
+
+    // if the directory name starts with a ~ and the $HOME variable is
+    // defined in the environment, replace ~ by the content of $HOME
+    if (dirname.at(0) == '~') {
+        char *home_dirname = getenv("HOME");
+        if (home_dirname != NULL) {
+            dirname = std::string(home_dirname) + dirname.substr(1);
+        }
+    }
+
+#ifdef ZYN_DATADIR
+    {
+        std::string var = "$ZYN_DATADIR";
+        size_t pos = dirname.find(var);
+        if (pos != std::string::npos) {
+            dirname.replace(pos, var.length(), ZYN_DATADIR);
+        }
+    }
+#endif
+
+    normalizedirsuffix(dirname);
+}
+
+void normalizedirsuffix(std::string &dirname) {
+    if(((dirname[dirname.size() - 1]) != '/')
+       && ((dirname[dirname.size() - 1]) != '\\'))
+        dirname += "/";
+}
+
 }
