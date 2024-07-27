@@ -83,6 +83,8 @@ typedef std::complex<fftwf_real> fft_t;
 // #define USE_COMPATIBLE_MIXING
 
 
+#define BIT_CONSTPOWMIX 0
+
 /**
  * The number of harmonics of additive synth
  * This must be smaller than OSCIL_SIZE/2
@@ -353,6 +355,15 @@ struct SYNTH_T {
      * Increase this => CPU requirements gets high (only at start of the note)
      */
     int oscilsize;
+    
+    
+    /**
+     * compatibility mask
+     * Bit0 (BIT_CONSTPOWMIX) 1: constant power mixing active 0: compatibility mode
+     * Bit1 (BIT_???) reserverd
+     * Bit2 (BIT_???) reserverd
+     */
+    int compatibitity;
 
     //Alias for above terms
     float samplerate_f;
