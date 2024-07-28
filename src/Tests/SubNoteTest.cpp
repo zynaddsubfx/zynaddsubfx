@@ -125,6 +125,8 @@ class SubNoteTest
 
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout/filter");
+            
+            TS_ASSERT((synth->compatibility&MSK_CONSTPOWMIX)!=MSK_CONSTPOWMIX);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
