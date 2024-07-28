@@ -320,7 +320,7 @@ public:
 struct SYNTH_T {
 
     SYNTH_T(void)
-        :samplerate(44100), buffersize(256), oscilsize(1024)
+        :samplerate(44100), buffersize(256), oscilsize(1024), compatibility(0)
     {
         alias(false);
     }
