@@ -409,11 +409,16 @@ int PADnote::noteout(float *outl, float *outr)
         }
 
     watch_punch(outl,synth.buffersize);
+    // compute panning factors 
     float pan_l, pan_r;
     if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
-    {
+    {   // sqrt 3dB constant power mode
         pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
         pan_r = sqrtf(NoteGlobalPar.Panning);
+    } else 
+    {   // compatibility mode
+        pan_l = (1.0f - NoteGlobalPar.Panning);
+        pan_r = (NoteGlobalPar.Panning);
     }
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
@@ -423,28 +428,13 @@ int PADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
-
-            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
-            {
-                outl[i] *= tmpvol * pan_l;
-                outr[i] *= tmpvol * pan_r;
-            } else 
-            {
-                outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
-                outr[i] *= tmpvol * NoteGlobalPar.Panning;
-            }
+            outl[i] *= tmpvol * pan_l;
+            outr[i] *= tmpvol * pan_r;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
-            {
-                outl[i] *= globalnewamplitude * pan_l;
-                outr[i] *= globalnewamplitude * pan_r;
-            } else
-            {
-                outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
-                outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-            }
+            outl[i] *= globalnewamplitude * pan_l;
+            outr[i] *= globalnewamplitude * pan_r;
         }
 
     watch_amp_int(outl,synth.buffersize);
