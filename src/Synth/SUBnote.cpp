@@ -580,7 +580,7 @@ int SUBnote::noteout(float *outl, float *outr)
         firsttick = false;
     }
     float pan_l, pan_r;
-    if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
     {
         pan_l = sqrtf(1.0f - panning);
         pan_r = sqrtf(panning);
@@ -593,7 +593,7 @@ int SUBnote::noteout(float *outl, float *outr)
                                                  newamplitude,
                                                  i,
                                                  synth.buffersize);
-            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
             {
                 outl[i] *= tmpvol * pan_l;
                 outr[i] *= tmpvol * pan_r;
@@ -606,7 +606,7 @@ int SUBnote::noteout(float *outl, float *outr)
     else
         for(int i = 0; i < synth.buffersize; ++i) {
             
-            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
             {
                 outl[i] *= newamplitude * pan_l;
                 outr[i] *= newamplitude * pan_r;
