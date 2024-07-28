@@ -1843,7 +1843,7 @@ int ADnote::noteout(float *outl, float *outr)
                     stereo_pos = 0.0f;
                 float panning = (stereo_pos + 1.0f) * 0.5f;
                 float lvol, rvol;
-                if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+                if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
                 {
                     lvol = sqrtf(1.0f - panning);
                     rvol = sqrtf(panning);

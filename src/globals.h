@@ -356,11 +356,11 @@ struct SYNTH_T {
     
     /**
      * compatibility mask
-     * Bit0 (BIT_CONSTPOWMIX) 1: constant power mixing active 0: compatibility mode
+     * Bit0 (MSK_CONSTPOWMIX) 1: constant power mixing active 0: compatibility mode
      * Bit1 (BIT_???) reserverd
      * Bit2 (BIT_???) reserverd
      */
-    int compatibitity;
+    int compatibility;
 
     //Alias for above terms
     float samplerate_f;

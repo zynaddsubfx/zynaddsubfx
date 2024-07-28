@@ -410,7 +410,7 @@ int PADnote::noteout(float *outl, float *outr)
 
     watch_punch(outl,synth.buffersize);
     float pan_l, pan_r;
-    if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
     {
         pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
         pan_r = sqrtf(NoteGlobalPar.Panning);
@@ -424,7 +424,7 @@ int PADnote::noteout(float *outl, float *outr)
                                                  i,
                                                  synth.buffersize);
 
-            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
             {
                 outl[i] *= tmpvol * pan_l;
                 outr[i] *= tmpvol * pan_r;
@@ -436,7 +436,7 @@ int PADnote::noteout(float *outl, float *outr)
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+            if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
             {
                 outl[i] *= globalnewamplitude * pan_l;
                 outr[i] *= globalnewamplitude * pan_r;

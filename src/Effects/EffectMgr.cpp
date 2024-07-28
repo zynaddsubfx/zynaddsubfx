@@ -548,7 +548,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     if(insertion != 0) {
         float v1, v2;
         
-    if((synth.compatibitity&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
     {
         v1 = sqrtf(1.0f-volume);
         v2 = sqrtf(volume);
