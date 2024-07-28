@@ -243,7 +243,10 @@ int main(int argc, char *argv[])
     synth.buffersize = config.cfg.SoundBufferSize;
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
-    synth.compatibility &= (config.cfg.ConstPowerMixing?1:0)<<BIT_CONSTPOWMIX;
+    if (config.cfg.ConstPowerPanning)
+        synth.compatibility |= MSK_CONSTPOWPAN;
+    if (config.cfg.ConstPowerMixing)
+        synth.compatibility |= MSK_CONSTPOWDRYWET;
     compr = config.cfg.AudioOutputCompressor;
 
     Nio::preferredSampleRate(synth.samplerate);

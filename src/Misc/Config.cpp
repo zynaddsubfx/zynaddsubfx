@@ -197,6 +197,7 @@ void Config::init()
     cfg.OscilSize  = 1024;
     cfg.SwapStereo = 0;
     cfg.ConstPowerMixing = 0;
+    cfg.ConstPowerPanning = 0;
     cfg.AudioOutputCompressor = 0;
 
     cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
@@ -330,6 +331,10 @@ void Config::readConfig(const char *filename)
                                        cfg.ConstPowerMixing,
                                        0,
                                        1);
+        cfg.ConstPowerMixing = xmlcfg.getpar("const_power_panning",
+                                       cfg.ConstPowerPanning,
+                                       0,
+                                       1);
         cfg.AudioOutputCompressor = xmlcfg.getpar("audio_output_compressor",
                                        cfg.AudioOutputCompressor,
                                        0,
@@ -431,6 +436,7 @@ void Config::saveConfig(const char *filename) const
     xmlcfg->addpar("oscil_size", cfg.OscilSize);
     xmlcfg->addpar("swap_stereo", cfg.SwapStereo);
     xmlcfg->addpar("const_power_mixing", cfg.ConstPowerMixing);
+    xmlcfg->addpar("const_power_panning", cfg.ConstPowerPanning);
     xmlcfg->addpar("audio_output_compressor", cfg.AudioOutputCompressor);
     xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
 

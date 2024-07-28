@@ -411,7 +411,7 @@ int PADnote::noteout(float *outl, float *outr)
     watch_punch(outl,synth.buffersize);
     // compute panning factors 
     float pan_l, pan_r;
-    if((synth.compatibility&MSK_CONSTPOWMIX)==MSK_CONSTPOWMIX)
+    if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
     {   // sqrt 3dB constant power mode
         pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
         pan_r = sqrtf(NoteGlobalPar.Panning);

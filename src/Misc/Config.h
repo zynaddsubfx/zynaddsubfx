@@ -41,7 +41,7 @@ class Config
 
         struct {
             oss_devs_t oss_devs;
-            int   SampleRate, SoundBufferSize, OscilSize, SwapStereo, ConstPowerMixing;
+            int   SampleRate, SoundBufferSize, OscilSize, SwapStereo, ConstPowerMixing, ConstPowerPanning;
             bool  AudioOutputCompressor;
             int   WindowsWaveOutId, WindowsMidiInId;
             int   BankUIAutoClose;
