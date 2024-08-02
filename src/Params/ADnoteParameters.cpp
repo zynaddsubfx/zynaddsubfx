@@ -200,8 +200,8 @@ static const Ports voicePorts = {
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
-
-
+    rToggle(PsyncEnabled,               rShort("sync"),  rDefault(false),
+            "Oscillator Hard Sync"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
@@ -604,6 +604,7 @@ void ADnoteVoiceParam::defaults()
     PFMFreqEnvelopeEnabled   = 0;
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
+    PsyncEnabled = false;
 
     OscilGn->defaults();
     FmGn->defaults();
@@ -886,6 +887,8 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             FMFreqEnvelope->add2XML(xml);
             xml.endbranch();
         }
+        
+        xml.addparbool("sync_enabled", PsyncEnabled);
 
         xml.beginbranch("OSCIL");
         FmGn->add2XML(xml);
@@ -1188,8 +1191,8 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMDetuneType);
     copy(PFMFreqEnvelopeEnabled);
 
-
     RCopy(FMFreqEnvelope);
+    copy(PsyncEnabled);
 
     RCopy(FmGn);
 
@@ -1408,6 +1411,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         }
         xml.exitbranch();
     }
+    PsyncEnabled     = (bool)xml.getpar127("sync_enabled", (int)PsyncEnabled);
 }
 
 }

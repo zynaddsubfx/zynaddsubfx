@@ -303,6 +303,12 @@ struct ADnoteVoiceParam {
     unsigned char   PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
+	/* Voice is being synced by modulator
+   0 = off (default)
+   all other values = on
+   It maynot be equal or bigger than current voice */
+    bool PsyncEnabled;
+
     unsigned char *GlobalPDetuneType;
 
     const AbsTime *time;
