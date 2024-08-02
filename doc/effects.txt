@@ -545,6 +545,7 @@ TIP: map the sustain pedal to the Q parameter
 Function
 ^^^^^^^^
 
+
 It is made off a bank of combfilters that are by default tuned like the 
 strings of a piano.
 
@@ -561,3 +562,28 @@ next paremeter.
 ** *Detune* Amount of detune between the unisono strings
 ** *Base* midi note of the lowest string
 
+Reverse
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The reversed effect plays the audio signal backwards. To prevent a time paradoxon
+it the input signal is chopped in segments that are reversed one by one.
+One classic usage is the reversing of a decaying sound for example from reverb.
+
+
+Function
+^^^^^^^^
+With a melotron it was possible to reverse each key by turning the magentic tape around.
+
+
+Description
+^^^^^^^^^^^
+
+** *Length* Length of the segments being played backwards.
+** *Numerator&Denominator* Alternatively the length can be set relative 
+to the global Tempo (bpm)
+** *Phase* adjust the time when the reversed segments start relative to a
+global time reference. It's usefull only when used together with another 
+timed element like LFO.

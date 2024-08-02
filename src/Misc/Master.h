@@ -134,6 +134,13 @@ class Master
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
          * This allows the program to be controlled by an external program*/
+        void UpdateExternalTiming(int bar,
+                                int beat,
+                                float tick,
+                                float bpm,
+                                bool playing);
+
+
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
@@ -185,7 +192,7 @@ class Master
         float vuoutpeakpartr[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
-        AbsTime  time;
+        AbsTime time;
         Controller ctl;
         bool       swaplr; //if L and R are swapped
 

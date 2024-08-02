@@ -280,7 +280,7 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, AbsTime &time_,
     const int &gzip_compression, const int &interpolation,
     Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),

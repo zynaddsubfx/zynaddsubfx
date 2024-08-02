@@ -27,9 +27,10 @@
 #include "DynamicFilter.h"
 #include "Phaser.h"
 #include "Sympathetic.h"
+#include "../Effects/Reverse.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
-#include "../Misc/Time.h"
+
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
@@ -130,29 +131,29 @@ static const rtosc::Ports local_ports = {
                 if (val>=0) {
                     eff->numerator = val;
                     int Pdelay, Pfreq;
-                    float freq;
-                    if(eff->denominator) {
+                    float freq, delay;
+                    if (eff->numerator&&eff->denominator) {
+                        eff->efx->speedfactor = (float)eff->denominator / (4.0f *(float)eff->numerator);
                         switch(eff->nefx) {
                         case 2: // Echo
+                        case 10: // Reverse
                             // invert:
-                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
-                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
-                                                 ((float)eff->numerator / (float)eff->denominator));
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pdelay);
+                            // delay = ((Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS); //0 .. x sec
+                            // Pdelay = (delay * 128.0f / MAX_REV_DELAY_SECONDS) -1
+                            // delay = 60 / tempo * 4 * numerator / denominator
+                            delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
+                            Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
+                            eff->seteffectparrt(2, Pdelay);
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                            freq =  ((float)eff->time->tempo * 
-                                     (float)eff->denominator / 
-                                     (240.0f * (float)eff->numerator));
+                            freq =  (float)eff->time->tempo * 60.0 * eff->efx->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pfreq);
+                            eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
@@ -177,29 +178,25 @@ static const rtosc::Ports local_ports = {
                 if (val > 0) {
                     eff->denominator = val;
                     int Pdelay, Pfreq;
-                    float freq;
-                    if(eff->numerator) {
+                    float freq, delay;
+                    if (eff->numerator&&eff->denominator) {
+                        eff->efx->speedfactor = (float)eff->denominator / (4.0f *(float)eff->numerator);
                         switch(eff->nefx) {
                         case 2: // Echo
-                            // invert:
-                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
-                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
-                                                 ((float)eff->numerator / (float)eff->denominator));
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pdelay);
+                        case 10: // Reverse
+                            delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
+                            Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
+                            eff->seteffectparrt(2, Pdelay);
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
                         case 5: // Alienwah
                         case 8: // DynamicFilter
-                            freq =  ((float)eff->time->tempo * 
-                                     (float)eff->denominator / 
-                                     (240.0f * (float)eff->numerator));
+                            freq =  (float)eff->time->tempo * 60.0 * eff->efx->speedfactor;
                             // invert:
                             // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
                             Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
-                            if (eff->numerator&&eff->denominator)
-                                eff->seteffectparrt(2, Pfreq);
+                            eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
                         case 6: // Distortion
@@ -229,7 +226,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i:c:S", rOptions(Disabled, Reverb, Echo, Chorus,
-     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic) rDefault(Disabled)
+     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic, Reverse) rDefault(Disabled)
      rProp(parameter) rDoc("Get Effect Type"), NULL,
      rCOptionCb(obj->nefx, obj->changeeffectrt(var))},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -258,12 +255,13 @@ static const rtosc::Ports local_ports = {
     rSubtype(Phaser),
     rSubtype(Reverb),
     rSubtype(Sympathetic),
+    rSubtype(Reverse),
 };
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
 
 EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
-                     const bool insertion_, const AbsTime *time_)
+                     const bool insertion_, AbsTime *time_)
     :insertion(insertion_),
       efxoutl(new float[synth_.buffersize]),
       efxoutr(new float[synth_.buffersize]),
@@ -346,6 +344,9 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
             case 9:
                 efx = memory.alloc<Sympathetic>(pars);
                 break;
+            case 10:
+                efx = memory.alloc<Reverse>(pars, time);
+                break;
             //put more effect here
             default:
                 efx = NULL;
@@ -358,6 +359,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
         if (numerator>0) {
             switch(nefx) {
                 case 2: // Echo
+                case 10:// Reverse
                     // invert:
                     // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
                     Pdelay = (int)roundf((20320.0f / (float)time->tempo) * 

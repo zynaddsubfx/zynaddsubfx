@@ -97,7 +97,7 @@ struct EffectParams
      * @return Initialized Effect Parameter object*/
     EffectParams(Allocator &alloc_, bool insertion_, float *efxoutl_, float *efxoutr_,
             unsigned char Ppreset_, unsigned int srate, int bufsize, FilterParams *filterpars_,
-            bool filterprotect=false);
+            bool filterprotect=false, AbsTime *time_ = nullptr);
 
 
     Allocator &alloc;
@@ -109,6 +109,7 @@ struct EffectParams
     int bufsize;
     FilterParams *filterpars;
     bool filterprotect;
+    AbsTime *time;
 };
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
@@ -162,6 +163,7 @@ class Effect
                           * Master Output only.*/
 
         float volume;
+        float speedfactor;
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
@@ -182,6 +184,8 @@ class Effect
 
         //Allocator
         Allocator &memory;
+
+        AbsTime *time;
 
         // current setup
         unsigned int samplerate;
