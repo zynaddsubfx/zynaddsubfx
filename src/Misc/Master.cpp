@@ -400,13 +400,13 @@ static const Ports master_ports = {
                           Part7, Part8, Part9, Part10, Part11, Part12,
                           Part13, Part14, Part15, Part16) rDefault([Off ...]),
                  "Part to insert part onto"),
-    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127)
-        rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
+    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(-64,63) rUnit(semitones)
+        rDefault(0) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);
+            d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift-64);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPkeyshift(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pkeyshift);}}},
+            ((Master*)d.obj)->setPkeyshift(limit<char>(rtosc_argument(m,0).i+64,0,127));
+            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pkeyshift-64);}}},
     {"echo", rDoc("Hidden port to echo messages"), 0, [](const char *m, RtData&d) {
        d.reply(m-1);}},
     {"get-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
