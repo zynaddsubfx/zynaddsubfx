@@ -88,7 +88,13 @@ static const Ports partPorts = {
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
     rParamZyn(Pmaxkey, rShort("max"), rDefault(127), "Max Used Key"),
-    rParamZyn(Pkeyshift, rShort("shift"), rDefault(64), "Part keyshift"),
+    {"Pkeyshift::i", rShort("shift") rProp(parameter) rLinear(-64,63) rUnit(semitones)
+    rDefault(0) rDoc("Part Key Shift"), 0, [](const char *m, RtData&d) {
+    if(rtosc_narguments(m)==0) {
+        d.reply(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);
+    } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+        ((Part*)d.obj)->Pkeyshift=(limit<char>(rtosc_argument(m,0).i+64,0,127));
+        d.broadcast(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);}}},
     rOption(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
             rDefaultDepends(partno),
             rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
