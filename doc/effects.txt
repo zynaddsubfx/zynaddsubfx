@@ -153,6 +153,12 @@ the *D/W* knob, but we have not applied panning and subtraction yet.
 * Next, the signal can be negated. If the *Subtract* checkbox is activated,
 the amplitude is multiplied by -1.
 * Finally, *Pan* lets you apply panning.
+* With the *Mode* selector you can choose between a few modes
+
+** *Chrous* The effect creates one lfo pitched voice. Use Amp middle values to mix it with the original.
+** *Flange* Instead of the pitch its more the phase changes that are audible
+** *Triple* The effect creates three voices using the lfo at 120° shifted phases.
+** *Dual* The effect creates two voices using the lfo at 180° shifted phases.
 
 Distortion
 ~~~~~~~~~~
