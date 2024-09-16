@@ -51,8 +51,16 @@ JackEngine::JackEngine(const SYNTH_T &synth)
         audio.portBuffs[i] = NULL;
     }
     midi.inport = NULL;
+    midi.outport = NULL;
     midi.jack_sync = false;
     osc.oscport = NULL;
+    
+    midiParameterFeedbackQueue = new RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH>;
+}
+
+JackEngine::~JackEngine(void)
+{
+    delete midiParameterFeedbackQueue;
 }
 
 bool JackEngine::connectServer(string server)
@@ -269,15 +277,24 @@ bool JackEngine::openMidi()
     midi.inport = jack_port_register(jackClient, "midi_input",
                                      JACK_DEFAULT_MIDI_TYPE,
                                      JackPortIsInput | JackPortIsTerminal, 0);
-    return midi.inport;
+                                     
+    midi.outport = jack_port_register(jackClient, "midi_output",
+                                     JACK_DEFAULT_MIDI_TYPE,
+                                     JackPortIsOutput | JackPortIsTerminal, 0);
+    setMidiParameterFeedbackQueue();
+    return midi.inport || midi.outport;
 }
 
 void JackEngine::stopMidi()
 {
-    jack_port_t *port = midi.inport;
+    jack_port_t *inport = midi.inport;
+    jack_port_t *ouport = midi.outport;
     midi.inport = NULL;
-    if(port)
-        jack_port_unregister(jackClient, port);
+    midi.outport = NULL;
+    if(inport)
+        jack_port_unregister(jackClient, inport);
+    if(ouport)
+        jack_port_unregister(jackClient, ouport);
 
     if(!getAudioEn())
         disconnectJack();
@@ -391,15 +408,14 @@ void JackEngine::handleMidi(unsigned long frames)
 {
     if(!midi.inport)
         return;
-    void *midi_buf = jack_port_get_buffer(midi.inport, frames);
+    void *midi_in_buf = jack_port_get_buffer(midi.inport, frames);
+    
     jack_midi_event_t jack_midi_event;
     jack_nframes_t    event_index = 0;
     unsigned char     buf[3];
-    unsigned char     type;
 
-    while(jack_midi_event_get(&jack_midi_event, midi_buf,
+    while(jack_midi_event_get(&jack_midi_event, midi_in_buf,
                               event_index++) == 0) {
-        MidiEvent ev = {};
 
         memset(buf, 0, sizeof(buf));
         memcpy(buf, jack_midi_event.buffer,
@@ -408,65 +424,39 @@ void JackEngine::handleMidi(unsigned long frames)
         /* make sure the values are within range */
         buf[1] &= 0x7F;
         buf[2] &= 0x7F;
-        type       = buf[0] & 0xF0;
-        ev.channel = buf[0] & 0x0F;
-        ev.time    = midi.jack_sync ? jack_midi_event.time : 0;
 
-        switch(type) {
-            case 0x80: /* note-off */
-                ev.type  = M_NOTE;
-                ev.num   = buf[1];
-                ev.value = 0;
-                InMgr::getInstance().putEvent(ev);
-                break;
+        for (size_t x = 0; x < jack_midi_event.size; x += 3) {
+            size_t y = jack_midi_event.size - x;
+            if (y >= 3) {
+                memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, 3);
+            } else {
+                memset(buf, 0, sizeof(buf));
+                memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, y);
+            }
+            midiProcess(buf[0], buf[1], buf[2]);
 
-            case 0x90: /* note-on */
-                ev.type  = M_NOTE;
-                ev.num   = buf[1];
-                ev.value = buf[2];
-                InMgr::getInstance().putEvent(ev);
-                break;
-
-            case 0xA0: /* pressure, aftertouch */
-                ev.type  = M_PRESSURE;
-                ev.num   = buf[1];
-                ev.value = buf[2];
-                InMgr::getInstance().putEvent(ev);
-                break;
-
-            case 0xB0: /* controller */
-                ev.type  = M_CONTROLLER;
-                ev.num   = buf[1];
-                ev.value = buf[2];
-                InMgr::getInstance().putEvent(ev);
-                break;
-
-            case 0xC0: /* program change */
-                ev.type  = M_PGMCHANGE;
-                ev.num   = buf[1];
-                InMgr::getInstance().putEvent(ev);
-                break;
-
-            case 0xE0: /* pitch bend */
-                ev.type  = M_CONTROLLER;
-                ev.num   = C_pitchwheel;
-                ev.value = ((buf[2] << 7) | buf[1]) - 8192;
-                InMgr::getInstance().putEvent(ev);
-                break;
-
-            default:
-                for (size_t x = 0; x < jack_midi_event.size; x += 3) {
-                    size_t y = jack_midi_event.size - x;
-                    if (y >= 3) {
-                        memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, 3);
-                    } else {
-                        memset(buf, 0, sizeof(buf));
-                        memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, y);
-                    }
-                    midiProcess(buf[0], buf[1], buf[2]);
-                }
-                break;
         }
+    }
+    
+    void * midi_out_buf = jack_port_get_buffer(midi.outport, frames);
+    jack_midi_clear_buffer(midi_out_buf);
+    
+    while (!midiParameterFeedbackQueue->empty()) {
+        // Get parameters from the front of the queue
+        auto params = midiParameterFeedbackQueue->front();
+        char chan = std::get<0>(params);
+        int type = std::get<1>(params);
+        int val = std::get<2>(params);
+
+        // Attempt to reserve space in the MIDI buffer
+        unsigned char* midi_out_buffer = jack_midi_event_reserve(midi_out_buf, 0, 3);
+        if (midi_out_buffer) {
+            midi_out_buffer[0] = 0xb0 | chan;
+            midi_out_buffer[1] = type;
+            midi_out_buffer[2] = val;
+        }
+    // Remove the processed message from the queue
+    midiParameterFeedbackQueue->pop();
     }
 }
 

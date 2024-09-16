@@ -146,6 +146,11 @@ void OutMgr::refillSmps(unsigned int smpsLimit)
  * 6) Lets return those samples to the primary and secondary outputs
  * 7) Lets wait for another tick
  */
+ 
+ void OutMgr::setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue)
+ {
+     master->setMidiParameterFeedbackQueue(midiQueue);
+ }
 Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
     auto retval = priBuf;

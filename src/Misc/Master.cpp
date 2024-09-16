@@ -499,7 +499,12 @@ static const Ports master_ports = {
     {"virtual_midi_cc:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
-            M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+            const int chan = rtosc_argument(m, 0).i;
+            const int type = rtosc_argument(m, 2).i;
+            const int val = rtosc_argument(m, 1).i;
+            //~ M->setController(chan,type,val);
+            M->sendCC(chan,type,val);
+            }},
     {"setController:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
@@ -834,6 +839,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     mastercb = 0;
     mastercb_ptr = 0;
+    
+    midiParamFeedbackQueue = 0;
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
@@ -1005,6 +1012,24 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 /*
  * Controllers
  */
+ 
+// Function to add a MIDI Control Change message to the queue
+void Master::sendCC(char chan, int type, int val) {
+    if (midiParamFeedbackQueue)
+    {
+        if(!midiParamFeedbackQueue->full())
+            midiParamFeedbackQueue->push(std::make_tuple(chan, type, val));
+        else
+            printf("Warning: midiParamFeedbackQueue full. Feedback message dropped \n");
+    }
+}
+
+void Master::setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue)
+{
+    midiParamFeedbackQueue = midiQueue;
+    printf("Master - midiParameterFeedbackQueue: %p \n", (void *) midiParamFeedbackQueue);
+}
+
 void Master::setController(char chan, int type, int par)
 {
     if(frozenState)

@@ -53,4 +53,9 @@ Stereo<float *> AudioOut::getNext()
     return OutMgr::getInstance().tick(bufferSize);
 }
 
+void AudioOut::setMidiParameterFeedbackQueue()
+{
+    return OutMgr::getInstance().setMidiParameterFeedbackQueue(midiParameterFeedbackQueue);
+}
+
 }

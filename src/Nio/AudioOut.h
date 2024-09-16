@@ -15,8 +15,10 @@
 #define AUDIO_OUT_H
 
 #include "../Misc/Stereo.h"
+#include "../Containers/RtQueue.h"
 #include "../globals.h"
 #include "Engine.h"
+#include <queue>
 
 namespace zyn {
 
@@ -48,7 +50,8 @@ class AudioOut:public virtual Engine
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
         Stereo<float *> getNext();
-
+        void setMidiParameterFeedbackQueue();
+        RTQueue<std::tuple<char, int, int>, 10> *midiParameterFeedbackQueue;
         const SYNTH_T &synth;
         int samplerate;
         int bufferSize;

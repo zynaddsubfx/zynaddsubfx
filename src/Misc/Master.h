@@ -18,6 +18,7 @@
 #include "Microtonal.h"
 #include <atomic>
 #include <set>
+#include "../Containers/RtQueue.h"
 #include <rtosc/automations.h>
 #include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
@@ -101,7 +102,7 @@ class Master
         /**put all data from the *data array to zynaddsubfx parameters (used for plugin)*/
         void putalldata(const char *data);
 
-        //Midi IN
+        //Midi
         void noteOn(char chan, note_t note, char velocity) {
             noteOn(chan, note, velocity, note / 12.0f);
         };
@@ -109,6 +110,10 @@ class Master
         void noteOff(char chan, note_t note);
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
+        void sendCC(char chan, int type, int val);
+        
+        RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiParamFeedbackQueue;
+        
         void setController(char chan, int type, note_t note, float value);
         //void NRPN...
 
@@ -140,6 +145,7 @@ class Master
                                 float *outr) REALTIME;
 
 
+        void setMidiParameterFeedbackQueue(RTQueue<std::tuple<char, int, int>, MIDI_QUEUE_LENGTH> *midiQueue);
         void partonoff(int npart, int what);
 
         //Set callback to run when master changes
