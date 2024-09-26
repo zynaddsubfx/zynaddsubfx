@@ -446,7 +446,8 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
         float tmp = 1.0f;
         if((pars.VoicePar[vc].FmGn->Padaptiveharmonics != 0)
                 || (voice.FMEnabled == FMTYPE::MIX)
-                || (voice.FMEnabled == FMTYPE::RING_MOD))
+                || (voice.FMEnabled == FMTYPE::RING_MOD)
+                || (voice.FMEnabled == FMTYPE::AM_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
         if(!pars.GlobalPar.Hrandgrouping)
@@ -1403,7 +1404,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
 /*
  * Computes the Oscillator (Ring Modulation)
  */
-inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
+inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice, FMTYPE FMmode)
 {
     ComputeVoiceOscillator_LinearInterpolation(nvoice);
 
@@ -1412,19 +1413,25 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
         vce.FMnewamplitude = 1.0f;
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
-    if(NoteVoicePar[nvoice].FMVoice >= 0)
+    if(NoteVoicePar[nvoice].FMVoice >= 0) {
         // if I use VoiceOut[] as modullator
+        const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
+
             for(int i = 0; i < synth.buffersize; ++i) {
                 const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
-                int FMVoice = NoteVoicePar[nvoice].FMVoice;
-                tw[i] *= (1.0f - amp) + amp * NoteVoicePar[FMVoice].VoiceOut[i];
+
+                if(FMmode == FMTYPE::RING_MOD)
+                    tw[i] *= (1.0f - amp) + amp * smps[i];
+                else if(FMmode == FMTYPE::AM_MOD)
+                    tw[i] *= (0.5f + (0.5f * amp * smps[i]));
             }
         }
+    }
     else
         for(int k = 0; k < vce.unison_size; ++k) {
             int    poshiFM  = vce.oscposhiFM[k];
@@ -1438,10 +1445,16 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
-                tw[i] *= (NoteVoicePar[nvoice].FMSmp[poshiFM] * (1.0f - posloFM)
+
+                const float modulatorSample = (NoteVoicePar[nvoice].FMSmp[poshiFM] * (1.0f - posloFM)
                           + NoteVoicePar[nvoice].FMSmp[poshiFM
-                                                       + 1] * posloFM) * amp
-                         + (1.0f - amp);
+                                                       + 1] * posloFM);
+
+                if(FMmode == FMTYPE::RING_MOD)
+                    tw[i] *= modulatorSample * amp + (1.0f - amp);
+                else if(FMmode == FMTYPE::AM_MOD)
+                    tw[i] *= (0.5f + (0.5f * amp * modulatorSample));
+
                 posloFM += freqloFM;
                 if(posloFM >= 1.0f) {
                     posloFM -= 1.0f;
@@ -1670,7 +1683,9 @@ int ADnote::noteout(float *outl, float *outr)
                         ComputeVoiceOscillatorMix(nvoice);
                         break;
                     case FMTYPE::RING_MOD:
-                        ComputeVoiceOscillatorRingModulation(nvoice);
+                    case FMTYPE::AM_MOD:
+                        ComputeVoiceOscillatorRingModulation(nvoice,
+                                                                  NoteVoicePar[nvoice].FMEnabled);
                         break;
                     case FMTYPE::FREQ_MOD:
                     case FMTYPE::PHASE_MOD:
