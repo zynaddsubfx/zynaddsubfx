@@ -137,6 +137,10 @@ with very short LFO delay and little LFO depth. You can imagine a flanger as two
 copies of a sound playing at almost the same time. This leads to interference,
 which can be clearly heard. It is popular to apply flangers to guitars, giving
 them more "character".
+While in standard CHORUS and FLANGER mode there is only one additional voice, that 
+can be blended with the original one using the amount knob, the DUAL and TRIPLE 
+mode adds two/three voices with their LFOs each being phase shifted by 180 / 120 degrees.
+Those have been used by famous roland string synthesizers.
 
 Usage
 ^^^^^
@@ -153,6 +157,7 @@ the *D/W* knob, but we have not applied panning and subtraction yet.
 * Next, the signal can be negated. If the *Subtract* checkbox is activated,
 the amplitude is multiplied by -1.
 * Finally, *Pan* lets you apply panning.
+* *Mode* selector lets you choose between Chorus, Flanger, Dual- and Triple Chorus.
 
 Distortion
 ~~~~~~~~~~
