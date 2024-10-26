@@ -51,6 +51,7 @@ Reverse::Reverse(EffectParams pars, AbsTime *time_)
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     setpanning(64);
+    setvolume(Pvolume);
 }
 
 Reverse::~Reverse()
