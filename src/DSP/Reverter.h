@@ -154,24 +154,19 @@ private:
     /**
      * @brief Handle synchronization modes and state transitions.
      * 
-     * @param i Index of the current sample in the buffer.
      */
-    void handleSync(int i);
+    void handleSync();
 
     /**
      * @brief Handle synchronization in NOTEON and NOTEONOFF modes.
      * 
-     * @param i Index of the current sample in the buffer.
      */
-    void handleNoteSync(int i);
+    void handleNoteSync();
 
     /**
      * @brief Handles state transitions in NOTEON and NOTEONOFF modes.
-     * 
-     * @param mode Name of the synchronization mode triggering the state change.
-     * @param i Index of the current sample in the buffer.
      */
-    void handleStateChange(const char *mode, int i);
+    void handleStateChange();
 
     /**
      * @brief Update the read position in the ring buffer.
