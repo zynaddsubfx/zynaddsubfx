@@ -83,7 +83,7 @@ void Reverse::out(const Stereo<float *> &input)
 
     // process external timecode to sync
 
-    unsigned int beat_new;
+    unsigned int beat_new = 0;
     if (time->tempo && speedfactor && PsyncMode == HOST)
     {
         tick = (time->beat-1)*1920 + time->tick;
