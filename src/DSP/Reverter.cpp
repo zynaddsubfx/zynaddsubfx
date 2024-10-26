@@ -41,6 +41,9 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
     pos_writer = 0;
     pos_reader = 0;
     pos_start = 0;
+    reverse_index = 0;
+    state = PLAYING;
+    
 }
 
 Reverter::~Reverter() {
@@ -72,6 +75,8 @@ void Reverter::filterout(float *smp) {
 
 void Reverter::writeToRingBuffer(float *smp) {
     int space_to_end = mem_size - pos_writer;
+    float rms = 0.0f;
+
     if (buffersize <= space_to_end) {
         // No wrap around, copy in one go
         memcpy(&input[pos_writer], smp, buffersize * sizeof(float));
@@ -80,25 +85,26 @@ void Reverter::writeToRingBuffer(float *smp) {
         memcpy(&input[pos_writer], smp, space_to_end * sizeof(float));
         memcpy(&input[0], smp + space_to_end, (buffersize - space_to_end) * sizeof(float));
     }
-
-// Update pos_writer
-pos_writer = (pos_writer + buffersize) % mem_size;
+    for (int i = 0; i < buffersize; i++) {
+        rms += fabsf(smp[i]);
+    }
+    // Update pos_writer
+    pos_writer = (pos_writer + buffersize) % mem_size;
+    // calculate rms
+    rms_hist = rms / static_cast<float>(buffersize);
+    //printf("rms_hist: %f\n", rms_hist);
 }
 
 void Reverter::processBuffer(float *smp) {
-    float rms = 0.0f;
     for (int i = 0; i < buffersize; i++) {
         reverse_index++;
-        rms += fabsf(smp[i]);
         phase_offset = phase_offset_old + static_cast<float>(i) * phase_offset_fade;
-
         handleSync();
         updateReaderPosition();
         crossfadeSamples(smp, i);
         applyGain(smp[i]);
     }
 
-    rms_hist = rms / static_cast<float>(buffersize);
     phase_offset_old = phase_offset;
     phase_offset_fade = 0.0f;
 }
@@ -106,7 +112,7 @@ void Reverter::processBuffer(float *smp) {
 void Reverter::handleSync() {
     switch (syncMode) {
         case AUTO:
-            if (reverse_index >= delay && state != IDLE) switchBuffers(delay / 2.0f);
+            if (reverse_index >= delay) switchBuffers(delay / 2.0f);
             break;
         case HOST:
         case MIDI:
@@ -128,7 +134,7 @@ void Reverter::handleNoteSync() {
                 (   
                   (reverse_index >= recorded_samples && state == PLAYING) ||
                   (reverse_index >= max_delay && state == PLAYING) ||
-                  (rms_hist < 0.01f && state == RECORDING)
+                  (rms_hist < 0.001f && state == RECORDING)
                 )
               ) {
         handleStateChange();
@@ -223,7 +229,8 @@ void Reverter::setsyncMode(SyncMode value) {
     if (value != syncMode) {
         syncMode = value;
         state = (syncMode == NOTEON || syncMode == NOTEONOFF) ? IDLE : PLAYING;
-        //printf("setting syncMode: %d state: %d\n", syncMode, state);
+        printf("setting syncMode: %d state: %s\n", syncMode, state==IDLE ? "IDLE" : "PLAYING");
+        reset();
     }
 }
 
