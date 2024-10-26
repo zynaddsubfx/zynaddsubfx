@@ -256,10 +256,10 @@ private:
     unsigned int mem_size;
 
     /// Sample rate of the audio engine
-    int samplerate;
+    const int samplerate;
 
     /// Size of the audio buffer in samples
-    int buffersize;
+    const int buffersize;
 
     /// Maximum allowable delay in samples
     float max_delay;
