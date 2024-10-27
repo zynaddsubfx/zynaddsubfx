@@ -23,9 +23,10 @@
 namespace zyn {
 
 Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsize, float tRef_, AbsTime *time_)
-    : samplerate(srate), buffersize(bufsize), syncMode(AUTO), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
+    : syncMode(AUTO), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
       tRef(tRef_), buffer_offset(0), buffer_counter(0), reverse_index(0.0f), phase_offset_old(0.0f),
-      phase_offset_fade(0.0f), fade_counter(0), rms_hist(999.9f), time(time_), memory(*alloc) 
+      phase_offset_fade(0.0f), fade_counter(0), rms_hist(999.9f), time(time_), memory(*alloc), 
+      samplerate(srate), buffersize(bufsize) 
 {
 
     fading_samples = static_cast<int>(srate * crossfade);
