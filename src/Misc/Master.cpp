@@ -782,7 +782,6 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     time.beat = 0;
     time.tick = 0.0f;
     time.bpm = 0.0f;
-    time.trigger = false;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
@@ -826,11 +825,11 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time);
+        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time, &sync);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
+        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time, &sync);
 
     //Note Visualization
     memset(activeNotes, 0, sizeof(activeNotes));
@@ -971,7 +970,7 @@ void Master::defaults()
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
-        time.trigger = true;
+        sync.notify();
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;

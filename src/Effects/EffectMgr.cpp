@@ -143,7 +143,7 @@ static const rtosc::Ports local_ports = {
                             // delay = 60 / tempo * 4 * numerator / denominator
                             delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
-                            eff->seteffectparrt(2, Pdelay);
+                            eff->seteffectparrt(2, Pdelay);                                
                             break;
                         case 3: // Chorus
                         case 4: // Phaser
@@ -261,7 +261,7 @@ static const rtosc::Ports local_ports = {
 const rtosc::Ports &EffectMgr::ports = local_ports;
 
 EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
-                     const bool insertion_, AbsTime *time_)
+                     const bool insertion_, const AbsTime *time_, Sync *sync_)
     :insertion(insertion_),
       efxoutl(new float[synth_.buffersize]),
       efxoutr(new float[synth_.buffersize]),
@@ -269,6 +269,7 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
       nefx(0),
       efx(NULL),
       time(time_),
+      sync(sync_),
       numerator(0),
       denominator(4),
       dryonly(false),
@@ -346,6 +347,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 break;
             case 10:
                 efx = memory.alloc<Reverse>(pars, time);
+                sync->attach(efx);
                 break;
             //put more effect here
             default:

@@ -24,7 +24,6 @@ class AbsTime
             beat(0),
             tick(0.0f),
             bpm(120.0f),
-            trigger(false),
             frames(0),
             s(synth) {};
         void operator++(){++frames;};
@@ -35,7 +34,6 @@ class AbsTime
         int beat;
         float tick;
         float bpm;
-        bool trigger;
         float dt() const { return s.dt(); }
         float framesPerSec() const { return 1/s.dt();}
         int   samplesPerFrame() const {return s.buffersize;}

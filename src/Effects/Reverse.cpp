@@ -44,7 +44,7 @@ rtosc::Ports Reverse::ports = {
 #undef rEnd
 #undef rObject
 
-Reverse::Reverse(EffectParams pars, AbsTime *time_)
+Reverse::Reverse(EffectParams pars, const AbsTime *time_)
     :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), PsyncMode(AUTO), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
@@ -100,20 +100,20 @@ void Reverse::out(const Stereo<float *> &input)
     // store beat_new for next cycle
     beat_new_hist = beat_new;
 
-    // process noteon trigger
-    if( (PsyncMode == NOTEON || PsyncMode == NOTEONOFF)  && time->trigger ) {
-        time->trigger = false;
-        reverterL->sync(0.0f);
-        if(Pstereo) reverterR->sync(0.0f);
-    }
-
     // do the actual processing
     reverterL->filterout(efxoutl);
     if(Pstereo) reverterR->filterout(efxoutr);
     else memcpy(efxoutr, efxoutl, bufferbytes);
 }
 
-
+void Reverse::update()
+{
+    // process noteon trigger
+    if( (PsyncMode == NOTEON || PsyncMode == NOTEONOFF) ) {
+        reverterL->sync(0.0f);
+        if(Pstereo) reverterR->sync(0.0f);
+    }
+}
 //Parameter control
 void Reverse::setvolume(unsigned char _Pvolume)
 {

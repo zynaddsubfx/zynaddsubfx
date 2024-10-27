@@ -56,7 +56,7 @@ public:
      * @param tRef Optional time reference (default is 0.0f).
      * @param time_ Optional pointer to an AbsTime object for timing.
      */
-    Reverter(Allocator *alloc, float delay, unsigned int srate, int bufsize, float tRef = 0.0f, AbsTime *time_ = nullptr);
+    Reverter(Allocator *alloc, float delay, unsigned int srate, int bufsize, float tRef = 0.0f, const AbsTime *time_ = nullptr);
 
     /// Destructor
     ~Reverter();
@@ -247,7 +247,7 @@ private:
     float rms_hist;
 
     /// Pointer to timing object for synchronization
-    AbsTime *time;
+    const AbsTime *time;
 
     /// Memory allocator
     Allocator &memory;

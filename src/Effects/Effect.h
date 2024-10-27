@@ -18,6 +18,7 @@
 #include "../globals.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
+#include "../Misc/Sync.h"
 
 // effect parameters differing between single effects
 #ifndef rEffPar
@@ -113,11 +114,14 @@ struct EffectParams
 };
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
-class Effect
+class Effect: public Observer
 {
     public:
         Effect(EffectParams pars);
         virtual ~Effect() {}
+        
+        void update() override {}
+        
         /**
          * Get default preset parameter value
          * @param npreset chosen preset
