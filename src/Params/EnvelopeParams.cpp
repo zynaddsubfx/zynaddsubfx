@@ -544,14 +544,13 @@ void EnvelopeParams::updatefree()
                 envdt[1] = A_dt;  // Attack time
                 Penvval[1] = 127; // Peak
                 
-                if(Penvsustain < Penvpoints) {
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
                     // Place sustain value at the sustain point
                     Penvval[Penvsustain] = PS_val;
                     
                     // If there's a point after sustain, set its time to R_dt
-                    if(Penvsustain + 1 < Penvpoints) {
+                    if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
                         envdt[Penvsustain + 1] = R_dt;
-                        Penvval[Penvpoints - 1] = 0; // Ensure end point is zero
                     }
                 }
             }
@@ -563,16 +562,12 @@ void EnvelopeParams::updatefree()
                 Penvval[0] = PA_val;
                 envdt[1] = A_dt;
                 
-                if(Penvsustain < Penvpoints) {
-                    // Middle value at sustain point
-                    Penvval[Penvsustain] = 64;
-                    
-                    // Release time and value after sustain
-                    if(Penvsustain + 1 < Penvpoints) {
-                        envdt[Penvsustain + 1] = R_dt;
-                        Penvval[Penvpoints - 1] = PR_val;
-                    }
+                // Release time and value after sustain
+                if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
+                    envdt[Penvsustain + 1] = R_dt;
+                    Penvval[Penvpoints - 1] = PR_val;
                 }
+
             }
             break;
             
@@ -581,22 +576,17 @@ void EnvelopeParams::updatefree()
                 Penvval[0] = PA_val;
                 envdt[1] = A_dt;
                 Penvval[1] = PD_val;
-                
-                if(Penvsustain < Penvpoints) {
-                    // Center value at sustain point
-                    Penvval[Penvsustain] = 64;
-                    
-                    // Release time and value after sustain
-                    if(Penvsustain + 1 < Penvpoints) {
-                        envdt[Penvsustain + 1] = R_dt;
-                        Penvval[Penvpoints - 1] = PR_val;
-                    }
+
+                // Release time and value after sustain
+                if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
+                    envdt[Penvsustain + 1] = R_dt;
+                    Penvval[Penvpoints - 1] = PR_val;
                 }
             }
             break;
     }
 }
-    
+
     // Updates ADSR parameters based on free mode points
 void EnvelopeParams::updatenonfree() {
     if(Pfreemode) return;
@@ -608,7 +598,7 @@ void EnvelopeParams::updatenonfree() {
                 // Attack time from first segment
                 A_dt = envdt[1];
                 
-                if(Penvsustain < Penvpoints) {
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
                     // Sustain level is the value at sustain point
                     PS_val = Penvval[Penvsustain];
                     
@@ -626,7 +616,7 @@ void EnvelopeParams::updatenonfree() {
                 PA_val = Penvval[0];
                 A_dt = envdt[1];
                 
-                if(Penvsustain < Penvpoints) {
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
                     if(Penvsustain + 1 < Penvpoints) {
                         R_dt = envdt[Penvsustain + 1];
                         PR_val = Penvval[Penvpoints - 1];
@@ -641,7 +631,7 @@ void EnvelopeParams::updatenonfree() {
                 A_dt = envdt[1];
                 PD_val = Penvval[1];
                 
-                if(Penvsustain < Penvpoints) {
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
                     if(Penvsustain + 1 < Penvpoints) {
                         R_dt = envdt[Penvsustain + 1];
                         PR_val = Penvval[Penvpoints - 1];
