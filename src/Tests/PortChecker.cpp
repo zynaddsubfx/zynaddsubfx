@@ -41,6 +41,7 @@ class PortChecker
             synth = new zyn::SYNTH_T;
             synth->buffersize = 256;
             synth->samplerate = 48000;
+            synth->oscilsize = 1024;
             synth->alias();
 
             mw = new zyn::MiddleWare(std::move(*synth), &config);
