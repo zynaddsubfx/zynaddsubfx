@@ -12,8 +12,7 @@
 */
 
 #pragma once
-#include "Filter.h"
-#include "Value_Smoothing_Filter.h"
+#include "../globals.h"
 
 namespace zyn {
 
