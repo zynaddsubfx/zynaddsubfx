@@ -29,9 +29,18 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
       samplerate(srate), buffersize(bufsize) 
 {
 
+    // current number of samples to be used for crossfade
     fading_samples = static_cast<int>(srate * crossfade);
+
+    // maximum number of samples for a reversed segment.
     max_delay = srate * MAX_REV_DELAY_SECONDS;
-    mem_size = static_cast<int>(ceilf(max_delay * 4.0f)) + static_cast<int>(1.27f * samplerate) + 2;
+    // Calculate mem_size for reverse delay effect:
+    // - 1 times max_delay for recording
+    // - 1 times max_delay fir reverse playing
+    // - 1 times max_delay for phase chaning while playing
+    // - Add maximum crossfade duration (1.27s).
+    // - Add 2 extra samples as a safety margin for interpolation and circular buffer wrapping.
+    mem_size = static_cast<int>(ceilf(max_delay * 3.0f)) + static_cast<int>(1.27f * samplerate) + 2;
 
     input = static_cast<float *>(memory.alloc_mem(mem_size * sizeof(float)));
     reset();
@@ -43,7 +52,6 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
     pos_start = 0;
     reverse_index = 0;
     state = PLAYING;
-    
 }
 
 Reverter::~Reverter() {
