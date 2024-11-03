@@ -14,7 +14,7 @@
 #ifndef EFFECT_LFO_H
 #define EFFECT_LFO_H
 
-#include "../Misc/Time.h"
+#include "../globals.h"
 
 namespace zyn {
 

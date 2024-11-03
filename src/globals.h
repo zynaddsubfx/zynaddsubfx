@@ -73,6 +73,9 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
+class  AbsTime;
+
+
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
