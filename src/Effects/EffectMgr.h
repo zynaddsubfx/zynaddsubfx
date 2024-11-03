@@ -18,7 +18,7 @@
 
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
-#include "../Misc/Sync.h"
+#include "../globals.h"
 
 namespace zyn {
 

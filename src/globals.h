@@ -74,6 +74,7 @@ class  FormantFilter;
 class  ModFilter;
 
 class  AbsTime;
+class  Sync;
 
 
 typedef float fftwf_real;
