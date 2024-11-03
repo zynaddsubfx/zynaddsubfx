@@ -581,10 +581,12 @@ Description
 
 ** *Length* Length of the segments being played backwards.
 ** *Numerator&Denominator* Alternatively the length can be set relative
-to the global Tempo (bpm)
+to the global Tempo (bpm). If and only if Numerator is 0 the length 
+parameter is used directly
 ** *Phase* adjust the time when the reversed segments start relative to a
 global time reference. It's usefull only when used together with another
 timed element like LFO.
+
 Sympathetic
 ~~~~~~~~
 

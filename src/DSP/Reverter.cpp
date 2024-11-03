@@ -57,7 +57,7 @@ inline float Reverter::sampleLerp(float *smp, float pos) {
 }
 
 inline float hanningWindow(float x) {
-    return 0.5f * (1.0f - cos(1.0f * M_PI * x));
+    return 0.5f * (1.0f - cos(M_PI * x));
 }
 
 inline void Reverter::switchBuffers(float offset) {
