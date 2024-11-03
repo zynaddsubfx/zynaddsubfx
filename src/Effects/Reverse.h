@@ -36,8 +36,12 @@ class Reverse final:public Effect
          *
          * The possible parameters are:
          *   -# Volume
-         *   -# Panning
+         *   -# Panning (member of parent class)
          *   -# Delay
+         *   -# Phase
+         *   -# Crossfade
+         *   -# Sync Mode
+         *   -# Stereo
          * @param npar number of chosen parameter
          * @param value the new value
          */
@@ -46,10 +50,15 @@ class Reverse final:public Effect
         /**
          * Gets the specified parameter
          *
-         * The possible parameters are
+         * The possible parameters are:
          *   -# Volume
-         *   -# Panning
+         *   -# Panning (member of parent class)
          *   -# Delay
+         *   -# Phase
+         *   -# Crossfade
+         *   -# Sync Mode
+         *   -# Stereo
+
          * @param npar number of chosen parameter
          * @return value of parameter
          */
@@ -60,12 +69,12 @@ class Reverse final:public Effect
         static rtosc::Ports ports;
     private:
         //Parameters
-        unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        unsigned char Pdelay;   /**<#2 Length of reversed segment 127 = 1.5s*/
-        unsigned char Pphase;
-        unsigned char Pcrossfade;
-        unsigned char PsyncMode;
-        unsigned char Pstereo;
+        unsigned char Pvolume;     /**< #0 Volume or Dry/Wetness */
+        unsigned char Pdelay;      /**< #2 Length of reversed segment, 127 = 1.5s */
+        unsigned char Pphase;      /**< #3 Phase offset for delay effect */
+        unsigned char Pcrossfade;  /**< #4 Crossfade duration between segments */
+        unsigned char PsyncMode;   /**< #5 Synchronization mode setting */
+        unsigned char Pstereo;     /**< #6 Stereo mode flag */
 
         void setvolume(unsigned char _Pvolume);
         void setdelay(unsigned char _Pdelay);
