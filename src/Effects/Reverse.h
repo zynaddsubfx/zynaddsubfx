@@ -15,7 +15,6 @@
 #define REVERSE_H
 
 #include "Effect.h"
-#include "../Misc/Stereo.h"
 #include "../DSP/Reverter.h"
 #include "../Misc/Time.h"
 

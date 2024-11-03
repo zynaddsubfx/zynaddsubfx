@@ -73,7 +73,6 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
-class  AbsTime;
 class  Sync;
 
 
