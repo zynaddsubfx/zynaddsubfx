@@ -165,7 +165,7 @@ protected:
     */
     const char* getMaker() const noexcept override
     {
-        return "ZynAddSubFX Team (friedolino test)";
+        return "ZynAddSubFX Team";
     }
 
    /**
