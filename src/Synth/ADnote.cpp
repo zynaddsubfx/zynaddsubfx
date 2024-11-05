@@ -1526,8 +1526,12 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
                     (tw[i]>=0.0f && fmold <0.0f) )
                 && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude))
                 ) {
+                fmold = tw[i];
+                tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f) + smps[0])/2.0f;
                 poslo = 0;
                 poshi = 0;
+                continue;
+                
             }
             fmold = tw[i];
 
