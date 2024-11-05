@@ -779,6 +779,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
 
     xml.addpar("fm_enabled", (int)PFMEnabled);
+    xml.addparbool("sync_enabled", PsyncEnabled);
 
     xml.beginbranch("OSCIL");
     OscilGn->add2XML(xml);
@@ -858,7 +859,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     }
 
     if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
-       || (!xml.minimal)) {
+       || (!xml.minimal) || PsyncEnabled) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
@@ -888,7 +889,6 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             xml.endbranch();
         }
         
-        xml.addparbool("sync_enabled", PsyncEnabled);
 
         xml.beginbranch("OSCIL");
         FmGn->add2XML(xml);
@@ -1274,6 +1274,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
     PfilterFcCtlBypass  = xml.getparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
     PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
+    PsyncEnabled   = xml.getparbool("sync_enabled", PsyncEnabled);
 
     if(xml.enterbranch("OSCIL")) {
         OscilGn->getfromXML(xml);
@@ -1411,7 +1412,6 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         }
         xml.exitbranch();
     }
-    PsyncEnabled     = (bool)xml.getpar127("sync_enabled", (int)PsyncEnabled);
 }
 
 }
