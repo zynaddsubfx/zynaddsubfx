@@ -189,7 +189,7 @@ class Effect: public Observer
         //Allocator
         Allocator &memory;
 
-        AbsTime *time;
+        const AbsTime *time;
 
         // current setup
         unsigned int samplerate;

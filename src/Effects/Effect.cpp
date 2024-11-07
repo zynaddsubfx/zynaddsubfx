@@ -33,8 +33,10 @@ Effect::Effect(EffectParams pars)
       filterpars(pars.filterpars),
       insertion(pars.insertion),
       memory(pars.alloc),
+      time(pars.time),
       samplerate(pars.srate),
       buffersize(pars.bufsize)
+      
 {
     alias();
 }
