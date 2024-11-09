@@ -70,7 +70,7 @@ inline float hanningWindow(float x) {
 
 inline void Reverter::switchBuffers(float offset) {
     reverse_index = 0;
-    pos_start = pos_writer + buffersize + offset;
+    pos_start = pos_writer + offset;
     float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
     delta_crossfade = pos_reader - 1.0f - pos_next;
     fade_counter = 0;
@@ -160,6 +160,19 @@ void Reverter::handleStateChange() {
 }
 
 void Reverter::updateReaderPosition() {
+    //                 buffersize
+    //                  <----->
+    // ---+------+------+------+------+------+---
+    //    |      |      |      |      |      |
+    // ...|  b4  |  b5  |  b6  |  b7  |  b8  |...
+    // ---+------+------+------+------+------+---
+    //             ^           ^             ^
+    //             |           L pos_start   L pos_writer
+    //             L pos_reader
+    //             <--><--_---->
+    //              |       L reverse_index
+    //              L phase_offset   
+    //    
     pos_reader = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
 }
 
