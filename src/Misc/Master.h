@@ -191,7 +191,7 @@ class Master
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         AbsTime time;
-        Sync sync;
+        Sync* sync;
         Controller ctl;
         bool       swaplr; //if L and R are swapped
 

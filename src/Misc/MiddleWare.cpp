@@ -625,6 +625,7 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
                                    master->time,
+                                   master->sync,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
                                    &master->microtonal, master->fft, &master->watcher,
@@ -684,6 +685,7 @@ public:
 
         Part *p = new Part(*master->memory, synth,
                 master->time,
+                master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);

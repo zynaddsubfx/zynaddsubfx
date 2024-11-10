@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm> // for std::find
+#include <vector>
+
 namespace zyn {
 
 class Observer {
@@ -10,6 +13,7 @@ public:
 
 class Sync {
 public:
+    Sync() {}
     void attach(Observer* observer) {
         observers.push_back(observer);
     }
