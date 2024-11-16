@@ -16,11 +16,12 @@
 
 namespace zyn {
 
-#define SYNCMODES   AUTO,\
+#define SYNCMODES   NOTEON,\
+                    NOTEONOFF,\
+                    AUTO,\
                     MIDI,\
-                    HOST,\
-                    NOTEON,\
-                    NOTEONOFF
+                    HOST
+                    
 
 enum SyncMode
 {
