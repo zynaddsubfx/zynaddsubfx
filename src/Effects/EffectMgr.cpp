@@ -286,7 +286,7 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
 
 EffectMgr::~EffectMgr()
 {
-    sync->detach(efx);
+    if(sync) sync->detach(efx);
     memory.dealloc(efx);
     delete filterpars;
     delete [] efxoutl;
@@ -309,7 +309,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     preset = 0;
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
-    //~ sync->detach(efx);
+    if(sync) sync->detach(efx);
     memory.dealloc(efx);
 
     int new_loc = (_nefx == 8) ? dynfilter_0 : in_effect;
@@ -349,7 +349,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 break;
             case 10:
                 efx = memory.alloc<Reverse>(pars, time);
-                sync->attach(efx);
+                if(sync) sync->attach(efx);
                 break;
             //put more effect here
             default:
@@ -443,7 +443,7 @@ void EffectMgr::init(void)
 void EffectMgr::kill(void)
 {
     //printf("Killing Effect(%d)\n", nefx);
-    //~ sync->detach(efx);
+    if(sync) sync->detach(efx);
     memory.dealloc(efx);
 }
 
