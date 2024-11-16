@@ -68,14 +68,13 @@ inline float hanningWindow(float x) {
     return 0.5f * (1.0f - cos(M_PI * x));
 }
 
-inline void Reverter::switchBuffers(float offset) {
+inline void Reverter::switchBuffers() {
     reverse_index = 0; 
     // Reset the reverse index to start fresh for the new reverse playback segment.
     
-    pos_start = pos_writer + buffersize + offset; 
+    pos_start = pos_writer;
     // Calculate the starting point for reverse playback:
     // - `pos_writer` is the current write position.
-    // - `buffersize` is added to ensure modulo arithmetic doesn't return a negative value.
     // - `offset` further adjusts the position to align with delay or phase offsets.
 
     float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size); 
@@ -137,11 +136,11 @@ void Reverter::processBuffer(float *smp) {
 void Reverter::handleSync() {
     switch (syncMode) {
         case AUTO:
-            if (reverse_index >= delay) switchBuffers(delay / 2.0f);
+            if (reverse_index >= delay) switchBuffers();
             break;
         case HOST:
         case MIDI:
-            if (doSync && reverse_index >= syncPos) switchBuffers(delay / 2.0f);
+            if (doSync && reverse_index >= syncPos) switchBuffers();
             break;
         case NOTEON:
         case NOTEONOFF:
@@ -149,7 +148,7 @@ void Reverter::handleSync() {
             
             break;
     }
-    if (reverse_index >= max_delay && state == PLAYING) switchBuffers(delay / 2.0f);
+    if (reverse_index >= max_delay && state == PLAYING) switchBuffers();
 }
 
 void Reverter::handleNoteSync() {
@@ -173,7 +172,7 @@ void Reverter::handleStateChange() {
     } else if (state == PLAYING) {
         state = IDLE; printf("IDLE\n");
     }
-    switchBuffers(delay / 2.0f);
+    switchBuffers();
 }
 
 void Reverter::updateReaderPosition() {

@@ -125,7 +125,7 @@ private:
      * 
      * @param offset Offset for buffer switching.
      */
-    void switchBuffers(float offset);
+    void switchBuffers();
 
     /**
      * @brief Perform linear interpolation between two samples.
