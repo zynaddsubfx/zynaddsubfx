@@ -69,11 +69,28 @@ inline float hanningWindow(float x) {
 }
 
 inline void Reverter::switchBuffers(float offset) {
-    reverse_index = 0;
-    pos_start = pos_writer + offset;
-    float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
-    delta_crossfade = pos_reader - 1.0f - pos_next;
-    fade_counter = 0;
+    reverse_index = 0; 
+    // Reset the reverse index to start fresh for the new reverse playback segment.
+    
+    pos_start = pos_writer + buffersize + offset; 
+    // Calculate the starting point for reverse playback:
+    // - `pos_writer` is the current write position.
+    // - `buffersize` is added to ensure modulo arithmetic doesn't return a negative value.
+    // - `offset` further adjusts the position to align with delay or phase offsets.
+
+    float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size); 
+    // Determine the position of the next sample (`pos_next`) after switching buffers:
+    // - Accounts for the current `reverse_index` (reset to 0 above) and phase offset.
+    // - Uses modulo (`fmodf`) to ensure the position wraps correctly within the circular buffer.
+    
+    delta_crossfade = pos_reader - 1.0f - pos_next; 
+    // Calculate the crossfade offset between the current read position (`pos_reader`)
+    // and the newly computed `pos_next`:
+    // - Subtracting `1.0f` compensates for the fact that `pos_reader` corresponds to a read
+    //   position from the previous tick, ensuring alignment with the updated playback.
+
+    fade_counter = 0; 
+    // Reset the fade counter to begin a new crossfade for the next segment.
 }
 
 void Reverter::filterout(float *smp) {
