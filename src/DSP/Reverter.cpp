@@ -195,7 +195,8 @@ void Reverter::updateReaderPosition() {
 void Reverter::crossfadeSamples(float *smp, int i) {
     if (fade_counter < fading_samples) {
         float fadePhase = static_cast<float>(fade_counter) / static_cast<float>(fading_samples);
-        float fadeinFactor = hanningWindow(fadePhase);
+        //~ float fadeinFactor = hanningWindow(fadePhase);
+        float fadeinFactor = fadePhase;
         float fadeoutFactor = 1.0f - fadeinFactor;
         fade_counter++;
 
