@@ -37,7 +37,7 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
     // Calculate mem_size for reverse delay effect:
     // - 1 times max_delay for recording
     // - 1 times max_delay fir reverse playing
-    // - 1 times max_delay for phase chaning while playing
+    // - 1 times max_delay for phase changing while playing
     // - Add maximum crossfade duration (1.27s).
     // - Add 2 extra samples as a safety margin for interpolation and circular buffer wrapping.
     mem_size = static_cast<int>(ceilf(max_delay * 3.0f)) + static_cast<int>(1.27f * samplerate) + 2;
@@ -97,7 +97,7 @@ void Reverter::filterout(float *smp) {
     processBuffer(smp);
 }
 
-void Reverter::writeToRingBuffer(float *smp) {
+void Reverter::writeToRingBuffer(const float *smp) {
     int space_to_end = mem_size - pos_writer;
     float rms = 0.0f;
 
@@ -199,10 +199,11 @@ void Reverter::crossfadeSamples(float *smp, int i) {
         float fadeoutFactor = 1.0f - fadeinFactor;
         fade_counter++;
 
-        if (state != IDLE) {
-            smp[i] = applyFade(fadeinFactor, fadeoutFactor);
-        } else {
+        if (state == IDLE) {
+            // in IDLE only the fade out part is needed
             smp[i] = fadeoutFactor * sampleLerp(input, fmodf(pos_reader + mem_size + delta_crossfade, mem_size));
+        } else {
+            smp[i] = applyFade(fadeinFactor, fadeoutFactor);
         }
     } else {
         smp[i] = (state == PLAYING) ? sampleLerp(input, pos_reader) : 0.0f;

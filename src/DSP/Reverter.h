@@ -141,7 +141,7 @@ private:
      * 
      * @param smp Pointer to the buffer of input samples.
      */
-    void writeToRingBuffer(float *smp);
+    void writeToRingBuffer(const float *smp);
 
     /**
      * @brief Process the samples and apply the reverse delay effect.
