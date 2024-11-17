@@ -122,9 +122,8 @@ void Reverter::writeToRingBuffer(const float *smp) {
 void Reverter::processBuffer(float *smp) {
     for (int i = 0; i < buffersize; i++) {
         reverse_index++;
-        phase_offset = phase_offset_old + static_cast<float>(i) * phase_offset_fade;
         handleSync();
-        updateReaderPosition();
+        updateReaderPosition(i);
         crossfadeSamples(smp, i);
         applyGain(smp[i]);
     }
@@ -175,7 +174,7 @@ void Reverter::handleStateChange() {
     switchBuffers();
 }
 
-void Reverter::updateReaderPosition() {
+void Reverter::updateReaderPosition(int i) {
     //                 buffersize
     //                  <----->
     // ---+------+------+------+------+------+---
@@ -189,6 +188,10 @@ void Reverter::updateReaderPosition() {
     //              |       L reverse_index
     //              L phase_offset   
     //    
+    
+    // linear interpolate phase
+    phase_offset = phase_offset_old + static_cast<float>(i) * phase_offset_fade;
+    // update reading position
     pos_reader = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
 }
 
@@ -255,7 +258,7 @@ void Reverter::setphase(float value) {
 }
 
 void Reverter::setcrossfade(float value) {
-    crossfade = value;
+    crossfade = value+1;
     fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
     if (delay < 2.0f * static_cast<float>(fading_samples)) fading_samples = static_cast<int>(delay * 0.5f);
 }

@@ -171,7 +171,7 @@ private:
     /**
      * @brief Update the read position in the ring buffer.
      */
-    void updateReaderPosition();
+    void updateReaderPosition(int i);
 
     /**
      * @brief Apply crossfading between two buffer segments.
