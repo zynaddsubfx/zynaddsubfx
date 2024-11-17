@@ -36,7 +36,7 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
     max_delay = srate * MAX_REV_DELAY_SECONDS;
     // Calculate mem_size for reverse delay effect:
     // - 1 times max_delay for recording
-    // - 1 times max_delay fir reverse playing
+    // - 1 times max_delay for reverse playing
     // - 1 times max_delay for phase changing while playing
     // - Add maximum crossfade duration (1.27s).
     // - Add 2 extra samples as a safety margin for interpolation and circular buffer wrapping.
