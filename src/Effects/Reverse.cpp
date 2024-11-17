@@ -46,7 +46,7 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(16), PsyncMode(NOTEON), Pstereo(0),time(time_)
+    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(64), PsyncMode(NOTEON), Pstereo(0),time(time_)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
