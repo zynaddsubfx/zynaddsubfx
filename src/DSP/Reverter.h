@@ -244,7 +244,7 @@ private:
     int fade_counter;
 
     /// Root mean square (RMS) history for input volume analysis
-    float rms_hist;
+    float mean_abs_value;
 
     /// Pointer to timing object for synchronization
     const AbsTime *time;

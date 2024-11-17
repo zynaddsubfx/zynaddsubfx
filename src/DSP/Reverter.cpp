@@ -6,7 +6,7 @@
   Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
+  modify it under the teabs_value of the GNU General Public License
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
@@ -25,7 +25,7 @@ namespace zyn {
 Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsize, float tRef_, const AbsTime *time_)
     : syncMode(AUTO), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
       tRef(tRef_), buffer_offset(0), buffer_counter(0), reverse_index(0.0f), phase_offset_old(0.0f),
-      phase_offset_fade(0.0f), fade_counter(0), rms_hist(999.9f), time(time_), memory(*alloc), 
+      phase_offset_fade(0.0f), fade_counter(0), mean_abs_value(999.9f), time(time_), memory(*alloc), 
       samplerate(srate), buffersize(bufsize) 
 {
 
@@ -99,7 +99,7 @@ void Reverter::filterout(float *smp) {
 
 void Reverter::writeToRingBuffer(const float *smp) {
     int space_to_end = mem_size - pos_writer;
-    float rms = 0.0f;
+    float abs_value = 0.0f;
 
     if (buffersize <= space_to_end) {
         // No wrap around, copy in one go
@@ -110,13 +110,12 @@ void Reverter::writeToRingBuffer(const float *smp) {
         memcpy(&input[0], smp + space_to_end, (buffersize - space_to_end) * sizeof(float));
     }
     for (int i = 0; i < buffersize; i++) {
-        rms += fabsf(smp[i]);
+        abs_value += fabsf(smp[i]);
     }
-    // Update pos_writer
+    // Update pos_writer after copying new buffer
     pos_writer = (pos_writer + buffersize) % mem_size;
-    // calculate rms
-    rms_hist = rms / static_cast<float>(buffersize);
-    //printf("rms_hist: %f\n", rms_hist);
+    // calculate mean abs value of new buffer (for silence detection)
+    mean_abs_value = abs_value / static_cast<float>(buffersize);
 }
 
 void Reverter::processBuffer(float *smp) {
@@ -157,7 +156,7 @@ void Reverter::handleNoteSync() {
                 (   
                   (reverse_index >= recorded_samples && state == PLAYING) ||
                   (reverse_index >= max_delay && state == PLAYING) ||
-                  (rms_hist < 0.001f && state == RECORDING)
+                  (mean_abs_value < 0.001f && state == RECORDING)
                 )
               ) {
         handleStateChange();
@@ -231,7 +230,7 @@ void Reverter::sync(float pos) {
         reset();
         state = RECORDING; printf("RECORDING\n");
         reverse_index = 0.0f;
-        rms_hist = 1.0f;
+        mean_abs_value = 999.9f;
     } else {
         syncPos = pos + reverse_index;
         doSync = true;
