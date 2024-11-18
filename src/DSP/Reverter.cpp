@@ -166,9 +166,9 @@ void Reverter::handleNoteSync() {
 void Reverter::handleStateChange() {
     if (state == RECORDING) {
         recorded_samples = reverse_index;
-        state = PLAYING; printf("PLAYING\n");
+        state = PLAYING;
     } else if (state == PLAYING) {
-        state = IDLE; printf("IDLE\n");
+        state = IDLE;
     }
     switchBuffers();
 }
@@ -228,7 +228,7 @@ void Reverter::applyGain(float &sample) {
 void Reverter::sync(float pos) {
     if (state == IDLE) {
         reset();
-        state = RECORDING; printf("RECORDING\n");
+        state = RECORDING;
         reverse_index = 0.0f;
         mean_abs_value = 999.9f;
     } else {
@@ -270,7 +270,6 @@ void Reverter::setsyncMode(SyncMode value) {
     if (value != syncMode) {
         syncMode = value;
         state = (syncMode == NOTEON || syncMode == NOTEONOFF) ? IDLE : PLAYING;
-        printf("setting syncMode: %d state: %s\n", syncMode, state==IDLE ? "IDLE" : "PLAYING");
         reset();
     }
 }
