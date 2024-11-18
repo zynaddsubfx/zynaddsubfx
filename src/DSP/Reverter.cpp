@@ -73,20 +73,19 @@ inline void Reverter::switchBuffers() {
     // Reset the reverse index to start fresh for the new reverse playback segment.
     
     pos_start = pos_writer;
-    // Calculate the starting point for reverse playback:
-    // - `pos_writer` is the current write position.
-    // - `offset` further adjusts the position to align with delay or phase offsets.
+    //
 
     float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size); 
     // Determine the position of the next sample (`pos_next`) after switching buffers:
     // - Accounts for the current `reverse_index` (reset to 0 above) and phase offset.
     // - Uses modulo (`fmodf`) to ensure the position wraps correctly within the circular buffer.
+    // The formula is the same as for pos_reader in updateReaderPosition()
     
     delta_crossfade = pos_reader - 1.0f - pos_next; 
-    // Calculate the crossfade offset between the current read position (`pos_reader`)
+    // Calculate the sample distance between the current read position (`pos_reader`)
     // and the newly computed `pos_next`:
     // - Subtracting `1.0f` compensates for the fact that `pos_reader` corresponds to a read
-    //   position from the previous tick, ensuring alignment with the updated playback.
+    //   position from the previous tick.
 
     fade_counter = 0; 
     // Reset the fade counter to begin a new crossfade for the next segment.
@@ -146,6 +145,7 @@ void Reverter::handleSync() {
             
             break;
     }
+    // if everything fails
     if (reverse_index >= max_delay && state == PLAYING) switchBuffers();
 }
 
