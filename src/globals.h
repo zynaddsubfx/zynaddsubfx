@@ -142,6 +142,11 @@ typedef std::complex<fftwf_real> fft_t;
 #define NUM_SYMPATHETIC_STRINGS 228U // 76*3
 
 /*
+ * Maximum number of "strings" in Sympathetic Resonance Effect
+ */
+#define MIDI_QUEUE_LENGTH 10
+
+/*
  * How is applied the velocity sensing
  */
 #define VELOCITY_MAX_SCALE 8.0f
