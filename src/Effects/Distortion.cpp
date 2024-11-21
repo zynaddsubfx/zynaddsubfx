@@ -54,7 +54,7 @@ rtosc::Ports Distortion::ports = {
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
                      Inverse Limiter, Clip, Asym2, Pow2, Sigmoid, Tanh,
-                     Cubic, Square), rLinear(0,127), 
+                     Cubic, Square, DualCos, Coerc, DualTanh), rLinear(0,127),
             rPresets(Arctangent, Asymmetric, Zigzag,
                      Asymmetric, Pow, Quantisize),
             "Distortion Shape"),
@@ -226,8 +226,8 @@ void Distortion::sethpf(unsigned char _Phpf)
 
 unsigned char Distortion::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define	PRESET_SIZE 13
-#define	NUM_PRESETS 6
+#define PRESET_SIZE 13
+#define NUM_PRESETS 6
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Overdrive 1
         {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0, 32, 64},
@@ -281,8 +281,8 @@ void Distortion::changepar(int npar, unsigned char value)
             Plevel = value;
             break;
         case 5:
-            if(value > 16)
-                Ptype = 16;  //this must be increased if more distortion types are added
+            if(value > 20)
+                Ptype = 20;  //this must be increased if more distortion types are added
             else
                 Ptype = value;
             break;
