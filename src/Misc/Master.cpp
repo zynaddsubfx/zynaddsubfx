@@ -20,6 +20,7 @@
 #include "../Misc/Stereo.h"
 #include "../Misc/Util.h"
 #include "../Params/LFOParams.h"
+#include "../Params/SEQParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Allocator.h"
