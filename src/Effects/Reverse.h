@@ -15,10 +15,10 @@
 #define REVERSE_H
 
 #include "Effect.h"
-#include "../DSP/Reverter.h"
-#include "../Misc/Time.h"
 
 namespace zyn {
+
+class Reverter;
 
 /**Reverse Effect*/
 class Reverse final:public Effect

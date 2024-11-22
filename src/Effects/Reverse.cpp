@@ -14,8 +14,10 @@
 #include <cmath>
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+#include "../DSP/Reverter.h"
 #include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
+#include "../Misc/Time.h"
 #include "Reverse.h"
 
 namespace zyn {
