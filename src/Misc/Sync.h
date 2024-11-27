@@ -1,9 +1,20 @@
-#pragma once
+/*
+  ZynAddSubFX - a software synthesizer
+
+  Sync.h - allow sync callback using observer pattern
+  Copyright (C) 2024 Michael Kirchner
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+*/
 
 #include <algorithm> // for std::find
-#include <vector>
 
 namespace zyn {
+
+#define MAX_OBSERVERS 4
 
 class Observer {
 public:
@@ -15,26 +26,34 @@ class Sync {
 public:
     Sync() {}
     void attach(Observer* observer) {
-        observers.push_back(observer);
+        if (observerCount >= MAX_OBSERVERS) {
+            return; // No space left to attach a new observer
+        }
+        // Check if already attached
+        if (std::find(observers, observers + observerCount, observer) != observers + observerCount) {
+            return; // Observer already attached
+        }
+        observers[observerCount++] = observer;
     }
     void detach(Observer* observer) {
-        // Prüfen, ob observer im Vektor existiert; falls nicht, einfach return
-        auto it = std::find(observers.begin(), observers.end(), observer);
-        if (it == observers.end()) {
-            return;
+        // Find the observer
+        auto it = std::find(observers, observers + observerCount, observer);
+        if (it == observers + observerCount) {
+            return; // Observer not found
         }
-        // Wenn gefunden, entfernen
-        observers.erase(it);
+        // Remove the observer by shifting the rest
+        std::move(it + 1, observers + observerCount, it);
+        --observerCount;
     }
     void notify() {
-        for (Observer* obs : observers) {
-            obs->update();  
-
+        for (int i = 0; i < observerCount; ++i) {
+            observers[i]->update();
         }
     }
 
 private:
-    std::vector<Observer*> observers;
+    Observer* observers[MAX_OBSERVERS];
+    int observerCount;              // Current number of observers
 };
 
 }
