@@ -36,11 +36,10 @@ rtosc::Ports Reverse::ports = {
             "Enable Stereo Processing"),
     rEffPar(Pphase,   4, rShort("phase"), rDefault(64),
             "Phase offset for Reversed Segment"),
-    rEffPar(Pcrossfade,5, rShort("fade"), rDefault(64),
-            rUnit("1/100 s"), 
+    rEffPar(Pcrossfade, 5, rShort("fade"), rDefault(64), rUnit(1\/100 s), 
             "Cross Fade Time between Reversed Segments"),
-    rEffParOpt(Psyncmode,    6, rShort("sync"),
-            rOptions(SYNCMODES),
+    rEffParOpt(Psyncmode,    6, rShort("sync"), rDefault(NOTEON),
+            rOptions(SYNCMODES), 
             "Sync Mode"),
 };
 #undef rBegin
@@ -74,7 +73,7 @@ void Reverse::cleanup(void)
 //Effect output
 void Reverse::out(const Stereo<float *> &input)
 {
-    // prepare the brocessing buffers
+    // prepare the processing buffers
     if(Pstereo) //Stereo
         for(int i = 0; i < buffersize; ++i) {
             efxoutl[i] = input.l[i] * pangainL;
@@ -89,8 +88,8 @@ void Reverse::out(const Stereo<float *> &input)
     unsigned int beat_new = 0;
     if (time->tempo && speedfactor && PsyncMode == HOST)
     {
-        tick = (time->beat-1)*1920 + time->tick;
-        const unsigned int delay_ticks = int(1920.0f * speedfactor);
+        tick = (time->beat-1)*PPQ + time->tick;
+        const unsigned int delay_ticks = int((float)PPQ * speedfactor);
         beat_new = tick/delay_ticks;
         const unsigned int phase_ticks = tick%delay_ticks;
 

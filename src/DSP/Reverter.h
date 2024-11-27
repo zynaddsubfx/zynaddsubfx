@@ -28,6 +28,8 @@ enum SyncMode
     SYNCMODES
 };
 
+// State Machine for the synchronized modes
+// Sync-Event leads to a cycle of RECORDING->PLAYING->IDLE
 #define STATE   RECORDING,\
                 PLAYING,\
                 IDLE
@@ -135,7 +137,7 @@ private:
      * @param pos Position to interpolate.
      * @return Interpolated sample value.
      */
-    float sampleLerp(float *smp, float pos);
+    float sampleLerp(const float *smp, const float pos);
 
     /**
      * @brief Write new input samples to the ring buffer.
@@ -231,7 +233,7 @@ private:
     float global_offset;
 
     /// Index for reverse playback
-    float reverse_index;
+    int reverse_index;
 
     /// Phase offset for delay transitions
     float phase_offset_old;
@@ -262,7 +264,7 @@ private:
     const int buffersize;
 
     /// Maximum allowable delay in samples
-    float max_delay;
+    const float max_delay;
 
     /// Start position for the read head in the ring buffer
     unsigned int pos_start;
@@ -271,7 +273,7 @@ private:
     float phase_offset;
 
     /// Number of samples recorded for playback
-    float recorded_samples;
+    int recorded_samples;
 
     /// Position to synchronize playback
     float syncPos;

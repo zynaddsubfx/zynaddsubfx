@@ -23,7 +23,7 @@ namespace zyn {
 class EffectLFO
 {
     public:
-            /**
+     /**
      * Constructs an EffectLFO object.
      *
      * @param srate_f Sample rate.

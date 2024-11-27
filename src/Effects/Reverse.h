@@ -37,10 +37,11 @@ class Reverse final:public Effect
          *   -# Volume
          *   -# Panning (member of parent class)
          *   -# Delay
+         *   -# Stereo
          *   -# Phase
          *   -# Crossfade
          *   -# Sync Mode
-         *   -# Stereo
+
          * @param npar number of chosen parameter
          * @param value the new value
          */
@@ -53,10 +54,11 @@ class Reverse final:public Effect
          *   -# Volume
          *   -# Panning (member of parent class)
          *   -# Delay
+         *   -# Stereo
          *   -# Phase
          *   -# Crossfade
          *   -# Sync Mode
-         *   -# Stereo
+
 
          * @param npar number of chosen parameter
          * @return value of parameter

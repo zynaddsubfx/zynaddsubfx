@@ -17,28 +17,25 @@
 #include <cstring>
 
 #include "../Misc/Allocator.h"
-#include "../Misc/Util.h"
 #include "Reverter.h"
 
 namespace zyn {
 
 Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsize, float tRef_, const AbsTime *time_)
-    : syncMode(AUTO), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
+    : syncMode(NOTEON), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
       tRef(tRef_), buffer_offset(0), buffer_counter(0), reverse_index(0.0f), phase_offset_old(0.0f),
       phase_offset_fade(0.0f), fade_counter(0), mean_abs_value(999.9f), time(time_), memory(*alloc), 
-      samplerate(srate), buffersize(bufsize) 
+      samplerate(srate), buffersize(bufsize), max_delay(srate * MAX_REV_DELAY_SECONDS)
 {
 
     // current number of samples to be used for crossfade
     fading_samples = static_cast<int>(srate * crossfade);
 
-    // maximum number of samples for a reversed segment.
-    max_delay = srate * MAX_REV_DELAY_SECONDS;
     // Calculate mem_size for reverse delay effect:
     // - 1 times max_delay for recording
     // - 1 times max_delay for reverse playing
     // - 1 times max_delay for phase changing while playing
-    // - Add maximum crossfade duration (1.27s).
+    // - Add maximum crossfade duration (1.27s). (7 bit, fixed point slope 1/100)
     // - Add 2 extra samples as a safety margin for interpolation and circular buffer wrapping.
     mem_size = static_cast<int>(ceilf(max_delay * 3.0f)) + static_cast<int>(1.27f * samplerate) + 2;
 
@@ -58,22 +55,16 @@ Reverter::~Reverter() {
     memory.dealloc(input);
 }
 
-inline float Reverter::sampleLerp(float *smp, float pos) {
+inline float Reverter::sampleLerp(const float *smp,const float pos) {
     int poshi = static_cast<int>(pos);
     float poslo = pos - static_cast<float>(poshi);
     return smp[poshi] + poslo * (smp[poshi + 1] - smp[poshi]);
 }
 
-inline float hanningWindow(float x) {
-    return 0.5f * (1.0f - cos(M_PI * x));
-}
-
 inline void Reverter::switchBuffers() {
     reverse_index = 0; 
     // Reset the reverse index to start fresh for the new reverse playback segment.
-    
     pos_start = pos_writer;
-    //
 
     float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size); 
     // Determine the position of the next sample (`pos_next`) after switching buffers:
@@ -229,7 +220,7 @@ void Reverter::sync(float pos) {
     if (state == IDLE) {
         reset();
         state = RECORDING;
-        reverse_index = 0.0f;
+        reverse_index = 0;
         mean_abs_value = 999.9f;
     } else {
         syncPos = pos + reverse_index;

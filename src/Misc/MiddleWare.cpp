@@ -2620,6 +2620,7 @@ void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
         fprintf(stderr, "Middleware::messageAnywhere message too big...\n");
         impl->multi_thread_source.free(mem);
     }
+    va_end(va);
 }
 
 
