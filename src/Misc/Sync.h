@@ -9,7 +9,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-
+#pragma once
 #include <algorithm> // for std::find
 
 namespace zyn {
@@ -24,7 +24,7 @@ public:
 
 class Sync {
 public:
-    Sync() {}
+    Sync() {observerCount = 0;}
     void attach(Observer* observer) {
         if (observerCount >= MAX_OBSERVERS) {
             return; // No space left to attach a new observer
