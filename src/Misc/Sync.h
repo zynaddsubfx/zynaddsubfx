@@ -14,7 +14,7 @@
 
 namespace zyn {
 
-#define MAX_OBSERVERS 4
+#define MAX_OBSERVERS 8
 
 class Observer {
 public:
