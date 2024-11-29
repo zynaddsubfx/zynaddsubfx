@@ -165,6 +165,8 @@ void Reverse::setsyncMode(unsigned char value)
 
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 {
+    (void)npreset;
+    (void)npar;
     return 0;
 }
 
