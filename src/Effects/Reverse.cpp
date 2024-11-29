@@ -27,6 +27,18 @@ namespace zyn {
 #define rEnd }
 
 rtosc::Ports Reverse::ports = {
+    {"preset::i", rProp(parameter)
+              rOptions(noteon, noteonoff, auto)
+              rProp(alias)
+              rDefault(0)
+              rDoc("Instrument Presets"), 0,
+              rBegin;
+              rObject *o = (rObject*)d.obj;
+              if(rtosc_narguments(msg))
+                  o->setpreset(rtosc_argument(msg, 0).i);
+              else
+                  d.reply(d.loc, "i", o->Ppreset);
+              rEnd},
     rPresetForVolume,
     rEffParVol(),
     rEffParPan(),
@@ -165,13 +177,32 @@ void Reverse::setsyncMode(unsigned char value)
 
 unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    (void)npreset;
-    (void)npar;
+#define	PRESET_SIZE 7
+#define	NUM_PRESETS 3
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+        //NOTEON
+        {64, 64, 25, 0, 64,   32, NOTEON},
+        //NOTEONOFF
+        {64, 64, 25, 0, 64,   16, NOTEONOFF},
+        //AUTO
+        {64, 64, 25, 0, 64,   50, AUTO}
+    };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if (npar == 0 && insertion == 0) {
+            /* lower the volume if this is system effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
     return 0;
 }
 
 void Reverse::setpreset(unsigned char npreset)
 {
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
 }
 
