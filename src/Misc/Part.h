@@ -19,7 +19,6 @@
 #include "../globals.h"
 #include "../Params/Controller.h"
 #include "../Containers/NotePool.h"
-#include "Sync.h"
 
 #include <functional>
 
