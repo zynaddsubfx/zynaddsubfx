@@ -119,9 +119,9 @@ class Effect: public Observer
     public:
         Effect(EffectParams pars);
         virtual ~Effect() {}
-        
+
         void update() override {}
-        
+
         /**
          * Get default preset parameter value
          * @param npreset chosen preset

@@ -776,8 +776,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     bToU = NULL;
     uToB = NULL;
     
-    sync = new Sync(); 
-    
+    sync = new Sync();
+
     // set default tempo
     time.tempo = 120;
     time.bar = 0;

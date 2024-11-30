@@ -62,23 +62,23 @@ inline float Reverter::sampleLerp(const float *smp,const float pos) {
 }
 
 inline void Reverter::switchBuffers() {
-    reverse_index = 0; 
+    reverse_index = 0;
     // Reset the reverse index to start fresh for the new reverse playback segment.
     pos_start = pos_writer;
 
-    float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size); 
+    float pos_next = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
     // Determine the position of the next sample (`pos_next`) after switching buffers:
     // - Accounts for the current `reverse_index` (reset to 0 above) and phase offset.
     // - Uses modulo (`fmodf`) to ensure the position wraps correctly within the circular buffer.
     // The formula is the same as for pos_reader in updateReaderPosition()
-    
-    delta_crossfade = pos_reader - 1.0f - pos_next; 
+
+    delta_crossfade = pos_reader - 1.0f - pos_next;
     // Calculate the sample distance between the current read position (`pos_reader`)
     // and the newly computed `pos_next`:
     // - Subtracting `1.0f` compensates for the fact that `pos_reader` corresponds to a read
     //   position from the previous tick.
 
-    fade_counter = 0; 
+    fade_counter = 0;
     // Reset the fade counter to begin a new crossfade for the next segment.
 }
 
@@ -136,7 +136,6 @@ void Reverter::handleSync() {
         case NOTEONOFF:
             if (handleNoteSync())
                 return;
-            
             break;
     }
     // if everything fails
@@ -147,8 +146,8 @@ bool Reverter::handleNoteSync() {
     if (syncMode == NOTEON && reverse_index >= delay && state != IDLE) {
         handleStateChange();
         return true;
-    } else if ( syncMode == NOTEONOFF &&  
-                (   
+    } else if ( syncMode == NOTEONOFF &&
+                (
                   (reverse_index >= recorded_samples && state == PLAYING) ||
                   (reverse_index >= max_delay && state == PLAYING) ||
                   (mean_abs_value < 0.001f && state == RECORDING)
@@ -182,9 +181,9 @@ void Reverter::updateReaderPosition(int i) {
     //             L pos_reader
     //             <--><--_---->
     //              |       L reverse_index
-    //              L phase_offset   
-    //    
-    
+    //              L phase_offset
+    // //////////////////////////////////////////////////
+
     // linear interpolate phase
     phase_offset = phase_offset_old + static_cast<float>(i) * phase_offset_fade;
     // update reading position

@@ -19,7 +19,7 @@ class AbsTime
 {
     public:
         AbsTime(const SYNTH_T &synth)
-            :tempo(120),    
+            :tempo(120),
             bar(0),
             beat(0),
             tick(0.0f),

@@ -48,10 +48,10 @@ rtosc::Ports Reverse::ports = {
             "Enable Stereo Processing"),
     rEffPar(Pphase,   4, rShort("phase"), rDefault(64),
             "Phase offset for Reversed Segment"),
-    rEffPar(Pcrossfade, 5, rShort("fade"), rDefault(64), rUnit(1\/100 s), 
+    rEffPar(Pcrossfade, 5, rShort("fade"), rDefault(64), rUnit(1\/100 s),
             "Cross Fade Time between Reversed Segments"),
     rEffParOpt(Psyncmode,    6, rShort("sync"), rDefault(NOTEON),
-            rOptions(SYNCMODES), 
+            rOptions(SYNCMODES),
             "Sync Mode"),
 };
 #undef rBegin

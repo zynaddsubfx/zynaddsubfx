@@ -36,7 +36,6 @@ Effect::Effect(EffectParams pars)
       time(pars.time),
       samplerate(pars.srate),
       buffersize(pars.bufsize)
-      
 {
     alias();
 }

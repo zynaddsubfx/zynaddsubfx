@@ -21,7 +21,6 @@ namespace zyn {
                     AUTO,\
                     MIDI,\
                     HOST
-                    
 
 enum SyncMode
 {
