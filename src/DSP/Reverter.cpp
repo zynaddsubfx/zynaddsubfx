@@ -125,14 +125,17 @@ void Reverter::handleSync() {
     switch (syncMode) {
         case AUTO:
             if (reverse_index >= delay) switchBuffers();
+            return;
             break;
         case HOST:
         case MIDI:
             if (doSync && reverse_index >= syncPos) switchBuffers();
+            return;
             break;
         case NOTEON:
         case NOTEONOFF:
-            handleNoteSync();
+            if (handleNoteSync())
+                return;
             
             break;
     }
@@ -140,9 +143,10 @@ void Reverter::handleSync() {
     if (reverse_index >= max_delay && state == PLAYING) switchBuffers();
 }
 
-void Reverter::handleNoteSync() {
+bool Reverter::handleNoteSync() {
     if (syncMode == NOTEON && reverse_index >= delay && state != IDLE) {
         handleStateChange();
+        return true;
     } else if ( syncMode == NOTEONOFF &&  
                 (   
                   (reverse_index >= recorded_samples && state == PLAYING) ||
@@ -151,7 +155,9 @@ void Reverter::handleNoteSync() {
                 )
               ) {
         handleStateChange();
+        return true;
     }
+    return false;
 }
 
 void Reverter::handleStateChange() {
