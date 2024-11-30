@@ -19,7 +19,6 @@ namespace zyn {
 #define SYNCMODES   NOTEON,\
                     NOTEONOFF,\
                     AUTO,\
-                    MIDI,\
                     HOST
 
 enum SyncMode

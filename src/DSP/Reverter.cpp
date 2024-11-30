@@ -130,7 +130,6 @@ void Reverter::handleSync() {
             }
             break;
         case HOST:
-        case MIDI:
             if (doSync && reverse_index >= syncPos) {
                 switchBuffers();
                 return;
