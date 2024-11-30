@@ -98,7 +98,7 @@ void Reverse::out(const Stereo<float *> &input)
     // process external timecode to sync
 
     unsigned int beat_new = 0;
-    if (time->tempo && speedfactor && PsyncMode == HOST)
+    if (time->tempo && speedfactor && (PsyncMode == HOST || PsyncMode == MIDI ))
     {
         tick = (time->beat-1)*PPQ + time->tick;
         const unsigned int delay_ticks = int((float)PPQ * speedfactor);
