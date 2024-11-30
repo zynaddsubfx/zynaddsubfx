@@ -124,18 +124,25 @@ void Reverter::processBuffer(float *smp) {
 void Reverter::handleSync() {
     switch (syncMode) {
         case AUTO:
-            if (reverse_index >= delay) switchBuffers();
-            return;
+            if (reverse_index >= delay) {
+                switchBuffers();
+                return;
+            }
             break;
         case HOST:
         case MIDI:
-            if (doSync && reverse_index >= syncPos) switchBuffers();
-            return;
+            if (doSync && reverse_index >= syncPos) {
+                switchBuffers();
+                return;
+            }
             break;
         case NOTEON:
         case NOTEONOFF:
             if (handleNoteSync())
                 return;
+            break;
+        default:
+            {}
             break;
     }
     // if everything fails
