@@ -63,6 +63,7 @@ inline float Reverter::sampleLerp(const float *smp,const float pos) {
 
 inline void Reverter::switchBuffers() {
     reverse_index = 0;
+    phase_offset = phase * delay;
     // Reset the reverse index to start fresh for the new reverse playback segment.
     pos_start = pos_writer;
 
@@ -190,8 +191,6 @@ void Reverter::updateReaderPosition(int i) {
     //              L phase_offset
     // //////////////////////////////////////////////////
 
-    // linear interpolate phase
-    phase_offset = phase_offset_old + static_cast<float>(i) * phase_offset_fade;
     // update reading position
     pos_reader = fmodf(float(pos_start + mem_size) - (reverse_index + phase_offset), mem_size);
 }
@@ -199,7 +198,6 @@ void Reverter::updateReaderPosition(int i) {
 void Reverter::crossfadeSamples(float *smp, int i) {
     if (fade_counter < fading_samples) {
         float fadePhase = static_cast<float>(fade_counter) / static_cast<float>(fading_samples);
-        //~ float fadeinFactor = hanningWindow(fadePhase);
         float fadeinFactor = fadePhase;
         float fadeoutFactor = 1.0f - fadeinFactor;
         fade_counter++;
@@ -239,23 +237,16 @@ void Reverter::sync(float pos) {
     }
 }
 
-void Reverter::update_phase(float value) {
-    float phase_offset_new = value * delay;
-    phase_offset_fade = (phase_offset_new - phase_offset_old) / static_cast<float>(buffersize);
-}
-
 void Reverter::setdelay(float value) {
     delay = value * static_cast<float>(samplerate);
     fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
     if (delay < 2.0f * static_cast<float>(fading_samples)) fading_samples = static_cast<int>(delay * 0.5f);
 
     global_offset = fmodf(tRef, delay);
-    update_phase(phase);
 }
 
 void Reverter::setphase(float value) {
     phase = value;
-    update_phase(phase);
 }
 
 void Reverter::setcrossfade(float value) {

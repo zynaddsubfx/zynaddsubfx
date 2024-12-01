@@ -115,13 +115,6 @@ public:
 
 private:
     /**
-     * @brief Update the phase of the delay.
-     * 
-     * @param phase New phase value.
-     */
-    void update_phase(float phase);
-
-    /**
      * @brief Switch between buffers when reverse playback is triggered.
      * 
      * @param offset Offset for buffer switching.
