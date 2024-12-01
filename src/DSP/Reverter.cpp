@@ -145,7 +145,7 @@ void Reverter::handleSync() {
             {}
             break;
     }
-    // if everything fails
+    // if switchBuffers was not called yet
     if (reverse_index >= max_delay && state == PLAYING) switchBuffers();
 }
 
@@ -178,7 +178,7 @@ void Reverter::handleStateChange() {
 
 void Reverter::updateReaderPosition(int i) {
     //                 buffersize
-    //                  <----->
+    //                  |<---->|
     // ---+------+------+------+------+------+---
     //    |      |      |      |      |      |
     // ...|  b4  |  b5  |  b6  |  b7  |  b8  |...
@@ -186,7 +186,7 @@ void Reverter::updateReaderPosition(int i) {
     //             ^           ^             ^
     //             |           L pos_start   L pos_writer
     //             L pos_reader
-    //             <--><--_---->
+    //             <--><------->
     //              |       L reverse_index
     //              L phase_offset
     // //////////////////////////////////////////////////

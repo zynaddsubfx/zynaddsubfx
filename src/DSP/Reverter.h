@@ -26,15 +26,20 @@ enum SyncMode
     SYNCMODES
 };
 
-// State Machine for the synchronized modes
+// State Machine for the modes NOTEON and NOTEONOFF
 // Sync-Event leads to a cycle of RECORDING->PLAYING->IDLE
-#define STATE   RECORDING,\
+//
+// RECORDING - not playing but counting the recording duration
+// PLAYING - playing for delay duration (NOTEON) or for the recorded duration (NOTEONOFF)
+// IDLE - not playing
+
+#define STATES  RECORDING,\
                 PLAYING,\
                 IDLE
 
 enum State
 {
-    STATE
+    STATES
 };
 
 /**
