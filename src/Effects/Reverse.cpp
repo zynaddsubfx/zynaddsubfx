@@ -30,6 +30,7 @@ rtosc::Ports Reverse::ports = {
     {"preset::i", rProp(parameter)
               rOptions(noteon, noteonoff, auto)
               rProp(alias)
+              rShort("preset")
               rDefault(0)
               rDoc("Instrument Presets"), 0,
               rBegin;
@@ -50,7 +51,7 @@ rtosc::Ports Reverse::ports = {
             "Phase offset for Reversed Segment"),
     rEffPar(Pcrossfade, 5, rShort("fade"), rDefault(64), rUnit(1\/100 s),
             "Cross Fade Time between Reversed Segments"),
-    rEffParOpt(Psyncmode,    6, rShort("sync"), rDefault(NOTEON),
+    rEffParOpt(Psyncmode,    6, rShort("mode"), rDefault(NOTEON),
             rOptions(SYNCMODES),
             "Sync Mode"),
 };
