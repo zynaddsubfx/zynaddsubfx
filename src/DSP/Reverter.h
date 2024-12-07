@@ -153,13 +153,13 @@ private:
      * @brief Handle synchronization modes and state transitions.
      * 
      */
-    void handleSync();
+    void checkSync();
 
     /**
      * @brief Handle synchronization in NOTEON and NOTEONOFF modes.
      * 
      */
-    bool handleNoteSync();
+    void handleNoteSync();
 
     /**
      * @brief Handles state transitions in NOTEON and NOTEONOFF modes.
