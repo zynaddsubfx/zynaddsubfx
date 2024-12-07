@@ -153,13 +153,7 @@ private:
      * @brief Handle synchronization modes and state transitions.
      * 
      */
-    void handleSync();
-
-    /**
-     * @brief Handle synchronization in NOTEON and NOTEONOFF modes.
-     * 
-     */
-    bool handleNoteSync();
+    void checkSync();
 
     /**
      * @brief Handles state transitions in NOTEON and NOTEONOFF modes.
@@ -194,6 +188,8 @@ private:
      * @param sample Reference to the sample to modify.
      */
     void applyGain(float &sample);
+    
+    void update_memsize();
 
     /// Current synchronization mode
     SyncMode syncMode;
@@ -260,7 +256,7 @@ private:
     const int buffersize;
 
     /// Maximum allowable delay in samples
-    const float max_delay;
+    const float max_delay_samples;
 
     /// Start position for the read head in the ring buffer
     unsigned int pos_start;
