@@ -152,7 +152,6 @@ void Reverter::sync(float pos) {
         reverse_index = 0;
     } else {
         syncPos = pos + reverse_index;
-            printf("syncPos: %f\n", syncPos);
         doSync = true;
     }
 }
@@ -234,8 +233,6 @@ void Reverter::update_memsize() {
         return;
     else
         mem_size = mem_size_new;
-
-    printf("mem_size: %d\n", mem_size);
 
     if (input != nullptr) {
         memory.devalloc(input);
