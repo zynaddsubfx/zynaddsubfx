@@ -1892,8 +1892,8 @@ static rtosc::Ports middlewareReplyPorts = {
     {"request-memory:", 0, 0,
         rBegin;
         //Generate out more memory for the RT memory pool
-        //5MBi chunk
-        size_t N  = 5*1024*1024;
+        //8MBi chunk
+        size_t N  = 8*1024*1024;
         void *mem = malloc(N);
         impl.uToB->write("/add-rt-memory", "bi", sizeof(void*), &mem, N);
         rEnd},

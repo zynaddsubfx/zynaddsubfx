@@ -1265,7 +1265,7 @@ bool Master::AudioOut(float *outl, float *outr)
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
     //Normal Limits
-    if(!pendingMemory && memory->lowMemory(4,1024*1024)) {
+    if(!pendingMemory && memory->lowMemory(6,1024*1024)) {
         printf("Requesting more memory\n");
         bToU->write("/request-memory", "");
         pendingMemory = true;
