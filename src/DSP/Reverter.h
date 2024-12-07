@@ -156,12 +156,6 @@ private:
     void checkSync();
 
     /**
-     * @brief Handle synchronization in NOTEON and NOTEONOFF modes.
-     * 
-     */
-    void handleNoteSync();
-
-    /**
      * @brief Handles state transitions in NOTEON and NOTEONOFF modes.
      */
     void handleStateChange();

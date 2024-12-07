@@ -119,29 +119,17 @@ void Reverter::checkSync() {
             }
             break;
         case NOTEON:
-        case NOTEONOFF:
-            handleNoteSync();
-            break;
-        default:
-            {}
-            break;
-    }
-}
-
-void Reverter::handleNoteSync() {
-    switch (syncMode) {
-        case NOTEON: 
             if (reverse_index >= delay && state != IDLE)
                 handleStateChange();
             break;
         case NOTEONOFF:
-            if (  (reverse_index >= recorded_samples && state == PLAYING) || // finished playing
-                  (reverse_index >= max_delay && state == PLAYING) || // if note is too long
-                  (mean_abs_value < 0.001f && state == RECORDING) // note has decayed
-               )     
+            if ( (reverse_index >= recorded_samples && state == PLAYING) || // finished playing
+                 (reverse_index >= max_delay && state == PLAYING) || // if note is too long
+                 (mean_abs_value < 0.001f && state == RECORDING) )   // note has decayed
+                    
                 handleStateChange();
             break;
-        default: 
+        default:
             {}
             break;
     }
