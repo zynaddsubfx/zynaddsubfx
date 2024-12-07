@@ -97,17 +97,23 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
 
     // process external timecode to sync
-
     unsigned int beat_new = 0;
     if (time->tempo && speedfactor && (PsyncMode == HOST ))
     {
-        tick = (time->beat-1)*PPQ + time->tick;
-        const unsigned int delay_ticks = int((float)PPQ * speedfactor);
+        const unsigned int buffer_ticks = (unsigned int)((float)buffersize / (float)samplerate * // seconds *
+                                            ((float)time->tempo / 60.0f) *                       // beats per seconds * 
+                                            (float)PPQ);                                         // ticks per beat
+        // calculate the tick at the end of the buffer
+        tick = (time->beat-1) * PPQ + time->tick + buffer_ticks; // beat is 1...4
+        const unsigned int delay_ticks = (unsigned int)((float)PPQ * speedfactor);
         beat_new = tick/delay_ticks;
-        const unsigned int phase_ticks = tick%delay_ticks;
+        
 
         if(beat_new!=beat_new_hist) {
-            const float syncPos = (phase_ticks/delay_ticks)*(60.0f/time->tempo)*(float)(time->samplerate());
+            // calculate ticks between beat and buffer end
+            const unsigned int phase_ticks = buffer_ticks - (tick%delay_ticks);
+            // calculate sample offset of the beat
+            const float syncPos = (phase_ticks/delay_ticks)*(60.0f/(float)time->tempo)*(float)samplerate;
             reverterL->sync(syncPos);
             if(Pstereo) reverterR->sync(syncPos);
         }
@@ -165,8 +171,8 @@ void Reverse::setphase(unsigned char value)
 void Reverse::setcrossfade(unsigned char value)
 {
     Pcrossfade = value;
-    reverterL->setcrossfade(float(value)/100.0f);
-    reverterR->setcrossfade(float(value)/100.0f);
+    reverterL->setcrossfade(float(value+1)/100.0f);
+    reverterR->setcrossfade(float(value+1)/100.0f);
 }
 
 void Reverse::setsyncMode(unsigned char value)

@@ -25,7 +25,7 @@ Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsi
     : syncMode(NOTEON), input(nullptr), gain(1.0f), delay(delay_), phase(0.0f), crossfade(0.16f),
       tRef(tRef_), buffer_offset(0), buffer_counter(0), reverse_index(0.0f), phase_offset_old(0.0f),
       phase_offset_fade(0.0f), fade_counter(0), mean_abs_value(999.9f), time(time_), memory(*alloc), 
-      samplerate(srate), buffersize(bufsize), max_delay(srate * MAX_REV_DELAY_SECONDS)
+      samplerate(srate), buffersize(bufsize), max_delay_samples(srate * MAX_REV_DELAY_SECONDS)
 {
     setdelay(delay);
     pos_writer = 0;
@@ -106,27 +106,27 @@ void Reverter::processBuffer(float *smp) {
 }
 
 void Reverter::checkSync() {
+    float delay_samples = delay * static_cast<float>(samplerate);
     switch (syncMode) {
         case AUTO:
-            if (reverse_index >= delay) {
+            if (reverse_index >= delay_samples) {
                 switchBuffers();
             }
             break;
         case HOST:
-            if ( (doSync && reverse_index >= syncPos) ||
-                reverse_index >= delay ) {
+            if ( (doSync && (float)reverse_index >= syncPos) || // external sync time OR
+                reverse_index >= max_delay_samples ) {   // note is too long buffer ends here
                 switchBuffers();
             }
             break;
         case NOTEON:
-            if (reverse_index >= delay && state != IDLE)
+            if (reverse_index >= delay_samples && state != IDLE)
                 handleStateChange();
             break;
         case NOTEONOFF:
-            if ( (reverse_index >= recorded_samples && state == PLAYING) || // finished playing
-                 (reverse_index >= max_delay && state == PLAYING) || // if note is too long
-                 (mean_abs_value < 0.001f && state == RECORDING) )   // note has decayed
-                    
+            if ( (reverse_index >= recorded_samples && state == PLAYING) || // finished playing OR
+                 (reverse_index >= max_delay_samples && state == PLAYING) ||// note is too long buffer ends here OR
+                 (mean_abs_value < 0.001f && state == RECORDING) )          // note has decayed
                 handleStateChange();
             break;
         default:
@@ -143,6 +143,18 @@ void Reverter::handleStateChange() {
         state = IDLE;
     }
     switchBuffers();
+}
+
+void Reverter::sync(float pos) {
+    if (state == IDLE) {
+        reset();
+        state = RECORDING;
+        reverse_index = 0;
+    } else {
+        syncPos = pos + reverse_index;
+            printf("syncPos: %f\n", syncPos);
+        doSync = true;
+    }
 }
 
 void Reverter::updateReaderPosition(int i) {
@@ -166,8 +178,7 @@ void Reverter::updateReaderPosition(int i) {
 
 void Reverter::crossfadeSamples(float *smp, int i) {
     if (fade_counter < fading_samples) {
-        float fadePhase = static_cast<float>(fade_counter) / static_cast<float>(fading_samples);
-        float fadeinFactor = fadePhase;
+        float fadeinFactor = static_cast<float>(fade_counter) / static_cast<float>(fading_samples);
         float fadeoutFactor = 1.0f - fadeinFactor;
         fade_counter++;
 
@@ -190,34 +201,22 @@ float Reverter::applyFade(float fadein, float fadeout) {
     }
 }
 
-void Reverter::applyGain(float &sample) {
-    sample *= gain;
-}
-
-void Reverter::sync(float pos) {
-    if (state == IDLE) {
-        reset();
-        state = RECORDING;
-        reverse_index = 0;
-    } else {
-        syncPos = pos + reverse_index;
-        doSync = true;
-    }
-}
-
 void Reverter::setdelay(float value) {
-    
-    float delay_new = value * static_cast<float>(samplerate);
-    if (delay == delay_new)
+
+    if (value == delay)
         return;
     else
-        delay = delay_new;
+        delay = value;
 
-    // current number of samples to be used for crossfade
-    fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
-    if (delay < 2.0f * static_cast<float>(fading_samples)) 
-        fading_samples = static_cast<int>(delay * 0.5f);
+    // update mem_size since it depends on delay
+    setcrossfade(crossfade);
+    // recalculate global offset using new delay
+    global_offset = fmodf(tRef, delay);
+    // update mem_size since it depends on delay and crossfade
+    update_memsize();
+}
 
+void Reverter::update_memsize() {
     // Calculate mem_size for reverse delay effect:
     // - 1 times delay for recording
     // - 1 times delay for reverse playing
@@ -225,43 +224,62 @@ void Reverter::setdelay(float value) {
     // - Add crossfade duration
     // - Add 2 extra samples as a safety margin for interpolation and circular buffer wrapping.
     // - Add buffersize to prevent a buffer write into reading area
-    
-    if (syncMode != NOTEONOFF)
-        mem_size = static_cast<int>(ceilf(delay * 3.0f)) + fading_samples + 2 + buffersize;
+    unsigned int mem_size_new;
+    if (syncMode == NOTEON || syncMode == AUTO)
+        mem_size_new = static_cast<int>(ceilf(3.0f * delay * static_cast<float>(samplerate))) + fading_samples + 2 + buffersize;
     else
-        mem_size = static_cast<int>(ceilf(max_delay * 3.0f)) + fading_samples + 2 + buffersize;
+        mem_size_new = static_cast<int>(ceilf(3.0f * max_delay_samples)) + fading_samples + 2 + buffersize;
 
-    if (input != NULL)
+    if (mem_size_new == mem_size)
+        return;
+    else
+        mem_size = mem_size_new;
+
+    printf("mem_size: %d\n", mem_size);
+
+    if (input != nullptr) {
         memory.devalloc(input);
+    }
+
     input = memory.valloc<float>(mem_size);
     reset();
-    global_offset = fmodf(tRef, delay);
+
+}
+
+void Reverter::setcrossfade(float value) {
+    crossfade = value;
+    float delay_samples = delay * static_cast<float>(samplerate);
+    fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
+    if (delay_samples < 2.0f * static_cast<float>(fading_samples)) 
+        fading_samples = static_cast<int>(delay_samples * 0.5f);
+}
+
+void Reverter::setsyncMode(SyncMode value) {
+    if (value != syncMode) {
+        syncMode = value;
+        // initialize state machine appropriate to the new mode
+        state = (syncMode == NOTEON || syncMode == NOTEONOFF) ? IDLE : PLAYING;
+        // update mem_size since it depends on syncMode
+        update_memsize();
+    }
+}
+
+void Reverter::reset() {
+    memset(input, 0, mem_size * sizeof(float));
+    pos_writer = 0;
+    reverse_index = 0;
 }
 
 void Reverter::setphase(float value) {
     phase = value;
 }
 
-void Reverter::setcrossfade(float value) {
-    crossfade = value+1;
-    fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
-    if (delay < 2.0f * static_cast<float>(fading_samples)) fading_samples = static_cast<int>(delay * 0.5f);
-}
-
 void Reverter::setgain(float value) {
     gain = dB2rap(value);
 }
 
-void Reverter::setsyncMode(SyncMode value) {
-    if (value != syncMode) {
-        syncMode = value;
-        state = (syncMode == NOTEON || syncMode == NOTEONOFF) ? IDLE : PLAYING;
-        reset();
-    }
-}
-
-void Reverter::reset() {
-    memset(input, 0, mem_size * sizeof(float));
+void Reverter::applyGain(float &sample) {
+    sample *= gain;
 }
 
 };
