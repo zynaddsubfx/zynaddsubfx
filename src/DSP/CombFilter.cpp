@@ -46,7 +46,7 @@ inline float CombFilter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos; // integer part (pos >= 0)
     float poslo = pos - (float) poshi; // decimal part
     // linear interpolation between samples
-    return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
+    return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]);
 }
 
 void CombFilter::filterout(float *smp)
@@ -61,8 +61,8 @@ void CombFilter::filterout(float *smp)
         float pos = float(mem_size-buffersize+i)-delay;
         // add the fwd and bwd feedback samples to current sample
         smp[i] = smp[i]*gain + tanhX(
-            gainfwd * sampleLerp( input, pos) - 
-            gainbwd * sampleLerp(output, pos)); 
+            gainfwd * sampleLerp( input, pos) -
+            gainbwd * sampleLerp(output, pos));
         // copy new sample to output buffer
         output[mem_size-buffersize+i] = smp[i];
         // apply output gain

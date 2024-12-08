@@ -17,7 +17,7 @@ MoogFilter::MoogFilter(unsigned char Ftype, float Ffreq, float Fq,
 {
     setfreq_and_q(Ffreq/srate, Fq);
     settype(Ftype); // q must be set before
-    
+
     // initialize state but not to 0, in case of being used as denominator
     for (unsigned int i = 0; i<(sizeof(state)/sizeof(*state)); i++)
     {
@@ -41,16 +41,16 @@ inline float MoogFilter::tanhX(const float x) const
 
 inline float MoogFilter::tanhXdivX(float x) const
 {
-    
+
     //add DC offset to raise even harmonics (like transistor bias current)
     x+= 0.1f;
     // pre calc often used term
     float x2 = x*x;
     // Pade approximation for tanh(x)/x used in filter stages (5x per sample)
-    //~ return ((15.0+x2)/(15.0+6.0*x2)); 
-    // faster approximation without division 
+    //~ return ((15.0+x2)/(15.0+6.0*x2));
+    // faster approximation without division
     // tuned for more distortion in self oscillation
-    return (1.0f-(0.35f*x2)+(0.06f*x2*x2)); 
+    return (1.0f-(0.35f*x2)+(0.06f*x2*x2));
 }
 
 inline float MoogFilter::step(float input)
@@ -74,7 +74,7 @@ inline float MoogFilter::step(float input)
               dp1 * state[3];
 
     // mix input and gained feedback estimate for
-    // cheaper feedback gain compensation. Idea from 
+    // cheaper feedback gain compensation. Idea from
     // Antti Huovilainen and Vesa Välimäki, "NEW APPROACHES TO DIGITAL SUBTRACTIVE SYNTHESIS"
     float u = input - tanhX(feedbackGain * (y3Estimate - 0.5f*input));
     // output of all stages
@@ -123,7 +123,7 @@ inline float MoogFilter::tan_2(const float x) const
 void MoogFilter::setfreq(float ff)
 {
     // pre warp cutoff to map to reality
-    c = tan_2(PI * ff);    
+    c = tan_2(PI * ff);
     // limit cutoff to prevent overflow
     c = limit(c,0.0006f,1.5f);
     // pre calculate some stuff outside the hot zone
