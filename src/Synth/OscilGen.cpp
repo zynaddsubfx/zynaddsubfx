@@ -132,6 +132,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
         }},
     //TODO update to rArray and test
     {"magnitude#128::c:i", rProp(parameter) rLinear(0,127) rProp(non-realtime)
+        rProp(no port checker) // buggy port
         rDefault([127 64 64 ...]) rDoc("Sets harmonic magnitude"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //printf("I'm at '%s'\n", d.loc);
