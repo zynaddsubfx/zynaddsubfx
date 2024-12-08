@@ -328,7 +328,7 @@ void connectMidiLearn(int par, int chan, bool isNrpn, string path, rtosc::MidiMa
             printf("mapping midi NRPN: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
         else
             printf("mapping midi CC: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
-            
+
         if(chan<1) chan=1;
         int ID = (isNrpn<<18) + (((chan-1)&0x0f)<<14) + par;
         //~ printf("ID = %d\n", ID);

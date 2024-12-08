@@ -1,0 +1,33 @@
+#!/bin/bash
+
+trailing_whitespace=0
+
+toplevel=$(git rev-parse --show-toplevel)
+
+if ! [ "$toplevel" ]
+then
+	echo "This script must be started from inside a clone"
+	exit 1
+fi
+
+for codefile in $(cd "$toplevel" && git ls-files '*.h' '*.cpp')
+do
+	if grep -H '[[:space:]]\+$' "$toplevel/$codefile"
+	then
+		trailing_whitespace=1
+	fi
+done
+
+if [ "$trailing_whitespace" -eq 1 ]
+then
+	echo "Error: Some lines of code end with whitespace"
+	echo "You can tell your editor to cleanup whitespace, or run this"
+	echo "in the toplevel dir of your git repo:"
+	echo
+	cat - << 'EOF'
+  for i in $(for codefile in $(git ls-files '*.h' '*.cpp'); do grep -H '[[:space:]]\+$' $codefile; done | cut -d: -f1 | sort -u); do sed 's#[[:space:]]\+$##g' -i $i; done
+EOF
+	echo
+fi
+
+exit $trailing_whitespace

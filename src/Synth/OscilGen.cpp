@@ -1974,7 +1974,7 @@ FILTER(lpsk)
     float vOut = tmp2PIf * tmp2PIf;
     std::complex<float> vIn = s*s + tmp2PIf*s/((par2)+(2.0f*par*par2)+0.5f) + tmp2PIf*tmp2PIf;
     return std::abs((vOut*vOut*vOut) / (vIn*vIn*vIn));
-    
+
 }
 #undef FILTER
 
