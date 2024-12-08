@@ -31,7 +31,7 @@ class AbsTime
     private:
         int64_t frames;
         const SYNTH_T &s;
-        
+
 };
 
 //Marker for an event relative to some position of the absolute timer

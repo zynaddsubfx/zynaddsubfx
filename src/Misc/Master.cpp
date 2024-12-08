@@ -775,7 +775,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
-    
+
     // set default tempo
     time.tempo = 120;
 

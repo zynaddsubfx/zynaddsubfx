@@ -609,7 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
-    
+
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();

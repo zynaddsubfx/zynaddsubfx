@@ -295,7 +295,7 @@ void AnalogFilter::setfreq(float frequency)
     }
     if (recompute)
         q = newq;
-    
+
     if (beforeFirstTick) {
         freq_smoothing.reset( freq );
         beforeFirstTick=false;

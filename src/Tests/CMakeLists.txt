@@ -100,3 +100,7 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+endif()
+
