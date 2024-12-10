@@ -1523,8 +1523,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             // reset phase at the carrier
             if (
                  ( (tw[i]>0.0f && fmold <=0.0f) ||
-                    (tw[i]>=0.0f && fmold <0.0f) )
-                && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude))
+                   (tw[i]>=0.0f && fmold <0.0f)    )
                 ) {
                 fmold = tw[i];
                 tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f) + smps[0])/2.0f;
