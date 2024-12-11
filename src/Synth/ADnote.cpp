@@ -1471,7 +1471,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
 
-    if(NoteVoicePar[nvoice].FMVoice >= 0)
+    if(vce.FMVoice >= 0)
         // if I use VoiceOut[] as modulator
         // copy it to tmpwave_unison[][]
         for(int k = 0; k < vce.unison_size; ++k) {
@@ -1521,9 +1521,11 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
 
             // if zero is crossed on the rising slope of the modulator
             // reset phase at the carrier
+            // if no modulation is selected reset only in a timewindow narrowed by FMnewamplitude
             if (
                  ( (tw[i]>0.0f && fmold <=0.0f) ||
-                   (tw[i]>=0.0f && fmold <0.0f)    )
+                    (tw[i]>=0.0f && fmold <0.0f) )
+                && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) || vce.FMEnabled != FMTYPE::NONE)
                 ) {
                 fmold = tw[i];
                 tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f) + smps[0])/2.0f;
@@ -1554,7 +1556,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode)
 {
     Voice& vce = NoteVoicePar[nvoice];
-    if(NoteVoicePar[nvoice].FMVoice >= 0) {
+    if(vce.FMVoice >= 0) {
         //if I use VoiceOut[] as modulator
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
