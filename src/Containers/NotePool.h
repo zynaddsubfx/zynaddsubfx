@@ -131,7 +131,7 @@ class NotePool
         void applyLegato(note_t note, const LegatoParams &par, PortamentoRealtime *portamento_realtime=NULL);
 
         void makeUnsustainable(note_t note);
-        
+
         void releaseLatched();
 
         bool full(void) const;
@@ -150,7 +150,7 @@ class NotePool
         void releaseNote(note_t note);
         void release(NoteDescriptor &d);
         void latch(NoteDescriptor &d);
-        
+
 
         void killAllNotes(void);
         void killNote(note_t note);

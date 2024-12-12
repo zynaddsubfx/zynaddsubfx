@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  CombFilter.h - Several analog filters 
+  CombFilter.h - Several analog filters
   Copyright (C) 2021-2021 Michael Kirchner
   Author: Michael Kirchner
 
@@ -32,7 +32,7 @@ class CombFilter:public Filter
         void settype(unsigned char type);
 
     private:
-    
+
         float* input;
         float* output;
         float gain;
@@ -46,8 +46,8 @@ class CombFilter:public Filter
 
         float gainfwd;
         float gainbwd;
-        float delay;        
-        
+        float delay;
+
         Allocator &memory;
         int mem_size;
 

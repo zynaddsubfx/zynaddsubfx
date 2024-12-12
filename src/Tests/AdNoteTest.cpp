@@ -65,7 +65,7 @@ class AdNoteTest
             lfop->Pcontinous  = randval(0,1);
             lfop->Pstretch    = randval(0,255);
             lfop->fel         = (consumer_location_type_t) randval(1,2);
-            
+
         }
 
         void run_lfo_randomtest(void)

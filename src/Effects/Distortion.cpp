@@ -54,7 +54,7 @@ rtosc::Ports Distortion::ports = {
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
                      Inverse Limiter, Clip, Asym2, Pow2, Sigmoid, Tanh,
-                     Cubic, Square), rLinear(0,127), 
+                     Cubic, Square), rLinear(0,127),
             rPresets(Arctangent, Asymmetric, Zigzag,
                      Asymmetric, Pow, Quantisize),
             "Distortion Shape"),

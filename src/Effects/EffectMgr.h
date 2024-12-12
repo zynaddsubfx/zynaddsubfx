@@ -73,10 +73,10 @@ class EffectMgr:public Presets
         int     nefx;
         Effect *efx;
         const AbsTime *time;
-        
+
         int numerator;
         int denominator;
-        
+
     private:
 
         //Parameters Prior to initialization
@@ -110,8 +110,8 @@ class EffectMgr:public Presets
         bool dryonly;
         Allocator &memory;
         const SYNTH_T &synth;
-        
-        
+
+
 };
 
 }
