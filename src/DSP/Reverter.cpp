@@ -262,7 +262,8 @@ void Reverter::setsyncMode(SyncMode value) {
 }
 
 void Reverter::reset() {
-    memset(input, 0, mem_size * sizeof(float));
+    if (input != nullptr)
+        memset(input, 0, mem_size * sizeof(float));
     pos_writer = 0;
     reverse_index = 0;
 }
