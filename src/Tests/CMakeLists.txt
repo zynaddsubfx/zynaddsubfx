@@ -47,6 +47,7 @@ quick_test(TriggerTest      ${test_lib})
 quick_test(UnisonTest       ${test_lib})
 quick_test(WatchTest        ${test_lib})
 quick_test(XMLwrapperTest   ${test_lib})
+quick_test(ReverseTest   ${test_lib})
 
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
