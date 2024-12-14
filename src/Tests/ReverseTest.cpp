@@ -67,7 +67,9 @@ class ReverseTest
 
         void testClear() {
             char DELAY = 2;
+            char MODE = 6;
             testFX->changepar(DELAY, 127);
+            testFX->changepar(MODE, 2);
 
             //flood with high input
             for(int i = 0; i < synth->buffersize; ++i)
