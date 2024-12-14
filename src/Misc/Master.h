@@ -23,7 +23,6 @@
 #include <rtosc/savefile.h>
 
 #include "Time.h"
-#include "Sync.h"
 #include "Bank.h"
 #include "Recorder.h"
 

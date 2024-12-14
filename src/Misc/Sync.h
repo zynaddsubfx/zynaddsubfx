@@ -35,7 +35,7 @@ public:
         }
         observers[observerCount++] = observer;
     }
-    void detach(Observer* observer) {
+    void detach(const Observer* observer) {
         // Find the observer
         auto it = std::find(observers, observers + observerCount, observer);
         if (it == observers + observerCount) {

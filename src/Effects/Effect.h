@@ -167,7 +167,7 @@ class Effect: public Observer
                           * Master Output only.*/
 
         float volume;
-        float speedfactor;
+        float speedfactor;    /**relative factor for using the global tempo (BPM)*/
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
