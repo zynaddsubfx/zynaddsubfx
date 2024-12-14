@@ -247,8 +247,8 @@ void Reverter::setcrossfade(float value) {
     crossfade = value;
     float delay_samples = delay * static_cast<float>(samplerate);
     fading_samples = static_cast<int>(crossfade * static_cast<float>(samplerate));
-    if (delay_samples < 2.0f * static_cast<float>(fading_samples)) 
-        fading_samples = static_cast<int>(delay_samples * 0.5f);
+    if (delay_samples < 1.25f * static_cast<float>(fading_samples)) 
+        fading_samples = static_cast<int>(delay_samples * 0.8f);
 }
 
 void Reverter::setsyncMode(SyncMode value) {
