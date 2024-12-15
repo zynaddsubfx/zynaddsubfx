@@ -246,8 +246,6 @@ typedef std::complex<fftwf_real> fft_t;
                                     i++) \
                                     data_[i] = 0.0f; }
 
-#define PPQ 480
-
 enum ONOFFTYPE {
     OFF = 0, ON = 1
 };
