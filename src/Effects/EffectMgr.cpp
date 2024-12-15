@@ -142,6 +142,7 @@ static const rtosc::Ports local_ports = {
                             // delay = ((Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS); //0 .. x sec
                             // Pdelay = (delay * 128.0f / MAX_REV_DELAY_SECONDS) -1
                             // delay = 60 / tempo * 4 * numerator / denominator
+                            assert(eff->time->tempo > 0);
                             delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             eff->seteffectparrt(2, Pdelay);
@@ -185,6 +186,7 @@ static const rtosc::Ports local_ports = {
                         switch(eff->nefx) {
                         case 2: // Echo
                         case 10: // Reverse
+                            assert(eff->time->tempo > 0);
                             delay = 60.0f / ((float)eff->time->tempo * eff->efx->speedfactor);
                             Pdelay = (unsigned char)(delay * 128.0f / MAX_REV_DELAY_SECONDS)-1;
                             eff->seteffectparrt(2, Pdelay);
