@@ -21,6 +21,7 @@
 #include "Reverse.h"
 
 namespace zyn {
+#define HZ2BPM 60.0f // frequency (Hz) * HZ2BPM = frequency (BPM)
 
 #define rObject Reverse
 #define rBegin [](const char *msg, rtosc::RtData &d) {
@@ -100,20 +101,21 @@ void Reverse::out(const Stereo<float *> &input)
     unsigned int beat_new = 0;
     if (time->tempo && speedfactor && (PsyncMode == HOST ))
     {
+        // calculate the buffer length measured in ticks
         const unsigned int buffer_ticks = (unsigned int)((float)buffersize / (float)samplerate * // seconds *
-                                            ((float)time->tempo / 60.0f) *                       // beats per seconds * 
-                                            (float)PPQ);                                         // ticks per beat
-        // calculate the tick at the end of the buffer
+                                            ((float)time->tempo / HZ2BPM) *                      // beats per seconds * 
+                                            (float)PPQ);                                         // pulses per quarter note
+        // calculate the tick count at the end of the buffer
         tick = (time->beat-1) * PPQ + time->tick + buffer_ticks; // beat is 1...4
         const unsigned int delay_ticks = (unsigned int)((float)PPQ * speedfactor);
         beat_new = tick/delay_ticks;
         
-
+        // check whether there is a beat inside this buffer
         if(beat_new!=beat_new_hist) {
             // calculate ticks between beat and buffer end
             const unsigned int phase_ticks = buffer_ticks - (tick%delay_ticks);
             // calculate sample offset of the beat
-            const float syncPos = (phase_ticks/delay_ticks)*(60.0f/(float)time->tempo)*(float)samplerate;
+            const float syncPos = (phase_ticks/delay_ticks)*(HZ2BPM/(float)time->tempo)*(float)samplerate;
             reverterL->sync(syncPos);
             if(Pstereo) reverterR->sync(syncPos);
         }
