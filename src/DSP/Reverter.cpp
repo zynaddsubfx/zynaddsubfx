@@ -207,7 +207,7 @@ void Reverter::setdelay(float value) {
     else
         delay = value;
 
-    // update mem_size since it depends on delay
+    // update crossfade since it depends on delay
     setcrossfade(crossfade);
     // recalculate global offset using new delay
     global_offset = fmodf(tRef, delay);
