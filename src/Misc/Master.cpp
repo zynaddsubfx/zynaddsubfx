@@ -973,6 +973,7 @@ void Master::defaults()
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
+        sync->notify();
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
@@ -1262,6 +1263,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
+
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
@@ -1276,12 +1278,10 @@ bool Master::AudioOut(float *outl, float *outr)
     if(!runOSC(outl, outr, false))
         return false;
 
-
     //Handle watch points
     if(bToU)
         watcher.write_back = bToU;
     watcher.tick();
-
 
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -1305,7 +1305,6 @@ bool Master::AudioOut(float *outl, float *outr)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
-
 
     float gainbuf[synth.buffersize];
 
@@ -1471,8 +1470,22 @@ bool Master::AudioOut(float *outl, float *outr)
 void Master::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr)
+                                float *outr,
+                                int bar,
+                                int beat,
+                                float tick,
+                                float bpm,
+                                float PPQ)
 {
+
+    if(bpm) {
+        time.bar = bar;
+        time.beat = beat;
+        time.tick = tick;
+        time.tempo = bpm;
+        time.ppq = PPQ;
+        
+    }
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job

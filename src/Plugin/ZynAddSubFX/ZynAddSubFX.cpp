@@ -345,6 +345,7 @@ protected:
 
         // Zeitposition vom Host abfragen
         const TimePosition& timePosition = getTimePosition();
+        
 
         if (! mutex.tryLock())
         {
@@ -455,7 +456,8 @@ protected:
                                                                  timePosition.bbt.bar,
                                                                  timePosition.bbt.beat,
                                                                  timePosition.bbt.tick,
-                                                                 timePosition.bbt.beatsPerMinute);
+                                                                 timePosition.bbt.beatsPerMinute,
+                                                                 timePosition.bbt.ticksPerBeat);
 
         else
             master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,

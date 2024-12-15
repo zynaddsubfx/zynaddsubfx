@@ -104,10 +104,10 @@ void Reverse::out(const Stereo<float *> &input)
         // calculate the buffer length measured in ticks
         const unsigned int buffer_ticks = (unsigned int)((float)buffersize / (float)samplerate * // seconds *
                                             ((float)time->tempo / HZ2BPM) *                      // beats per seconds * 
-                                            (float)PPQ);                                         // pulses per quarter note
+                                            (float)time->ppq);                                         // pulses per quarter note
         // calculate the tick count at the end of the buffer
-        tick = (time->beat-1) * PPQ + time->tick + buffer_ticks; // beat is 1...4
-        const unsigned int delay_ticks = (unsigned int)((float)PPQ * speedfactor);
+        tick = (time->beat-1) * time->ppq + time->tick + buffer_ticks; // beat is 1...4
+        const unsigned int delay_ticks = (unsigned int)((float)time->ppq * speedfactor);
         beat_new = tick/delay_ticks;
         
         // check whether there is a beat inside this buffer
