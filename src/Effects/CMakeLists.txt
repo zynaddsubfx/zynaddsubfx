@@ -12,5 +12,6 @@ set(zynaddsubfx_effect_SRCS
 	Effects/Phaser.cpp
 	Effects/Reverb.cpp
 	Effects/Sympathetic.cpp
+	Effects/Reverse.cpp
     PARENT_SCOPE
 )

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <string>
 #include "../Misc/Time.h"
+#include "../Misc/Sync.h"
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Part.h"
 #include "../Misc/Util.h"
@@ -34,6 +35,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 AbsTime *time_;
+Sync *sync_;
 
 char *instance_name=(char*)"";
 MiddleWare *middleware;
@@ -74,6 +76,7 @@ void setup() {
     synth->samplerate = 48000;
     synth->alias();
     time_ = new AbsTime(*synth);
+    sync_ = new Sync();
     //for those patches that are just really big
     alloc.addMemory(malloc(1024*1024),1024*1024);
 
@@ -84,7 +87,7 @@ void setup() {
     for(int i = 0; i < synth->buffersize; ++i)
         outR[i] = 0.0f;
 
-    p = new Part(alloc, *synth, *time_, compress, interp, &microtonal, &fft);
+    p = new Part(alloc, *synth, *time_, sync_, compress, interp, &microtonal, &fft);
 }
 
 void xml(string s)

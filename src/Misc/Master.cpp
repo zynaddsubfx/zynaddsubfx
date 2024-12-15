@@ -19,6 +19,7 @@
 #include "zyn-version.h"
 #include "../Misc/Stereo.h"
 #include "../Misc/Util.h"
+#include "../Misc/Sync.h"
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
@@ -766,7 +767,7 @@ void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 }
 
 Master::Master(const SYNTH_T &synth_, Config* config)
-    :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
+    :HDDRecorder(synth_), time(synth_), sync(), ctl(synth_, &time),
     microtonal(config->cfg.GzipCompression), bank(config),
     automate(16,4,8),
     frozenState(false), pendingMemory(false),
@@ -776,8 +777,14 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     bToU = NULL;
     uToB = NULL;
     
+    sync = new Sync();
+
     // set default tempo
     time.tempo = 120;
+    time.bar = 0;
+    time.beat = 0;
+    time.tick = 0.0f;
+    time.bpm = 0.0f;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
@@ -807,7 +814,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
-        part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
+        part[npart] = new Part(*memory, synth, time, sync, config->cfg.GzipCompression,
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
         smoothing_part_l[npart].sample_rate( synth.samplerate );
@@ -821,11 +828,11 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time);
+        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time, sync);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
+        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time, sync);
 
     //Note Visualization
     memset(activeNotes, 0, sizeof(activeNotes));
@@ -966,6 +973,7 @@ void Master::defaults()
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
+        sync->notify();
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
@@ -1255,11 +1263,12 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
+
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
     //Normal Limits
-    if(!pendingMemory && memory->lowMemory(4,1024*1024)) {
+    if(!pendingMemory && memory->lowMemory(6,1024*1024)) {
         printf("Requesting more memory\n");
         bToU->write("/request-memory", "");
         pendingMemory = true;
@@ -1269,12 +1278,10 @@ bool Master::AudioOut(float *outl, float *outr)
     if(!runOSC(outl, outr, false))
         return false;
 
-
     //Handle watch points
     if(bToU)
         watcher.write_back = bToU;
     watcher.tick();
-
 
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -1298,7 +1305,6 @@ bool Master::AudioOut(float *outl, float *outr)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
-
 
     float gainbuf[synth.buffersize];
 
@@ -1464,8 +1470,22 @@ bool Master::AudioOut(float *outl, float *outr)
 void Master::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr)
+                                float *outr,
+                                int bar,
+                                int beat,
+                                float tick,
+                                float bpm,
+                                float PPQ)
 {
+
+    if(bpm) {
+        time.bar = bar;
+        time.beat = beat;
+        time.tick = tick;
+        time.tempo = bpm;
+        time.ppq = PPQ;
+        
+    }
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
