@@ -25,6 +25,10 @@
 using namespace rtosc;
 
 namespace zyn {
+ 
+#define DAMAGEPARENT char part_loc[128]; strncpy(part_loc, DATA.loc, sizeof(part_loc));\
+ part_loc[sizeof(part_loc) - 1] = '\0'; char *end = strrchr(part_loc, '/');\
+ if(end) { end[1] = '\0'; DATA.broadcast("/damage", "s", part_loc); }
 
 #define rObject EnvelopeParams
 #define rBegin [](const char *msg, RtData &d) { \
@@ -117,6 +121,12 @@ static const rtosc::Ports localPorts = {
             "Linear or Logarithmic Envelopes"),
     rToggle(Prepeating, rShort("repeat"), rDefault(false),
             "Repeat the Envelope"),
+#undef  rChangeCb
+#define DATA data  
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  else obj->updatefree(); \
+                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); }\
+                  DAMAGEPARENT
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), rDepends(Pfreemode),
             "Attack Time"),
     rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f),
@@ -169,9 +179,13 @@ static const rtosc::Ports localPorts = {
               rDefault(64),
               "Release Value"),
 #undef rChangeCb
-#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+#undef DATA
+#define DATA data
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree();  \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); } \
-                  if(idx >= obj->Penvpoints) { obj->Penvpoints = idx + 1; }
+                  if(idx >= obj->Penvpoints) { obj->Penvpoints = idx + 1; } \
+                  if(obj->Pfreemode) obj->updatenonfree();\
+                  DAMAGEPARENT
     rParamsDT(envdt,  MAX_ENVELOPE_POINTS, rProp(alias), "Envelope Delay Times"),
     rArrayF(envdt, MAX_ENVELOPE_POINTS, rProp(parameter),
             rEnabledBy(Pfreemode),
@@ -206,6 +220,8 @@ static const rtosc::Ports localPorts = {
         rBegin;
         d.reply(d.loc, "i", env->Envmode);
         rEnd},
+#undef DATA
+#define DATA d
     {"envdt", rDoc("Envelope Delay Times (ms)"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
@@ -222,6 +238,8 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f)/1000; //store as seconds in member variable
             }
+            env->updatenonfree();
+            DAMAGEPARENT
         }
         rEnd},
     {"dt", rDoc("Envelope Delay Times (sec)"), NULL,
@@ -241,6 +259,8 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i)
                 env->envdt[i] = (rtosc_argument(msg, i).f);
         }
+        env->updatenonfree();
+        DAMAGEPARENT
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
         rBegin;
@@ -258,6 +278,8 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->Penvval[i] = limit(roundf(rtosc_argument(msg,i).f*127.0f), 0.0f, 127.0f);
             }
+            env->updatenonfree();
+            DAMAGEPARENT
         }
         rEnd},
 
@@ -298,7 +320,7 @@ static const rtosc::Ports localPorts = {
 
         rEnd},
 };
-
+#undef DATA
 const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 
@@ -508,8 +530,117 @@ void EnvelopeParams::converttofree()
     }
 }
 
+void EnvelopeParams::updatefree()
+{
+    if(!Pfreemode) return;
+        
+    switch(Envmode) {
+        case ADSR_lin:
+        case ADSR_dB:
+            // Preserve number of points and sustain in case of custom shapes
+            // but update their values based on ADSR params
+            if(Penvpoints >= 4) {
+                Penvval[0] = 0;  // Start at zero
+                envdt[1] = A_dt;  // Attack time
+                Penvval[1] = 127; // Peak
+                
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
+                    // Place sustain value at the sustain point
+                    Penvval[Penvsustain] = PS_val;
+                    
+                    // If there's a point after sustain, set its time to R_dt
+                    if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
+                        envdt[Penvsustain + 1] = R_dt;
+                    }
+                }
+            }
+            break;
+            
+        case ASR_freqlfo:
+        case ASR_bw:
+            if(Penvpoints >= 3) {
+                Penvval[0] = PA_val;
+                envdt[1] = A_dt;
+                
+                // Release time and value after sustain
+                if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
+                    envdt[Penvsustain + 1] = R_dt;
+                    Penvval[Penvpoints - 1] = PR_val;
+                }
 
+            }
+            break;
+            
+        case ADSR_filter:
+            if(Penvpoints >= 4) {
+                Penvval[0] = PA_val;
+                envdt[1] = A_dt;
+                Penvval[1] = PD_val;
 
+                // Release time and value after sustain
+                if(Penvsustain > 0 && Penvsustain + 1 < Penvpoints) {
+                    envdt[Penvsustain + 1] = R_dt;
+                    Penvval[Penvpoints - 1] = PR_val;
+                }
+            }
+            break;
+    }
+}
+
+    // Updates ADSR parameters based on free mode points
+void EnvelopeParams::updatenonfree() {
+    if(Pfreemode) return;
+    
+    switch(Envmode) {
+        case ADSR_lin:
+        case ADSR_dB:
+            if(Penvpoints >= 4) {
+                // Attack time from first segment
+                A_dt = envdt[1];
+                
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
+                    // Sustain level is the value at sustain point
+                    PS_val = Penvval[Penvsustain];
+                    
+                    // Release time is the time of the segment after sustain
+                    if(Penvsustain + 1 < Penvpoints) {
+                        R_dt = envdt[Penvsustain + 1];
+                    }
+                }
+            }
+            break;
+            
+        case ASR_freqlfo:
+        case ASR_bw:
+            if(Penvpoints >= 3) {
+                PA_val = Penvval[0];
+                A_dt = envdt[1];
+                
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
+                    if(Penvsustain + 1 < Penvpoints) {
+                        R_dt = envdt[Penvsustain + 1];
+                        PR_val = Penvval[Penvpoints - 1];
+                    }
+                }
+            }
+            break;
+            
+        case ADSR_filter:
+            if(Penvpoints >= 4) {
+                PA_val = Penvval[0];
+                A_dt = envdt[1];
+                PD_val = Penvval[1];
+                
+                if(Penvsustain > 0 && Penvsustain < Penvpoints) {
+                    if(Penvsustain + 1 < Penvpoints) {
+                        R_dt = envdt[Penvsustain + 1];
+                        PR_val = Penvval[Penvpoints - 1];
+                    }
+                }
+            }
+            break;
+    }
+}
 
 void EnvelopeParams::add2XML(XMLwrapper& xml)
 {
