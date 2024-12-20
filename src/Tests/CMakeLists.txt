@@ -101,6 +101,15 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+    execute_process(
+        COMMAND git rev-parse --is-inside-work-tree
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE IS_GIT_REPO
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(IS_GIT_REPO STREQUAL "true")
+        add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+    endif()
 endif()
 
