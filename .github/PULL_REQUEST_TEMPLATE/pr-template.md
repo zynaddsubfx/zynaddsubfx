@@ -7,8 +7,8 @@
 ## Human checks (please check those!):
 
 - [ ] 01. Is the PR atomic? (or could parts of this PR be split into another PR)
-- [ ] 02. Does this PR depend on another PR or does it block another PR?
-- [ ] 03. Does this PR solve a known issue?
+- [ ] 02. Are PRs relying on or blocking this PR marked and linked in both PRs descriptions
+- [ ] 03. Are known issues that this PR solves linked in both descriptions (PR and issue)?
 - [ ] 04. Is there sufficient user documentation in the `doc/` folder?
 - [ ] 05. Is the code realtime safe? (e.g. no `new`/`delete`, no other syscalls like `sleep`/file handling/mutexes, no prints in non-error code pathways, ...)
 - [ ] 06. Is aliasing properly avoided?
