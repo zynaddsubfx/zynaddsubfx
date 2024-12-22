@@ -227,7 +227,7 @@ protected:
             break;
         }
         if(index <= kParamSlot16) {
-            parameter.hints  = kParameterIsAutomable;
+            parameter.hints  = kParameterIsAutomatable;
             parameter.name   = ("Slot " + zyn::to_s(index-kParamSlot1 + 1)).c_str();
             parameter.symbol = ("slot"  + zyn::to_s(index-kParamSlot1 + 1)).c_str();
             parameter.unit   = "";
