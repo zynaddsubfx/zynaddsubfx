@@ -14,7 +14,7 @@
 - [ ] 06. Is aliasing properly avoided?
 - [ ] 07. Are clicks/pops/discontinuities successfully avoided?
 - [ ] 08. Are all new parameters well-mapped and behave as expected across their provided range?
-- [ ] 09. Is divide by zero completely impossible with this changes?
+- [ ] 09. Is divide by zero completely impossible with these changes?
 - [ ] 10. Are all magic numbers clearly defined and centralized (local ones at the top of the file global ones in src/globals.h)?
 - [ ] 11. Are all nontrivial formulae or constants explained, with appropriate references provided?
 - [ ] 12. Do nontrivial class variables have appropriate Doxygen comments?
