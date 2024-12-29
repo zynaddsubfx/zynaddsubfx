@@ -146,3 +146,23 @@ jobs:
 #        run: make VERBOSE=1 -k test ARGS='-VVd' -C build
 #      - name: Install zynaddsubfx
 #        run: make VERBOSE=1 install -C build
+  check-includes:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: update_apt
+      run:   sudo apt-get update
+    - name: install_deps1
+      run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
+    - name: install_deps2
+      run: sudo apt-get install liblo-dev iwyu
+    - name: submodule
+      run: git submodule update --init
+    - name: configure
+      run: mkdir build && cd build && cmake -DIncludeWhatYouUse=ON -DPluginEnable=FALSE ..
+    - name: make
+      run: cd build && make 2>&1 >/dev/null | tee make.txt
+    - name: iwyu
+      run: cd build && cat make.txt | ../src/Tests/grep-includes

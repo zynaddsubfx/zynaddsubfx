@@ -1,0 +1,23 @@
+#!/bin/bash
+
+main()
+{
+	set -eE
+	result=$(
+		awk '/should remove these lines:$/ {print; flag=1; next} /^The full include-list for/ {flag=0} flag && NF' | # print all from "should remove these lines" until "The full include list"
+		awk '/ should / {if(found) { found=0 } should=$LINE} /- .+/ {if(found==0) print should; found=1; print}' | # print only if at least one nonempty removal suggestion is found |
+		awk '/ should / {ignore=0} /globals.h should/ {ignore=1} (!ignore)' # ignore globals.h
+	)
+
+	if [ "$result" ]
+	then
+		echo "Unnecessary includes found:"
+		echo "$result"
+		exit 1
+	else
+		exit 0
+	fi
+}
+
+main "$@"
+
