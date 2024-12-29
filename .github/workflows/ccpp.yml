@@ -27,7 +27,7 @@ jobs:
       run: mkdir build && cd build && cmake ..
     - name: configure-extensive
       if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
-      run: cd build && cmake -DCompileExtensiveTests=ON ..
+      run: cd build && cmake -DCompileExtensiveTests=ON -DRTOSC_WERROR=ON -DWerror=ON ..
     - name: make
       run: cd build && make
     - name: make test

@@ -20,7 +20,9 @@ find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(ECM)
 list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
-find_package(LibGit2)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    find_package(LibGit2)
+endif()
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
@@ -202,8 +204,19 @@ option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
 option (ExtendedWarnings "Enable all useful warnings" OFF)
+option (Werror "Treat all warnings as errors" ON)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
 mark_as_advanced(IncludeWhatYouUse)
+
+if(Werror)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+        set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+    else()
+        if(NOT WIN32)  # For Windows, just allow warnings for now
+            add_definitions(-Werror)
+        endif()
+    endif()
+endif()
 
 set(CMAKE_BUILD_TYPE "Release")
 
@@ -281,17 +294,13 @@ set (BuildOptionsDebug
     CACHE STRING "Debug build flags")
 STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
-if(${CMAKE_VERSION} VERSION_LESS "3.3.0")
-    set(IwyuErr "disabled (cmake < 3.3.0)")
-else()
-    if(IncludeWhatYouUse)
-        find_program(IwyuPath NAMES include-what-you-use iwyu)
-        if(NOT IwyuPath)
-            set(IwyuErr "package NOT found")
-        endif()
-    else()
-        set(IwyuErr "disabled (IncludeWhatYouUse=OFF)")
+if(IncludeWhatYouUse)
+    find_program(IwyuPath NAMES include-what-you-use iwyu)
+    if(NOT IwyuPath)
+        set(IwyuErr "package NOT found")
     endif()
+else()
+    set(IwyuErr "disabled (IncludeWhatYouUse=OFF)")
 endif()
 
 ########### Settings dependent code ###########
@@ -367,9 +376,9 @@ endif()
 add_definitions(
 	 -Wall
 	 -Wextra
-	 )
+	 -Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
 
-# macro similar to "check_cxx_compiler_flag_extra", however,
+# macro similar to "check_cxx_compiler_flag", however,
 # it also checks for warnings that are only output if other warnings are active
 macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
     set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
@@ -388,12 +397,6 @@ check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
     )
 if(COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE)
     add_definitions(-Wno-inconsistent-missing-override)
-endif()
-
-check_cxx_compiler_flag("-Wall -Wextra -Werror --system-header-prefix='FL/'"
-    COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
-if(COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
-    add_definitions(--system-header-prefix="FL/")
 endif()
 
 if(HAVE_X86_FISTPL)
@@ -464,11 +467,9 @@ if(FltkGui)
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
 
-	include_directories(
-			${FLTK_INCLUDE_DIR}
-			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
-			"${CMAKE_CURRENT_BINARY_DIR}/UI"
-			)
+	include_directories(SYSTEM ${FLTK_INCLUDE_DIR})
+	include_directories(	"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+				"${CMAKE_CURRENT_BINARY_DIR}/UI")
 
 	add_subdirectory(UI)
 endif()
@@ -493,11 +494,9 @@ if(NtkGui)
 
 	message(STATUS "Will build NTK gui")
 
-	include_directories(BEFORE
-			${NTK_INCLUDE_DIRS}
-			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
-			"${CMAKE_CURRENT_BINARY_DIR}/UI"
-			)
+	include_directories(BEFORE SYSTEM ${NTK_INCLUDE_DIRS})
+	include_directories(BEFORE	"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+					"${CMAKE_CURRENT_BINARY_DIR}/UI")
 
 	add_subdirectory(UI)
 endif()
