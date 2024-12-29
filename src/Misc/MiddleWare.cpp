@@ -849,7 +849,9 @@ public:
                                 tmp1 << xml;
                                 tmp2 << xml2;
                             }
-                            system("diff tmp1.txt tmp2.txt");
+                            int sys_ret = system("diff tmp1.txt tmp2.txt");
+                            if(sys_ret)
+                                puts("FAILED to compare tmp1.txt and tmp2.txt. Please compare manually.");
                             res = -1;
                         }
 

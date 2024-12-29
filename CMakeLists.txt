@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 project(zynaddsubfx)
 set(VERSION_MAJOR "3")
 set(VERSION_MINOR "0")
 set(VERSION_REVISION "7")
+cmake_policy(SET CMP0072 NEW)
 
 #Set data directory, if any
 if(DEFINED ZYN_DATADIR)
