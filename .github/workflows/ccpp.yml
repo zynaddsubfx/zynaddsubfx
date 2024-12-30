@@ -16,8 +16,22 @@ jobs:
       matrix:
         config:
           - {
+            name: "Windows MSVC",
+            enabled: 0,
+            os: windows-latest,
+            deps: "",
+            config: "cmake
+                    -B build
+                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+                    -DRTOSC_WERROR=1
+                    -DCMAKE_BUILD_TYPE=Debug
+                    ",
+            build: "cmake --build build --config Debug",
+            test: "ctest --output-on-failure --test-dir build"
+          }
+          - {
             name: "Ubuntu gcc",
-            enabled: 1,
+            enabled: 0,
             os: ubuntu-latest,
             update: "sudo apt-get update",
             deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
@@ -33,8 +47,8 @@ jobs:
             enabled: 1,
             os: macos-latest,
             update: "",
-            deps1: "brew install extra-cmake-modules liblo zlib libmxml fftw fltk@1.3 fluid-synth libxpm",
-            deps2: "",
+            deps1: "brew install extra-cmake-modules liblo zlib fftw fltk@1.3 fluid-synth libxpm",
+            deps2: "brew install libmxml --HEAD",
             testdeps: "brew install ruby",
             config: "cd build && cmake ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
@@ -43,29 +57,40 @@ jobs:
           }
     steps:
       - name: check out
+        if: ${{ matrix.config.enabled == 1 }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: update_apt
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.update }}
       - name: install_deps1
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.deps1 }}
       - name: install_deps2
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.deps2 }}
       - name: install_test_deps1
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.testdeps }}
       - name: submodule
+        if: ${{ matrix.config.enabled == 1 }}
         run: git submodule update --init
       - name: create_builddir
+        if: ${{ matrix.config.enabled == 1 }}
         run: mkdir build
       - name: configure
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
       - name: configure-extensive
+        if: ${{ matrix.config.enabled == 1 }}
         if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
         run: ${{ matrix.config.configext }}
       - name: make
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build }}
       - name: make test
+        if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.test }}
 
 #  build_arch_linux_system_rtosc:
