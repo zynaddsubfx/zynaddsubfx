@@ -83,14 +83,14 @@ jobs:
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
       - name: configure-extensive
-        if: >
-          ${{ matrix.config.enabled == 1 &&
-              (
-                (github.event_name == 'pull_request_review' &&
-                 github.event.action == 'submitted') ||
-                github.ref == 'refs/heads/master'
-              )
-          }}
+        if: ${{
+          matrix.config.enabled == 1 &&
+          (
+            (github.event_name == 'pull_request_review' &&
+             github.event.action == 'submitted') ||
+            github.ref == 'refs/heads/master'
+          )
+        }}
         run: ${{ matrix.config.configext }}
       - name: make
         if: ${{ matrix.config.enabled == 1 }}
