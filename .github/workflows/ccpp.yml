@@ -28,6 +28,19 @@ jobs:
             build: "cd build && make",
             test: "cd build && ctest --output-on-failure"
           }
+          - {
+            name: "macOS clang",
+            enabled: 1,
+            os: macos-latest,
+            update: "",
+            deps1: "brew install liblo",
+            deps2: "",
+            testdeps: "sudo apt-get install ruby",
+            config: "cd build && cmake ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make",
+            test: "cd build && ctest --output-on-failure"
+          }
     steps:
       - name: check out
         uses: actions/checkout@v4
