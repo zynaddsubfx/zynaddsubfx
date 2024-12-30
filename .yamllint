@@ -1,0 +1,3 @@
+rules:
+  line-length:
+    max: 145  # to silence all warnings

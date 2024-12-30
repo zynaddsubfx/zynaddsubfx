@@ -1,6 +1,7 @@
-name: Ubuntu Build CI
+---
+name: Build CI
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
   pull_request:
   pull_request_review:
@@ -8,30 +9,52 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu gcc",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            config: "cd build && cmake ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make",
+            test: "cd build && make test CTEST_OUTPUT_ON_FAILURE=1"
+          }
     steps:
-    - uses: actions/checkout@v1
-    - name: update_apt
-      run:   sudo apt-get update
-    - name: install_deps1
-      run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
-    - name: install_deps2
-      run: sudo apt-get install liblo-dev
-    - name: install_test_deps1
-      run: sudo apt-get install ruby
-    - name: submodule
-      run: git submodule update --init
-    - name: configure
-      run: mkdir build && cd build && cmake ..
-    - name: configure-extensive
-      if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
-      run: cd build && cmake -DCompileExtensiveTests=ON ..
-    - name: make
-      run: cd build && make
-    - name: make test
-      run: cd build && make test CTEST_OUTPUT_ON_FAILURE=1
+      - name: check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: update_apt
+        run: ${{ matrix.config.update }}
+      - name: install_deps1
+        run: ${{ matrix.config.deps1 }}
+      - name: install_deps2
+        run: ${{ matrix.config.deps2 }}
+      - name: install_test_deps1
+        run: ${{ matrix.config.testdeps }}
+      - name: submodule
+        run: git submodule update --init
+      - name: create_builddir
+        run: mkdir build
+      - name: configure
+        run: ${{ matrix.config.config }}
+      - name: configure-extensive
+        if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
+        run: ${{ matrix.config.configext }}
+      - name: make
+        run: ${{ matrix.config.build }}
+      - name: make test
+        run: ${{ matrix.config.test }}
+
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
 #    container:
