@@ -26,10 +26,10 @@ namespace zyn {
 #define MAX_CHORUS_DELAY 250.0f //ms
 
 #define CHORUS_MODES \
-    CHORUS,\
-    FLANGE,\
-    TRIPLE,\
-    DUAL\
+    CHORUS,\ // default chorus mode
+    FLANGE,\ // flanger mode (very short delays)
+    TRIPLE,\ // 120° triple phase chorus
+    DUAL\    // 180° dual phase chorus
 
 enum {
     CHORUS_MODES
@@ -94,7 +94,7 @@ class Chorus final:public Effect
         unsigned char Pdepth;      //the depth of the Chorus(ms)
         unsigned char Pdelay;      //the delay (ms)
         unsigned char Pfb;         //feedback
-        unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
+        unsigned char Pflangemode; //mode as described above in CHORUS_MODES
         unsigned char Poutsub;     //if I wish to subtract the output instead of the adding it
         EffectLFO     lfo;         //lfo-ul chorus
 
