@@ -20,6 +20,10 @@
 using namespace std;
 
 namespace zyn {
+    
+#define PHASE_120 0.33333333f
+#define PHASE_180 0.5f
+#define PHASE_240 0.66666666f
 
 #define rObject Chorus
 #define rBegin [](const char *msg, rtosc::RtData &d) {
@@ -139,7 +143,7 @@ void Chorus::out(const Stereo<float *> &input)
         // same for second member for ensemble mode with 120° phase offset
         dlHist2 = dlNew2;
         drHist2 = drNew2;
-        lfo.effectlfoout(&lfol, &lfor, 0.5f);
+        lfo.effectlfoout(&lfol, &lfor, PHASE_180);
         dlNew2 = getdelay(lfol);
         drNew2 = getdelay(lfor);
         fbComp /= 2.0f;
@@ -150,14 +154,14 @@ void Chorus::out(const Stereo<float *> &input)
         // same for second member for ensemble mode with 120° phase offset
         dlHist2 = dlNew2;
         drHist2 = drNew2;
-        lfo.effectlfoout(&lfol, &lfor, 0.33333333f);
+        lfo.effectlfoout(&lfol, &lfor, PHASE_120);
         dlNew2 = getdelay(lfol);
         drNew2 = getdelay(lfor);
         
         // same for third member for ensemble mode with 240° phase offset
         dlHist3 = dlNew3;
         drHist3 = drNew3;
-        lfo.effectlfoout(&lfol, &lfor, 0.66666666f); 
+        lfo.effectlfoout(&lfol, &lfor, PHASE_240); 
         dlNew3 = getdelay(lfol);
         drNew3 = getdelay(lfor);
         fbComp /= 3.0f;
