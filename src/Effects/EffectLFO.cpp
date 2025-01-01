@@ -104,7 +104,7 @@ void EffectLFO::effectlfoout(float *outl, float *outr, float phaseOffset)
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampr1 + xr * (ampr2 - ampr1));
     *outr = (out + 1.0f) * 0.5f;
-    
+
     // update right phase for master lfo
     if(phaseOffset==0.0f) {
         xr += incx;
@@ -114,7 +114,7 @@ void EffectLFO::effectlfoout(float *outl, float *outr, float phaseOffset)
             ampr2 = (1.0f - lfornd) + lfornd * RND;
         }
     }
-    
+
 }
 
 }

@@ -20,7 +20,7 @@
 using namespace std;
 
 namespace zyn {
-    
+
 #define PHASE_120 0.33333333f
 #define PHASE_180 0.5f
 #define PHASE_240 0.66666666f
@@ -148,7 +148,7 @@ void Chorus::out(const Stereo<float *> &input)
         drNew2 = getdelay(lfor);
         fbComp /= 2.0f;
     }
-    
+
     if (Pflangemode == TRIPLE) // ensemble mode
     {
         // same for second member for ensemble mode with 120° phase offset
@@ -157,11 +157,11 @@ void Chorus::out(const Stereo<float *> &input)
         lfo.effectlfoout(&lfol, &lfor, PHASE_120);
         dlNew2 = getdelay(lfol);
         drNew2 = getdelay(lfor);
-        
+
         // same for third member for ensemble mode with 240° phase offset
         dlHist3 = dlNew3;
         drHist3 = drNew3;
-        lfo.effectlfoout(&lfol, &lfor, PHASE_240); 
+        lfo.effectlfoout(&lfol, &lfor, PHASE_240);
         dlNew3 = getdelay(lfol);
         drNew3 = getdelay(lfor);
         fbComp /= 3.0f;
@@ -236,7 +236,7 @@ void Chorus::out(const Stereo<float *> &input)
                 // nothing to do for standard chorus
                 break;
         }
-        
+
         delaySample.r[drk] = inR + output * fbComp;
         efxoutr[i] = output;
     }
