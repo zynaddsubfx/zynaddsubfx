@@ -25,11 +25,17 @@ namespace zyn {
 
 #define MAX_CHORUS_DELAY 250.0f //ms
 
+// Chorus modes
+// CHORUS default chorus mode
+// FLANGE flanger mode (very short delays)
+// TRIPLE 120° triple phase chorus
+// DUAL   180° dual phase chorus
+
 #define CHORUS_MODES \
-    CHORUS,\ // default chorus mode
-    FLANGE,\ // flanger mode (very short delays)
-    TRIPLE,\ // 120° triple phase chorus
-    DUAL\    // 180° dual phase chorus
+    CHORUS,\
+    FLANGE,\
+    TRIPLE,\
+    DUAL
 
 enum {
     CHORUS_MODES
