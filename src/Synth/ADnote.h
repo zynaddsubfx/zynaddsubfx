@@ -87,10 +87,6 @@ class ADnote:public SynthNote
         /**Compute the Oscillator's samples.
          * Affects tmpwave_unison and updates oscposhi/oscposlo
          * @todo remove this declaration if it is commented out*/
-        inline void ComputeVoiceOscillator_SincInterpolation(int nvoice);
-        /**Compute the Oscillator's samples.
-         * Affects tmpwave_unison and updates oscposhi/oscposlo
-         * @todo remove this declaration if it is commented out*/
         inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
         /**Computes the Oscillator samples with mixing.
          * updates tmpwave_unison*/
@@ -310,6 +306,9 @@ class ADnote:public SynthNote
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
+            
+            
+            bool syncEnabled; // stub to be removed after rebasing to Master with applies Sync PR
 
         } NoteVoicePar[NUM_VOICES];
 
