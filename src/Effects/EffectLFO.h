@@ -30,7 +30,7 @@ class EffectLFO
      * @param bufsize_f Buffer size.
      * @param time Pointer to an AbsTime object (optional).
      */
-    EffectLFO(float srate_f, float bufsize_f, const AbsTime *time = nullptr);
+    EffectLFO(float srate_f, float bufsize_f);
 
     /**
      * Destructs the EffectLFO object.
@@ -42,8 +42,11 @@ class EffectLFO
      *
      * @param outl Pointer to the left output channel.
      * @param outr Pointer to the right output channel.
+     * @param phaseOffset phaseoffset 
+     * if phaseOffset is not 0 we don't want to update the phase 
+     * but get the phased shifted output of the last one.
      */
-    void effectlfoout(float *outl, float *outr, float phaseOffset = 0);
+    void effectlfoout(float *outl, float *outr, float phaseOffset = 0.0f);
 
     /**
      * Updates the LFO parameters based on the current settings.
