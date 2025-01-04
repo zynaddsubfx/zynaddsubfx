@@ -21,9 +21,9 @@ using namespace std;
 
 namespace zyn {
 
-#define PHASE_120 0.33333333f
-#define PHASE_180 0.5f
-#define PHASE_240 0.66666666f
+constexpr float PHASE_120 = 0.33333333f;
+constexpr float PHASE_180 = 0.5f;
+constexpr float PHASE_240 = 0.66666666f;
 
 #define rObject Chorus
 #define rBegin [](const char *msg, rtosc::RtData &d) {
@@ -140,7 +140,7 @@ void Chorus::out(const Stereo<float *> &input)
     float fbComp = fb;
     if (Pflangemode == DUAL) // ensemble mode
     {
-        // same for second member for ensemble mode with 120° phase offset
+        // same for second member for ensemble mode with 180° phase offset
         dlHist2 = dlNew2;
         drHist2 = drNew2;
         lfo.effectlfoout(&lfol, &lfor, PHASE_180);
@@ -164,7 +164,9 @@ void Chorus::out(const Stereo<float *> &input)
         lfo.effectlfoout(&lfol, &lfor, PHASE_240);
         dlNew3 = getdelay(lfol);
         drNew3 = getdelay(lfor);
-        fbComp /= 3.0f;
+        // reduce amplitude to match single phase modes
+        // 0.85 * fbComp / 3 
+        fbComp /= 3.53f;
     }
 
     for(int i = 0; i < buffersize; ++i) {
@@ -181,9 +183,9 @@ void Chorus::out(const Stereo<float *> &input)
         // increase delay line writing position and handle turnaround
         if(++dlk >= maxdelay)
             dlk = 0;
-        // linear interpolate from old to new value over length og the buffer
+        // linear interpolate from old to new value over length of the buffer
         float dl = (dlHist * (buffersize - i) + dlNew * i) / buffersize_f;
-        // get sample with that delay form delay line and add to output accumulator
+        // get sample with that delay from delay line and add to output accumulator
         output += getSample(delaySample.l, dl, dlk);
         switch (Pflangemode) {
             case DUAL:
@@ -198,8 +200,6 @@ void Chorus::out(const Stereo<float *> &input)
             // same for third ensemble member
             dl = (dlHist3 * (buffersize - i) + dlNew3 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
-            // reduce amplitude to match single phase modes
-            output *= 0.85f;
                 break;
             default:
                 // nothing to do for standard chorus
