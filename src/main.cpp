@@ -717,6 +717,7 @@ int main(int argc, char *argv[])
         if(gui_pid == 0) {
             auto exec_fusion = [&addr](const char* path) {
                 execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+#ifndef __APPLE__
             if(fusion_dir && *fusion_dir)
             {
                 std::string fusion = fusion_dir;
@@ -736,6 +737,7 @@ int main(int argc, char *argv[])
                     exec_fusion(fusion.c_str());
                 }
             }
+#endif
             exec_fusion("./zyn-fusion");
             exec_fusion("/opt/zyn-fusion/zyn-fusion");
             exec_fusion("zyn-fusion");
