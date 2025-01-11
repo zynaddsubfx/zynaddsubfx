@@ -46,7 +46,7 @@ rtosc::Ports DynamicFilter::ports = {
             "Effect Frequency"),
     rEffPar(Pfreqrnd,   3, rShort("rand"),   rDefault(0),
             "Frequency Randomness"),
-    rEffParOpt(PLFOtype,   4, rShort("shape"),  rOptions(sin, tri),
+    rEffParOpt(PLFOtype,   4, rShort("shape"),  rOptions(sin, tri, noise),
             rDefault(sin), "LFO Shape"),
     rEffPar(PStereo,    5, rShort("stereo"), rPresets(64, 80, 50, 64, 96),
             "Stereo Mode"),

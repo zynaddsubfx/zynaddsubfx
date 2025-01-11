@@ -65,6 +65,7 @@ private:
      * @return The calculated LFO shape value.
      */
     float getlfoshape(float x);
+    float biquad(float input);
 
     float xl, xr;  //!< Phase accumulators for left and right channels
     float incx;  //!< Increment for phase accumulators
@@ -75,6 +76,19 @@ private:
     // Current setup
     float samplerate_f;  //!< Sample rate
     float buffersize_f;  //!< Buffer size
+    float dt;
+    float last_random;
+    float FcAbs, K, norm, freq;
+
+
+    //biquad coefficients for lp filtering in noise-LFO
+    float a0 = 0.00017046738216391932;
+    float a1 = 0.00034093476432783864;
+    float a2 = 0.00017046738216391932;
+    float b1 = -1.9623638210277727;
+    float b2 = 0.9630456905564285;
+    float z1 = 0.0f;
+    float z2 = 0.0f;
 };
 
 }

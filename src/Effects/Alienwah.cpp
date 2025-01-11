@@ -48,7 +48,7 @@ rtosc::Ports Alienwah::ports = {
     rEffPar(Pfreqrnd,  3, rShort("rand"), rPreset(1, 106) rDefault(0),
             "Frequency Randomness"),
     rEffParOpt(PLFOtype,  4, rShort("shape"),
-            rOptions(sine, triangle), rPresets(sine, sine, triangle, triangle),
+            rOptions(sine, triangle, noise), rPresets(sine, sine, triangle, triangle),
             "LFO Shape"),
     rEffPar(PStereo,   5, rShort("stereo"), rPresets(62, 101, 100, 66),
             "Stereo Mode"),
