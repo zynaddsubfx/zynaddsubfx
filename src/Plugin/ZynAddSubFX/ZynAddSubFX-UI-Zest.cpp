@@ -11,6 +11,12 @@
   of the License, or (at your option) any later version.
 */
 
+#if !defined(WIN32) && !defined(__APPLE__)
+#include <string>
+#include <unistd.h>
+#include "zyn-config.h"
+#endif
+
 // DPF includes
 #include "DistrhoUI.hpp"
 #ifdef WIN32
@@ -66,7 +72,18 @@ public:
         if(!handle) // VST
             handle = dlopen("@loader_path/../Resources/libzest.dylib", RTLD_LAZY);
 #else
-        handle = dlopen("./libzest.so", RTLD_LAZY);
+        if(zyn::fusion_dir && *zyn::fusion_dir)
+        {
+            std::string fusion = zyn::fusion_dir;
+            fusion += "/libzest.so";
+            if(access(fusion.c_str(), R_OK))
+                fputs("Warning: CMake's ZynFusionDir does not contain a"
+                      "\"libzest.so\" library - ignoring.", stderr);
+            else
+                handle = dlopen(fusion.c_str(), RTLD_LAZY);
+        }
+        if(!handle)
+            handle = dlopen("./libzest.so", RTLD_LAZY);
         if(!handle)
             handle = dlopen("/opt/zyn-fusion/libzest.so", RTLD_LAZY);
         if(!handle)
