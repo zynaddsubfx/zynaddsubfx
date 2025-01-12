@@ -20,7 +20,7 @@ find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(ECM)
 list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
     find_package(LibGit2)
 endif()
 # lash
@@ -210,16 +210,6 @@ option (ExtendedWarnings "Enable all useful warnings" OFF)
 option (Werror "Treat all warnings as errors" ON)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
 mark_as_advanced(IncludeWhatYouUse)
-
-if(Werror)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-        set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-    else()
-        if(NOT WIN32)  # For Windows, just allow warnings for now
-            add_definitions(-Werror)
-        endif()
-    endif()
-endif()
 
 set(CMAKE_BUILD_TYPE "Release")
 
@@ -621,6 +611,16 @@ endif(CompileTests)
 
 
 add_executable(zynaddsubfx main.cpp)
+
+if(Werror)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+        set_target_properties(zynaddsubfx PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+    else()
+        if(NOT WIN32)  # For Windows, just allow warnings for now
+            target_compile_options(zynaddsubfx PUBLIC -Werror)
+        endif()
+    endif()
+endif()
 
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
