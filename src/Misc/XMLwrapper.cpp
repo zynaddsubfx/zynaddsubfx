@@ -32,9 +32,30 @@ namespace zyn {
 int  xml_k   = 0;
 bool verbose = false;
 
-const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
+#if MXML_MAJOR_VERSION <= 3
+// Define new types for the MXML3 types
+typedef int mxml_ws_t;
+typedef int mxml_descend_t;
+// Define new type names for the MXML3 type names
+constexpr int MXML_DESCEND_ALL = MXML_DESCEND;
+constexpr int MXML_DESCEND_NONE = MXML_NO_DESCEND;
+constexpr int MXML_TYPE_OPAQUE = MXML_OPAQUE;
+constexpr int MXML_TYPE_ELEMENT = MXML_ELEMENT;
+constexpr int MXML_TYPE_TEXT = MXML_TEXT;
+#endif
+
+const char *XMLwrapper_whitespace_callback(void*, mxml_node_t *node, mxml_ws_t where)
 {
+#if MXML_MAJOR_VERSION >= 4
+    // New node types in MXL4
+    if(mxmlGetDirective(node))  // "?xml" directive
+        return "\n";
+    else if(mxmlGetDeclaration(node))  // "!DOCTYPE" declaration
+        return nullptr;
+#endif
+
     const char *name = mxmlGetElement(node);
+    assert(name);
 
     if((where == MXML_WS_BEFORE_OPEN) && (!strcmp(name, "?xml")))
         return NULL;
@@ -67,13 +88,21 @@ const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
     return 0;
 }
 
+#if MXML_MAJOR_VERSION <= 3
+// Wrapper, because int and mxml_ws_t are different types
+inline const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
+{
+    return XMLwrapper_whitespace_callback(nullptr, node, where);
+}
+#endif
+
 //temporary const overload of mxmlFindElement
 const mxml_node_t *mxmlFindElement(const mxml_node_t *node,
                                    const mxml_node_t *top,
                                    const char *name,
                                    const char *attr,
                                    const char *value,
-                                   int descend)
+                                   mxml_descend_t descend)
 {
     return const_cast<const mxml_node_t *>(mxmlFindElement(
                                                const_cast<mxml_node_t *>(node),
@@ -92,16 +121,22 @@ XMLwrapper::XMLwrapper()
     minimal = true;
     SaveFullXml=false;
 
-    node = tree = mxmlNewElement(MXML_NO_PARENT,
-                                 "?xml version=\"1.0f\" encoding=\"UTF-8\"?");
+    node = tree = mxmlNewXML("1.0");
+    assert(node);
     /*  for mxml 2.1f (and older)
         tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
         mxmlElementSetAttr(tree,"version","1.0f");
         mxmlElementSetAttr(tree,"encoding","UTF-8");
     */
 
-    mxml_node_t *doctype = mxmlNewElement(tree, "!DOCTYPE");
-    mxmlElementSetAttr(doctype, "ZynAddSubFX-data", NULL);
+    mxml_node_t *doctype =
+#if MXML_MAJOR_VERSION <= 3
+        mxmlNewElement(tree, "!DOCTYPE");
+        mxmlElementSetAttr(doctype, "ZynAddSubFX-data", NULL);
+#else
+        mxmlNewDeclaration(tree, "DOCTYPE ZynAddSubFX-data");
+#endif
+    assert(doctype);
 
     node = root = addparams("ZynAddSubFX-data", 4,
                             "version-major", stringFrom<int>(
@@ -164,7 +199,7 @@ bool XMLwrapper::hasPadSynth() const
                                        "INFORMATION",
                                        NULL,
                                        NULL,
-                                       MXML_DESCEND);
+                                       MXML_DESCEND_ALL);
 
     mxml_node_t *parameter = mxmlFindElement(tmp,
                                              tmp,
@@ -204,7 +239,14 @@ char *XMLwrapper::getXMLdata() const
 {
     xml_k = 0;
 
+#if MXML_MAJOR_VERSION <= 3
     char *xmldata = mxmlSaveAllocString(tree, XMLwrapper_whitespace_callback);
+#else
+    mxml_options_t *options = mxmlOptionsNew();
+    mxmlOptionsSetWhitespaceCallback(options, XMLwrapper_whitespace_callback, /*cbdata*/nullptr);
+    char *xmldata = mxmlSaveAllocString(tree, options);
+#endif
+
 
     return xmldata;
 }
@@ -317,8 +359,14 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if(xmldata == NULL)
         return -1;  //the file could not be loaded or uncompressed
 
+#if MXML_MAJOR_VERSION <= 3
     root = tree = mxmlLoadString(NULL, trimLeadingWhite(
-                                     xmldata), MXML_OPAQUE_CALLBACK);
+                                           xmldata), MXML_OPAQUE_CALLBACK);
+#else
+    mxml_options_t *options = mxmlOptionsNew();
+    mxmlOptionsSetTypeValue(options, MXML_TYPE_OPAQUE);
+    root = tree = mxmlLoadString(NULL, options, trimLeadingWhite(xmldata));
+#endif
 
     delete[] xmldata;
 
@@ -330,7 +378,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
                                   "ZynAddSubFX-data",
                                   NULL,
                                   NULL,
-                                  MXML_DESCEND);
+                                  MXML_DESCEND_ALL);
     if(root == NULL)
         return -3;  //the XML doesn't embbed zynaddsubfx data
 
@@ -384,8 +432,14 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     if(xmldata == NULL)
         return false;
 
+#if MXML_MAJOR_VERSION <= 3
     root = tree = mxmlLoadString(NULL, trimLeadingWhite(
-                                     xmldata), MXML_OPAQUE_CALLBACK);
+                                           xmldata), MXML_OPAQUE_CALLBACK);
+#else
+    mxml_options_t *options = mxmlOptionsNew();
+    mxmlOptionsSetTypeValue(options, MXML_TYPE_OPAQUE);
+    root = tree = mxmlLoadString(NULL, options, trimLeadingWhite(xmldata));
+#endif
     if(tree == NULL)
         return false;
 
@@ -394,7 +448,7 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
                                   "ZynAddSubFX-data",
                                   NULL,
                                   NULL,
-                                  MXML_DESCEND);
+                                  MXML_DESCEND_ALL);
     if(root == NULL)
         return false;
 
@@ -531,11 +585,11 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
         return;
     if(mxmlGetFirstChild(tmp) == NULL)
         return;
-    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_OPAQUE) {
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TYPE_OPAQUE) {
         snprintf(par, maxstrlen, "%s", mxmlGetOpaque(mxmlGetFirstChild(tmp)));
         return;
     }
-    if((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT)
+    if((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TYPE_TEXT)
        && (mxmlGetFirstChild(tmp) != NULL)) {
         snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp),NULL));
         return;
@@ -555,11 +609,11 @@ string XMLwrapper::getparstr(const string &name,
     if((tmp == NULL) || (mxmlGetFirstChild(tmp) == NULL))
         return defaultpar;
 
-    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_OPAQUE
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TYPE_OPAQUE
        && (mxmlGetOpaque(mxmlGetFirstChild(tmp)) != NULL))
         return mxmlGetOpaque(mxmlGetFirstChild(tmp));
 
-    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TYPE_TEXT
        && (mxmlGetText(mxmlGetFirstChild(tmp),NULL) != NULL))
         return mxmlGetText(mxmlGetFirstChild(tmp),NULL);
 
@@ -684,8 +738,8 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
     std::vector<XmlNode> res;
     mxml_node_t *current = mxmlGetFirstChild(node);
     while(current) {
-        if(mxmlGetType(current) == MXML_ELEMENT) {
-#if MXML_MAJOR_VERSION == 3
+        if(mxmlGetType(current) == MXML_TYPE_ELEMENT) {
+#if MXML_MAJOR_VERSION >= 3
             XmlNode n(mxmlGetElement(current));
             int count = mxmlElementGetAttrCount(current);
             const char *name;
@@ -705,7 +759,7 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
 #endif
             res.push_back(n);
         }
-        current = mxmlWalkNext(current, node, MXML_NO_DESCEND);
+        current = mxmlWalkNext(current, node, MXML_DESCEND_NONE);
     }
     return res;
 }

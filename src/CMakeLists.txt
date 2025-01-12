@@ -33,7 +33,10 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_check_modules(NTK_IMAGES ntk_images)
 
     pkg_check_modules(FFTW3F REQUIRED fftw3f)
-    pkg_check_modules(MXML REQUIRED mxml)
+    pkg_check_modules(MXML mxml4)
+    if(NOT MXML_FOUND)
+        pkg_check_modules(MXML REQUIRED mxml)
+    endif()
 
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
