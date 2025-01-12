@@ -23,7 +23,16 @@ class EffectLFO
     public:
         EffectLFO(float srate_f, float bufsize_f);
         ~EffectLFO();
-        void effectlfoout(float *outl, float *outr);
+        // if phaseOffset!=0 we don't want to update the phase but get a phased shifted output of the last one.
+        /**
+         * calculate the output of the effect LFO for two signals (stereo)
+         * @param outl pointer to write the result for left side to
+         * @param outr pointer to write the result for right side to
+         * @param phaseOffset phaseoffset 
+         * if phaseOffset is not 0 we don't want to update the phase 
+         * but get the phased shifted output of the last one.
+         * */
+        void effectlfoout(float *outl, float *outr, float phaseOffset = 0.0f);
         void updateparams(void);
         unsigned char Pfreq;
         unsigned char Prandomness;
