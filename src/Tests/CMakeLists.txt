@@ -61,8 +61,9 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
                            ${PLATFORM_LIBRARIES})
 
     add_executable(ins-test InstrumentStats.cpp)
+    target_link_libraries(ins-test ${test_lib})
     if(HAVE_LIBRT)
-        target_link_libraries(ins-test ${test_lib} rt)
+        target_link_libraries(ins-test rt)
     endif()
 
     if(LIBLO_FOUND)
