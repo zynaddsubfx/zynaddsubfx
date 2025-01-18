@@ -105,6 +105,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 
     //TODO update to rArray and test
     {"phase#128::c:i", rProp(parameter) rLinear(0,127) rProp(non-realtime)
+        rProp(no port checker) // buggy port
         rDefault([64 ...])
         rDoc("Sets harmonic phase"),
         NULL, [](const char *m, rtosc::RtData &d) {
