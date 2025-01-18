@@ -164,6 +164,8 @@ static const rtosc::Ports local_ports = {
                             break;
                         }
                     }
+                    else
+                        eff->efx->speedfactor = 0.0f;
                 }
                 d.broadcast(d.loc, "i", val);
             } else {
@@ -208,6 +210,8 @@ static const rtosc::Ports local_ports = {
                             break;
                         }
                     }
+                    else
+                        eff->efx->speedfactor = 0.0f;
                 }
                 d.broadcast(d.loc, "i", val);
             } else {

@@ -1483,6 +1483,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
         time.beat = beat;
         time.tick = tick;
         time.tempo = bpm;
+        time.bpm = bpm;
         time.ppq = PPQ;
         
     }
