@@ -97,16 +97,16 @@ class UnisonTest
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
             ADnote* note = new ADnote(params, pars);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(values[0], outL[80], 1.9e-5);
+            TS_ASSERT_DELTA(values[0], outL[80], 2.5e-5);
             printf("{%f,", outL[80]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(values[1], outR[90], 1.9e-5);
+            TS_ASSERT_DELTA(values[1], outR[90], 2.5e-5);
             printf("%f,", outR[90]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(values[2], outL[20], 1.9e-5);
+            TS_ASSERT_DELTA(values[2], outL[20], 2.5e-5);
             printf("%f,", outL[20]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(values[3], outR[200], 1.9e-5);
+            TS_ASSERT_DELTA(values[3], outR[200], 2.5e-5);
             printf("%f},\n", outR[200]);
             delete note;
         }

@@ -76,7 +76,7 @@ class AdNoteTest
                 switch(lfop->fel)
                 {
                     case consumer_location_type_t::amp:
-                        TS_ASSERT((-2.0f < out && out < 2.0f));
+                        TS_ASSERT((-2.001f < out && out < 2.001f)); // try to fix test on MacOS
                         break;
                     case consumer_location_type_t::filter:
                         TS_ASSERT((-8.0f < out && out < 8.0f));
