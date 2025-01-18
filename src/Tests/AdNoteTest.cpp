@@ -91,7 +91,6 @@ class AdNoteTest
         }
 
 
-
         void setUp() {
             //First the sensible settings and variables that have to be set:
             synth = new SYNTH_T;
