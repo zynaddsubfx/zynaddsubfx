@@ -65,17 +65,17 @@ class FilterParams:public PresetsArray
         /*
  * wrappers old <-> new parameters
  */
-static float baseqFromOldPq(int Pq)
+[[gnu::optimize("O0")]] static float baseqFromOldPq(int Pq)
 {
     return expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
 }
 
-constexpr static float gainFromOldPgain(int Pgain)
+[[gnu::optimize("O0")]] constexpr static float gainFromOldPgain(int Pgain)
 {
     return (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
 }
 
-constexpr static float basefreqFromOldPreq(int Pfreq)
+[[gnu::optimize("O0")]] constexpr static float basefreqFromOldPreq(int Pfreq)
 {
     return powf(2.0f, ((Pfreq / 64.0f - 1.0f) * 5.0f) + 9.96578428f);
 }
