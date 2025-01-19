@@ -235,8 +235,15 @@ class PluginTest
             master[0]->putalldata((char*)fdata.c_str());
             int res = master[0]->getalldata(&result);
             // Replace "1.0f" with "1.0" and "UTF-8" with "utf-8" in `<?xml...`
-            std::regex xml_version_regex(R"(<\?xml version="1\.0f" encoding="UTF-8"\?>)");
-            fdata = std::regex_replace(fdata, xml_version_regex, R"(<?xml version="1.0" encoding="utf-8"?>)");
+            fdata = std::regex_replace(fdata,
+                                       std::regex(R"(<\?xml version="1\.0f" encoding="UTF-8"\?>)"),
+                                       R"(<?xml version="1.0" encoding="utf-8"?>)");
+            // guitar-adnote has tags ending on " />" - we remove the space
+            fdata = std::regex_replace(fdata, std::regex(" />"), "/>");
+            // Remove trailing newline
+            if (fdata.size() >= 1 && fdata[fdata.size() - 1] == '\n') {
+                fdata.pop_back();
+            }
             // Checks
             TS_ASSERT_EQUAL_INT((int)(fdata.length()+1), res);
             TS_ASSERT(fdata == result);
