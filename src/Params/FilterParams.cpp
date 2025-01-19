@@ -556,25 +556,6 @@ float FilterParams::getgain() const
 }
 
 /*
- * wrappers old <-> new parameters
- */
-float FilterParams::baseqFromOldPq(int Pq)
-{
-    return expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
-}
-
-float FilterParams::gainFromOldPgain(int Pgain)
-{
-    return (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
-}
-
-float FilterParams::basefreqFromOldPreq(int Pfreq)
-{
-    float tmp = (Pfreq / 64.0f - 1.0f) * 5.0f;
-    return powf(2.0f, tmp + 9.96578428f);
-}
-
-/*
  * Get the center frequency of the formant's graph
  */
 float FilterParams::getcenterfreq() const
