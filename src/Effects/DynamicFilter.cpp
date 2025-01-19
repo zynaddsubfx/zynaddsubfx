@@ -218,7 +218,13 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
             filterpars->Pcategory = 1;
             filterpars->Ptype     = 0;
             filterpars->basefreq  = FilterParams::basefreqFromOldPreq(50);
-            filterpars->baseq     = FilterParams::baseqFromOldPq(70);
+            filterpars->baseq     =
+#ifdef __APPLE__
+                                    // rounding issues on apple, so we cannot use the function
+                                    0x1.d04b1ep+2;
+#else
+                                    FilterParams::baseqFromOldPq(70);
+#endif
             filterpars->Pstages   = 1;
             filterpars->gain      = FilterParams::gainFromOldPgain(64);
 
