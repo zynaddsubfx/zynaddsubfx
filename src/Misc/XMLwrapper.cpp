@@ -245,6 +245,7 @@ char *XMLwrapper::getXMLdata() const
     mxml_options_t *options = mxmlOptionsNew();
     mxmlOptionsSetWhitespaceCallback(options, XMLwrapper_whitespace_callback, /*cbdata*/nullptr);
     char *xmldata = mxmlSaveAllocString(tree, options);
+    mxmlOptionsDelete(options);
 #endif
 
 
@@ -366,6 +367,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
     mxml_options_t *options = mxmlOptionsNew();
     mxmlOptionsSetTypeValue(options, MXML_TYPE_OPAQUE);
     root = tree = mxmlLoadString(NULL, options, trimLeadingWhite(xmldata));
+    mxmlOptionsDelete(options);
 #endif
 
     delete[] xmldata;
@@ -439,6 +441,7 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     mxml_options_t *options = mxmlOptionsNew();
     mxmlOptionsSetTypeValue(options, MXML_TYPE_OPAQUE);
     root = tree = mxmlLoadString(NULL, options, trimLeadingWhite(xmldata));
+    mxmlOptionsDelete(options);
 #endif
     if(tree == NULL)
         return false;
