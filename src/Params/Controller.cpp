@@ -114,7 +114,7 @@ const rtosc::Ports Controller::ports = {
 #undef rChangeCb
 #define rChangeCb rChangeCbBase
     rToggle(NRPN.receive, rDefault(true), "NRPN MIDI Enable"),
-    rAction(defaults),
+    rAction(defaults, "Reset Controller to defaults"),
 };
 #undef rChangeCb
 

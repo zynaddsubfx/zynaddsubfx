@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <string>
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Master.h"
@@ -229,11 +230,14 @@ class PluginTest
         void testLoadSave(void)
         {
             const string fname = string(SOURCE_DIR) + "/guitar-adnote.xmz";
-            const string fdata = loadfile(fname);
+            string fdata = loadfile(fname);
             char *result = NULL;
             master[0]->putalldata((char*)fdata.c_str());
             int res = master[0]->getalldata(&result);
-
+            // Replace "1.0f" with "1.0" and "UTF-8" with "utf-8" in `<?xml...`
+            std::regex xml_version_regex(R"(<\?xml version="1\.0f" encoding="UTF-8"\?>)");
+            fdata = std::regex_replace(fdata, xml_version_regex, R"(<?xml version="1.0" encoding="utf-8"?>)");
+            // Checks
             TS_ASSERT_EQUAL_INT((int)(fdata.length()+1), res);
             TS_ASSERT(fdata == result);
             if(fdata != result)

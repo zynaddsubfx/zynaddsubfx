@@ -31,7 +31,7 @@ jobs:
           }
           - {
             name: "Ubuntu gcc",
-            enabled: 0,
+            enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
             deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
@@ -39,6 +39,20 @@ jobs:
             testdeps: "sudo apt-get install ruby",
             config: "cd build && cmake ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make",
+            test: "cd build && ctest --output-on-failure"
+          }
+          - {
+            name: "Ubuntu clang+lld",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            config: "cd build && cmake ..",
+            # the only really different line to gcc:
+            configext: "cd build && cmake -DCompileExtensiveTests=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS='-fuse-ld=lld' -DCMAKE_CXX_FLAGS='-fuse-ld=lld' ..",
             build: "cd build && make",
             test: "cd build && ctest --output-on-failure"
           }
