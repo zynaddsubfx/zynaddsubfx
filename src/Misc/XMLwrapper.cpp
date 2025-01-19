@@ -33,10 +33,10 @@ int  xml_k   = 0;
 bool verbose = false;
 
 #if MXML_MAJOR_VERSION <= 3
-// Define new types for the MXML3 types
+// Mimic datatypes present in mxml4 for compatibility
 typedef int mxml_ws_t;
 typedef int mxml_descend_t;
-// Define new type names for the MXML3 type names
+// Mimic typenames present in mxml4 for compatibility
 constexpr int MXML_DESCEND_ALL = MXML_DESCEND;
 constexpr int MXML_DESCEND_NONE = MXML_NO_DESCEND;
 constexpr int MXML_TYPE_OPAQUE = MXML_OPAQUE;
