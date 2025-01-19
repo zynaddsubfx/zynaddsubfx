@@ -65,7 +65,7 @@ class FilterParams:public PresetsArray
         /*
  * wrappers old <-> new parameters
  */
-constexpr static float baseqFromOldPq(int Pq)
+static float baseqFromOldPq(int Pq)
 {
     return expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
 }
