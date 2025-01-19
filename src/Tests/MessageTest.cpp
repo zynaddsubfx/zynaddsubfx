@@ -105,22 +105,16 @@ class MessageTest
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/VoicePar0/FMSmp/");
 
             TS_ASSERT_EQUAL_STR("Poscilgen", mw->getPresetsStore().clipboard.type.c_str());
-            // a regex would be better here...
-            // hopefully, mxml will not change its whitespace behavior
-            assert_non_null(strstr(mw->getPresetsStore().clipboard.data.c_str(), "<par name=\"base_function_par\" value=\"32\" />"),
-                    "base_function_par at right value", __LINE__);
-
-            /* // better test this without string comparison:
+	    //Use XMLwrapper to validate copied XML
             {
                 XMLwrapper xml;
                 bool couldPutXml = xml.putXMLdata(mw->getPresetsStore().clipboard.data.c_str());
                 TS_ASSERT(couldPutXml);
+		xml.enterbranch("Poscilgen");
                 unsigned char copiedBasefuncPar = xml.getpar127("base_function_par", 0);
-                TS_ASSERT_EQUALS(copiedBasefuncPar, 32);
-            }*/
-
-            //printf("clipboard type: %s\n",mw->getPresetsStore().clipboard.type.c_str());
-            //printf("clipboard data:\n%s\n",mw->getPresetsStore().clipboard.data.c_str());
+		xml.exitbranch();
+                TS_ASSERT_EQUAL_INT(+copiedBasefuncPar, 32);
+            }
 
             TS_ASSERT_EQUAL_INT(osc_dst.Pbasefuncpar, 64);
             TS_ASSERT_EQUAL_INT(osc_oth.Pbasefuncpar, 64);
