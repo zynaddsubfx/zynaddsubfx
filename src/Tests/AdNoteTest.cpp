@@ -56,14 +56,14 @@ class AdNoteTest
         }
 
         void randomize_params(void) {
-            lfop->Pintensity  = randval(0,255);
-            lfop->Pstartphase = randval(0,255);
+            lfop->Pintensity  = randval(0,127);
+            lfop->Pstartphase = randval(0,127);
             lfop->Pcutoff     = randval(0,127);
             lfop->PLFOtype    = randval(0,6);
-            lfop->Prandomness = randval(0,255);
-            lfop->Pfreqrand   = randval(0,255);
+            lfop->Prandomness = randval(0,127);
+            lfop->Pfreqrand   = randval(0,127);
             lfop->Pcontinous  = randval(0,1);
-            lfop->Pstretch    = randval(0,255);
+            lfop->Pstretch    = randval(0,127);
             lfop->fel         = (consumer_location_type_t) randval(1,2);
             
         }
