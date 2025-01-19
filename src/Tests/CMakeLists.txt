@@ -1,6 +1,6 @@
 function(cp_script script_name)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
-		${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
 endfunction()
 
 function(quick_test test_name link)
@@ -8,6 +8,15 @@ function(quick_test test_name link)
     add_test(NAME ${test_name}
              COMMAND ${test_name})
     target_link_libraries(${test_name} ${link} ${ARGN})
+    if(Werror)
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+            set_target_properties(${test_name} PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+	 else()
+            if(NOT WIN32)  # For Windows, just allow warnings for now
+                target_compile_options(${test_name} PUBLIC -Werror)
+            endif()
+        endif()
+    endif()
 endfunction()
 
 #for tests looking for files stored in the source dir
