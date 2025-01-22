@@ -328,7 +328,7 @@ void connectMidiLearn(int par, int chan, bool isNrpn, string path, rtosc::MidiMa
             printf("mapping midi NRPN: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
         else
             printf("mapping midi CC: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
-            
+
         if(chan<1) chan=1;
         int ID = (isNrpn<<18) + (((chan-1)&0x0f)<<14) + par;
         //~ printf("ID = %d\n", ID);
@@ -849,7 +849,9 @@ public:
                                 tmp1 << xml;
                                 tmp2 << xml2;
                             }
-                            system("diff tmp1.txt tmp2.txt");
+                            int sys_ret = system("diff tmp1.txt tmp2.txt");
+                            if(sys_ret)
+                                puts("FAILED to compare tmp1.txt and tmp2.txt. Please compare manually.");
                             res = -1;
                         }
 

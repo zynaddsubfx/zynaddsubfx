@@ -67,7 +67,7 @@ class PartSysEffSend {open : {public Fl_Group}
         code0 {o->size(25,25);}
         code1 {o->alt_init("/","Psysefxvol"+to_s(neff)+"/part"+to_s(npart));}
         code2 {o->mark_dead();}
-        code3 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
+        code3 {char tmp[12];snprintf(tmp,sizeof(tmp),"%d",neff+1);o->copy_label(tmp);}
         class Fl_Osc_Dial
       }
     }
@@ -227,7 +227,7 @@ else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
-        code0 {snprintf(label,10,"%d",n+1);o->label(label);}
+        code0 {snprintf(label,sizeof(label),"%d",n+1);o->label(label);}
         code1 {o->init("Penabled");}
         code2 {if (n==0) o->deactivate();}
         class Fl_Osc_Check
@@ -258,7 +258,7 @@ end();} {}
   }
   decl {int n;} {private local
   }
-  decl {char label[10];} {private local
+  decl {char label[12];} {private local
   }
   decl {class PartUI *partui;} {private local
   }

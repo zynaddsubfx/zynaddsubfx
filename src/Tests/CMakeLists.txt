@@ -1,6 +1,6 @@
 function(cp_script script_name)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
-		${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
 endfunction()
 
 function(quick_test test_name link)
@@ -8,6 +8,15 @@ function(quick_test test_name link)
     add_test(NAME ${test_name}
              COMMAND ${test_name})
     target_link_libraries(${test_name} ${link} ${ARGN})
+    if(Werror)
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+            set_target_properties(${test_name} PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+	 else()
+            if(NOT WIN32)  # For Windows, just allow warnings for now
+                target_compile_options(${test_name} PUBLIC -Werror)
+            endif()
+        endif()
+    endif()
 endfunction()
 
 #for tests looking for files stored in the source dir
@@ -101,5 +110,18 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
         add_test(SaveOscAllFiles save-osc test-all)
     endif()
 
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    execute_process(
+        COMMAND git rev-parse --is-inside-work-tree
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE IS_GIT_REPO
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(IS_GIT_REPO STREQUAL "true")
+        add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+    endif()
 endif()
 

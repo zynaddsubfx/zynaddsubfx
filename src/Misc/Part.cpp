@@ -643,7 +643,7 @@ bool Part::NoteOnInternal(note_t note,
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
-    
+
     // in latch mode release latched notes before creating the new one
     if(Platchmode)
         notePool.releaseLatched();

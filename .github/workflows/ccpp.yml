@@ -37,7 +37,7 @@ jobs:
             deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
             deps2: "sudo apt-get install liblo-dev",
             testdeps: "sudo apt-get install ruby",
-            config: "cd build && cmake ..",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make",
             test: "cd build && ctest --output-on-failure"
