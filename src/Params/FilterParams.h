@@ -80,7 +80,7 @@ constexpr static float basefreqFromOldPreq(int Pfreq)
     return powf(2.0f, ((Pfreq / 64.0f - 1.0f) * 5.0f) + 9.96578428f);
 }
 
-        
+
         //Formant filter parameters
         unsigned char Pnumformants; //how many formants are used
         unsigned char Pformantslowness; //how slow varies the formants
