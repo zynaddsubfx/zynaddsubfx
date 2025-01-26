@@ -44,7 +44,7 @@ jobs:
             info: "cmake --version && gcc --version",
             config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make",
+            build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure"
           }
           - {
@@ -59,7 +59,7 @@ jobs:
             config: "cd build && cmake ..",
             # the only really different line to gcc:
             configext: "cd build && cmake -DCompileExtensiveTests=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS='-fuse-ld=lld' -DCMAKE_CXX_FLAGS='-fuse-ld=lld' -DRTOSC_WERROR=ON -DWerror=ON ..",
-            build: "cd build && make",
+            build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure"
           }
           - {
@@ -73,7 +73,7 @@ jobs:
             info: "cmake --version && clang --version",
             config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make",
+            build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure"
           }
     steps:
