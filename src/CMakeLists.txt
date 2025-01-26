@@ -618,7 +618,7 @@ add_executable(zynaddsubfx main.cpp)
 
 if(Werror)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-        set_target_properties(zynaddsubfx PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+        set_target_properties(zynaddsubfx_core PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
     else()
         if(NOT WIN32)  # For Windows, just allow warnings for now
             target_compile_options(zynaddsubfx PUBLIC -Werror)
