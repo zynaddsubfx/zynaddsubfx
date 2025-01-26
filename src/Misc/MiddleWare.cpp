@@ -128,42 +128,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
 
-    if(!strcmp(buffer, "/path-search") &&
-       (!strcmp("ss",  rtosc_argument_string(buffer)) ||
-        !strcmp("ssT", rtosc_argument_string(buffer)) ) )
-    {
-        constexpr bool debug_path_search = false;
-        if(debug_path_search) {
-            fprintf(stderr, "MW: path-search: %s, %s\n",
-                   rtosc_argument(buffer, 0).s, rtosc_argument(buffer, 1).s);
-        }
-        bool reply_with_query = rtosc_narguments(buffer) == 3;
-
-        char reply_buffer[1024*20];
-        std::size_t length =
-            rtosc::path_search(MiddleWare::getAllPorts(), buffer, 128,
-                               reply_buffer, sizeof(reply_buffer),
-                               rtosc::path_search_opts::sorted_and_unique_prefix,
-                               reply_with_query);
-        if(length) {
-            lo_message msg  = lo_message_deserialise((void*)reply_buffer,
-                                                     length, NULL);
-            if(debug_path_search) {
-                fprintf(stderr, "  reply:\n");
-                lo_message_pp(msg);
-            }
-            lo_address addr = lo_address_new_from_url(mw->activeUrl().c_str());
-            if(addr)
-                lo_send_message(addr, reply_buffer, msg);
-            lo_address_free(addr);
-            lo_message_free(msg);
-        }
-        else {
-            if(debug_path_search)
-                fprintf(stderr, "  -> no reply!\n");
-        }
-    }
-    else if(buffer[0]=='/' && strrchr(buffer, '/')[1])
+    if(buffer[0]=='/' && strrchr(buffer, '/')[1])
     {
         mw->transmitMsg(rtosc::Ports::collapsePath(buffer));
     }
@@ -2367,6 +2332,37 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 {
+    // handle path-search
+    if(!msg_comes_from_realtime)
+    {
+        if(!strcmp(msg, "/path-search") &&
+            (!strcmp("ss",  rtosc_argument_string(msg)) ||
+             !strcmp("ssT", rtosc_argument_string(msg)) ) )
+        {
+            constexpr bool debug_path_search = false;
+            if(debug_path_search) {
+                fprintf(stderr, "MW: path-search: %s, %s\n",
+                        rtosc_argument(msg, 0).s, rtosc_argument(msg, 1).s);
+            }
+            bool reply_with_query = rtosc_narguments(msg) == 3;
+
+            char reply_buffer[1024*20];
+            std::size_t length =
+                rtosc::path_search(MiddleWare::getAllPorts(), msg, 128,
+                                   reply_buffer, sizeof(reply_buffer),
+                                   rtosc::path_search_opts::sorted_and_unique_prefix,
+                                   reply_with_query);
+            if(length) {
+                sendToRemote(reply_buffer, parent->activeUrl());
+            }
+            else {
+                if(debug_path_search)
+                    fprintf(stderr, "  -> no reply!\n");
+            }
+            return;
+        }
+    }
+
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
