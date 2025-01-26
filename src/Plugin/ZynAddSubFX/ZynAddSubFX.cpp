@@ -528,7 +528,7 @@ private:
     void _initMaster()
     {
         middleware = new zyn::MiddleWare(std::move(synth), &config);
-        middleware->setUiCallback(__uiCallback, this);
+        middleware->setUiCallback(0, __uiCallback, this);
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());
 

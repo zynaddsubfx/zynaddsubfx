@@ -24,13 +24,10 @@ class PortChecker
         void _masterChangedCallback(zyn::Master* m)
         {
             master = m;
-            master->setMasterChangedCallback(__masterChangedCallback, this);
-        }
-
-        // TODO: eliminate static callbacks
-        static void __masterChangedCallback(void* ptr, zyn::Master* m)
-        {
-            ((PortChecker*)ptr)->_masterChangedCallback(m);
+            master->setMasterChangedCallback(
+                [](void* p, zyn::Master* m) {
+                    ((PortChecker*)p)->_masterChangedCallback(m); },
+                this);
         }
 
         void setUp() {
@@ -44,7 +41,14 @@ class PortChecker
             synth->alias();
 
             mw = new zyn::MiddleWare(std::move(*synth), &config);
-            mw->setUiCallback(_uiCallback, this);
+            mw->setUiCallback(0,
+                [](void* p, const char* msg) {
+                    ((PortChecker*)p)->uiCallback0(msg); },
+                this);
+            mw->setUiCallback(1,
+                [](void* p, const char* msg) {
+                    ((PortChecker*)p)->uiCallback1(msg); },
+                this);
             _masterChangedCallback(mw->spawnMaster());
             realtime = nullptr;
         }
@@ -57,7 +61,12 @@ class PortChecker
             delete synth;
         }
 
-        void uiCallback(const char* msg)
+        void uiCallback0(const char* msg)
+        {
+            (void)msg;
+        }
+	
+        void uiCallback1(const char* msg)
         {
             (void)msg;
         }
@@ -75,11 +84,6 @@ class PortChecker
     public:
         PortChecker() { setUp(); }
         ~PortChecker() { tearDown(); }
-
-        static void _uiCallback(void* ptr, const char* msg)
-        {
-            ((PortChecker*)ptr)->uiCallback(msg);
-        }
 
         int run()
         {
