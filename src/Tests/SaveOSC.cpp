@@ -72,7 +72,7 @@ class SaveOSCTest
             synth->alias();
 
             mw = new zyn::MiddleWare(std::move(*synth), &config);
-            mw->setUiCallback(_uiCallback, this);
+            mw->setUiCallback(0, _uiCallback, this);
             _masterChangedCallback(mw->spawnMaster());
             realtime = nullptr;
         }
@@ -106,9 +106,9 @@ class SaveOSCTest
 
             if(prependArg == -1)
             {
-                mw->transmitMsgGui(osc_path, "stT", arg1, start_time.val.t);
+                mw->transmitMsgGui(0, osc_path, "stT", arg1, start_time.val.t);
             } else {
-                mw->transmitMsgGui(osc_path, "istT", prependArg, arg1, start_time.val.t);
+                mw->transmitMsgGui(0, osc_path, "istT", prependArg, arg1, start_time.val.t);
             }
 
             int attempt;
@@ -236,7 +236,7 @@ class SaveOSCTest
                 if (strstr(filename.c_str(), ".xiz") ==
                     filename.c_str() + filename.length() - 4)
                 {
-                    mw->transmitMsgGui("/reset_master", "");
+                    mw->transmitMsgGui(0, "/reset_master", "");
                     fprintf(stderr, "Loading XIZ file %s...\n", filename.c_str());
                     load_ok = timeOutOperation("/load_xiz", filename.c_str(), 1000, 0);
                 }
@@ -281,39 +281,39 @@ class SaveOSCTest
         int test_presets()
         {
             // enable almost everything, in order to test all ports
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFilterEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFreqEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFreqLfoEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PAAEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PAmpEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PAmpLfoEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFilterEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFilterEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFilterLfoEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFMEnabled", "i", 1);
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFMFreqEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/adpars/VoicePar0/PFMAmpEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/Psubenabled", "T");
-            mw->transmitMsgGui("/part0/kit0/subpars/PBandWidthEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/subpars/PFreqEnvelopeEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/subpars/PGlobalFilterEnabled", "T");
-            mw->transmitMsgGui("/part0/kit0/Ppadenabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFilterEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFreqEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFreqLfoEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PAAEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PAmpEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PAmpLfoEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFilterEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFilterEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFilterLfoEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFMEnabled", "i", 1);
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFMFreqEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/adpars/VoicePar0/PFMAmpEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/Psubenabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/subpars/PBandWidthEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/subpars/PFreqEnvelopeEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/subpars/PGlobalFilterEnabled", "T");
+            mw->transmitMsgGui(0, "/part0/kit0/Ppadenabled", "T");
 
             // use all effects as ins fx
-            mw->transmitMsgGui("/insefx0/efftype", "S", "Reverb");
-            mw->transmitMsgGui("/insefx1/efftype", "S", "Phaser");
-            mw->transmitMsgGui("/insefx2/efftype", "S", "Echo");
-            mw->transmitMsgGui("/insefx3/efftype", "S", "Distortion");
-            mw->transmitMsgGui("/insefx4/efftype", "S", "Sympathetic");
-            mw->transmitMsgGui("/insefx5/efftype", "S", "DynFilter");
-            mw->transmitMsgGui("/insefx6/efftype", "S", "Alienwah");
-            mw->transmitMsgGui("/insefx7/efftype", "S", "EQ");
-            mw->transmitMsgGui("/part0/partefx0/efftype", "S", "Chorus");
+            mw->transmitMsgGui(0, "/insefx0/efftype", "S", "Reverb");
+            mw->transmitMsgGui(0, "/insefx1/efftype", "S", "Phaser");
+            mw->transmitMsgGui(0, "/insefx2/efftype", "S", "Echo");
+            mw->transmitMsgGui(0, "/insefx3/efftype", "S", "Distortion");
+            mw->transmitMsgGui(0, "/insefx4/efftype", "S", "Sympathetic");
+            mw->transmitMsgGui(0, "/insefx5/efftype", "S", "DynFilter");
+            mw->transmitMsgGui(0, "/insefx6/efftype", "S", "Alienwah");
+            mw->transmitMsgGui(0, "/insefx7/efftype", "S", "EQ");
+            mw->transmitMsgGui(0, "/part0/partefx0/efftype", "S", "Chorus");
             // use all effects as sys fx (except Chorus, it does not differ)
-            mw->transmitMsgGui("/sysefx0/efftype", "S", "Reverb");
-            mw->transmitMsgGui("/sysefx1/efftype", "S", "Phaser");
-            mw->transmitMsgGui("/sysefx2/efftype", "S", "Echo");
-            mw->transmitMsgGui("/sysefx3/efftype", "S", "Distortion");
+            mw->transmitMsgGui(0, "/sysefx0/efftype", "S", "Reverb");
+            mw->transmitMsgGui(0, "/sysefx1/efftype", "S", "Phaser");
+            mw->transmitMsgGui(0, "/sysefx2/efftype", "S", "Echo");
+            mw->transmitMsgGui(0, "/sysefx3/efftype", "S", "Distortion");
 
             int res = EXIT_SUCCESS;
 
@@ -329,21 +329,21 @@ class SaveOSCTest
                 int npresets_part[] = {10};
                 for(; insefxstr[7] < '8'; ++insefxstr[7])
                     if(preset < npresets_ins[insefxstr[7]-'0'])
-                        mw->transmitMsgGui(insefxstr, "i", preset);
+                        mw->transmitMsgGui(0, insefxstr, "i", preset);
                 for(; partefxstr[14] < '1'; ++partefxstr[14])
                     if(preset < npresets_part[partefxstr[14]-'0'])
-                        mw->transmitMsgGui(partefxstr, "i", preset);
+                        mw->transmitMsgGui(0, partefxstr, "i", preset);
                 if(preset == 13) // for presets 13-17, test the up to 5 sysefx
                 {
-                    mw->transmitMsgGui("/sysefx0/efftype", "S", "Sympathetic");
-                    mw->transmitMsgGui("/sysefx1/efftype", "S", "DynFilter");
-                    mw->transmitMsgGui("/sysefx2/efftype", "S", "Alienwah");
-                    mw->transmitMsgGui("/sysefx3/efftype", "S", "EQ");
+                    mw->transmitMsgGui(0, "/sysefx0/efftype", "S", "Sympathetic");
+                    mw->transmitMsgGui(0, "/sysefx1/efftype", "S", "DynFilter");
+                    mw->transmitMsgGui(0, "/sysefx2/efftype", "S", "Alienwah");
+                    mw->transmitMsgGui(0, "/sysefx3/efftype", "S", "EQ");
                 }
                 int type_offset = (preset>=13)?4:0;
                 for(; sysefxstr[7] < '4'; ++sysefxstr[7])
                     if(preset%13 < npresets_ins[sysefxstr[7]-'0'+type_offset])
-                        mw->transmitMsgGui(sysefxstr, "i", preset%13);
+                        mw->transmitMsgGui(0, sysefxstr, "i", preset%13);
 
                 char filename[] = "file0";
                 filename[4] += preset;

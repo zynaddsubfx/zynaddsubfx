@@ -661,7 +661,8 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         parent->transmitMsg("/load-part", "ib", npart, sizeof(Part *), &p);
-        GUI::raiseUi(ui, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
+        for(void* uihandle : ui)
+            GUI::raiseUi(uihandle, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
     }
 
     //Well, you don't get much crazier than changing out all of your RT
@@ -972,9 +973,6 @@ public:
     //Only valid until freed
     Master *previous_master = nullptr;
 
-    //The ONLY means that any chunk of UI code should have for interacting with the
-    //backend
-    Fl_Osc_Interface *osc;
     //Synth Engine Parameters
     ParamStore kits;
 
@@ -982,10 +980,15 @@ public:
     void(*idle)(void*);
     void* idle_ptr;
 
-    //General UI callback
-    cb_t cb;
-    //UI handle
-    void *ui;
+    //General UI callbacks
+    cb_t cb[2];
+    //UI handles
+    void *ui[2];
+
+    //The ONLY means that any chunk of UI code should have for interacting with the
+    //backend
+    //Note: Only the first UI is defined to have such an interface
+    Fl_Osc_Interface *osc;
 
     std::atomic_int pending_load[NUM_MIDI_PARTS];
     std::atomic_int actual_load[NUM_MIDI_PARTS];
@@ -1934,7 +1937,7 @@ static rtosc::Ports middlewareReplyPorts = {
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     Config* config, int preferrred_port)
-    :parent(mw), config(config), ui(nullptr), synth(std::move(synth_)),
+    :parent(mw), config(config), ui{nullptr,nullptr}, synth(std::move(synth_)),
     presetsstore(*config), autoSave(-1, [this]() {
             auto master = this->master;
             this->doReadOnlyOp([master](){
@@ -1962,7 +1965,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 
 
     //dummy callback for starters
-    cb = [](void*, const char*){};
+    for(cb_t& uicb : cb)
+        uicb = [](void*, const char*){};
     idle = 0;
     idle_ptr = 0;
 
@@ -2191,12 +2195,13 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
 
 void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 {
-    //Always send to the local UI
+    //Always send to the local UIs
     sendToRemote(rtmsg, "GUI");
+    sendToRemote(rtmsg, "GUI2");
 
     //Send to remote UI if there's one listening
     for(auto rem:known_remotes)
-        if(rem != "GUI")
+        if(rem != "GUI" && rem != "GUI2")
             sendToRemote(rtmsg, rem);
 
     broadcast = false;
@@ -2213,7 +2218,9 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
     //printf("sendToRemote(%s:%s,%s)\n", rtmsg, rtosc_argument_string(rtmsg),
     //        dest.c_str());
     if(dest == "GUI") {
-        cb(ui, rtmsg);
+        cb[0](ui[0], rtmsg);
+    } else if(dest == "GUI2") {
+        cb[1](ui[1], rtmsg);
     } else if(!dest.empty()) {
         lo_message msg  = lo_message_deserialise((void*)rtmsg,
                 rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
@@ -2534,10 +2541,11 @@ void MiddleWare::doReadOnlyOp(std::function<void()> fn)
     impl->doReadOnlyOp(fn);
 }
 
-void MiddleWare::setUiCallback(void(*cb)(void*,const char *), void *ui)
+void MiddleWare::setUiCallback(int gui_id, void(*cb)(void*,const char *), void *ui)
 {
-    impl->cb = cb;
-    impl->ui = ui;
+    assert(gui_id < sizeof(impl->cb)/sizeof(impl->cb[0]));
+    impl->cb[gui_id] = cb;
+    impl->ui[gui_id] = ui;
 }
 
 void MiddleWare::setIdleCallback(void(*cb)(void*), void *ptr)
@@ -2572,32 +2580,35 @@ void MiddleWare::transmitMsg_va(const char *path, const char *args, va_list va)
         fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
-void MiddleWare::transmitMsgGui(const char *msg)
+void MiddleWare::transmitMsgGui(int gui_id, const char *msg)
 {
-    if(activeUrl() != "GUI") {
+    if(gui_id == 0 && activeUrl() != "GUI") {
         transmitMsg("/echo", "ss", "OSC_URL", "GUI");
         activeUrl("GUI");
+    } else if(gui_id == 1 && activeUrl() != "GUI2") {
+        transmitMsg("/echo", "ss", "OSC_URL", "GUI2");
+        activeUrl("GUI2");
     }
     transmitMsg(msg);
 }
 
-void MiddleWare::transmitMsgGui(const char *path, const char *args, ...)
+void MiddleWare::transmitMsgGui(int gui_id, const char *path, const char *args, ...)
 {
     char buffer[1024];
     va_list va;
     va_start(va,args);
     if(rtosc_vmessage(buffer,1024,path,args,va))
-        transmitMsgGui(buffer);
+        transmitMsgGui(gui_id, buffer);
     else
         fprintf(stderr, "Error in transmitMsgGui(...)\n");
     va_end(va);
 }
 
-void MiddleWare::transmitMsgGui_va(const char *path, const char *args, va_list va)
+void MiddleWare::transmitMsgGui_va(int gui_id, const char *path, const char *args, va_list va)
 {
     char buffer[1024];
     if(rtosc_vmessage(buffer, 1024, path, args, va))
-        transmitMsgGui(buffer);
+        transmitMsgGui(gui_id, buffer);
     else
         fprintf(stderr, "Error in transmitMsgGui(va)n");
 }
