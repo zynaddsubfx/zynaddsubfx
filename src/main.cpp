@@ -630,7 +630,7 @@ int main(int argc, char *argv[])
     printf("[INFO] startup OSC\n");
     typedef std::vector<const char *> wait_t;
     wait_t msg_waitlist;
-    middleware->setUiCallback([](void*v,const char*msg) {
+    middleware->setUiCallback(0, [](void*v,const char*msg) {
             wait_t &wait = *(wait_t*)v;
             size_t len = rtosc_message_length(msg, -1);
             char *copy = new char[len];
@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
     printf("[INFO] UI calbacks\n");
     if(!noui)
         gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
-    middleware->setUiCallback(GUI::raiseUi, gui);
+    middleware->setUiCallback(0, GUI::raiseUi, gui);
     middleware->setIdleCallback([](void*){GUI::tickUi(gui);}, NULL);
 
     //Replay Startup Responses

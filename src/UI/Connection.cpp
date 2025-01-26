@@ -295,7 +295,7 @@ class UI_Interface:public Fl_Osc_Interface
             char *tmp = strdup(s.c_str());
             s = rtosc::Ports::collapsePath(tmp);
             free(tmp);
-            impl->transmitMsgGui(s.c_str(),"");
+            impl->transmitMsgGui(0, s.c_str(),"");
         }
 
         void write(string s, const char *args, ...) override
@@ -309,7 +309,7 @@ class UI_Interface:public Fl_Osc_Interface
             ////fprintf(stderr, ".");
             //fprintf(stderr, "write(%s:%s)\n", s.c_str(), args);
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsgGui_va(s.c_str(), args, va);
+            impl->transmitMsgGui_va(0, s.c_str(), args, va);
             va_end(va);
         }
 
@@ -319,7 +319,7 @@ class UI_Interface:public Fl_Osc_Interface
             ////fprintf(stderr, ".");
             //fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsgGui(rtosc::Ports::collapsePath((char*)msg));
+            impl->transmitMsgGui(0, rtosc::Ports::collapsePath((char*)msg));
         }
 
         void writeValue(string s, string ss) override
