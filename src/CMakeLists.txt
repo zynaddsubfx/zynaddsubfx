@@ -616,16 +616,6 @@ endif(CompileTests)
 
 add_executable(zynaddsubfx main.cpp)
 
-if(Werror)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-        set_target_properties(zynaddsubfx_core PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
-    else()
-        if(NOT WIN32)  # For Windows, just allow warnings for now
-            target_compile_options(zynaddsubfx PUBLIC -Werror)
-        endif()
-    endif()
-endif()
-
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
 target_link_libraries(zynaddsubfx
@@ -656,6 +646,16 @@ if (DssiEnable)
 		-Wl,--no-undefined
 		)
     install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION ${PluginLibDir}/dssi/)
+endif()
+
+if(Werror)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+        set_target_properties(zynaddsubfx PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+    else()
+        if(NOT WIN32)  # For Windows, just allow warnings for now
+            target_compile_options(zynaddsubfx PUBLIC -Werror)
+        endif()
+    endif()
 endif()
 
 install(TARGETS zynaddsubfx
