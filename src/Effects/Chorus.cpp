@@ -165,7 +165,7 @@ void Chorus::out(const Stereo<float *> &input)
         dlNew3 = getdelay(lfol);
         drNew3 = getdelay(lfor);
         // reduce amplitude to match single phase modes
-        // 0.85 * fbComp / 3 
+        // 0.85 * fbComp / 3
         fbComp /= 3.53f;
     }
 
