@@ -88,9 +88,12 @@ class Reverse final:public Effect
         Reverter* reverterL;
         Reverter* reverterR;
 
-        unsigned int tick;          // number of ticks passed in the current measure
+        float tick;                 // number of ticks passed in the current measure
                                     // - used to predict the position of the next beat
         unsigned int beat_new_hist; // stored beat value from last buffer cycle to detect change
+        int tick_ind;
+        float tick_hist;
+        float tick_at_fist_buffer_start;
 };
 
 }

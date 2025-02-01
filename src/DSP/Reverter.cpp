@@ -117,6 +117,7 @@ void Reverter::checkSync() {
             if ( (doSync && (float)reverse_index >= syncPos) || // external sync time OR
                 reverse_index >= max_delay_samples ) {   // note is too long buffer ends here
                 switchBuffers();
+                doSync = false;
             }
             break;
         case NOTEON:

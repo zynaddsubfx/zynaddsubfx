@@ -1485,7 +1485,8 @@ void Master::GetAudioOutSamples(size_t nsamples,
         time.tempo = bpm;
         time.bpm = bpm;
         time.ppq = PPQ;
-        
+        time.nsamples = nsamples;
+
     }
     off_t out_off = 0;
 

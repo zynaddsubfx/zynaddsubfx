@@ -20,6 +20,7 @@ class AbsTime
     public:
         AbsTime(const SYNTH_T &synth)
             :tempo(120),
+            nsamples(0),
             bar(0),
             beat(0),
             tick(0.0f),
@@ -31,6 +32,7 @@ class AbsTime
         void operator++(int){frames++;};
         int64_t time() const {return frames;};
         unsigned int tempo;
+        int nsamples;
         int bar;
         int beat;
         float tick;

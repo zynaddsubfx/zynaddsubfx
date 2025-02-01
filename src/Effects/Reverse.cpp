@@ -61,13 +61,14 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(64), PsyncMode(NOTEON), Pstereo(0),time(time_)
+    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(64), PsyncMode(NOTEON), Pstereo(0),time(time_), tick_hist(0)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     reverterR = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
     setpanning(64);
     setvolume(Pvolume);
+    tick_at_fist_buffer_start = (time->beat - 1) * time->ppq + time->tick;
 }
 
 Reverse::~Reverse()
@@ -98,30 +99,45 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
 
     // process external timecode to sync
-    unsigned int beat_new = 0;
-    if (time->tempo && speedfactor && (PsyncMode == HOST ))
-    {
-        // calculate the buffer length measured in ticks
-        const unsigned int buffer_ticks = (unsigned int)((float)buffersize / (float)samplerate * // seconds *
-                                            ((float)time->tempo / HZ2BPM) *                      // beats per seconds * 
-                                            (float)time->ppq);                                         // pulses per quarter note
-        // calculate the tick count at the end of the buffer
-        tick = (time->beat-1) * time->ppq + time->tick + buffer_ticks; // beat is 1...4
-        const unsigned int delay_ticks = (unsigned int)((float)time->ppq * speedfactor);
-        beat_new = tick/delay_ticks;
-        
-        // check whether there is a beat inside this buffer
-        if(beat_new!=beat_new_hist) {
-            // calculate ticks between beat and buffer end
-            const unsigned int phase_ticks = buffer_ticks - (tick%delay_ticks);
-            // calculate sample offset of the beat
-            const float syncPos = (phase_ticks/delay_ticks)*(HZ2BPM/(float)time->tempo)*(float)samplerate;
+    if (time->tempo && speedfactor && (PsyncMode == HOST)) {
+        const float buffer_ticks = ((float)time->nsamples / (float)samplerate * // seconds per host buffer *
+                                            ((float)time->tempo / HZ2BPM) *     // beats per second        *
+                                            (float)time->ppq);                  // ticks per beat = ticks per buffer
+
+        const float subbuffer_ticks = buffer_ticks * (float)buffersize / (float)time->nsamples; // ticks per subbuffer
+
+        if(time->nsamples && time->nsamples > buffersize) {
+            if(time->tick != tick_hist) {
+                tick_ind = 0;
+                tick_hist = time->tick;
+                tick_at_fist_buffer_start = (time->beat - 1) * time->ppq + time->tick;
+            }
+            else
+                tick_ind++;
+        }
+
+        // tick offset of the current subbuffer
+        const float tick_offset = subbuffer_ticks * (float)tick_ind;
+
+        // Berechnung von tick_at_buffer_start unter Berücksichtigung des Sub-Buffers
+        const float tick_at_buffer_start = tick_at_fist_buffer_start + tick_offset;
+
+        tick = tick_at_buffer_start + subbuffer_ticks;
+//~ printf("tick: %f\n", tick);
+        const float ticks_per_beat = (float)time->ppq / speedfactor;
+//~ printf("ticks_per_beat: %f\n", ticks_per_beat);
+        const float phase_ticks = fmodf(tick, ticks_per_beat);
+//~ printf("phase_ticks: %f\n", phase_ticks);
+//~ printf("buffer_ticks: %f\n", subbuffer_ticks);
+        if(phase_ticks < subbuffer_ticks) { // Ensure beat is inside the buffer
+            const float syncPos = ( (subbuffer_ticks - phase_ticks) / (float)subbuffer_ticks) * (float)buffersize;
+
+printf("                                                     ----------------------------syncPos: %f\n", syncPos);
+
             reverterL->sync(syncPos);
-            if(Pstereo) reverterR->sync(syncPos);
+            if (Pstereo) reverterR->sync(syncPos);
         }
     }
-    // store beat_new for next cycle
-    beat_new_hist = beat_new;
 
     // do the actual processing
     reverterL->filterout(efxoutl);
