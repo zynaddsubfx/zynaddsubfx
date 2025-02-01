@@ -169,7 +169,7 @@ static const rtosc::Ports local_ports = {
                 }
                 d.broadcast(d.loc, "i", val);
             } else {
-                d.reply(d.loc, "i", eff->numerator); 
+                d.reply(d.loc, "i", eff->numerator);
             }
         }},
     {"denominator::i", rShort("dem") rDefault(4) rLinear(1,99)
@@ -215,7 +215,7 @@ static const rtosc::Ports local_ports = {
                 }
                 d.broadcast(d.loc, "i", val);
             } else {
-                d.reply(d.loc, "i", eff->denominator); 
+                d.reply(d.loc, "i", eff->denominator);
             }
         }},
     {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
@@ -362,8 +362,8 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 efx = NULL;
                 break; //no effect (thru)
         }
-        
-        // set freq / delay params according to bpm ratio 
+
+        // set freq / delay params according to bpm ratio
         int Pdelay, Pfreq;
         float freq;
         if (numerator>0) {
@@ -372,7 +372,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 case 10:// Reverse
                     // invert:
                     // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
-                    Pdelay = (int)roundf((20320.0f / (float)time->tempo) * 
+                    Pdelay = (int)roundf((20320.0f / (float)time->tempo) *
                                          ((float)numerator / (float)denominator));
                     if (numerator&&denominator)
                         seteffectparrt(2, Pdelay);
@@ -381,8 +381,8 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 case 4: // Phaser
                 case 5: // Alienwah
                 case 8: // DynamicFilter
-                    freq =  ((float)time->tempo * 
-                             (float)denominator / 
+                    freq =  ((float)time->tempo *
+                             (float)denominator /
                              (240.0f * (float)numerator));
                     // invert:
                     // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
@@ -397,7 +397,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                     break;
             }
         }
-        
+
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to change effect " << _nefx << ": " << ba.what() << std::endl;
         return;

@@ -345,7 +345,7 @@ protected:
 
         // Zeitposition vom Host abfragen
         const TimePosition& timePosition = getTimePosition();
-        
+
 
         if (! mutex.tryLock())
         {
@@ -373,7 +373,7 @@ protected:
 
             if (midiEvent.frame > framesOffset)
             {
-                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, 
+                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate,
                                                                          outputs[0]+framesOffset,
                                                                          outputs[1]+framesOffset);
 

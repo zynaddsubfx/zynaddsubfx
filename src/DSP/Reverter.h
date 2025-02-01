@@ -44,7 +44,7 @@ enum State
 
 /**
  * @brief Reverse Delay effect class
- * 
+ *
  * Implements a reverse delay effect using a ring buffer. Supports synchronization
  * with host, MIDI, or note-on/off events.
  */
@@ -53,7 +53,7 @@ class Reverter
 public:
     /**
      * @brief Constructor for the Reverter class.
-     * 
+     *
      * @param alloc Allocator for memory management.
      * @param delay Initial delay time in seconds.
      * @param srate Sample rate in Hz.
@@ -68,42 +68,42 @@ public:
 
     /**
      * @brief Process and filter the input audio samples.
-     * 
+     *
      * @param smp Pointer to the buffer of input samples.
      */
     void filterout(float *smp);
 
     /**
      * @brief Set the delay time in seconds.
-     * 
+     *
      * @param value Delay time.
      */
     void setdelay(float value);
 
     /**
      * @brief Set the phase of the delay.
-     * 
+     *
      * @param value Phase value.
      */
     void setphase(float value);
 
     /**
      * @brief Set the crossfade time for the transition between buffers.
-     * 
+     *
      * @param value Crossfade time.
      */
     void setcrossfade(float value);
 
     /**
      * @brief Set the output gain.
-     * 
+     *
      * @param value Gain value in dB.
      */
     void setgain(float value);
 
     /**
      * @brief Set the synchronization mode for the reverter.
-     * 
+     *
      * @param value Synchronization mode (e.g., AUTO, MIDI, HOST).
      */
     void setsyncMode(SyncMode value);
@@ -113,7 +113,7 @@ public:
 
     /**
      * @brief Synchronize the delay based on an external position.
-     * 
+     *
      * @param pos External position for syncing.
      */
     void sync(float pos);
@@ -121,14 +121,14 @@ public:
 private:
     /**
      * @brief Switch between buffers when reverse playback is triggered.
-     * 
+     *
      * @param offset Offset for buffer switching.
      */
     void switchBuffers();
 
     /**
      * @brief Perform linear interpolation between two samples.
-     * 
+     *
      * @param smp Pointer to the sample buffer.
      * @param pos Position to interpolate.
      * @return Interpolated sample value.
@@ -137,21 +137,21 @@ private:
 
     /**
      * @brief Write new input samples to the ring buffer.
-     * 
+     *
      * @param smp Pointer to the buffer of input samples.
      */
     void writeToRingBuffer(const float *smp);
 
     /**
      * @brief Process the samples and apply the reverse delay effect.
-     * 
+     *
      * @param smp Pointer to the buffer of input samples.
      */
     void processBuffer(float *smp);
 
     /**
      * @brief Handle synchronization modes and state transitions.
-     * 
+     *
      */
     void checkSync();
 
@@ -167,7 +167,7 @@ private:
 
     /**
      * @brief Apply crossfading between two buffer segments.
-     * 
+     *
      * @param smp Pointer to the buffer of input samples.
      * @param i Index of the current sample in the buffer.
      */
@@ -175,7 +175,7 @@ private:
 
     /**
      * @brief Apply fading for transitions between buffer segments.
-     * 
+     *
      * @param fadein Fade-in factor.
      * @param fadeout Fade-out factor.
      * @return Crossfaded sample value.
@@ -184,11 +184,11 @@ private:
 
     /**
      * @brief Apply the output gain to a sample.
-     * 
+     *
      * @param sample Reference to the sample to modify.
      */
     void applyGain(float &sample);
-    
+
     void update_memsize();
 
     /// Current synchronization mode
