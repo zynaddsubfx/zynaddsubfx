@@ -140,6 +140,8 @@ class Master
                                 float *outr,
                                 int bar=0,
                                 int beat=0,
+                                float beatsPerBar=0.0f,
+                                float beatType=0.0f,
                                 float tick=0.0f,
                                 float bpm=0.0f,
                                 float PPQ=0.0f) REALTIME;

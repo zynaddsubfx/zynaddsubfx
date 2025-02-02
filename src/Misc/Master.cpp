@@ -1474,6 +1474,8 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 int bar,
                                 int beat,
                                 float tick,
+                                float beatsPerBar,
+                                float beatType,
                                 float bpm,
                                 float PPQ)
 {
@@ -1482,6 +1484,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
         time.bar = bar;
         time.beat = beat;
         time.tick = tick;
+        time.beatsPerBar = beatsPerBar;
         time.tempo = bpm;
         time.bpm = bpm;
         time.ppq = PPQ;

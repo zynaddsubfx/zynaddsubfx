@@ -36,6 +36,8 @@ class AbsTime
         int bar;
         int beat;
         float tick;
+        float beatsPerBar;
+        float beatType;
         float bpm;
         float ppq;
         float dt() const { return s.dt(); }

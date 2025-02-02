@@ -110,7 +110,7 @@ void Reverse::out(const Stereo<float *> &input)
             if(time->tick != tick_hist) {
                 tick_ind = 0;
                 tick_hist = time->tick;
-                tick_at_fist_buffer_start = (time->beat - 1) * time->ppq + time->tick;
+                tick_at_fist_buffer_start = (((time->bar - 1) * time->beatsPerBar) + (time->beat - 1)) * time->ppq + time->tick;
             }
             else
                 tick_ind++;
@@ -132,7 +132,7 @@ void Reverse::out(const Stereo<float *> &input)
         if(phase_ticks < subbuffer_ticks) { // Ensure beat is inside the buffer
             const float syncPos = ( (subbuffer_ticks - phase_ticks) / (float)subbuffer_ticks) * (float)buffersize;
 
-printf("                                                     ----------------------------syncPos: %f\n", syncPos);
+printf("--> syncPos: %f\n", syncPos);
 
             reverterL->sync(syncPos);
             if (Pstereo) reverterR->sync(syncPos);

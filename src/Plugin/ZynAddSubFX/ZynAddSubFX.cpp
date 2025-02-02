@@ -456,6 +456,8 @@ protected:
                                                                  timePosition.bbt.bar,
                                                                  timePosition.bbt.beat,
                                                                  timePosition.bbt.tick,
+                                                                 timePosition.bbt.beatsPerBar,
+                                                                 timePosition.bbt.beatType,
                                                                  timePosition.bbt.beatsPerMinute,
                                                                  timePosition.bbt.ticksPerBeat);
 
