@@ -40,6 +40,7 @@ class AbsTime
         float beatType;
         float bpm;
         float ppq;
+        bool playing;
         float dt() const { return s.dt(); }
         float framesPerSec() const { return 1/s.dt();}
         int   samplesPerFrame() const {return s.buffersize;}

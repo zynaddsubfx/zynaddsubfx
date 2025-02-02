@@ -459,7 +459,8 @@ protected:
                                                                  timePosition.bbt.beatsPerBar,
                                                                  timePosition.bbt.beatType,
                                                                  timePosition.bbt.beatsPerMinute,
-                                                                 timePosition.bbt.ticksPerBeat);
+                                                                 timePosition.bbt.ticksPerBeat,
+                                                                 timePosition.playing);
 
         else
             master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,

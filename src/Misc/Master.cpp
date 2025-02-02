@@ -1477,10 +1477,12 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 float beatsPerBar,
                                 float beatType,
                                 float bpm,
-                                float PPQ)
+                                float PPQ,
+                                bool playing)
 {
 
     if(bpm) {
+        time.nsamples = nsamples;
         time.bar = bar;
         time.beat = beat;
         time.tick = tick;
@@ -1488,7 +1490,8 @@ void Master::GetAudioOutSamples(size_t nsamples,
         time.tempo = bpm;
         time.bpm = bpm;
         time.ppq = PPQ;
-        time.nsamples = nsamples;
+        time.playing = playing;
+
 
     }
     off_t out_off = 0;

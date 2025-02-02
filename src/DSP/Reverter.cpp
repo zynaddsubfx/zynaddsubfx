@@ -17,6 +17,7 @@
 #include <cstring>
 
 #include "../Misc/Allocator.h"
+#include "../Misc/Time.h"
 #include "Reverter.h"
 
 namespace zyn {
@@ -119,6 +120,16 @@ void Reverter::checkSync() {
                 switchBuffers();
                 doSync = false;
             }
+            // silence the effect if host transport is stopped
+            if(!time->playing)
+                state = IDLE;
+            else
+                if (state != PLAYING)
+                {
+                    state = PLAYING;
+                    reset();
+                }
+
             break;
         case NOTEON:
             if (reverse_index >= delay_samples && state != IDLE)

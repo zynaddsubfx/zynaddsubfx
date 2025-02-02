@@ -144,7 +144,8 @@ class Master
                                 float beatType=0.0f,
                                 float tick=0.0f,
                                 float bpm=0.0f,
-                                float PPQ=0.0f) REALTIME;
+                                float PPQ=0.0f,
+                                bool playing=false) REALTIME;
 
 
         void partonoff(int npart, int what);
