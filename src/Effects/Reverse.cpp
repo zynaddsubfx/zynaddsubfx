@@ -84,7 +84,6 @@ void Reverse::cleanup(void)
     reverterL->reset();
 }
 
-
 //Effect output
 void Reverse::out(const Stereo<float *> &input)
 {
@@ -119,21 +118,13 @@ void Reverse::out(const Stereo<float *> &input)
         // tick offset of the current subbuffer
         const float tick_offset = subbuffer_ticks * (float)tick_ind;
 
-        // Berechnung von tick_at_buffer_start unter Berücksichtigung des Sub-Buffers
         const float tick_at_buffer_start = tick_at_fist_buffer_start + tick_offset;
 
         tick = tick_at_buffer_start + subbuffer_ticks;
-//~ printf("tick: %f\n", tick);
         const float ticks_per_beat = (float)time->ppq / speedfactor;
-//~ printf("ticks_per_beat: %f\n", ticks_per_beat);
         const float phase_ticks = fmodf(tick, ticks_per_beat);
-//~ printf("phase_ticks: %f\n", phase_ticks);
-//~ printf("buffer_ticks: %f\n", subbuffer_ticks);
         if(phase_ticks < subbuffer_ticks) { // Ensure beat is inside the buffer
             const float syncPos = ( (subbuffer_ticks - phase_ticks) / (float)subbuffer_ticks) * (float)buffersize;
-
-printf("--> syncPos: %f\n", syncPos);
-
             reverterL->sync(syncPos);
             if (Pstereo) reverterR->sync(syncPos);
         }
