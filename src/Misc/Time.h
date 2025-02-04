@@ -19,12 +19,14 @@ class AbsTime
 {
     public:
         AbsTime(const SYNTH_T &synth)
-            :frames(0),
+            :source(INTERNAL),
+            frames(0),
             s(synth){};
         void operator++(){++frames;};
         void operator++(int){frames++;};
         int64_t time() const {return frames;};
         unsigned int tempo;
+        SyncSource source;
         float dt() const { return s.dt(); }
         float framesPerSec() const { return 1/s.dt();}
         int   samplesPerFrame() const {return s.buffersize;}

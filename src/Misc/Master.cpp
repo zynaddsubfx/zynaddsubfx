@@ -512,6 +512,14 @@ static const Ports master_ports = {
         } else
             d.reply(d.loc, "i", m->time.tempo);
         rEnd},
+    {"sync::i:c:S", rProp(parameter) rDefault(0) rShort("Sync") rDoc("Syncronisation Source") rOptions(SYNCSOURCES), 0,
+        rBegin;
+        if(!strcmp("i",rtosc_argument_string(msg))) {
+            m->time.source = (SyncSource)rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", m->time.source);
+        } else
+            d.reply(d.loc, "i", m->time.source);
+        rEnd},
     {"Panic:", rDoc("Stop all sound"), 0,
         [](const char *, RtData &d) {
             Master &M =  *(Master*)d.obj;
