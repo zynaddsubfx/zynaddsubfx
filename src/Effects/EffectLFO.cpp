@@ -60,7 +60,6 @@ void EffectLFO::updateparams(void)
 
 float EffectLFO::biquad(float input)
 {
-    float output;
 
     if (Pfreq!=freq ) // calculate coeffs only if cutoff changed
     {
@@ -78,7 +77,7 @@ float EffectLFO::biquad(float input)
     }
 
     // lp filter the (s&h) random LFO
-    output = limit(input * a0 + z1, -1.0f, 1.0f);
+    const float output = limit(input * a0 + z1, -1.0f, 1.0f);
     z1 = input * a1 + z2 - b1 * output;
     z2 = input * a2 - b2 * output;
     return output;
