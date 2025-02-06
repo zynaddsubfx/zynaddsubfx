@@ -98,10 +98,7 @@ float EffectLFO::getlfoshape(float x)
                 out = 4.0f * x - 4.0f;
             break;
         case 2: //EffectLFO_NOISE
-            //~ if ((x < 0.5) != first_half) {
-                first_half = x < 0.5;
-                last_random = 2*RND-1;
-            //~ }
+            last_random = 2*RND-1;
             return biquad(last_random);
 
 

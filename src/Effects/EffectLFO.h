@@ -44,7 +44,6 @@ class EffectLFO
         float buffersize_f;
         float dt;
 
-        bool first_half;
         float last_random;
 
         float FcAbs, K, norm, freq;
