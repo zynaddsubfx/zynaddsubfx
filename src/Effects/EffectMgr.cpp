@@ -27,6 +27,7 @@
 #include "DynamicFilter.h"
 #include "Phaser.h"
 #include "Sympathetic.h"
+#include "Hysteresis.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
@@ -157,6 +158,7 @@ static const rtosc::Ports local_ports = {
                         case 1: // Reverb
                         case 6: // Distortion
                         case 7: // EQ
+                        case 10: // Hysteresis
                         default:
                             break;
                         }
@@ -204,6 +206,7 @@ static const rtosc::Ports local_ports = {
                         case 1: // Reverb
                         case 6: // Distortion
                         case 7: // EQ
+                        case 10: // Hysteresis
                         default:
                             break;
                         }
@@ -229,7 +232,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i:c:S", rOptions(Disabled, Reverb, Echo, Chorus,
-     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic) rDefault(Disabled)
+     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic, Hysteresis) rDefault(Disabled)
      rProp(parameter) rDoc("Get Effect Type"), NULL,
      rCOptionCb(obj->nefx, obj->changeeffectrt(var))},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -258,6 +261,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(Phaser),
     rSubtype(Reverb),
     rSubtype(Sympathetic),
+    rSubtype(Hysteresis),
 };
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
@@ -346,6 +350,9 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
             case 9:
                 efx = memory.alloc<Sympathetic>(pars);
                 break;
+            case 10:
+                efx = memory.alloc<Hysteresis>(pars);
+                break;
             //put more effect here
             default:
                 efx = NULL;
@@ -381,6 +388,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 case 1: // Reverb
                 case 6: // Distortion
                 case 7: // EQ
+                case 10: //Hysteresis
                 default:
                     break;
             }
