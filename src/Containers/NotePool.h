@@ -49,6 +49,7 @@ class NotePool
             bool entombed(void) const;
             bool dying(void) const;
             bool latched(void) const;
+            bool newest(void) const;
 
             //status transitions
             void setStatus(uint8_t s);
@@ -71,6 +72,8 @@ class NotePool
         NoteDescriptor   ndesc[POLYPHONY];
         SynthDescriptor  sdesc[POLYPHONY*EXPECTED_USAGE];
         bool             needs_cleaning;
+        
+        static NoteDescriptor *newest_nd;
 
 
         //Iterators
