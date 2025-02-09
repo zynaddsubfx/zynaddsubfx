@@ -145,7 +145,8 @@ class Master
                                 float tick=0.0f,
                                 float bpm=0.0f,
                                 float PPQ=0.0f,
-                                bool playing=false) REALTIME;
+                                bool playing=false,
+                                size_t frames=0) REALTIME;
 
 
         void partonoff(int npart, int what);
