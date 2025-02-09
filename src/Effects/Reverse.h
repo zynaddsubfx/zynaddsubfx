@@ -91,9 +91,9 @@ class Reverse final:public Effect
         float tick;                 // number of ticks passed in the current measure
                                     // - used to predict the position of the next beat
         unsigned int beat_new_hist; // stored beat value from last buffer cycle to detect change
-        int tick_ind;
+        unsigned int currentSubbufferIndex = 0;
         float tick_hist;
-        float tick_at_fist_buffer_start;
+        float tick_at_host_buffer_start;
 };
 
 }
