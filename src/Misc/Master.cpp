@@ -1483,7 +1483,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
 {
 
     if(bpm) {
-        time.nsamples = frames;
+        time.hostSamples = frames;
         time.bar = bar;
         time.beat = beat;
         time.tick = tick;
@@ -1492,9 +1492,10 @@ void Master::GetAudioOutSamples(size_t nsamples,
         time.bpm = bpm;
         time.ppq = PPQ;
         time.playing = playing;
-
-
     }
+    else
+        time.bpm = 0;
+
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job

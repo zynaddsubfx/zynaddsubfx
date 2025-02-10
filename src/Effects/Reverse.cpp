@@ -98,6 +98,7 @@ void Reverse::out(const Stereo<float *> &input)
             efxoutl[i] = (input.l[i] * pangainL + input.r[i] * pangainR);
 
     // process external timecode for syncing to host beat
+    // but only if we have timing info, speedfactor is set and we are in host mode.
     if (time->tempo && speedfactor && (PsyncMode == HOST)) {
         // in host mode we want to find out if (condition) and when (position) a beat happens inside the buffer
         // and call sync at that position
@@ -109,27 +110,24 @@ void Reverse::out(const Stereo<float *> &input)
         // in this case the processing function is called multiple times for one host buffer
         // and we have to interpolate the ticks for each internal buffer
 
-        // number of ticks during the length of one host buffer
-        const float host_buffer_ticks = ((float)time->nsamples / (float)samplerate * // seconds per host buffer *
+        // number of ticks during the length of one internal buffer
+        const float internal_buffer_ticks = ((float)buffersize / (float)samplerate * // seconds per host buffer *
                                             ((float)time->tempo / HZ2BPM) *     // beats per second        *
                                             (float)time->ppq);                  // ticks per beat = ticks per buffer
 
-        // number of ticks during the length of one internal buffer
-        const float internal_buffer_ticks = host_buffer_ticks * (float)buffersize / (float)time->nsamples;
 
-        if(time->nsamples && time->nsamples > buffersize) {
-            // check if there is new timing information
-            // that indicates a new host buffer
-            // therefore we reset the current subbuffer index.
-            // and calculate the new tick at time of host buffer start
-            if(time->tick != tick_hist) {
-                currentSubbufferIndex = 0;
-                tick_hist = time->tick;
-                tick_at_host_buffer_start = (((time->bar - 1) * time->beatsPerBar) + (time->beat - 1)) * time->ppq + time->tick;
-            }
-            else
-                currentSubbufferIndex++;
+        // check if there is new timing information
+        // that indicates a new host buffer
+        // therefore we reset the current subbuffer index.
+        // and calculate the new tick at time of host buffer start
+        if(time->tick != tick_hist) {
+            currentSubbufferIndex = 0;
+            tick_hist = time->tick;
+            tick_at_host_buffer_start = (((time->bar - 1) * time->beatsPerBar) + (time->beat - 1)) * time->ppq + time->tick;
         }
+        else
+            currentSubbufferIndex++;
+
 
         // tick offset from the host buffer to the current internal buffer
         const float tick_offset = internal_buffer_ticks * (float)currentSubbufferIndex;
