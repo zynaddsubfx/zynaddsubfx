@@ -269,7 +269,7 @@ private:
 #ifdef WIN32
     HMODULE handle;
 #else
-    void *handle;
+    void *handle = nullptr;
 #endif
 
 
