@@ -1467,6 +1467,11 @@ bool Master::AudioOut(float *outl, float *outr)
 
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
+//
+// beatType is not being used yet.
+// but beatsPerBar/beatType could be used to
+// match numerator/denominator along with bpm to plugin host
+
 void Master::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
