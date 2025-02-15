@@ -69,6 +69,7 @@ Reverse::Reverse(EffectParams pars, const AbsTime *time_)
     setpanning(64);
     setvolume(Pvolume);
     tick_at_host_buffer_start = (time->beat - 1) * time->ppq + time->tick;
+    tick_at_host_buffer_hist = 0;
 }
 
 Reverse::~Reverse()
@@ -124,6 +125,12 @@ void Reverse::out(const Stereo<float *> &input)
             currentSubbufferIndex = 0;
             tick_hist = time->tick;
             tick_at_host_buffer_start = (((time->bar - 1) * time->beatsPerBar) + (time->beat - 1)) * time->ppq + time->tick;
+            if(tick_at_host_buffer_start > 0 && tick_at_host_buffer_hist == 0) { 
+                reverterL->sync(0);
+                if (Pstereo) reverterR->sync(0);
+            }
+            tick_at_host_buffer_hist = tick_at_host_buffer_start;
+                
         }
         else
             currentSubbufferIndex++;
