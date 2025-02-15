@@ -267,9 +267,9 @@ private:
     int oscPort;
     zest_handles z;
 #ifdef WIN32
-    HMODULE handle;
+    HMODULE handle = nullptr;
 #else
-    void *handle;
+    void *handle = nullptr;
 #endif
 
 
