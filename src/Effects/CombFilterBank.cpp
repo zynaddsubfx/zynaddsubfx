@@ -121,9 +121,9 @@ namespace zyn {
             unsigned int nrOfActualStrings = 0;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
                 if (delays[j] != 0.0f) {
-					smp[i] += string_smps[j][pos_writer];
-					nrOfActualStrings++;
-				}
+                    smp[i] += string_smps[j][pos_writer];
+                    nrOfActualStrings++;
+                }
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value

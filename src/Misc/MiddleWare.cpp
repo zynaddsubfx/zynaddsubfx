@@ -590,6 +590,7 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
                                    master->time,
+                                   master->sync,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
                                    &master->microtonal, master->fft, &master->watcher,
@@ -649,6 +650,7 @@ public:
 
         Part *p = new Part(*master->memory, synth,
                 master->time,
+                master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
@@ -1890,8 +1892,8 @@ static rtosc::Ports middlewareReplyPorts = {
     {"request-memory:", 0, 0,
         rBegin;
         //Generate out more memory for the RT memory pool
-        //5MBi chunk
-        size_t N  = 5*1024*1024;
+        //8MBi chunk
+        size_t N  = 8*1024*1024;
         void *mem = malloc(N);
         impl.uToB->write("/add-rt-memory", "bi", sizeof(void*), &mem, N);
         rEnd},
@@ -2627,6 +2629,7 @@ void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
         fprintf(stderr, "Middleware::messageAnywhere message too big...\n");
         impl->multi_thread_source.free(mem);
     }
+    va_end(va);
 }
 
 

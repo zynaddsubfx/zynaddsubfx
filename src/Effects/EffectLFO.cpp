@@ -15,11 +15,11 @@
 #include "../Misc/Util.h"
 
 #include <cmath>
-#include "globals.h"
+#include "../globals.h"
 
 namespace zyn {
 
-EffectLFO::EffectLFO(float srate_f, float bufsize_f)
+EffectLFO::EffectLFO(float srate_f, float bufsize_f, const AbsTime *time_)
     :Pfreq(40),
       Prandomness(0),
       PLFOtype(0),
@@ -32,7 +32,8 @@ EffectLFO::EffectLFO(float srate_f, float bufsize_f)
       ampr2(RND),
       lfornd(0.0f),
       samplerate_f(srate_f),
-      buffersize_f(bufsize_f)
+      buffersize_f(bufsize_f),
+      time(time_)
 {
     updateparams();
 }

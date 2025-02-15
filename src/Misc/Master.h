@@ -137,7 +137,16 @@ class Master
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr) REALTIME;
+                                float *outr,
+                                int bar=0,
+                                int beat=0,
+                                float beatsPerBar=0.0f,
+                                float beatType=0.0f,
+                                float tick=0.0f,
+                                float bpm=0.0f,
+                                float PPQ=0.0f,
+                                bool playing=false,
+                                size_t frames=0) REALTIME;
 
 
         void partonoff(int npart, int what);
@@ -185,7 +194,8 @@ class Master
         float vuoutpeakpartr[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
-        AbsTime  time;
+        AbsTime time;
+        Sync* sync;
         Controller ctl;
         bool       swaplr; //if L and R are swapped
 

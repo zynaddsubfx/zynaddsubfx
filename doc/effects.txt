@@ -551,13 +551,45 @@ strings of a piano.
 Description
 ^^^^^^^^^^^
 
-** *Drive* how much input signal id fed to the strings
+** *Drive* how much input signal is fed to the strings
 ** *Level* Output Volume
 ** *Str* Number of strings to use. 12 is a full Octave. On small systems 
-be carefull with cpu load
-** *Q* How strong is the Reflection
-** *Uni* Unisono - how many strings should have the 'same' frequency it' used with the
+be careful with cpu load
+** *Q* How strong is the reflection
+** *Uni* Unisono - how many strings should have the 'same' frequency. It's used with the
 next paremeter.
 ** *Detune* Amount of detune between the unisono strings
 ** *Base* midi note of the lowest string
 
+Reverse
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The reversed effect plays the audio signal backwards. To prevent a time paradoxon
+the input signal is chopped in segments that are reversed one by one.
+One classic usage is the reversing of a decaying sound for example from reverb.
+
+Function
+^^^^^^^^
+With a melotron it was possible to reverse each key by turning the magentic tape around. 
+While exactly this is not possible with this effect, because there is no prerecorded
+sound when hitting a key, this effect can create sounds that resemble those of the melotron.
+
+
+Description
+^^^^^^^^^^^
+
+** *Length* Length of the segments being played backwards.
+** *Numerator&Denominator* Alternatively the length can be set relative
+to the global Tempo (bpm) as note value. For example 1/4 at 120bpm is 0.5s
+** *Phase* adjust the time when the reversed segments start relative to a
+global time reference. It's useful only in combination with another
+timed element like an LFO or delay.
+** *Sync* choose how the recording and reverse playing phase is synchronized
+* *Auto* the effect switches automatically between recording and reverse playing and vice versa after a segment (length)
+* *MIDI* like auto but speed is taken from MIDI timecode
+* *Host* like auto but speed is taken from plugin host (when running as plugin mode)
+* *NoteOn* recording starts at noteOn. Reverse playing starts after a segment (length)
+* *NoteOnOff* recording starts at noteon. Reverse playing starts when the decaying note reaches silence

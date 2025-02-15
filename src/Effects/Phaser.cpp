@@ -113,7 +113,7 @@ rtosc::Ports Phaser::ports = {
 #define ZERO_ 0.00001f        // Same idea as above.
 
 Phaser::Phaser(EffectParams pars)
-    :Effect(pars), lfo(pars.srate, pars.bufsize), old(NULL), xn1(NULL),
+    :Effect(pars), lfo(pars.srate, pars.bufsize, pars.time), old(NULL), xn1(NULL),
       yn1(NULL), diff(0.0f), oldgain(0.0f), fb(0.0f)
 {
     analog_setup();
