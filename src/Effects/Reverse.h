@@ -93,7 +93,7 @@ class Reverse final:public Effect
         unsigned int currentSubbufferIndex = 0;
         float tick_hist;
         float tick_at_host_buffer_start;
-        float tick_at_host_buffer_hist;
+        bool playing_hist;
 };
 
 }

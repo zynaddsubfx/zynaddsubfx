@@ -278,6 +278,7 @@ void Reverter::reset() {
         memset(input, 0, mem_size * sizeof(float));
     pos_writer = 0;
     reverse_index = 0;
+    syncPos = mem_size;
 }
 
 void Reverter::setphase(float value) {
