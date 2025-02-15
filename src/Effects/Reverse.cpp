@@ -103,19 +103,32 @@ void Reverse::out(const Stereo<float *> &input)
     if (time->tempo && speedfactor && (PsyncMode == HOST)) {
         // in host mode we want to find out if (condition) and when (position) a beat happens inside the buffer
         // and call sync at that position
-        // condition: at the end of the buffer ticks % ticks_per_beat < ticks_per buffer
+        // condition: at the end of the buffer: ticks % ticks_per_beat < ticks_per buffer
         // position: ticks % ticks_per_beat
         //
         // to complicate things:
         // when running as plugin, the host may have a larger buffer than buffersize.
         // in this case the processing function is called multiple times for one host buffer
         // and we have to interpolate the ticks for each internal buffer
+        //
+        // 1:01:00 (start of "song")       1:02:00                internal buffer end
+        // |                                                           |
+        // |-------------------------------|-------------------------------|
+        //               1 beat
+        //
+        //
+        // |-----------------------------------------------------------|
+        //         "tick"
+        //                                 |--"ticks_since_last_beat"--|
+        //
+        //              |---"internal_buffer_ticks"------------------| if beat change inside internal buffer
+        //                                 |-"internal_buffer_ticks"-| if beat change not inside internal buffer
+
 
         // number of ticks during the length of one internal buffer
-        const float internal_buffer_ticks = ((float)buffersize / (float)samplerate * // seconds per host buffer *
+        const float internal_buffer_ticks = ((float)buffersize / (float)samplerate) * // seconds per host buffer *
                                             ((float)time->tempo / HZ2BPM) *     // beats per second        *
-                                            (float)time->ppq);                  // ticks per beat = ticks per buffer
-
+                                            (float)time->ppq;                  // ticks per beat = ticks per buffer
 
         // check if there is new timing information
         // that indicates a new host buffer
@@ -125,32 +138,32 @@ void Reverse::out(const Stereo<float *> &input)
             currentSubbufferIndex = 0;
             tick_hist = time->tick;
             tick_at_host_buffer_start = (((time->bar - 1) * time->beatsPerBar) + (time->beat - 1)) * time->ppq + time->tick;
-            if(time->playing != playing_hist) { 
+            if(time->playing != playing_hist) {
                 reverterL->sync(0);
                 if (Pstereo) reverterR->sync(0);
-                printf("time->playing: %d", time->playing);
             }
             playing_hist = time->playing;
-                
+
         }
         else
             currentSubbufferIndex++;
 
+        {
+            // tick offset from the host buffer to the current internal buffer
+            const float tick_offset = internal_buffer_ticks * (float)currentSubbufferIndex;
+            // tick at time of internal buffer start
+            const float tick_at_buffer_start = tick_at_host_buffer_start + tick_offset;
+            // now calculate the tick at time of internal buffer end
+            // this is needed to determine if a beat change will happen during this internal buffer
 
-        // tick offset from the host buffer to the current internal buffer
-        const float tick_offset = internal_buffer_ticks * (float)currentSubbufferIndex;
-        // tick at time of internal buffer start
-        const float tick_at_buffer_start = tick_at_host_buffer_start + tick_offset;
-        // now calculate the tick at time of internal buffer end
-        // this is needed to determine if a beat change will happen during this internal buffer
-
-        tick = tick_at_buffer_start + internal_buffer_ticks;
+            tick = tick_at_buffer_start + internal_buffer_ticks;
+        }
 
 
         const float ticks_per_beat = (float)time->ppq / speedfactor;
-        const float phase_ticks = fmodf(tick, ticks_per_beat);
-        if(phase_ticks < internal_buffer_ticks) { // Ensure beat is inside the buffer
-            const float syncPos = ( (internal_buffer_ticks - phase_ticks) / (float)internal_buffer_ticks) * (float)buffersize;
+        const float ticks_since_last_beat = fmodf(tick, ticks_per_beat);
+        if(ticks_since_last_beat < internal_buffer_ticks) { // Ensure beat is inside the buffer
+            const float syncPos = ( (internal_buffer_ticks - ticks_since_last_beat) / (float)internal_buffer_ticks) * (float)buffersize;
             reverterL->sync(syncPos);
             if (Pstereo) reverterR->sync(syncPos);
         }
