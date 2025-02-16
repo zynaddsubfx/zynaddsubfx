@@ -888,7 +888,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             FMFreqEnvelope->add2XML(xml);
             xml.endbranch();
         }
-        
+
 
         xml.beginbranch("OSCIL");
         FmGn->add2XML(xml);
