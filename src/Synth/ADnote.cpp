@@ -1410,7 +1410,7 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
         ComputeVoiceOscillatorSync(nvoice);
     else
         ComputeVoiceOscillator_LinearInterpolation(nvoice);
-    
+
     Voice& vce = NoteVoicePar[nvoice];
     if(vce.FMnewamplitude > 1.0f)
         vce.FMnewamplitude = 1.0f;
@@ -1532,7 +1532,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
                 poslo = 0;
                 poshi = 0;
                 continue;
-                
+
             }
             fmold = tw[i];
 
@@ -1783,9 +1783,9 @@ int ADnote::noteout(float *outl, float *outr)
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
                     default:
-                        if(NoteVoicePar[nvoice].AAEnabled) 
+                        if(NoteVoicePar[nvoice].AAEnabled)
                             ComputeVoiceOscillator_SincInterpolation(nvoice);
-                        else 
+                        else
                             if(NoteVoicePar[nvoice].syncEnabled)
                                 ComputeVoiceOscillatorSync(nvoice);
                             else
