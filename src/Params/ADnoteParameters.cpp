@@ -200,8 +200,8 @@ static const Ports voicePorts = {
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
-
-
+    rToggle(PsyncEnabled,               rShort("sync"),  rDefault(false),
+            "Oscillator Hard Sync"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
@@ -604,6 +604,7 @@ void ADnoteVoiceParam::defaults()
     PFMFreqEnvelopeEnabled   = 0;
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
+    PsyncEnabled = false;
 
     OscilGn->defaults();
     FmGn->defaults();
@@ -778,6 +779,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
 
     xml.addpar("fm_enabled", (int)PFMEnabled);
+    xml.addparbool("sync_enabled", PsyncEnabled);
 
     xml.beginbranch("OSCIL");
     OscilGn->add2XML(xml);
@@ -857,7 +859,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     }
 
     if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
-       || (!xml.minimal)) {
+       || (!xml.minimal) || PsyncEnabled) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
@@ -886,6 +888,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             FMFreqEnvelope->add2XML(xml);
             xml.endbranch();
         }
+
 
         xml.beginbranch("OSCIL");
         FmGn->add2XML(xml);
@@ -1188,8 +1191,8 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMDetuneType);
     copy(PFMFreqEnvelopeEnabled);
 
-
     RCopy(FMFreqEnvelope);
+    copy(PsyncEnabled);
 
     RCopy(FmGn);
 
@@ -1271,6 +1274,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
     PfilterFcCtlBypass  = xml.getparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
     PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
+    PsyncEnabled   = xml.getparbool("sync_enabled", PsyncEnabled);
 
     if(xml.enterbranch("OSCIL")) {
         OscilGn->getfromXML(xml);
