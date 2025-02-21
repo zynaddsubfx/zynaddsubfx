@@ -1,0 +1,14 @@
+---
+name: Scripted Checks
+'on': [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Run yamllint
+        run: for i in $(git ls-files '*.yml'); do yamllint $i; done
