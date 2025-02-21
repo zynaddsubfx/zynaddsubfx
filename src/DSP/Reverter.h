@@ -163,7 +163,7 @@ private:
     /**
      * @brief Update the read position in the ring buffer.
      */
-    void updateReaderPosition(int i);
+    void updateReaderPosition();
 
     /**
      * @brief Apply crossfading between two buffer segments.
@@ -214,12 +214,6 @@ private:
 
     /// Time reference for syncing
     float tRef;
-
-    /// Offset in the buffer for reading/writing
-    int buffer_offset;
-
-    /// Counter for buffer processing
-    int buffer_counter;
 
     /// Offset for global time synchronization
     float global_offset;

@@ -2543,7 +2543,7 @@ void MiddleWare::doReadOnlyOp(std::function<void()> fn)
     impl->doReadOnlyOp(fn);
 }
 
-void MiddleWare::setUiCallback(int gui_id, void(*cb)(void*,const char *), void *ui)
+void MiddleWare::setUiCallback(std::size_t gui_id, void(*cb)(void*,const char *), void *ui)
 {
     assert(gui_id < sizeof(impl->cb)/sizeof(impl->cb[0]));
     impl->cb[gui_id] = cb;
@@ -2582,7 +2582,7 @@ void MiddleWare::transmitMsg_va(const char *path, const char *args, va_list va)
         fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
-void MiddleWare::transmitMsgGui(int gui_id, const char *msg)
+void MiddleWare::transmitMsgGui(std::size_t gui_id, const char *msg)
 {
     if(gui_id == 0 && activeUrl() != "GUI") {
         transmitMsg("/echo", "ss", "OSC_URL", "GUI");
@@ -2594,7 +2594,7 @@ void MiddleWare::transmitMsgGui(int gui_id, const char *msg)
     transmitMsg(msg);
 }
 
-void MiddleWare::transmitMsgGui(int gui_id, const char *path, const char *args, ...)
+void MiddleWare::transmitMsgGui(std::size_t gui_id, const char *path, const char *args, ...)
 {
     char buffer[1024];
     va_list va;
@@ -2606,7 +2606,7 @@ void MiddleWare::transmitMsgGui(int gui_id, const char *path, const char *args, 
     va_end(va);
 }
 
-void MiddleWare::transmitMsgGui_va(int gui_id, const char *path, const char *args, va_list va)
+void MiddleWare::transmitMsgGui_va(std::size_t gui_id, const char *path, const char *args, va_list va)
 {
     char buffer[1024];
     if(rtosc_vmessage(buffer, 1024, path, args, va))

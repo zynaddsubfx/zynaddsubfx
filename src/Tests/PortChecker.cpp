@@ -28,7 +28,7 @@ char *instance_name=(char*)"";
 class direct_server : public rtosc::port_checker::server
 {
     zyn::MiddleWare* const mw;
-    const int gui_id;
+    const std::size_t gui_id;
     std::queue<std::vector<char>> received;  // inbox for MW's replies
 
 public:
@@ -123,7 +123,7 @@ public:
 
     void vinit(const char* ) override {}  // nothing to do here
 
-    direct_server(int gui_id, int timeout_msecs, zyn::MiddleWare* mw)
+    direct_server(std::size_t gui_id, int timeout_msecs, zyn::MiddleWare* mw)
         : server(timeout_msecs)
         , mw(mw)
         , gui_id(gui_id) {}
@@ -193,8 +193,8 @@ class PortChecker
             bool ok;
             try {
                 int timeout_msecs = 50;
-                sender = new direct_server(0, timeout_msecs, mw);
-                other = new direct_server(1, timeout_msecs, mw);
+                sender = new direct_server(0u, timeout_msecs, mw);
+                other = new direct_server(1u, timeout_msecs, mw);
                 rtosc::port_checker pc(sender, other);
                 ok = pc(mw->getServerPort());
 

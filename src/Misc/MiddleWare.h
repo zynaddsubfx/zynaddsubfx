@@ -51,7 +51,7 @@ class MiddleWare
         //return  UI interface
         Fl_Osc_Interface *spawnUiApi(void);
         //Set callback to push UI events to
-        void setUiCallback(int gui_id, void(*cb)(void*,const char *),void *ui);
+        void setUiCallback(std::size_t gui_id, void(*cb)(void*,const char *),void *ui);
         //Set callback to run while busy
         void setIdleCallback(void(*cb)(void*),void *ptr);
         //Handle events
@@ -66,11 +66,11 @@ class MiddleWare
         void transmitMsg_va(const char *, const char *args, va_list va);
 
         //Handle a rtosc Message uToB, if sender is GUI
-        void transmitMsgGui(int gui_id, const char * msg);
+        void transmitMsgGui(std::size_t gui_id, const char * msg);
         //Handle a rtosc Message uToB, if sender is GUI
-        void transmitMsgGui(int gui_id, const char *, const char *args, ...);
+        void transmitMsgGui(std::size_t gui_id, const char *, const char *args, ...);
         //Handle a rtosc Message uToB, if sender is GUI
-        void transmitMsgGui_va(int gui_id, const char *, const char *args, va_list va);
+        void transmitMsgGui_va(std::size_t gui_id, const char *, const char *args, va_list va);
 
         //Send a message to middleware from an arbitrary thread
         void messageAnywhere(const char *msg, const char *args, ...);

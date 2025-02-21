@@ -24,7 +24,7 @@ namespace zyn {
 
 Reverter::Reverter(Allocator *alloc, float delay_, unsigned int srate, int bufsize, float tRef_, const AbsTime *time_)
     : syncMode(NOTEON), input(nullptr), gain(1.0f), delay(0.0f), phase(0.0f), crossfade(0.16f),
-      tRef(tRef_), buffer_offset(0), buffer_counter(0), reverse_index(0.0f), phase_offset_old(0.0f),
+      tRef(tRef_), reverse_index(0.0f), phase_offset_old(0.0f),
       phase_offset_fade(0.0f), fade_counter(0), mean_abs_value(999.9f), time(time_), memory(*alloc),
       samplerate(srate), buffersize(bufsize), max_delay_samples(srate * MAX_REV_DELAY_SECONDS)
 {
@@ -97,7 +97,7 @@ void Reverter::processBuffer(float *smp) {
     for (int i = 0; i < buffersize; i++) {
         reverse_index++;
         checkSync();
-        updateReaderPosition(i);
+        updateReaderPosition();
         crossfadeSamples(smp, i);
         applyGain(smp[i]);
     }
@@ -168,7 +168,7 @@ void Reverter::sync(float pos) {
     }
 }
 
-void Reverter::updateReaderPosition(int i) {
+void Reverter::updateReaderPosition() {
     //                 buffersize
     //                  |<---->|
     // ---+------+------+------+------+------+---
