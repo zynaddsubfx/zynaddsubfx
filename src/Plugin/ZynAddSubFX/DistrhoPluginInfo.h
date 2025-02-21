@@ -14,9 +14,10 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_BRAND "ZynAddSubFX"
-#define DISTRHO_PLUGIN_NAME  "ZynAddSubFX"
-#define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net"
+#define DISTRHO_PLUGIN_BRAND   "ZynAddSubFX"
+#define DISTRHO_PLUGIN_NAME    "ZynAddSubFX"
+#define DISTRHO_PLUGIN_URI     "http://zynaddsubfx.sourceforge.net"
+#define DISTRHO_PLUGIN_CLAP_ID "zynaddsubfx.synthesizer"
 
 #if defined(NTK_GUI)
  #define DISTRHO_PLUGIN_HAS_UI          1
