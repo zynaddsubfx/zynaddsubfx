@@ -28,9 +28,8 @@ class EffectLFO
      *
      * @param srate_f Sample rate.
      * @param bufsize_f Buffer size.
-     * @param time Pointer to an AbsTime object (optional).
      */
-    EffectLFO(float srate_f, float bufsize_f, const AbsTime *time = nullptr);
+    EffectLFO(float srate_f, float bufsize_f);
 
     /**
      * Destructs the EffectLFO object.
@@ -76,11 +75,6 @@ private:
     // Current setup
     float samplerate_f;  //!< Sample rate
     float buffersize_f;  //!< Buffer size
-
-    const AbsTime *time;  //!< Pointer to an AbsTime object
-    unsigned int numerator;  //!< The numerator of the time signature to calculate the frequency from system tempo(bpm)
-                            //!< If it is 0 Pfreq is used.
-    unsigned int denominator;  //!< The denominator of the time signature to calculate the frequency from system tempo(bpm)
 };
 
 }

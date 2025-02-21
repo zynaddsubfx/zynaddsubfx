@@ -370,9 +370,17 @@ add_definitions(
 	 -Wall
 	 -Wextra)
 
-check_cxx_compiler_flag("-Wno-stringop-truncation" COMPILER_SUPPORTS_NO_STRINGOP_TRUNCATION)
-if (COMPILER_SUPPORTS_NO_STRINGOP_TRUNCATION)
+check_cxx_compiler_flag("-Wno-stringop-truncation" HAVE_NO_STRINGOP_TRUNCATION)
+if (HAVE_NO_STRINGOP_TRUNCATION)
     add_definitions(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
+endif()
+check_cxx_compiler_flag("-Wno-vla-cxx-extension" HAVE_NO_VLA_CXX_EXTENSION)
+if (HAVE_NO_VLA_CXX_EXTENSION)
+    add_definitions(-Wno-vla-cxx-extension)
+endif()
+check_cxx_compiler_flag("-Wno-nan-infinity-disabled" HAVE_NO_NAN_INFINITY_DISABLED)
+if (HAVE_NO_NAN_INFINITY_DISABLED)
+    add_definitions(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
 endif()
 
 # macro similar to "check_cxx_compiler_flag", however,
@@ -390,9 +398,9 @@ endmacro ()
 
 check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
     "unrecognized|option"
-    COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE
+    HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
     )
-if(COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE)
+if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
     add_definitions(-Wno-inconsistent-missing-override)
 endif()
 

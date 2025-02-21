@@ -334,11 +334,11 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pfreqtracking = rtosc_argument(msg, 0).i;
-                obj->freqtracking = 100 * (Pfreqtracking - 64.0f) / (64.0f);
+                obj->freqtracking = 100.0f * (Pfreqtracking - 64.0f) / (64.0f);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pfreqtracking);
             } else {
-                int Pfreqtracking = obj->freqtracking/100.0*64.0 + 64.0;
+                int Pfreqtracking = static_cast<int>(roundf(((obj->freqtracking/100.0f) * 64.0f + 64.0f)));
                 d.reply(d.loc, "i", Pfreqtracking);
             }
         }},

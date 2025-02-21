@@ -68,7 +68,7 @@ static const rtosc::Ports local_ports = {
                 if(!tail)
                     return;
                 for(int i=0;i<128;++i) {
-                    sprintf(tail+1, "parameter%d", i);
+                    snprintf(tail+1, sizeof(loc)-(tail+1-loc), "parameter%d", i);
                     d.broadcast(loc, "i", eff->geteffectparrt(i));
                 }
             }
