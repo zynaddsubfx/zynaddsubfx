@@ -87,7 +87,7 @@ class MessageTest
                         } else {
                             auto *mem = s->alloc();
                             if(mem) {
-                                sprintf(mem->memory,"%d written by %d@op%d", i*OPS+op,i,op);
+                                snprintf(mem->memory, mem->size, "%d written by %d@op%d", i*OPS+op,i,op);
                                 //printf("w%d",i%10);
                                 op++;
                             }

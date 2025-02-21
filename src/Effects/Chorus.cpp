@@ -80,7 +80,7 @@ rtosc::Ports Chorus::ports = {
 
 Chorus::Chorus(EffectParams pars)
     :Effect(pars),
-      lfo(pars.srate, pars.bufsize, pars.time),
+      lfo(pars.srate, pars.bufsize),
       maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * samplerate_f)),
       delaySample(memory.valloc<float>(maxdelay), memory.valloc<float>(maxdelay))
 {

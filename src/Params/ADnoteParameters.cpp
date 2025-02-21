@@ -453,7 +453,7 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
      NULL, rArrayTCbMember(VoicePar, Enabled)},
     // this must come after "VoicePar#.../..." ports, so rtosc::apropos finds
     // the more exact path first (bug in apropos)
-    rRecurs(VoicePar, NUM_VOICES),
+    rRecurs(VoicePar, NUM_VOICES, "Voice Parameters"),
     rRecur(GlobalPar, "Adnote Parameters"),
 };
 #undef rChangeCb
