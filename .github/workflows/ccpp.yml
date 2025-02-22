@@ -1,4 +1,5 @@
-name: Ubuntu Build CI
+---
+name: Build CI
 
 on:
   push:
@@ -8,30 +9,113 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows MSVC",
+            enabled: 0,
+            os: windows-latest,
+            deps1: "",
+            deps2: "",
+            testdeps: "",
+            info: "",
+            config: "cmake
+                    -B build
+                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+                    -DRTOSC_WERROR=1
+                    -DCMAKE_BUILD_TYPE=Debug
+                    ",
+            configext: "cmake -B build -DCompileExtensiveTests=ON ..",
+            build: "cmake --build build --config Debug",
+            test: "ctest --output-on-failure --test-dir build"
+          }
+          - {
+            name: "Ubuntu gcc",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            info: "cmake --version && gcc --version",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure"
+          }
+          - {
+            name: "Ubuntu clang+lld",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            info: "cmake --version && clang --version",
+            config: "cd build && cmake ..",
+            # the only really different line to gcc:
+            configext: "cd build && cmake -DCompileExtensiveTests=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS='-fuse-ld=lld' -DCMAKE_CXX_FLAGS='-fuse-ld=lld' -DRTOSC_WERROR=ON -DWerror=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure"
+          }
+          - {
+            name: "macOS clang",
+            enabled: 1,
+            os: macos-latest,
+            update: "cmake --version && clang --version",
+            deps1: "brew install extra-cmake-modules liblo zlib fftw fltk@1.3 fluid-synth libxpm",
+            deps2: "brew install libmxml --HEAD",
+            testdeps: "brew install ruby",
+            info: "cmake --version && clang --version",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure"
+          }
     steps:
-    - uses: actions/checkout@v1
-    - name: update_apt
-      run:   sudo apt-get update
-    - name: install_deps1
-      run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
-    - name: install_deps2
-      run: sudo apt-get install liblo-dev
-    - name: install_test_deps1
-      run: sudo apt-get install ruby
-    - name: submodule
-      run: git submodule update --init
-    - name: configure
-      run: mkdir build && cd build && cmake ..
-    - name: configure-extensive
-      if: (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' )
-      run: cd build && cmake -DCompileExtensiveTests=ON -DRTOSC_WERROR=ON -DWerror=ON ..
-    - name: make
-      run: cd build && make
-    - name: make test
-      run: cd build && make test CTEST_OUTPUT_ON_FAILURE=1
+      - name: check out
+        if: ${{ matrix.config.enabled == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: update_apt
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.update }}
+      - name: install_deps1
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.deps1 }}
+      - name: install_deps2
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.deps2 }}
+      - name: install_test_deps1
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.testdeps }}
+      - name: submodule
+        if: ${{ matrix.config.enabled == 1 }}
+        run: git submodule update --init
+      - name: info
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.info }}
+      - name: create_builddir
+        if: ${{ matrix.config.enabled == 1 }}
+        run: mkdir build
+      - name: configure
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.config }}
+      - name: configure-extensive
+        if: ${{ matrix.config.enabled == 1 && ( (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' ) ) }}
+        run: ${{ matrix.config.configext }}
+      - name: make
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.build }}
+      - name: make test
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.test }}
+
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
 #    container:
