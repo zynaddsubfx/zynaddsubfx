@@ -42,17 +42,19 @@ rtosc::Ports Reverse::ports = {
                   d.reply(d.loc, "i", o->Ppreset);
               rEnd},
     rPresetForVolume,
-    rEffParVol(),
+    rEffParVol(rDefaultDepends(presetOfVolume),
+            rPresets(32, 32, 32),
+            rPresetsAt(16, 64, 64, 64)),
     rEffParPan(),
-    rEffPar(Pdelay,   2, rShort("delay"), rDefault(31),
+    rEffPar(Pdelay,   2, rShort("delay"), rDefault(25),
             "Length of Reversed Segment"),
-    rEffParTF(Pstereo,3, rShort("stereo"),
+    rEffParTF(Pstereo,3, rShort("stereo"), rDefault(false),
             "Enable Stereo Processing"),
     rEffPar(Pphase,   4, rShort("phase"), rDefault(64),
             "Phase offset for Reversed Segment"),
-    rEffPar(Pcrossfade, 5, rShort("fade"), rDefault(64), rUnit(1/100 s),
+    rEffPar(Pcrossfade, 5, rShort("fade"), rPresets(32, 16, 50), rUnit(1/100 s),
             "Cross Fade Time between Reversed Segments"),
-    rEffParOpt(Psyncmode,    6, rShort("mode"), rDefault(NOTEON),
+    rEffParOpt(Psyncmode,    6, rShort("mode"), rPresets(NOTEON, NOTEONOFF, AUTO),
             rOptions(SYNCMODES),
             "Sync Mode"),
 };
@@ -61,7 +63,7 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(50),Pdelay(31),Pphase(64), Pcrossfade(64), PsyncMode(NOTEON), Pstereo(0),time(time_), tick_hist(0)
+    :Effect(pars),Pvolume(insertion?64:32),Pdelay(25),Pphase(64), Pcrossfade(32), PsyncMode(NOTEON), Pstereo(0),time(time_), tick_hist(0)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
