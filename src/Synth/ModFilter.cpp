@@ -77,6 +77,7 @@ void ModFilter::update(float relfreq, float relq)
         baseFreq = pars.getfreq();
         baseQ    = pars.getq();
         tracking = pars.getfreqtracking(noteFreq);
+        
     }
 
     //Controller Free Center Frequency
@@ -181,5 +182,7 @@ void ModFilter::cbParamUpdate(CombFilter &cb)
 {
     cb.settype(pars.Ptype);
     cb.setgain(pars.getgain());
+    cb.sethpf(pars.Phpf);
+    cb.setlpf(pars.Plpf);
 }
 }
