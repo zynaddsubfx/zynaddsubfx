@@ -141,7 +141,10 @@ const rtosc::Ports FilterParams::ports = {
             "Center Freq (formant)"),
     rParamZyn(Poctavesfreq,     rShort("octaves"), rDefault(64),
             "Number of octaves for formant"),
-
+    rParamZyn(Phpf, rShort("hpl"), rDefault(0),
+            "Waveguide HighPass"),
+    rParamZyn(Plpf, rShort("lpf"), rDefault(127),
+            "Waveguide LowPass"),
     rParamI(Psequencesize,    rShort("seq.size"),
             rLinear(0, FF_MAX_SEQUENCE),
             rDefault(3), rDefaultDepends(loc),
@@ -456,6 +459,8 @@ void FilterParams::defaults()
     Pcenterfreq     = 64; //1 kHz
     Poctavesfreq    = 64;
     Pvowelclearness = 64;
+    Phpf    = 0;
+    Plpf    = 127;
 }
 
 void FilterParams::defaults(int n)

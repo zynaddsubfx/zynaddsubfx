@@ -30,6 +30,8 @@ class CombFilter:public Filter
         void setq(float q) override;
         void setgain(float dBgain) override;
         void settype(unsigned char type);
+        void sethpf(unsigned char _Phpf);
+        void setlpf(unsigned char _Plpf);
 
     private:
 
@@ -38,15 +40,21 @@ class CombFilter:public Filter
         float gain=1.0f;
         float q;
         unsigned char type;
+        
+        unsigned char Plpf;
+        unsigned char Phpf;
 
         float step(float x);
 
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
 
+
         float gainfwd;
         float gainbwd;
         float delay;
+        
+        class AnalogFilter *lpf, *hpf; //filters
 
         unsigned int inputIndex=0;
         unsigned int outputIndex=0;

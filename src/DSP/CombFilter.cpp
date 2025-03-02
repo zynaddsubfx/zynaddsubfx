@@ -6,6 +6,7 @@
 #include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "CombFilter.h"
+#include "AnalogFilter.h"
 
 // theory from `Introduction to Digital Filters with Audio Applications'', by Julius O. Smith III, (September 2007 Edition).
 // https://www.dsprelated.com/freebooks/filters/Analysis_Digital_Comb_Filter.html
@@ -14,7 +15,8 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), q(Fq), type(Ftype), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), Plpf(127), Phpf(0), 
+    lpf(nullptr), hpf(nullptr), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -31,6 +33,13 @@ CombFilter::~CombFilter(void)
 {
     memory.dealloc(input);
     memory.dealloc(output);
+
+    if(Plpf != 127) { //LowPass
+        memory.dealloc(lpf);
+    }
+    if(Phpf != 0) { //HighPass
+        memory.dealloc(hpf);
+    }
 }
 
 
@@ -85,6 +94,7 @@ void CombFilter::filterout(float *smp)
         // Apply output gain
         smp[i] *= outgain;
     }
+
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
@@ -140,6 +150,36 @@ void CombFilter::settype(unsigned char type_)
             gainfwd = -q;
             gainbwd = -q;
             break;
+    }
+}
+
+void CombFilter::sethpf(unsigned char _Phpf)
+{
+    if(Phpf == _Phpf) return;
+    Phpf = _Phpf;
+    if(Phpf == 0) { //No HighPass
+        memory.dealloc(hpf);
+    } else {
+        const float fr = expf(sqrtf(Phpf / 127.0f) * logf(10000.0f)) + 20.0f;
+        if(hpf == NULL)
+            hpf = memory.alloc<AnalogFilter>(1, fr, 1, 0, samplerate, buffersize);
+        else
+            hpf->setfreq(fr);
+    }
+}
+
+void CombFilter::setlpf(unsigned char _Plpf)
+{
+    if(Plpf == _Plpf) return;
+    Plpf = _Plpf;
+    if(Plpf == 127) { //No LowPass
+        memory.dealloc(lpf);
+    } else {
+        const float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
+        if(!lpf)
+            lpf = memory.alloc<AnalogFilter>(0, fr, 1, 0, samplerate, buffersize);
+        else
+            lpf->setfreq(fr);
     }
 }
 
