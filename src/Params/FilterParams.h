@@ -70,6 +70,9 @@ class FilterParams:public PresetsArray
         unsigned char Pformantslowness; //how slow varies the formants
         unsigned char Pvowelclearness; //how vowels are kept clean (how much try to avoid "mixed" vowels)
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
+        
+        //Comb filter parameter
+        unsigned char Phpf, Plpf; //the center frequency of the res. func., and the number of octaves
 
         struct Pvowels_t {
             struct formants_t {
