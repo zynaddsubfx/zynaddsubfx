@@ -72,16 +72,16 @@ void CombFilter::filterout(float *smp)
             const float inputPos = fmodf(inputIndex + i - delay + mem_size, mem_size);
             // Calculate the feedback sample positions in the output buffer
             const float outputPos = fmodf((outputIndex - delay + mem_size), mem_size);
-            
+
             // Add the fwd and bwd feedback samples to current sample
             smp[i] = smp[i] * gain + tanhX(
                 gainfwd * sampleLerp(input, inputPos) -
                 gainbwd * sampleLerp(output, outputPos));
-            
+
             // Copy new sample to output buffer
             output[outputIndex] = smp[i];
             outputIndex = (outputIndex + 1) % mem_size;
-            
+
             // Apply output gain
             smp[i] *= outgain;
         }
