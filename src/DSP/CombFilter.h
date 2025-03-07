@@ -47,6 +47,8 @@ class CombFilter:public Filter
         float gainfwd;
         float gainbwd;
         float delay;
+        
+        unsigned int inputIndex, outputIndex;
 
         Allocator &memory;
         int mem_size;

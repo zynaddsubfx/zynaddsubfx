@@ -14,7 +14,7 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), inputIndex(0), outputIndex(0), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -51,25 +51,40 @@ inline float CombFilter::sampleLerp(float *smp, float pos) {
 
 void CombFilter::filterout(float *smp)
 {
-    // shift the buffer content to the left
-    memmove(&input[0], &input[buffersize], (mem_size-buffersize)*sizeof(float));
-    // copy new input samples to the right end of the buffer
-    memcpy(&input[mem_size-buffersize], smp, buffersize*sizeof(float));
-    for (int i = 0; i < buffersize; i ++)
+    int endSize = mem_size - inputIndex;
+    if (endSize < buffersize)
     {
-        // calculate the feedback sample positions in the buffer
-        float pos = float(mem_size-buffersize+i)-delay;
-        // add the fwd and bwd feedback samples to current sample
-        smp[i] = smp[i]*gain + tanhX(
-            gainfwd * sampleLerp( input, pos) -
-            gainbwd * sampleLerp(output, pos));
-        // copy new sample to output buffer
-        output[mem_size-buffersize+i] = smp[i];
-        // apply output gain
-        smp[i] *= outgain;
+        // Copy the part of the samples that fit at the end of the buffer
+        memcpy(&input[inputIndex], smp, endSize * sizeof(float));
+        // Copy the remaining samples to the beginning of the buffer
+        memcpy(&input[0], &smp[endSize], (buffersize - endSize) * sizeof(float));
     }
-    // shift the buffer content one buffersize to the left
-    memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
+    else
+    {
+        // Copy new input samples to the buffer
+        memcpy(&input[inputIndex], smp, buffersize * sizeof(float));
+    }
+    inputIndex = (inputIndex + buffersize) % mem_size;
+
+    for (int i = 0; i < buffersize; i++)
+        {
+            // Calculate the feedback sample positions in the input buffer
+            const float inputPos = fmodf(inputIndex + i - delay + mem_size, mem_size);
+            // Calculate the feedback sample positions in the output buffer
+            const float outputPos = fmodf((outputIndex - delay + mem_size), mem_size);
+            
+            // Add the fwd and bwd feedback samples to current sample
+            smp[i] = smp[i] * gain + tanhX(
+                gainfwd * sampleLerp(input, inputPos) -
+                gainbwd * sampleLerp(output, outputPos));
+            
+            // Copy new sample to output buffer
+            output[outputIndex] = smp[i];
+            outputIndex = (outputIndex + 1) % mem_size;
+            
+            // Apply output gain
+            smp[i] *= outgain;
+        }
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
