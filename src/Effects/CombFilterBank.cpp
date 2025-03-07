@@ -5,6 +5,11 @@
 
 namespace zyn {
 
+    struct FloatTuple {
+        float A;  // Gain for read head A
+        float B;  // Gain for read head B
+    };
+
     CombFilterBank::CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_, float initgain):
     inputgain(1.0f),
     outgain(1.0f),
@@ -36,40 +41,54 @@ namespace zyn {
         if(nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq)
             return;
 
-        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew*1.03f + buffersize + 2)/16) * 16;
+        baseFreq = baseFreqNew;
+        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew*1.03f + maxDrop + buffersize + 2)/16) * 16;
+        setStrings(nrOfStringsNew, mem_size_new);
+    }
+
+    void CombFilterBank::setStrings(unsigned int nrOfStringsNew, unsigned int mem_size_new)
+    {
+
         if(mem_size_new == mem_size)
         {
             if(nrOfStringsNew>nrOfStrings)
             {
+                // allocate more combs of the same mem_size
                 for(unsigned int i = nrOfStrings; i < nrOfStringsNew; ++i)
                 {
-                    string_smps[i] = memory.valloc<float>(mem_size);
-                    memset(string_smps[i], 0, mem_size*sizeof(float));
+                    comb_smps[i] = memory.valloc<float>(mem_size);
+                    memset(comb_smps[i], 0, mem_size*sizeof(float));
                 }
             }
-            else if(nrOfStringsNew<nrOfStrings)
+            else if(nrOfStringsNew<nrOfStrings) // free some combs
                 for(unsigned int i = nrOfStringsNew; i < nrOfStrings; ++i)
-                    memory.devalloc(string_smps[i]);
-        } else
+                    memory.devalloc(comb_smps[i]);
+        } else // different mem_size
         {
-            // free the old buffers (wrong size for baseFreqNew)
+            // free the old combs (wrong size for baseFreqNew)
             for(unsigned int i = 0; i < nrOfStrings; ++i)
-                memory.devalloc(string_smps[i]);
+                memory.devalloc(comb_smps[i]);
 
             // allocate buffers with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
-                string_smps[i] = memory.valloc<float>(mem_size_new);
-                memset(string_smps[i], 0, mem_size_new*sizeof(float));
+                comb_smps[i] = memory.valloc<float>(mem_size_new);
+                memset(comb_smps[i], 0, mem_size_new*sizeof(float));
             }
             // update mem_size and baseFreq
             mem_size = mem_size_new;
-            baseFreq = baseFreqNew;
             // reset writer position
             pos_writer = 0;
         }
         // update nrOfStrings
         nrOfStrings = nrOfStringsNew;
+    }
+
+    inline float CombFilterBank::sampleLerp(const float *smp, const float pos) const {
+        int poshi = (int)pos; // integer part (pos >= 0)
+        float poslo = pos - (float) poshi; // decimal part
+        // linear interpolation between samples
+        return smp[poshi] + poslo * (smp[(poshi+1)%mem_size]-smp[poshi]);
     }
 
     inline float CombFilterBank::tanhX(const float x)
@@ -80,58 +99,168 @@ namespace zyn {
         return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
     }
 
-    inline float CombFilterBank::sampleLerp(const float *smp, const float pos) const {
-        int poshi = (int)pos; // integer part (pos >= 0)
-        float poslo = pos - (float) poshi; // decimal part
-        // linear interpolation between samples
-        return smp[poshi] + poslo * (smp[(poshi+1)%mem_size]-smp[poshi]);
+
+    /**
+     * Generiert zwei 180° phasenverschobene Sägezahn-Funktionen
+     * Bei positiver dropRate: 0 bis +maxDrop
+     * Bei negativer dropRate: 0 bis -maxDrop
+     */
+    inline FloatTuple generatePhasedSawtooth(float& masterCounter, float dropRate, float maxDrop) {
+        FloatTuple result;
+
+        // Gemeinsamen Zähler aktualisieren
+        masterCounter += dropRate;
+
+        if (dropRate >= 0) {
+            // Positive Richtung: 0 bis +maxDrop
+            if (masterCounter >= maxDrop) {
+                masterCounter -= floorf(masterCounter);
+            }
+
+            result.A = masterCounter;
+            result.B = masterCounter + (maxDrop * 0.5f);
+            if (result.B >= maxDrop) {
+                result.B -= floorf(result.B);
+            }
+
+        } else {
+            // Negative Richtung: 0 bis -maxDrop
+            if (masterCounter <= -maxDrop) {
+                masterCounter = 0;
+            }
+
+            result.A = masterCounter;
+            result.B = masterCounter - (maxDrop * 0.5f);
+            if (result.B <= -maxDrop) {
+                result.B -= floorf(result.B);
+            }
+        }
+        return result;
+    }
+
+
+    /**
+     * Calculates symmetric equal-power crossfade gains for two read heads
+     *
+     * @param normalizedPhase Normalized phase position in range [0.0, 1.0]
+     * @param crossoverWidth Width of transition zones in range [0.0, 1.0]
+     * @return CrossfadeGains structure with gainA and gainB (gainA² + gainB² = 1.0)
+     */
+    inline FloatTuple calculateSymmetricCrossfade(float phase, float crossoverWidth) {
+
+        FloatTuple gains;
+
+        // crossoverWidth = 0 → hartes Umschalten
+        if (crossoverWidth <= 1e-6f) {
+            gains.A = (phase < 0.5f) ? 1.0f : 0.0f;
+            gains.B = (phase < 0.5f) ? 0.0f : 1.0f;
+            return gains;
+        }
+
+        // Calculate zone boundaries
+        const float stableZone = 0.5f * (1.0 - crossoverWidth);  // Length of each stable zone
+        const float transitionZone = crossoverWidth*0.5f;     // Length of each transition zone
+
+        // Zone 1: A stable (left side)
+        const float zone1End = stableZone;
+        // Zone 2: A→B crossfade
+        const float zone2End = zone1End + transitionZone;
+        // Zone 3: B stable (center)
+        const float zone3End = zone2End + stableZone;
+        // Zone 4: B→A crossfade
+        // zone4End = 1.0 (implicit)
+
+        if (phase < zone1End) {
+            // Zone 1: A on, B off
+            gains.A = 1.0f;
+            gains.B = 0.0f;
+        }
+        else if (phase < zone2End) {
+            // Zone 2: A→B equal-power crossfade
+            float fadeFactor = (phase - zone1End) / transitionZone;
+            assert(fadeFactor <= 1.0f);
+            assert(fadeFactor >= 0.0f);
+            gains.A = (1.0f - fadeFactor);
+            gains.B = (fadeFactor);
+        }
+        else if (phase < zone3End) {
+            // Zone 3: A off, B on
+            gains.A = 0.0f;
+            gains.B = 1.0f;
+        }
+        else {
+            // Zone 4: B→A equal-power crossfade
+            float fadeFactor = (phase - zone3End) / transitionZone;
+            assert(fadeFactor <= 1.0f);
+            assert(fadeFactor >= 0.0f);
+            gains.A = (fadeFactor);
+            gains.B = (1.0f - fadeFactor);
+        }
+
+        return gains;
     }
 
     void CombFilterBank::filterout(float *smp)
     {
-        // no string -> no sound
-        if (nrOfStrings==0) return;
-
-        // interpolate gainbuf values over buffer length using value smoothing filter (lp)
-        // this should prevent popping noise when controlled binary with 0 / 127
-        // new control rate = samplerate / 16
-        const unsigned int gainbufsize = buffersize / 16;
-        float gainbuf[gainbufsize]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
-
         for (unsigned int i = 0; i < buffersize; ++i)
         {
-            // apply input gain
-            const float input_smp = smp[i]*inputgain;
+            const float input_smp = smp[i] * inputgain;
+            const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
+
+            const float normalizedPhase = sampleCounter>0.0f ? fmodf(sampleCounter / maxDrop + 0.5f, 1.0f)
+                                                             : fmodf((-sampleCounter) / maxDrop + 0.5f, 1.0f) ;
+            const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
 
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 if (delays[j] == 0.0f) continue;
-                assert(float(mem_size)>delays[j]);
-                // calculate the feedback sample positions in the buffer
-                const float pos_reader = fmodf(float(pos_writer+mem_size) - delays[j], float(mem_size));
+                const float baseDelay = delays[j];  // Grund-Delay des Comb-Filters
 
-                // sample at that position
-                const float sample = sampleLerp(string_smps[j], pos_reader);
-                string_smps[j][pos_writer] = input_smp + tanhX(sample*gainbuf[i/16]);
+                float sampleA = 0.0f;
+                if (gains.A > 0.0f)
+                {
+                    const float delay1 = min(baseDelay * powf(2.0f, phases.A), float(mem_size));
+                    const float pos_reader1 = fmodf(float(pos_writer + mem_size - delay1), float(mem_size));
+                    sampleA = sampleLerp(comb_smps[j], pos_reader1) * gains.A;
+
+                }
+                float sampleB = 0.0f;
+                if (gains.B > 0.0f) {
+                    const float delay2 = min(baseDelay * powf(2.0f, phases.B), float(mem_size));
+                    const float pos_reader2 = fmodf(float(pos_writer + mem_size) - delay2, float(mem_size));
+                    sampleB = sampleLerp(comb_smps[j], pos_reader2)* gains.B;
+
+                }
+
+    //~ if (j == 0 && i == 0) {  // Nur erste 10 Samples des ersten Strings
+    //~ printf(" -------------------------- \n");
+    //~ printf("sampleCounter: %f \n", sampleCounter);
+    //~ printf("  Phases: A=%.3f, B=%.3f\n", phases.A/ maxDrop, phases.B/ maxDrop);
+    //~ printf("  Gains: A=%.3f, B=%.3f, squaresum: %f\n", gains.A, gains.B, sqrtf(gains.A*gains.A + gains.B*gains.B));
+
+    //~ }
+
+
+
+
+                float feedbackSample = (sampleA + sampleB);
+                comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbwd);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
-            unsigned int nrOfActualStrings = 0;
+            unsigned int nrOfNonZeroStrings = 0;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
                 if (delays[j] != 0.0f) {
-                    smp[i] += string_smps[j][pos_writer];
-                    nrOfActualStrings++;
-                }
+                    smp[i] += comb_smps[j][pos_writer];
+                    nrOfNonZeroStrings++;
+            }
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value
             // division by zero is catched at the beginning filterOut()
-            smp[i] *= outgain / (float)nrOfActualStrings;
+            smp[i] *= outgain / (float)nrOfNonZeroStrings;
 
-            // increment writing position
-            ++pos_writer %= mem_size;
+        ++pos_writer %= mem_size;
         }
     }
 }

@@ -14,6 +14,7 @@ class CombFilterBank
     CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_, float initgain);
     ~CombFilterBank();
     void filterout(float *smp);
+    void updateOffsets(float maxDrop);
 
     float delays[NUM_SYMPATHETIC_STRINGS]={};
     float inputgain;
@@ -21,13 +22,19 @@ class CombFilterBank
     float gainbwd;
 
     void setStrings(unsigned int nr, const float basefreq);
+    void setStrings(unsigned int nrOfStringsNew, unsigned int mem_size_new);
 
+    float fadingTime;
+
+    float maxDrop = 2.0f;
+    float dropRate;
+    float pitchOffset;
 
     private:
     static float tanhX(const float x);
     float sampleLerp(const float *smp, const float pos) const;
 
-    float* string_smps[NUM_SYMPATHETIC_STRINGS] = {};
+    float* comb_smps[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;
     unsigned int nrOfStrings=0;
     unsigned int pos_writer = 0;
@@ -39,6 +46,7 @@ class CombFilterBank
     unsigned int mem_size=0;
     int samplerate=0;
     unsigned int buffersize=0;
+    float sampleCounter = 0.0f;
 
 
 };

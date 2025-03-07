@@ -32,7 +32,7 @@ namespace zyn {
 
 rtosc::Ports Sympathetic::ports = {
     {"preset::i", rProp(parameter)
-                  rOptions(Generic, Piano, Grand, Guitar, 12-String)
+                  rOptions(Generic, Piano, Grand, Guitar, 12-String, PitchDrop)
                   rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
@@ -48,10 +48,10 @@ rtosc::Ports Sympathetic::ports = {
         rObject *o = (rObject*)d.obj;
         d.reply(d.loc, "i", o->Ppreset + (16 * o->insertion));
         rEnd},
-    rEffParVol(rDefaultDepends(presetOfVolume),
+    rEffParVol(rDefault(127) rDefaultDepends(presetOfVolume),
             rPresetsAt(0, 84, 66, 53, 66, 60),
             rPresetsAt(16, 127, 100, 80, 100, 90)),
-    rEffParPan(),
+    rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
             rPresets(125, 125, 125, 110, 110), "Resonance"),
     rEffPar(Pdrive,   3, rShort("dr"), rDefault(65),
@@ -67,8 +67,12 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(3, 3, 1, 1, 2), "Number of Unison Strings"),
     rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(12),
             rPresets(12, 12, 60, 6, 6), "Number of Strings"),
-    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
+    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
+    rEffPar(PdropRate, 12, rShort("dr"), rDefault(64),
+            rPresets(125, 125, 125, 110, 110), "Pitch Drop Rate"),
+    rEffPar(PmaxDrop, 13, rShort("max"), rDefault(64), "Max Drop"),
+    rEffPar(PfadingTime, 14, rShort("fade"), rDefault(64), "Fading Time"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -92,7 +96,11 @@ Sympathetic::Sympathetic(EffectParams pars)
       Punison_frequency_spread(30),
       Pstrings(12),
       Pbasenote(57),
-      baseFreq(220.0f)
+      PdropRate(64),
+      PmaxDrop(0),
+      PfadingTime(96),
+      baseFreq(220.0f),
+      srate(pars.srate)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -223,7 +231,23 @@ void Sympathetic::calcFreqs()
         case 4:
             calcFreqsGuitar();
             break;
+        case 5:
+            calcFreqsPitchDrop();
+            break;
     }
+}
+
+
+void Sympathetic::calcFreqsPitchDrop()
+{
+    Pstrings = 8;
+    for(unsigned int i = 0; i < Pstrings; i++)
+    {
+        filterBank->delays[i] = ((float)samplerate) * freeverb_freqs[i] / 44100.0f;
+    }
+    const unsigned int mem_size_new = (int)ceilf(( filterBank->delays[0] * 16.0f * 1.03f + buffersize + 2)/16) * 16;
+
+    filterBank->setStrings(Pstrings,mem_size_new);
 }
 
 void Sympathetic::calcFreqsGeneric()
@@ -281,20 +305,22 @@ void Sympathetic::calcFreqsGuitar()
 
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define PRESET_SIZE 13
-#define NUM_PRESETS 5
+#define PRESET_SIZE 16
+#define NUM_PRESETS 6
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note
         //Generic
-        {127, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
+        {127, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 64, 0, 0},
         //Piano 12-String
-        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
+        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 64, 0, 0},
         //Piano 60-String
-        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33},
+        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33, 64, 0, 0},
         //Guitar 6-String
-        {100, 64, 110, 20, 65, 0,  0, 127, 0, 1,    6,  52},
+        {100, 64, 110, 20, 65, 0,  0, 127, 0, 1,    6,  52, 64, 0, 0},
         //Guitar 12-String
-        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52},
+        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52, 64, 0, 0},
+        //Pitchdrop
+        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52, 32, 32, 32},
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
@@ -389,6 +415,19 @@ void Sympathetic::changepar(int npar, unsigned char value)
                 calcFreqs();
             }
             break;
+        case 12:
+            PdropRate = value;
+            filterBank->dropRate = (float)(PdropRate-64)/(256.0f * float(srate));
+            break;
+        case 13:
+            PmaxDrop = value;
+            filterBank->maxDrop = (float)(PmaxDrop+1)/32.0f;
+            break;
+        case 14:
+            PfadingTime = value;
+            filterBank->fadingTime = (float)value/127.0f;
+            break;
+
         default:
             break;
     }
@@ -409,6 +448,9 @@ unsigned char Sympathetic::getpar(int npar) const
         case 9:  return Punison_size;
         case 10: return Pstrings;
         case 11: return Pbasenote;
+        case 12: return PdropRate;
+        case 13: return PmaxDrop;
+        case 14: return PfadingTime;
         default: return 0; //in case of bogus parameter number
     }
 }
