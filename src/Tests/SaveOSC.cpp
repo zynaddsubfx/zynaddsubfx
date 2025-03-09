@@ -309,6 +309,7 @@ class SaveOSCTest
             mw->transmitMsgGui(0, "/insefx6/efftype", "S", "Alienwah");
             mw->transmitMsgGui(0, "/insefx7/efftype", "S", "EQ");
             mw->transmitMsgGui(0, "/part0/partefx0/efftype", "S", "Chorus");
+            mw->transmitMsgGui(0, "/part0/partefx1/efftype", "S", "Reverse");
             // use all effects as sys fx (except Chorus, it does not differ)
             mw->transmitMsgGui(0, "/sysefx0/efftype", "S", "Reverb");
             mw->transmitMsgGui(0, "/sysefx1/efftype", "S", "Phaser");
@@ -326,13 +327,13 @@ class SaveOSCTest
                 char partefxstr[] = "/part0/partefx0/preset";
                 char sysefxstr[] = "/sysefx0/preset";
                 int npresets_ins[] = {13, 12, 9, 6, 5, 5, 4, 2};
-                int npresets_part[] = {10};
-                for(; insefxstr[7] < '8'; ++insefxstr[7])
+                int npresets_part[] = {12, 3};
+                for(; insefxstr[7] < '0' + (char)(sizeof(npresets_ins) / sizeof(npresets_ins[0])); ++insefxstr[7])
                     if(preset < npresets_ins[insefxstr[7]-'0'])
-                        mw->transmitMsgGui(0, insefxstr, "i", preset);
-                for(; partefxstr[14] < '1'; ++partefxstr[14])
+                        mw->transmitMsgGui(0, insefxstr, "i", preset);  // "/insefx?/preset ?"
+                for(; partefxstr[14] < '0' + (char)(sizeof(npresets_part) / sizeof(npresets_part[0])); ++partefxstr[14])
                     if(preset < npresets_part[partefxstr[14]-'0'])
-                        mw->transmitMsgGui(0, partefxstr, "i", preset);
+                        mw->transmitMsgGui(0, partefxstr, "i", preset);  // "/part0/partefx?/preset ?"
                 if(preset == 13) // for presets 13-17, test the up to 5 sysefx
                 {
                     mw->transmitMsgGui(0, "/sysefx0/efftype", "S", "Sympathetic");
@@ -343,7 +344,7 @@ class SaveOSCTest
                 int type_offset = (preset>=13)?4:0;
                 for(; sysefxstr[7] < '4'; ++sysefxstr[7])
                     if(preset%13 < npresets_ins[sysefxstr[7]-'0'+type_offset])
-                        mw->transmitMsgGui(0, sysefxstr, "i", preset%13);
+                        mw->transmitMsgGui(0, sysefxstr, "i", preset%13);  // "/sysefx?/preset ?"
 
                 char filename[] = "file0";
                 filename[4] += preset;
