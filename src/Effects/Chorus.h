@@ -37,14 +37,14 @@ namespace zyn {
     TRIPLE,\
     DUAL
 
-enum {
-    CHORUS_MODES
-};
-
 /**Chorus and Flange effects*/
 class Chorus final:public Effect
 {
     public:
+        enum ChorusModes {
+            CHORUS_MODES
+        };
+
         Chorus(EffectParams pars);
         /**Destructor*/
         ~Chorus();

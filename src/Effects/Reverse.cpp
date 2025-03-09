@@ -63,7 +63,8 @@ rtosc::Ports Reverse::ports = {
 #undef rObject
 
 Reverse::Reverse(EffectParams pars, const AbsTime *time_)
-    :Effect(pars),Pvolume(insertion?64:32),Pdelay(25),Pphase(64), Pcrossfade(32), PsyncMode(NOTEON), Pstereo(0),time(time_), tick_hist(0)
+    :Effect(pars),Pvolume(insertion?64:32),Pdelay(25),Pphase(64), Pcrossfade(32),
+     PsyncMode(Reverter::SyncMode::NOTEON), Pstereo(0),time(time_), tick_hist(0)
 {
     float tRef = float(time->time());
     reverterL = memory.alloc<Reverter>(&memory, float(Pdelay+1)/128.0f*MAX_REV_DELAY_SECONDS, samplerate, buffersize, tRef, time);
@@ -102,7 +103,7 @@ void Reverse::out(const Stereo<float *> &input)
 
     // process external timecode for syncing to host beat
     // but only if we have timing info, speedfactor is set and we are in host mode.
-    if (time->tempo && speedfactor && (PsyncMode == HOST)) {
+    if (time->tempo && speedfactor && (PsyncMode == Reverter::SyncMode::HOST)) {
         // in host mode we want to find out if (condition) and when (position) a beat happens inside the buffer
         // and call sync at that position
         // condition: at the end of the buffer: ticks % ticks_per_beat < ticks_per buffer
@@ -179,8 +180,9 @@ void Reverse::out(const Stereo<float *> &input)
 
 void Reverse::update()
 {
+    using SyncMode = Reverter::SyncMode;
     // process noteon trigger
-    if( (PsyncMode == NOTEON || PsyncMode == NOTEONOFF) ) {
+    if( (PsyncMode == SyncMode::NOTEON || PsyncMode == SyncMode::NOTEONOFF) ) {
         reverterL->sync(0.0f);
         if(Pstereo) reverterR->sync(0.0f);
     }
@@ -228,6 +230,7 @@ void Reverse::setcrossfade(unsigned char value)
 void Reverse::setsyncMode(unsigned char value)
 {
     PsyncMode = value;
+    using SyncMode = Reverter::SyncMode;
     reverterL->setsyncMode((SyncMode)value);
     reverterR->setsyncMode((SyncMode)value);
 }
@@ -238,11 +241,11 @@ unsigned char Reverse::getpresetpar(unsigned char npreset, unsigned int npar)
 #define	NUM_PRESETS 3
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //NOTEON
-        {64, 64, 25, 0, 64,   32, NOTEON},
+        {64, 64, 25, 0, 64,   32, Reverter::NOTEON},
         //NOTEONOFF
-        {64, 64, 25, 0, 64,   16, NOTEONOFF},
+        {64, 64, 25, 0, 64,   16, Reverter::NOTEONOFF},
         //AUTO
-        {64, 64, 25, 0, 64,   50, AUTO}
+        {64, 64, 25, 0, 64,   50, Reverter::AUTO}
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if (npar == 0 && insertion == 0) {
