@@ -21,11 +21,6 @@ namespace zyn {
                     AUTO,\
                     HOST
 
-enum SyncMode
-{
-    SYNCMODES
-};
-
 // State Machine for the modes NOTEON and NOTEONOFF
 // Sync-Event leads to a cycle of RECORDING->PLAYING->IDLE
 //
@@ -37,11 +32,6 @@ enum SyncMode
                 PLAYING,\
                 IDLE
 
-enum State
-{
-    STATES
-};
-
 /**
  * @brief Reverse Delay effect class
  *
@@ -51,6 +41,16 @@ enum State
 class Reverter
 {
 public:
+    enum SyncMode
+    {
+        SYNCMODES
+    };
+
+    enum State
+    {
+        STATES
+    };
+
     /**
      * @brief Constructor for the Reverter class.
      *
