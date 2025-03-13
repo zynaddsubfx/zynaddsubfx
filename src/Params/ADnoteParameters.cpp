@@ -494,6 +494,10 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
+
+    wskernel = new float[WSKERNELSIZE];
+    windowedsinc(0.00625, 1.0f, WSKERNELSIZE, wskernel);
+
 }
 
 void ADnoteParameters::defaults()
@@ -720,6 +724,7 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
     delete FilterEnvelope;
     delete FilterLfo;
     delete Reson;
+    delete [] wskernel;
 }
 
 ADnoteParameters::~ADnoteParameters()
