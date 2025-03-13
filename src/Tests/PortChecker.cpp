@@ -146,7 +146,7 @@ class PortChecker
             config.cfg.SaveFullXml = false;
 
             synth = new zyn::SYNTH_T;
-            synth->buffersize = 256;
+            synth->buffersize = 512;
             synth->samplerate = 48000;
             synth->oscilsize = 256;
             synth->alias();
