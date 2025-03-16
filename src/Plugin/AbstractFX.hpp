@@ -30,6 +30,7 @@
 #include "Params/FilterParams.h"
 #include "Effects/Effect.h"
 #include "Misc/Allocator.h"
+#include "Misc/Time.h"
 #include "zyn-version.h"
 
 /* ------------------------------------------------------------------------------------------------------------
@@ -168,6 +169,10 @@ protected:
     */
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
+        
+        const TimePosition& timePosition = getTimePosition();
+        
+        
         if (outputs[0] != inputs[0])
             copyWithMultiply(outputs[0], inputs[0], 0.5f, frames);
         else
@@ -178,6 +183,20 @@ protected:
         else
             multiply(outputs[1], 0.5f, frames);
 
+    if(timePosition.bpm) {
+        time.hostSamples = frames;
+        time.bar = timePosition.bar;
+        time.beat = timePosition.beat;
+        time.tick = timePosition.tick;
+        time.beatsPerBar = timePosition.beatsPerBar;
+        time.tempo = timePosition.bpm;
+        time.bpm = timePosition.bpm;
+        time.ppq = timePosition.PPQ;
+        time.playing = timePosition.playing;
+    }
+    else {
+        time.bpm = 0;
+    }
         // FIXME: Make Zyn use const floats
         effect->out(zyn::Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
 
@@ -233,6 +252,7 @@ private:
 
     uint32_t bufferSize;
     double   sampleRate;
+    zyn::AbsTime time;
 
     zyn::Effect* effect;
     float*  efxoutl;
