@@ -20,8 +20,8 @@
 
 */
 
-//~ #ifndef ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
-//~ #define ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+#ifndef ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+#define ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
 
 // DPF includes
 #include "DistrhoPlugin.hpp"
@@ -185,15 +185,15 @@ protected:
         else
             multiply(outputs[1], 0.5f, frames);
 
-    if(timePosition.bpm) {
+    if(timePosition.bbt.valid) {
         time.hostSamples = frames;
-        time.bar = timePosition.bar;
-        time.beat = timePosition.beat;
-        time.tick = timePosition.tick;
-        time.beatsPerBar = timePosition.beatsPerBar;
-        time.tempo = timePosition.bpm;
-        time.bpm = timePosition.bpm;
-        time.ppq = timePosition.PPQ;
+        time.bar = timePosition.bbt.bar;
+        time.beat = timePosition.bbt.beat;
+        time.tick = timePosition.bbt.tick;
+        time.beatsPerBar = timePosition.bbt.beatsPerBar;
+        time.tempo = timePosition.bbt.beatsPerMinute;
+        time.bpm = timePosition.bbt.beatsPerMinute;
+        time.ppq = timePosition.bbt.ticksPerBeat;
         time.playing = timePosition.playing;
     }
     else {
@@ -315,4 +315,4 @@ private:
     DISTRHO_DECLARE_NON_COPY_CLASS(AbstractPluginFX)
 };
 
-//~ #endif // ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+#endif // ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
