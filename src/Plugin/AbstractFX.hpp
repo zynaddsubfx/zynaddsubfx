@@ -20,8 +20,8 @@
 
 */
 
-#ifndef ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
-#define ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+//~ #ifndef ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+//~ #define ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
 
 // DPF includes
 #include "DistrhoPlugin.hpp"
@@ -46,6 +46,7 @@ public:
           programCount(programs),
           bufferSize(getBufferSize()),
           sampleRate(getSampleRate()),
+          time(getBufferSize(), getSampleRate()),
           effect(nullptr),
           efxoutl(nullptr),
           efxoutr(nullptr)
@@ -171,6 +172,7 @@ protected:
     {
         
         const TimePosition& timePosition = getTimePosition();
+        printf("DISTRHO_PLUGIN_WANT_TIMEPOS:  %d\n",DISTRHO_PLUGIN_WANT_TIMEPOS);
         
         
         if (outputs[0] != inputs[0])
@@ -313,4 +315,4 @@ private:
     DISTRHO_DECLARE_NON_COPY_CLASS(AbstractPluginFX)
 };
 
-#endif // ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
+//~ #endif // ZYNADDSUBFX_ABSTRACTFX_HPP_INCLUDED
