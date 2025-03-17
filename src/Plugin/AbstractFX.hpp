@@ -42,11 +42,11 @@ class AbstractPluginFX : public Plugin
 public:
     AbstractPluginFX(const uint32_t params, const uint32_t programs)
         : Plugin(params-2, programs, 0),
+          time(getBufferSize(), getSampleRate()),
           paramCount(params-2), // volume and pan handled by host
           programCount(programs),
           bufferSize(getBufferSize()),
           sampleRate(getSampleRate()),
-          time(getBufferSize(), getSampleRate()),
           effect(nullptr),
           efxoutl(nullptr),
           efxoutr(nullptr)
@@ -56,8 +56,15 @@ public:
         filterpar = new zyn::FilterParams();
         std::memset(efxoutl, 0, sizeof(float)*bufferSize);
         std::memset(efxoutr, 0, sizeof(float)*bufferSize);
+        
+        // set default tempo
+        time.tempo = 120;
+        time.bar = 0;
+        time.beat = 0;
+        time.tick = 0.0f;
+        time.bpm = 0.0f;
 
-        doReinit(true);
+        //~ doReinit(true);
     }
 
     ~AbstractPluginFX() override
@@ -185,20 +192,20 @@ protected:
         else
             multiply(outputs[1], 0.5f, frames);
 
-    if(timePosition.bbt.valid) {
-        time.hostSamples = frames;
-        time.bar = timePosition.bbt.bar;
-        time.beat = timePosition.bbt.beat;
-        time.tick = timePosition.bbt.tick;
-        time.beatsPerBar = timePosition.bbt.beatsPerBar;
-        time.tempo = timePosition.bbt.beatsPerMinute;
-        time.bpm = timePosition.bbt.beatsPerMinute;
-        time.ppq = timePosition.bbt.ticksPerBeat;
-        time.playing = timePosition.playing;
-    }
-    else {
-        time.bpm = 0;
-    }
+        if(timePosition.bbt.valid) {
+            time.hostSamples = frames;
+            time.bar = timePosition.bbt.bar;
+            time.beat = timePosition.bbt.beat;
+            time.tick = timePosition.bbt.tick;
+            time.beatsPerBar = timePosition.bbt.beatsPerBar;
+            time.tempo = timePosition.bbt.beatsPerMinute;
+            time.bpm = timePosition.bbt.beatsPerMinute;
+            time.ppq = timePosition.bbt.ticksPerBeat;
+            time.playing = timePosition.playing;
+        }
+        else {
+            time.bpm = 0;
+        }
         // FIXME: Make Zyn use const floats
         effect->out(zyn::Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
 
@@ -247,23 +254,8 @@ protected:
     }
 
     // -------------------------------------------------------------------------------------------------------
-
-private:
-    const uint32_t paramCount;
-    const uint32_t programCount;
-
-    uint32_t bufferSize;
-    double   sampleRate;
     zyn::AbsTime time;
-
-    zyn::Effect* effect;
-    float*  efxoutl;
-    float*  efxoutr;
-    zyn::FilterParams* filterpar;
-
-    zyn::AllocatorClass allocator;
-
-    void doReinit(const bool firstInit)
+    virtual void doReinit(const bool firstInit)
     {
         // save current param values before recreating effect
         uchar params[paramCount];
@@ -277,7 +269,8 @@ private:
         }
 
         zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
-        effect = new ZynFX(pars);
+        
+        effect = instantiateFX(pars);
 
         if (firstInit)
         {
@@ -292,6 +285,26 @@ private:
         // reset volume and pan
         effect->changepar(0, 127);
         effect->changepar(1, 64);
+    }
+    
+private:
+    const uint32_t paramCount;
+    const uint32_t programCount;
+
+    uint32_t bufferSize;
+    double   sampleRate;
+
+    zyn::Effect* effect;
+    float*  efxoutl;
+    float*  efxoutr;
+    zyn::FilterParams* filterpar;
+
+    zyn::AllocatorClass allocator;
+
+
+    virtual ZynFX* instantiateFX(zyn::EffectParams pars)
+    {
+        return new ZynFX(pars);
     }
 
     void addWithMultiply(float* dst, const float* src, const float multiplier, const uint32_t frames) noexcept

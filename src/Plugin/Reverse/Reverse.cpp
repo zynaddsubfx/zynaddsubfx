@@ -24,7 +24,7 @@ class ReversePlugin : public AbstractPluginFX<zyn::Reverse>
 {
 public:
     ReversePlugin()
-        : AbstractPluginFX(13, 13) {}
+        : AbstractPluginFX(13, 13) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
@@ -54,7 +54,12 @@ protected:
     */
     int64_t getUniqueId() const noexcept override
     {
-        return d_cconst('Z', 'X', 'r', 'v');
+        return d_cconst('Z', 'X', 'r', 's');
+    }
+    
+    virtual zyn::Reverse* instantiateFX(zyn::EffectParams pars) override
+    {
+        return new zyn::Reverse(pars, &time);
     }
 
    /* --------------------------------------------------------------------------------------------------------

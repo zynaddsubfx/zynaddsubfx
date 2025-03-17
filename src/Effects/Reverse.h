@@ -24,7 +24,7 @@ class Reverter;
 class Reverse final:public Effect
 {
     public:
-        Reverse(EffectParams pars, const AbsTime *time_ = nullptr);
+        Reverse(EffectParams pars, const AbsTime *time_);
         ~Reverse();
         void update();
         void out(const Stereo<float *> &input);
