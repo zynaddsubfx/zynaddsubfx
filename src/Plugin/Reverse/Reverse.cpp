@@ -24,7 +24,7 @@ class ReversePlugin : public AbstractPluginFX<zyn::Reverse>
 {
 public:
     ReversePlugin()
-        : AbstractPluginFX(13, 13) {doReinit(true);}
+        : AbstractPluginFX(13, 13) {}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ protected:
         return d_cconst('Z', 'X', 'r', 's');
     }
     
-    virtual zyn::Reverse* instantiateFX(zyn::EffectParams pars) override
+    zyn::Reverse* instantiateFX(zyn::EffectParams pars) override
     {
         return new zyn::Reverse(pars, &time);
     }
@@ -213,7 +213,13 @@ START_NAMESPACE_DISTRHO
 
 Plugin* createPlugin()
 {
-    return new ReversePlugin();
+    Plugin* plugin = new ReversePlugin();
+    ReversePlugin* fxPlugin = dynamic_cast<ReversePlugin*>(plugin);
+    if (fxPlugin)
+    {
+        fxPlugin->doReinit(true);
+    }
+    return plugin;
 }
 
 END_NAMESPACE_DISTRHO

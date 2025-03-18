@@ -74,6 +74,38 @@ public:
         delete effect;
         delete filterpar;
     }
+    
+    virtual void doReinit(const bool firstInit)
+    {
+        // save current param values before recreating effect
+        uchar params[paramCount];
+
+        if (effect != nullptr)
+        {
+            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
+                params[i] = effect->getpar(i+2);
+
+            delete effect;
+        }
+
+        zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
+        
+        effect = instantiateFX(pars);
+
+        if (firstInit)
+        {
+            effect->setpreset(0);
+        }
+        else
+        {
+            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
+                effect->changepar(i+2, params[i]);
+        }
+
+        // reset volume and pan
+        effect->changepar(0, 127);
+        effect->changepar(1, 64);
+    }
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
@@ -255,38 +287,6 @@ protected:
 
     // -------------------------------------------------------------------------------------------------------
     zyn::AbsTime time;
-    virtual void doReinit(const bool firstInit)
-    {
-        // save current param values before recreating effect
-        uchar params[paramCount];
-
-        if (effect != nullptr)
-        {
-            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
-                params[i] = effect->getpar(i+2);
-
-            delete effect;
-        }
-
-        zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
-        
-        effect = instantiateFX(pars);
-
-        if (firstInit)
-        {
-            effect->setpreset(0);
-        }
-        else
-        {
-            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
-                effect->changepar(i+2, params[i]);
-        }
-
-        // reset volume and pan
-        effect->changepar(0, 127);
-        effect->changepar(1, 64);
-    }
-    
 private:
     const uint32_t paramCount;
     const uint32_t programCount;
