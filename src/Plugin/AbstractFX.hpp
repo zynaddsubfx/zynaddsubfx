@@ -211,7 +211,7 @@ protected:
     {
         
         const TimePosition& timePosition = getTimePosition();
-        printf("DISTRHO_PLUGIN_WANT_TIMEPOS:  %d\n",DISTRHO_PLUGIN_WANT_TIMEPOS);
+        //~ printf("DISTRHO_PLUGIN_WANT_TIMEPOS:  %d\n",DISTRHO_PLUGIN_WANT_TIMEPOS);
         
         
         if (outputs[0] != inputs[0])
