@@ -24,7 +24,7 @@ class ReversePlugin : public AbstractPluginFX<zyn::Reverse>
 {
 public:
     ReversePlugin()
-        : AbstractPluginFX(6, 5) {}
+        : AbstractPluginFX(7, 5) {}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
@@ -84,6 +84,7 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
         parameter.symbol = "delay";
         break;
     case 1: // Stereo
+        parameter.hints |= kParameterIsBoolean;
         parameter.name   = "Stereo";
         parameter.symbol = "stereo";
         parameter.ranges.max = 1.0f;
@@ -100,6 +101,8 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
     case 4: // Sync Mode
         parameter.name   = "Sync Mode";
         parameter.symbol = "syncMode";
+        parameter.ranges.max = 3.0f;
+        parameter.ranges.def = 0.0f;
         break;
     default:
         // For unused parameters
