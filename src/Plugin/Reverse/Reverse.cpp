@@ -26,6 +26,11 @@ public:
     ReversePlugin()
         : AbstractPluginFX(7, 5) {}
 
+    void setSpeedfactor(float factor)
+    {
+        effect->speedfactor=factor;
+    }
+
 protected:
    /* --------------------------------------------------------------------------------------------------------
     * Information */
@@ -150,6 +155,7 @@ Plugin* createPlugin()
     if (fxPlugin)
     {
         fxPlugin->doReinit(true);
+        fxPlugin->setSpeedfactor(1.0f);
     }
     return plugin;
 }

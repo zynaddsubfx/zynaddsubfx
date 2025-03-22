@@ -43,11 +43,11 @@ public:
     AbstractPluginFX(const uint32_t params, const uint32_t programs)
         : Plugin(params-2, programs, 0),
           time(getBufferSize(), getSampleRate()),
+          effect(nullptr),
           paramCount(params-2), // volume and pan handled by host
           programCount(programs),
           bufferSize(getBufferSize()),
           sampleRate(getSampleRate()),
-          effect(nullptr),
           efxoutl(nullptr),
           efxoutr(nullptr)
     {
@@ -287,6 +287,9 @@ protected:
 
     // -------------------------------------------------------------------------------------------------------
     zyn::AbsTime time;
+    
+    zyn::Effect* effect;
+    
 private:
     const uint32_t paramCount;
     const uint32_t programCount;
@@ -294,7 +297,7 @@ private:
     uint32_t bufferSize;
     double   sampleRate;
 
-    zyn::Effect* effect;
+    
     float*  efxoutl;
     float*  efxoutr;
     zyn::FilterParams* filterpar;
