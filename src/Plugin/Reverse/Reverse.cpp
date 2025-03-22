@@ -150,13 +150,13 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
     case 5: // Numerator
         parameter.name   = "Numerator of BPM ratio";
         parameter.symbol = "numerator";
-        parameter.ranges.max = 99.0f;
+        parameter.ranges.max = 32.0f;
         parameter.ranges.def = 0.0f;
         break;
     case 6: // Denominator
         parameter.name   = "Denominator of BPM ratio";
         parameter.symbol = "denominator";
-        parameter.ranges.max = 99.0f;
+        parameter.ranges.max = 32.0f;
         parameter.ranges.def = 4.0f;
         break;
     default:
