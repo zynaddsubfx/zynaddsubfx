@@ -24,7 +24,7 @@ class ReversePlugin : public AbstractPluginFX<zyn::Reverse>
 {
 public:
     ReversePlugin()
-        : AbstractPluginFX(7, 5) {}
+        : AbstractPluginFX(9, 5) {}
 
     void setSpeedfactor(float factor)
     {
@@ -66,6 +66,44 @@ protected:
     {
         return new zyn::Reverse(pars, &time);
     }
+    
+    
+    /**
+      Get the current value of a parameter.
+      The host may call this function from any context, including realtime processing.
+    */
+    float getParameterValue(uint32_t index) const override
+    {
+        if(index==5) 
+            return numerator;
+        else if(index==6) 
+            return denominator;
+        else 
+            return AbstractPluginFX::getParameterValue(index);
+    }
+
+   /**
+      Change a parameter value.
+      The host may call this function from any context, including realtime processing.
+      When a parameter is marked as automable, you must ensure no non-realtime operations are performed.
+      @note This function will only be called for parameter inputs.
+    */
+    void setParameterValue(uint32_t index, float value) override
+    {
+        if(index==5) numerator = value;
+        if(index==6) denominator = value;
+        if(index==5 || index==6)
+        {
+            if (numerator&&denominator)
+                        effect->speedfactor = (float)denominator / (4.0f *(float)numerator);
+        }
+        else
+        {
+            AbstractPluginFX::setParameterValue(index, value);
+        }
+    }
+    
+    
 
    /* --------------------------------------------------------------------------------------------------------
     * Init */
@@ -109,6 +147,18 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
         parameter.ranges.max = 3.0f;
         parameter.ranges.def = 0.0f;
         break;
+    case 5: // Numerator
+        parameter.name   = "Numerator of BPM ratio";
+        parameter.symbol = "numerator";
+        parameter.ranges.max = 99.0f;
+        parameter.ranges.def = 0.0f;
+        break;
+    case 6: // Denominator
+        parameter.name   = "Denominator of BPM ratio";
+        parameter.symbol = "denominator";
+        parameter.ranges.max = 99.0f;
+        parameter.ranges.def = 4.0f;
+        break;
     default:
         // For unused parameters
         parameter.name   = "Unused";
@@ -138,7 +188,14 @@ void initProgramName(uint32_t index, String& programName) noexcept override
         programName = "Custom Preset"; // Für alle anderen Presets
         break;
     }
+
 }
+
+
+private:
+    float numerator;
+    float denominator;
+
 
     DISTRHO_DECLARE_NON_COPY_CLASS(ReversePlugin)
 };
