@@ -74,12 +74,22 @@ protected:
     */
     float getParameterValue(uint32_t index) const override
     {
-        if(index==5) 
-            return numerator;
-        else if(index==6) 
-            return denominator;
-        else 
-            return AbstractPluginFX::getParameterValue(index);
+        switch(index)
+        {
+            case 4:
+                return AbstractPluginFX::getParameterValue(index)-2;
+                break;
+            case 5:
+                return numerator;
+                break;
+            case 6:
+                return denominator;
+                break;
+            default:
+                return AbstractPluginFX::getParameterValue(index);
+                break;
+         }
+
     }
 
    /**
@@ -90,10 +100,16 @@ protected:
     */
     void setParameterValue(uint32_t index, float value) override
     {
-        if(index==5) numerator = value;
-        if(index==6) denominator = value;
+        if(index==4) 
+        {
+            AbstractPluginFX::setParameterValue(index, value+2);
+            return;
+        }
+        
         if(index==5 || index==6)
         {
+            if(index==5) numerator = value;
+            if(index==6) denominator = value;
             if (numerator&&denominator)
                         effect->speedfactor = (float)denominator / (4.0f *(float)numerator);
         }
@@ -144,8 +160,8 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
     case 4: // Sync Mode
         parameter.name   = "Sync Mode";
         parameter.symbol = "syncMode";
-        parameter.ranges.max = 3.0f;
-        parameter.ranges.def = 0.0f;
+        parameter.ranges.max = 1.0f; // SYNC
+        parameter.ranges.def = 0.0f; // AUTO
         break;
     case 5: // Numerator
         parameter.name   = "Numerator of BPM ratio";
