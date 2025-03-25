@@ -66,8 +66,8 @@ protected:
     {
         return new zyn::Reverse(pars, &time);
     }
-    
-    
+
+
     /**
       Get the current value of a parameter.
       The host may call this function from any context, including realtime processing.
@@ -100,12 +100,12 @@ protected:
     */
     void setParameterValue(uint32_t index, float value) override
     {
-        if(index==4) 
+        if(index==4)
         {
             AbstractPluginFX::setParameterValue(index, value+2);
             return;
         }
-        
+
         if(index==5 || index==6)
         {
             if(index==5) numerator = value;
@@ -118,8 +118,8 @@ protected:
             AbstractPluginFX::setParameterValue(index, value);
         }
     }
-    
-    
+
+
 
    /* --------------------------------------------------------------------------------------------------------
     * Init */
@@ -158,6 +158,7 @@ void initParameter(uint32_t index, Parameter& parameter) noexcept override
         parameter.symbol = "crossfade";
         break;
     case 4: // Sync Mode
+        parameter.hints |= kParameterIsBoolean;
         parameter.name   = "Sync Mode";
         parameter.symbol = "syncMode";
         parameter.ranges.max = 1.0f; // SYNC
