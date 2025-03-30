@@ -1349,7 +1349,10 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
  */
 inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
 {
-    ComputeVoiceOscillator_LinearInterpolation(nvoice);
+    if(NoteVoicePar[nvoice].syncEnabled)
+        ComputeVoiceOscillatorSync(nvoice);
+    else
+        ComputeVoiceOscillator_LinearInterpolation(nvoice);
 
     Voice& vce = NoteVoicePar[nvoice];
     if(vce.FMnewamplitude > 1.0f)
