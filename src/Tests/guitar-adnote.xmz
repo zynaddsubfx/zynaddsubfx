@@ -1,5 +1,5 @@
 
-<?xml version="1.0f" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE ZynAddSubFX-data>
 <ZynAddSubFX-data version-major="3" version-minor="0"
 version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
@@ -826,32 +826,14 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="1">
 <par name="par" value="65" />
 </par_no>
-<par_no id="2">
-<par name="par" value="35" />
-</par_no>
 <par_no id="3">
 <par name="par" value="97" />
 </par_no>
 <par_no id="4">
 <par name="par" value="29" />
 </par_no>
-<par_no id="5">
-<par name="par" value="0" />
-</par_no>
-<par_no id="6">
-<par name="par" value="0" />
-</par_no>
 <par_no id="7">
 <par name="par" value="83" />
-</par_no>
-<par_no id="8">
-<par name="par" value="0" />
-</par_no>
-<par_no id="9">
-<par name="par" value="0" />
-</par_no>
-<par_no id="10">
-<par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
 <par name="numerator" value="0" />
@@ -868,33 +850,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="0">
 <par name="par" value="56" />
 </par_no>
-<par_no id="1">
-<par name="par" value="0" />
-</par_no>
-<par_no id="2">
-<par name="par" value="0" />
-</par_no>
-<par_no id="3">
-<par name="par" value="0" />
-</par_no>
-<par_no id="4">
-<par name="par" value="0" />
-</par_no>
-<par_no id="5">
-<par name="par" value="0" />
-</par_no>
-<par_no id="6">
-<par name="par" value="0" />
-</par_no>
-<par_no id="7">
-<par name="par" value="0" />
-</par_no>
-<par_no id="8">
-<par name="par" value="0" />
-</par_no>
-<par_no id="9">
-<par name="par" value="0" />
-</par_no>
 <par_no id="10">
 <par name="par" value="7" />
 </par_no>
@@ -907,23 +862,14 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="13">
 <par name="par" value="36" />
 </par_no>
-<par_no id="14">
-<par name="par" value="0" />
-</par_no>
 <par_no id="15">
 <par name="par" value="6" />
 </par_no>
 <par_no id="16">
 <par name="par" value="76" />
 </par_no>
-<par_no id="17">
-<par name="par" value="64" />
-</par_no>
 <par_no id="18">
 <par name="par" value="32" />
-</par_no>
-<par_no id="19">
-<par name="par" value="0" />
 </par_no>
 <par_no id="20">
 <par name="par" value="9" />
@@ -934,15 +880,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="22">
 <par name="par" value="75" />
 </par_no>
-<par_no id="23">
-<par name="par" value="64" />
-</par_no>
-<par_no id="24">
-<par name="par" value="0" />
-</par_no>
-<par_no id="25">
-<par name="par" value="0" />
-</par_no>
 <par_no id="26">
 <par name="par" value="36" />
 </par_no>
@@ -951,303 +888,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 </par_no>
 <par_no id="28">
 <par name="par" value="57" />
-</par_no>
-<par_no id="29">
-<par name="par" value="0" />
-</par_no>
-<par_no id="30">
-<par name="par" value="0" />
-</par_no>
-<par_no id="31">
-<par name="par" value="64" />
-</par_no>
-<par_no id="32">
-<par name="par" value="64" />
-</par_no>
-<par_no id="33">
-<par name="par" value="64" />
-</par_no>
-<par_no id="34">
-<par name="par" value="0" />
-</par_no>
-<par_no id="35">
-<par name="par" value="0" />
-</par_no>
-<par_no id="36">
-<par name="par" value="64" />
-</par_no>
-<par_no id="37">
-<par name="par" value="64" />
-</par_no>
-<par_no id="38">
-<par name="par" value="64" />
-</par_no>
-<par_no id="39">
-<par name="par" value="0" />
-</par_no>
-<par_no id="40">
-<par name="par" value="0" />
-</par_no>
-<par_no id="41">
-<par name="par" value="64" />
-</par_no>
-<par_no id="42">
-<par name="par" value="64" />
-</par_no>
-<par_no id="43">
-<par name="par" value="64" />
-</par_no>
-<par_no id="44">
-<par name="par" value="0" />
-</par_no>
-<par_no id="45">
-<par name="par" value="0" />
-</par_no>
-<par_no id="46">
-<par name="par" value="64" />
-</par_no>
-<par_no id="47">
-<par name="par" value="64" />
-</par_no>
-<par_no id="48">
-<par name="par" value="64" />
-</par_no>
-<par_no id="49">
-<par name="par" value="0" />
-</par_no>
-<par_no id="50">
-<par name="par" value="0" />
-</par_no>
-<par_no id="51">
-<par name="par" value="0" />
-</par_no>
-<par_no id="52">
-<par name="par" value="0" />
-</par_no>
-<par_no id="53">
-<par name="par" value="0" />
-</par_no>
-<par_no id="54">
-<par name="par" value="0" />
-</par_no>
-<par_no id="55">
-<par name="par" value="0" />
-</par_no>
-<par_no id="56">
-<par name="par" value="0" />
-</par_no>
-<par_no id="57">
-<par name="par" value="0" />
-</par_no>
-<par_no id="58">
-<par name="par" value="0" />
-</par_no>
-<par_no id="59">
-<par name="par" value="0" />
-</par_no>
-<par_no id="60">
-<par name="par" value="0" />
-</par_no>
-<par_no id="61">
-<par name="par" value="0" />
-</par_no>
-<par_no id="62">
-<par name="par" value="0" />
-</par_no>
-<par_no id="63">
-<par name="par" value="0" />
-</par_no>
-<par_no id="64">
-<par name="par" value="0" />
-</par_no>
-<par_no id="65">
-<par name="par" value="0" />
-</par_no>
-<par_no id="66">
-<par name="par" value="0" />
-</par_no>
-<par_no id="67">
-<par name="par" value="0" />
-</par_no>
-<par_no id="68">
-<par name="par" value="0" />
-</par_no>
-<par_no id="69">
-<par name="par" value="0" />
-</par_no>
-<par_no id="70">
-<par name="par" value="0" />
-</par_no>
-<par_no id="71">
-<par name="par" value="0" />
-</par_no>
-<par_no id="72">
-<par name="par" value="0" />
-</par_no>
-<par_no id="73">
-<par name="par" value="0" />
-</par_no>
-<par_no id="74">
-<par name="par" value="0" />
-</par_no>
-<par_no id="75">
-<par name="par" value="0" />
-</par_no>
-<par_no id="76">
-<par name="par" value="0" />
-</par_no>
-<par_no id="77">
-<par name="par" value="0" />
-</par_no>
-<par_no id="78">
-<par name="par" value="0" />
-</par_no>
-<par_no id="79">
-<par name="par" value="0" />
-</par_no>
-<par_no id="80">
-<par name="par" value="0" />
-</par_no>
-<par_no id="81">
-<par name="par" value="0" />
-</par_no>
-<par_no id="82">
-<par name="par" value="0" />
-</par_no>
-<par_no id="83">
-<par name="par" value="0" />
-</par_no>
-<par_no id="84">
-<par name="par" value="0" />
-</par_no>
-<par_no id="85">
-<par name="par" value="0" />
-</par_no>
-<par_no id="86">
-<par name="par" value="0" />
-</par_no>
-<par_no id="87">
-<par name="par" value="0" />
-</par_no>
-<par_no id="88">
-<par name="par" value="0" />
-</par_no>
-<par_no id="89">
-<par name="par" value="0" />
-</par_no>
-<par_no id="90">
-<par name="par" value="0" />
-</par_no>
-<par_no id="91">
-<par name="par" value="0" />
-</par_no>
-<par_no id="92">
-<par name="par" value="0" />
-</par_no>
-<par_no id="93">
-<par name="par" value="0" />
-</par_no>
-<par_no id="94">
-<par name="par" value="0" />
-</par_no>
-<par_no id="95">
-<par name="par" value="0" />
-</par_no>
-<par_no id="96">
-<par name="par" value="0" />
-</par_no>
-<par_no id="97">
-<par name="par" value="0" />
-</par_no>
-<par_no id="98">
-<par name="par" value="0" />
-</par_no>
-<par_no id="99">
-<par name="par" value="0" />
-</par_no>
-<par_no id="100">
-<par name="par" value="0" />
-</par_no>
-<par_no id="101">
-<par name="par" value="0" />
-</par_no>
-<par_no id="102">
-<par name="par" value="0" />
-</par_no>
-<par_no id="103">
-<par name="par" value="0" />
-</par_no>
-<par_no id="104">
-<par name="par" value="0" />
-</par_no>
-<par_no id="105">
-<par name="par" value="0" />
-</par_no>
-<par_no id="106">
-<par name="par" value="0" />
-</par_no>
-<par_no id="107">
-<par name="par" value="0" />
-</par_no>
-<par_no id="108">
-<par name="par" value="0" />
-</par_no>
-<par_no id="109">
-<par name="par" value="0" />
-</par_no>
-<par_no id="110">
-<par name="par" value="0" />
-</par_no>
-<par_no id="111">
-<par name="par" value="0" />
-</par_no>
-<par_no id="112">
-<par name="par" value="0" />
-</par_no>
-<par_no id="113">
-<par name="par" value="0" />
-</par_no>
-<par_no id="114">
-<par name="par" value="0" />
-</par_no>
-<par_no id="115">
-<par name="par" value="0" />
-</par_no>
-<par_no id="116">
-<par name="par" value="0" />
-</par_no>
-<par_no id="117">
-<par name="par" value="0" />
-</par_no>
-<par_no id="118">
-<par name="par" value="0" />
-</par_no>
-<par_no id="119">
-<par name="par" value="0" />
-</par_no>
-<par_no id="120">
-<par name="par" value="0" />
-</par_no>
-<par_no id="121">
-<par name="par" value="0" />
-</par_no>
-<par_no id="122">
-<par name="par" value="0" />
-</par_no>
-<par_no id="123">
-<par name="par" value="0" />
-</par_no>
-<par_no id="124">
-<par name="par" value="0" />
-</par_no>
-<par_no id="125">
-<par name="par" value="0" />
-</par_no>
-<par_no id="126">
-<par name="par" value="0" />
-</par_no>
-<par_no id="127">
-<par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
 <par name="numerator" value="0" />
