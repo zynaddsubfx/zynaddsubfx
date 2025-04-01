@@ -233,7 +233,7 @@ class PluginTest
             const string fname = string(SOURCE_DIR) + "/guitar-adnote.xmz";
             string fdata = loadfile(fname);
             char *result = NULL;
-            master[0]->putalldata((char*)fdata.c_str());
+            master[0]->loadXML(fname.c_str());
             int res = master[0]->getalldata(&result);
 
             // Fixup, because d44dc9b corrupted guitar-adnote.xmz:
