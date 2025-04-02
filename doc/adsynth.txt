@@ -59,11 +59,30 @@ Modulation
 
 Within the options for modulation, one can select:
 
-* Morph
+* Mix Modulation
 * Ring Modulation
 * Phase Modulation
 * Frequency Modulation
+* Pulse Modulation
 * Disabled
+
+Also you can activate oscillator hard sync. It can be combined with the other modulations. 
+
+
+All modulations as well as the hard sync use the modulator to modify some aspect
+of the carrier.
+Mix modifies the carrier sample by mixing in the modulators samples.
+Ring modifies the amplitude of the carrier
+Frequency and Phase Modulations modify frequency and phase of the carrier
+Pulse modifies phase but twice on two identical carriers with mirrored modulators
+Hard Sync resets the phase of the carrier at the zerocrossing of the modulator
+
+Attention: 
+1) Hard Sync makes only sense if modulator and carrier can have different frequencies.
+Therefor it is disabled in the first voice and when active active the NORMAL fm voice is disabled.
+2) Keep in mind that the fundamental frequency of the resulting sound is determined by the modulator
+3) The standard Oscillator Hard Sync effect is accomplisehd with modulation amplitude (Vol. knob) and sense at 100% 
+
 
 Unison
 ^^^^^^
