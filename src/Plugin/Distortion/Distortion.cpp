@@ -24,7 +24,7 @@ class DistortionPlugin : public AbstractPluginFX<zyn::Distortion>
 {
 public:
     DistortionPlugin()
-        : AbstractPluginFX(11, 6) {}
+        : AbstractPluginFX(11, 6) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
