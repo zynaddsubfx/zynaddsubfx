@@ -89,7 +89,7 @@ static const rtosc::Ports local_ports = {
                 d.broadcast(d.loc, "i", eff->geteffectparrt(0));
             }
         }},
-    {"Ppanning::i", rProp(parameter) rDefault(64) rLinear(0,127) rShort("pan") rDoc("panning"),
+    {"Ppanning::i", rProp(parameter) rLinear(0,127) rShort("pan") rDoc("panning"),
         0,
         [](const char *msg, rtosc::RtData &d)
         {
