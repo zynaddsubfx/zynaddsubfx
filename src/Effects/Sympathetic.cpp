@@ -65,9 +65,9 @@ rtosc::Ports Sympathetic::ports = {
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffParRange(Punison_size, 9, rShort("uni"), rLinear(1,3), rDefault(1),
             rPresets(3, 3, 1, 1, 2), "Number of Unison Strings"),
-    rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76),
+    rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(12),
             rPresets(12, 12, 60, 6, 6), "Number of Strings"),
-    rEffPar(Pbasenote, 11, rShort("base"), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
+    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
