@@ -310,9 +310,6 @@ class ADnote:public SynthNote
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
-            
-            
-            bool syncEnabled; // stub to be removed after rebasing to Master with applies Sync PR
 
         } NoteVoicePar[NUM_VOICES];
 
