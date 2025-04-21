@@ -24,7 +24,7 @@ class AlienWahPlugin : public AbstractPluginFX<zyn::Alienwah>
 {
 public:
     AlienWahPlugin()
-        : AbstractPluginFX(11, 4) {}
+        : AbstractPluginFX(11, 4) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------

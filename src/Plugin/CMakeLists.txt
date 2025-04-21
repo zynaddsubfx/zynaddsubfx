@@ -26,6 +26,7 @@ add_subdirectory(DynamicFilter)
 add_subdirectory(Echo)
 add_subdirectory(Phaser)
 add_subdirectory(Reverb)
+add_subdirectory(Reverse)
 ENDIF(LIBDL_FOUND)
 
 add_subdirectory(ZynAddSubFX)

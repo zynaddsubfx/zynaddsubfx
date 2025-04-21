@@ -24,7 +24,7 @@ class ChorusPlugin : public AbstractPluginFX<zyn::Chorus>
 {
 public:
     ChorusPlugin()
-        : AbstractPluginFX(12, 10) {}
+        : AbstractPluginFX(12, 10) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------
