@@ -119,7 +119,7 @@ static const rtosc::Ports localPorts = {
             "Repeat the Envelope"),
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), rDepends(Pfreemode),
             "Attack Time"),
-    rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f),
+    rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f), rUnit(s),
               rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_freq, 0.254f),   rPreset(ad_global_filter, 0.127f),
               rPreset(ad_voice_freq, 0.127f),    rPreset(ad_voice_filter, 0.970f),
@@ -138,7 +138,7 @@ static const rtosc::Ports localPorts = {
               "Attack Value"),
     rParamDT(D_dt, rShort("d.dt"), rLinear(0,127), rDepends(Pfreemode),
               "Decay Time"),
-    rParamF(D_dt,  rShort("d.dt"), rLogWithLogmin(0.f, 41.0f, 0.0001f),
+    rParamF(D_dt,  rShort("d.dt"), rLogWithLogmin(0.f, 41.0f, 0.0001f), rUnit(s),
               rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_amp, 0.127f),    rPreset(ad_global_filter, 0.970f),
               rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.970f),
@@ -156,7 +156,7 @@ static const rtosc::Ports localPorts = {
               "Sustain Value"),
     rParamDT(R_dt, rShort("r.dt"), rLinear(0,127), rDepends(Pfreemode),
               "Release Time"),
-    rParamF(R_dt,  rShort("r.dt"), rLogWithLogmin(0.f,41.0f,0.009f),
+    rParamF(R_dt,  rShort("r.dt"), rLogWithLogmin(0.f,41.0f,0.009f), rUnit(s),
               rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_amp, 0.041f),
               rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.009f),
@@ -238,8 +238,55 @@ static const rtosc::Ports localPorts = {
             }
             d.replyArray(d.loc, arg_types, args);
         } else {
-            for(int i=0; i<N && i<M; ++i)
+            for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f);
+
+            }
+            char part_loc[128];
+            strncpy(part_loc, d.loc, sizeof(part_loc));
+            part_loc[sizeof(part_loc) - 1] = '\0';
+            char *end = strrchr(part_loc, '/');
+            if(end) {
+                end[1] = '\0';
+                d.broadcast("/damage", "s", part_loc);
+            }
+        }
+        rEnd},
+    {"envcpy::b", rShort("bezier") rProp(parameter)
+            rBlobType(f) rDefault([0.f 0.f ...])
+            rDoc("Envelope Bezier Control Points"), NULL,
+            rBegin;
+        const int N = MAX_ENVELOPE_CPOINTS;
+        if(rtosc_narguments(msg) == 0) {
+            d.reply(d.loc, "b", N * sizeof(float), env->envcpy);
+        } else {
+            const rtosc_blob_t blob = rtosc_argument(msg, 0).b;
+            const float* buf = (float*) blob.data;
+            const int M = blob.len/sizeof(float);
+            for(int i=0; i<N && i<M; ++i) {
+                env->envcpy[i] = buf[i];
+            }
+            d.broadcast(d.loc, "b", N * sizeof(float), env->envcpy); // broadcast to all clients
+        }
+        rEnd},
+    {"envcpy", rShort("bezier") rDefault([0.0 ...]) rProp(alias)
+        rDoc("Envelope Bezier Control Points"), NULL,
+        rBegin;
+        const int N = MAX_ENVELOPE_CPOINTS;
+        const int M = rtosc_narguments(msg);
+        rtosc_arg_t args[N];
+        char arg_types[N+1] = {};
+        if(M == 0) {
+
+            for(int i=0; i<N; ++i) {
+                    args[i].f    = env->envcpy[i];
+                    arg_types[i] = 'f';
+            }
+            d.replyArray(d.loc, arg_types, args);
+        } else {
+            for(int i=0; i<N && i<M; ++i) {
+                env->envcpy[i] = rtosc_argument(msg,i).f;
+            }
         }
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
@@ -260,17 +307,17 @@ static const rtosc::Ports localPorts = {
             }
         }
         rEnd},
-
     {"addPoint:i", rProp(internal) rDoc("Add point to envelope"), NULL,
         rBegin;
         const int curpoint = rtosc_argument(msg, 0).i;
-        //int curpoint=freeedit->lastpoint;
         if (curpoint<0 || curpoint>env->Penvpoints || env->Penvpoints>=MAX_ENVELOPE_POINTS)
             return;
 
         for (int i=env->Penvpoints; i>=curpoint+1; i--) {
             env->envdt[i]=env->envdt[i-1];
             env->Penvval[i]=env->Penvval[i-1];
+            env->envcpy[i*2] = env->envcpy[(i-1)*2];
+            env->envcpy[i*2-1] = env->envcpy[(i-1)*2-1];
         }
 
         if (curpoint==0)
@@ -289,6 +336,8 @@ static const rtosc::Ports localPorts = {
         for (int i=curpoint+1;i<env->Penvpoints;i++){
             env->envdt[i-1]=env->envdt[i];
             env->Penvval[i-1]=env->Penvval[i];
+            env->envcpy[(i-1)*2] = env->envcpy[i*2];
+            env->envcpy[(i-1)*2-1] = env->envcpy[i*2-1];
         };
 
         env->Penvpoints--;
@@ -318,6 +367,8 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         envdt[i]  = dTREAL(32);
         Penvval[i] = 64;
+        envcpy[i*2] = 0.0f;
+        envcpy[i*2+1] = 0.0f;
     }
     envdt[0]        = 0.0f; //not used
     Penvsustain     = 1;
@@ -385,7 +436,7 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 
 float EnvelopeParams::getdt(char i) const
 {
-    return envdt[(int)i]; //seconds
+    return envdt[(int)i]; // 1/(seconds*sr)
 }
 
 /*
@@ -531,9 +582,12 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
     if((Pfreemode != 0) || (!xml.minimal))
         for(int i = 0; i < Penvpoints; ++i) {
             xml.beginbranch("POINT", i);
-            if(i != 0)
+            if(i != 0) {
                 xml.addparreal("dt", envdt[i]);
+                xml.addparreal("envcpy", envcpy[i]);
+            }
             xml.addpar("val", Penvval[i]);
+
             xml.endbranch();
         }
 }
@@ -613,6 +667,7 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
             else {
                 envdt[i] = xml.getparreal("dt", envdt[i]);
             }
+            if(xml.hasparreal("envcpy")) envcpy[i] = xml.getparreal("envcpy", 0.0f);
         }
         Penvval[i] = version_fix(xml.getpar127("val", Penvval[i]));
         xml.exitbranch();
