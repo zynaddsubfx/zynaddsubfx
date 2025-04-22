@@ -66,7 +66,7 @@ protected:
     */
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
-        parameter.hints = kParameterIsInteger|kParameterIsAutomable;
+        parameter.hints = kParameterIsInteger|kParameterIsAutomatable;
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
