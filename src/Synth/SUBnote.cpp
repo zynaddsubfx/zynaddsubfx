@@ -579,6 +579,17 @@ int SUBnote::noteout(float *outl, float *outr)
         }
         firsttick = false;
     }
+    // compute panning factors 
+    float pan_l, pan_r;
+    if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
+    {   // sqrt 3dB constant power mode
+        pan_l = sqrtf(1.0f - panning);
+        pan_r = sqrtf(panning);
+    } else 
+    {   // compatibility mode
+        pan_l = (1.0f - panning);
+        pan_r = (panning);
+    }
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
         // Amplitude interpolation
@@ -587,14 +598,16 @@ int SUBnote::noteout(float *outl, float *outr)
                                                  newamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * (1.0f - panning);
-            outr[i] *= tmpvol * panning;
+            outl[i] *= tmpvol * pan_l;
+            outr[i] *= tmpvol * pan_r;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= newamplitude * (1.0f - panning);
-            outr[i] *= newamplitude * panning;
+            outl[i] *= newamplitude * pan_l;
+            outr[i] *= newamplitude * pan_r;
         }
+        
+
     watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;
     computecurrentparameters();
