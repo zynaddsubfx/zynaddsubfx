@@ -59,8 +59,13 @@ Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
             filter->setgain(pars->getgain());
             break;
         case 4:
-            filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
-            filter->setgain(pars->getgain());
+            {
+            CombFilter* comb = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
+            comb->setgain(pars->getgain());
+            comb->sethpf(pars->Phpf);
+            comb->setlpf(pars->Plpf);
+            filter = comb;
+            }
             break;
         default:
             filter = memory.alloc<AnalogFilter>(Ftype, 1000.0f, pars->getq(), Fstages, srate, bufsize);
