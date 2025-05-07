@@ -1237,7 +1237,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
         for(int i = 0; i < synth.buffersize; ++i) {
-            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
+            // advance to next sample position
             poslo += freqlo;                // increment fractional part (sample interval phase)
             poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
             poslo &= 0xffffff;              // remove overflow from poslo
@@ -1248,9 +1248,9 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 
             float out = 0;
 
-            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 2.0f) { 
+            if(NoteVoicePar[nvoice].AAEnabled && abs(freqhi) > 2.0f) { 
                 // resampling factor
-                const int rsmpfactor = (freqhi>40) ? 40 : (freqhi<1) ? 1 : freqhi;
+                const int rsmpfactor = freqhi;
                 // offset of the oscillator sample to be multplied with first kernel position
                 const int startoffset = 2*rsmpfactor;
                 // position of that oscillator sample
@@ -1261,19 +1261,17 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
                 // first kernel sample to be used
                 const int startpos = (((1<<24)-poslo) * stpsize);
                 const int startposhi = startpos>>24;                
-                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;         
 
                 // reset output value
                 out = 0;
                 for (int l = startposhi; l<(WSKERNELSIZE-1); l+=stpsize) { 
-                    const float factor = 
-                        (pars.GlobalPar.wskernel[l] * ((1<<24) - kernelposlo) +
-                        pars.GlobalPar.wskernel[l+1] * kernelposlo)/(1.0f*(1<<24));
+                    const float kernel_sample = pars.GlobalPar.wskernel[l];
                         
-                    out += factor*smps[ovsmpposhi];
+                    out += kernel_sample*smps[ovsmpposhi];
 
                     // advance to next oscillator sample
                     ovsmpposhi++;
+                    // remove overflow
                     ovsmpposhi &= synth.oscilsize - 1;
                 }
                 tw[i] = out*(float)stpsize;
@@ -1426,38 +1424,12 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
     if(vce.FMVoice >= 0)
         // if I use VoiceOut[] as modulator
         // copy it to tmpwave_unison[][]
+        // in sync oscillator this is the only option
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
             const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
             memcpy(tw, smps, synth.bufferbytes);
         }
-    else{
-        //Compute the modulator and store it in tmpwave_unison[][]
-        for(int k = 0; k < vce.unison_size; ++k) {
-            int    poshiFM  = vce.oscposhiFM[k];
-            int    posloFM  = (int)(vce.oscposloFM[k]  * (1<<24));
-            int    freqhiFM = vce.oscfreqhiFM[k];
-            int    freqloFM = (int)(vce.oscfreqloFM[k] * (1<<24));
-
-            float *tw = tmpwave_unison[k];
-            const float *smps = NoteVoicePar[nvoice].FMSmp;
-
-            for(int i = 0; i < synth.buffersize; ++i) {
-                tw[i] = (smps[poshiFM] * ((1<<24) - posloFM)
-                         + smps[poshiFM + 1] * posloFM) / (1.0f*(1<<24));
-
-                posloFM += freqloFM;
-                if(posloFM >= (1<<24)) {
-                    posloFM &= 0xffffff;//fmod(posloFM, 1.0f);
-                    poshiFM++;
-                }
-                poshiFM += freqhiFM;
-                poshiFM &= synth.oscilsize - 1;
-            }
-            vce.oscposhiFM[k] = poshiFM;
-            vce.oscposloFM[k] = posloFM/((1<<24)*1.0f);
-        }
-    }
 
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
@@ -1594,32 +1566,31 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
     for(int k = 0; k < vce.unison_size; ++k) {
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
-        float  fmold = vce.FMoldsmp[k];
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
-
+        float  fmold = vce.FMoldsmp[k];
+        
         // variables to store the sampling position and underflow during AA filtering
         int    ovsmpposhi;
 
         for(int i = 0; i < synth.buffersize; ++i) {
-
+            
             if(NoteVoicePar[nvoice].syncEnabled &&
                         ( (tw[i]>0.0f && fmold <=0.0f) ||
                         (tw[i]>=0.0f && fmold <0.0f) )) {
                 poshi = 0.0f;
                 poslo = 0.0f;
             }
-            fmold = tw[i];
 
             float fmpos;
             // FM: accumulate tw to transform freq to pos
             // PM: use tw as pos
             fmold += tw[i];
             if(FMmode == FMTYPE::FREQ_MOD)
-                fmpos=fmold;
-            else
+                fmpos=fmold; 
+            else 
                 fmpos = tw[i];
 
             int FMmodposhi = 0;
@@ -1632,7 +1603,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             //carrier position
             int carposhi = poshi + FMmodposhi;
             int carposlo = poslo + FMmodposlo;
-
+            
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 carposhi += NoteVoicePar[nvoice].phase_offset;
 
@@ -1642,8 +1613,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 4.0f) {
-            //if(NoteVoicePar[nvoice].AAEnabled) {
+            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 4.0f) { 
+            //if(NoteVoicePar[nvoice].AAEnabled) { 
                 // carrier frequency
                 const int carfreqhi = (FMmode == FMTYPE::FREQ_MOD) ? tw[i]+freqhi : freqhi;
                 // resampling factor
@@ -1655,27 +1626,27 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 ovsmpposhi &= synth.oscilsize - 1;
                 //for resampling factor up to 40 we reduce the kernel step size down to 1.
                 // -> lower cut off frequency
-
+                
                 #define minstep 8 // <-----      this factor reduces the needed multiplications  <----------------
                                  // it's best to use integer factors of 40
-
+                
                 const int stpsize = rsmpfactor>40/minstep ? minstep : 40/rsmpfactor;
                 // for resampling factor above 40 start scipping oscillator samples
                 const int ovsmpfreqhi = rsmpfactor<minstep ? 1 : rsmpfactor/minstep;
                 // first kernel sample to be used
                 const int startpos = (((1<<24)-carposlo) * stpsize);
-                const int startposhi = startpos>>24;
-                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;
+                const int startposhi = startpos>>24;                
+                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;                
                 // reset output value
                 float out = 0;
-                for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) {
-                    const float kernelsample =
+                for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) { 
+                    const float kernelsample = 
                         (pars.GlobalPar.wskernel[l] * ((1<<24) - kernelposlo) +
                         pars.GlobalPar.wskernel[l+1] * kernelposlo)/(1.0f*(1<<24));
-
+                        
                     out += kernelsample*smps[ovsmpposhi];
 
-                    // advance to next oscillator sample
+                    // advance to next oscillator sample 
                     ovsmpposhi += ovsmpfreqhi;
                     ovsmpposhi &= synth.oscilsize - 1;
                 }
