@@ -141,7 +141,6 @@ public:
 protected:
    /* --------------------------------------------------------------------------------------------------------
     * Information */
-
    /**
       Get the plugin label.
       This label is a short restricted name consisting of only _, a-z, A-Z and 0-9 characters.
@@ -284,8 +283,11 @@ protected:
     */
     void loadProgram(uint32_t index) override
     {
+        setState(nullptr, defaultState);
+        /*
         //in plugin mode, only the first part is useful
         middleware->pendingSetProgram(0, index);
+        */
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -340,6 +342,11 @@ protected:
     */
     void run(const float**, float** outputs, uint32_t frames, const MidiEvent* midiEvents, uint32_t midiEventCount) override
     {
+
+        // Zeitposition vom Host abfragen
+        const TimePosition& timePosition = getTimePosition();
+
+
         if (! mutex.tryLock())
         {
             //if (! isOffline())
@@ -348,7 +355,6 @@ protected:
                 std::memset(outputs[1], 0, sizeof(float)*frames);
                 return;
             }
-
             mutex.lock();
         }
 
@@ -367,8 +373,10 @@ protected:
 
             if (midiEvent.frame > framesOffset)
             {
-                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate, outputs[0]+framesOffset,
-                                                                                           outputs[1]+framesOffset);
+                master->GetAudioOutSamples(midiEvent.frame-framesOffset, synth.samplerate,
+                                                                         outputs[0]+framesOffset,
+                                                                         outputs[1]+framesOffset);
+
                 framesOffset = midiEvent.frame;
             }
 
@@ -441,9 +449,24 @@ protected:
             }
         }
 
-        if (frames > framesOffset)
-            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate, outputs[0]+framesOffset,
-                                                                              outputs[1]+framesOffset);
+        if (timePosition.bbt.valid)
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
+                                                                 outputs[0]+framesOffset,
+                                                                 outputs[1]+framesOffset,
+                                                                 timePosition.bbt.bar,
+                                                                 timePosition.bbt.beat,
+                                                                 timePosition.bbt.tick,
+                                                                 timePosition.bbt.beatsPerBar,
+                                                                 timePosition.bbt.beatType,
+                                                                 timePosition.bbt.beatsPerMinute,
+                                                                 timePosition.bbt.ticksPerBeat,
+                                                                 timePosition.playing,
+                                                                 frames);
+
+        else
+            master->GetAudioOutSamples(frames-framesOffset, synth.samplerate,
+                                                                 outputs[0]+framesOffset,
+                                                                 outputs[1]+framesOffset);
 
         mutex.unlock();
     }
@@ -525,7 +548,7 @@ private:
     void _initMaster()
     {
         middleware = new zyn::MiddleWare(std::move(synth), &config);
-        middleware->setUiCallback(__uiCallback, this);
+        middleware->setUiCallback(0, __uiCallback, this);
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());
 

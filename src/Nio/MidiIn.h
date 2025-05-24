@@ -17,6 +17,7 @@
 #define MIDI_IN_H
 
 #include "Engine.h"
+#include <stdint.h>//uint8_t
 
 namespace zyn {
 

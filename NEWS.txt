@@ -1,3 +1,21 @@
+3.0.7 (TBD)
+        - Add NSM renaming for alsa MIDI port
+        - Add portamento auto mode
+        - Add MIDI bank select to LV2/VST2 versions
+        - Add filter bypass
+        - Add sympathetic resonance effect
+        - Fix built in record wavefile saving
+        - Fix message corruption bug in rtosc
+        - Fix analog filter q update rate
+        - Fix all-note-off message with sustain pedals
+        - Fix how controller values are applied when enabled/disabled
+        - Increase parameter smoothing filter frequency
+        - Eliminate some clicks when changing filter parameters
+        - Fix loading invalid values from XML savefiles
+        - Fix and improve the Zyn-Fusion UI
+        - Fix multiple bugs
+
+
 3.0.6 (21 January 2022)
         - Enhances watchpoint system for waveform views (GSOC michiboo)
         - Add anti-alias mode to add synth oscillator interpolation
@@ -370,7 +388,7 @@
 
 1.0.7 (7 Feb 2003)
       - some settings (like samplerate) are set at runtime (by comand line)
-      - added Distorsion effect
+      - added Distortion effect
       - added controllers, and NRPNs for changing all effects parameters by midi
       - bugs removed and other improvements
 

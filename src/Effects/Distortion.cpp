@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Distorsion.cpp - Distorsion effect
+  Distortion.cpp - Distortion effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -11,7 +11,7 @@
   of the License, or (at your option) any later version.
 */
 
-#include "Distorsion.h"
+#include "Distortion.h"
 #include "../DSP/AnalogFilter.h"
 #include "../Misc/WaveShapeSmps.h"
 #include "../Misc/Allocator.h"
@@ -21,14 +21,16 @@
 
 namespace zyn {
 
-#define rObject Distorsion
+#define rObject Distortion
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
-rtosc::Ports Distorsion::ports = {
+rtosc::Ports Distortion::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Overdrive 1, Overdrive 2, A. Exciter 1, A. Exciter 2, Guitar Amp,
                     Quantisize)
+                  rProp(alias)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -37,7 +39,10 @@ rtosc::Ports Distorsion::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresetsAt(2, 64, 64)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+            rPresetsAt(0,  84, 84, 42, 42,  84, 84),
+            rPresetsAt(16,127,127, 64, 64, 127,127)),
     rEffParPan(),
     rEffPar(Plrcross, 2, rShort("l/r"), rDefault(35), "Left/Right Crossover"),
     rEffPar(Pdrive,   3, rShort("drive"),
@@ -49,7 +54,7 @@ rtosc::Ports Distorsion::ports = {
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
                      Inverse Limiter, Clip, Asym2, Pow2, Sigmoid, Tanh,
-                     Cubic, Square), rLinear(0,127), 
+                     Cubic, Square), rLinear(0,127),
             rPresets(Arctangent, Asymmetric, Zigzag,
                      Asymmetric, Pow, Quantisize),
             "Distortion Shape"),
@@ -68,7 +73,7 @@ rtosc::Ports Distorsion::ports = {
             rLinear(0, 127), "Input DC Offset"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
-            Distorsion  &dd = *(Distorsion*)d.obj;
+            Distortion  &dd = *(Distortion*)d.obj;
             float        buffer[128], orig[128];
             rtosc_arg_t  args[128];
             char         arg_str[128+1] = {};
@@ -92,7 +97,7 @@ rtosc::Ports Distorsion::ports = {
 #undef rEnd
 #undef rObject
 
-Distorsion::Distorsion(EffectParams pars)
+Distortion::Distortion(EffectParams pars)
     :Effect(pars),
       Pvolume(50),
       Pdrive(90),
@@ -114,7 +119,7 @@ Distorsion::Distorsion(EffectParams pars)
     cleanup();
 }
 
-Distorsion::~Distorsion()
+Distortion::~Distortion()
 {
     memory.dealloc(lpfl);
     memory.dealloc(lpfr);
@@ -123,7 +128,7 @@ Distorsion::~Distorsion()
 }
 
 //Cleanup the effect
-void Distorsion::cleanup(void)
+void Distortion::cleanup(void)
 {
     lpfl->cleanup();
     hpfl->cleanup();
@@ -133,7 +138,7 @@ void Distorsion::cleanup(void)
 
 
 //Apply the filters
-void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
+void Distortion::applyfilters(float *efxoutl, float *efxoutr)
 {
     if(Plpf!=127) lpfl->filterout(efxoutl);
     if(Phpf!=0) hpfl->filterout(efxoutl);
@@ -145,7 +150,7 @@ void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 
 
 //Effect output
-void Distorsion::out(const Stereo<float *> &smp)
+void Distortion::out(const Stereo<float *> &smp)
 {
     float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
     if(Pnegate)
@@ -189,7 +194,7 @@ void Distorsion::out(const Stereo<float *> &smp)
 
 
 //Parameter control
-void Distorsion::setvolume(unsigned char _Pvolume)
+void Distortion::setvolume(unsigned char _Pvolume)
 {
     Pvolume = _Pvolume;
 
@@ -203,7 +208,7 @@ void Distorsion::setvolume(unsigned char _Pvolume)
         cleanup();
 }
 
-void Distorsion::setlpf(unsigned char _Plpf)
+void Distortion::setlpf(unsigned char _Plpf)
 {
     Plpf = _Plpf;
     float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
@@ -211,7 +216,7 @@ void Distorsion::setlpf(unsigned char _Plpf)
     lpfr->setfreq(fr);
 }
 
-void Distorsion::sethpf(unsigned char _Phpf)
+void Distortion::sethpf(unsigned char _Phpf)
 {
     Phpf = _Phpf;
     float fr = expf(sqrtf(Phpf / 127.0f) * logf(25000.0f)) + 20.0f;
@@ -219,7 +224,7 @@ void Distorsion::sethpf(unsigned char _Phpf)
     hpfr->setfreq(fr);
 }
 
-unsigned char Distorsion::getpresetpar(unsigned char npreset, unsigned int npar)
+unsigned char Distortion::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define	PRESET_SIZE 13
 #define	NUM_PRESETS 6
@@ -240,14 +245,14 @@ unsigned char Distorsion::getpresetpar(unsigned char npreset, unsigned int npar)
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
             /* lower the volume if this is system effect */
-            return (3 * presets[npreset][npar]) / 2;
+            return (2 * presets[npreset][npar]) / 3;
         }
         return presets[npreset][npar];
     }
     return 0;
 }
 
-void Distorsion::setpreset(unsigned char npreset)
+void Distortion::setpreset(unsigned char npreset)
 {
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
@@ -257,7 +262,7 @@ void Distorsion::setpreset(unsigned char npreset)
     cleanup();
 }
 
-void Distorsion::changepar(int npar, unsigned char value)
+void Distortion::changepar(int npar, unsigned char value)
 {
     switch(npar) {
         case 0:
@@ -277,7 +282,7 @@ void Distorsion::changepar(int npar, unsigned char value)
             break;
         case 5:
             if(value > 16)
-                Ptype = 16;  //this must be increased if more distorsion types are added
+                Ptype = 16;  //this must be increased if more distortion types are added
             else
                 Ptype = value;
             break;
@@ -297,7 +302,7 @@ void Distorsion::changepar(int npar, unsigned char value)
             Pstereo = (value > 1) ? 1 : value;
             break;
         case 10:
-            Pprefiltering = value;
+            Pprefiltering = (value!=0);
             break;
         case 11:
             Pfuncpar = value;
@@ -308,7 +313,7 @@ void Distorsion::changepar(int npar, unsigned char value)
     }
 }
 
-unsigned char Distorsion::getpar(int npar) const
+unsigned char Distortion::getpar(int npar) const
 {
     switch(npar) {
         case 0:  return Pvolume;

@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "Microtonal.h"
 #include <atomic>
+#include <set>
 #include <rtosc/automations.h>
 #include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
@@ -78,7 +79,7 @@ class Master
         int loadXML(const char *filename);
 
         /**Append all settings to an OSC savefile (as specified by RT OSC)*/
-        std::string saveOSC(std::string savefile);
+        std::string saveOSC(std::string savefile, std::set<std::string>& alreadyWritten);
         /**loads all settings from an OSC file (as specified by RT OSC)
          * @param dispatcher Message dispatcher and modifier
          * @return 0 for ok or <0 if there is an error*/
@@ -123,6 +124,12 @@ class Master
         bool runOSC(float *outl, float *outr, bool offline=false,
                     Master* master_from_mw = nullptr);
 
+        //For debugging OSC issues
+        void setUnknownAddressCallback(void(*cb)(void*,bool,rtosc::msg_t), void* ptr) {
+            unknown_address_cb = cb;
+            unknown_address_cb_ptr = ptr;
+        }
+
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
@@ -130,7 +137,16 @@ class Master
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr) REALTIME;
+                                float *outr,
+                                int bar=0,
+                                int beat=0,
+                                float beatsPerBar=0.0f,
+                                float beatType=0.0f,
+                                float tick=0.0f,
+                                float bpm=0.0f,
+                                float PPQ=0.0f,
+                                bool playing=false,
+                                size_t frames=0) REALTIME;
 
 
         void partonoff(int npart, int what);
@@ -140,6 +156,8 @@ class Master
         //Copy callback to other master
         void copyMasterCbTo(Master* dest);
         bool hasMasterCb() const;
+        void setMasterSwitchUpcoming() { masterSwitchUpcoming = true; }
+        bool isMasterSwitchUpcoming() const { return masterSwitchUpcoming; }
         void setAudioCompressor(bool enabled);
 
         /**parts \todo see if this can be made to be dynamic*/
@@ -176,7 +194,8 @@ class Master
         float vuoutpeakpartr[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
-        AbsTime  time;
+        AbsTime time;
+        Sync* sync;
         Controller ctl;
         bool       swaplr; //if L and R are swapped
 
@@ -232,6 +251,8 @@ class Master
 
     private:
         std::atomic<bool> run_osc_in_use = { false };
+        void (*unknown_address_cb)(void*,bool,rtosc::msg_t) = nullptr;
+        void* unknown_address_cb_ptr;
 
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
@@ -246,6 +267,7 @@ class Master
         //Callback When Master changes
         void(*mastercb)(void*,Master*);
         void* mastercb_ptr;
+        std::atomic<bool> masterSwitchUpcoming = { false };
 
         //! apply an OSC event with a DataObj parameter
         //! @note This may be called by MiddleWare if we are offline

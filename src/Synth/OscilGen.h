@@ -84,7 +84,7 @@ private:
 class OscilGen:public Presets, NoCopyNoMove
 {
     public:
-        OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
+        OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, const Resonance *res_);
 
         //You need to call this func if you need your own buffers for get() etc.
         OscilGenBuffersCreator createOscilGenBuffers() const;
@@ -228,7 +228,7 @@ class OscilGen:public Presets, NoCopyNoMove
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size) const;
 
-        Resonance *res;
+        const Resonance *res;
 
         unsigned int randseed;
     public:

@@ -80,7 +80,7 @@ static const rtosc::Ports realtime_ports =
     rParamI(PDetune,        rShort("fine"), rLinear(0, 16383), rDefault(8192),
         "Fine Detune"),
     rParamI(PCoarseDetune,  rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,  rShort("type"),
+    rOption(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
             rDefault(L10cents), "Magnitude of Detune"),
 
@@ -158,6 +158,8 @@ static const rtosc::Ports non_realtime_ports =
 {
     rSelf(PADnoteParameters),
     rPresetType,
+#undef rDefaultProps
+#define rDefaultProps rProp(non-realtime)
     {"paste:b", rProp(internal) rDoc("paste port"), 0,
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
@@ -199,12 +201,12 @@ static const rtosc::Ports non_realtime_ports =
             rDefault(Off), "Type of amplitude multiplier"),
     rParamZyn(Php.amp.par1, rShort("p1"),   rDefault(80),
         "Amplitude multiplier parameter"),
-    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(60),
+    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(64),
         "Amplitude multiplier parameter"),
     rToggle(Php.autoscale,  rShort("auto"), rDefault(true),
         "Autoscaling Harmonics"),
     rOption(Php.onehalf, rShort("side"),
-            rOptions(Full, Upper Half, Lower Half), rDefault(Full)
+            rOptions(Full, Upper Half, Lower Half), rDefault(Full),
             "Harmonic cutoff model"),
 
     //Harmonic Bandwidth
@@ -220,7 +222,7 @@ static const rtosc::Ports non_realtime_ports =
     rOption(Phrpos.type,
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
                 Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Harmonic Overtone shifting mode"),
     rParamI(Phrpos.par1, rShort("p1"), rLinear(0,255), rDefault(0),
         "Harmonic position parameter"),
@@ -246,8 +248,10 @@ static const rtosc::Ports non_realtime_ports =
             "Samples per octave"),
     rParamI(Pquality.oct, rShort("octaves"), rLinear(0,7), rDefault(3),
             "Number of octaves to sample (above the first sample"),
+#undef rDefaultProps
+#define rDefaultProps
 
-    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rLinear(0,1000)
+    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rProp(non-realtime) rLinear(0,1000)
         rDefault(500) rDoc("Bandwidth Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
@@ -258,7 +262,7 @@ static const rtosc::Ports non_realtime_ports =
                 d.reply(d.loc, "i", p->Pbandwidth);
             }}},
 
-    {"bandwidthvalue:", rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
+    {"bandwidthvalue:", rProp(non-realtime) rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
         [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             d.reply(d.loc, "f", p->setPbandwidth(p->Pbandwidth));
@@ -310,6 +314,7 @@ static const rtosc::Ports non_realtime_ports =
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };
+#undef rDefaultProps
 #undef rChangeCb
 
 const rtosc::Ports &PADnoteParameters::non_realtime_ports = zyn::non_realtime_ports;

@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include <cstdint>
 
 namespace zyn {
 
@@ -116,7 +117,7 @@ struct ADnoteVoiceParam {
     void add2XML(XMLwrapper& xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
-    void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson,
+    void enable(const SYNTH_T &synth, FFTwrapper *fft, const Resonance *Reson,
                 const AbsTime *time);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
@@ -162,6 +163,7 @@ struct ADnoteVoiceParam {
 
     // filter bypass
     unsigned char Pfilterbypass;
+    unsigned char PfilterFcCtlBypass;
 
     /** Voice oscillator */
     OscilGen *OscilGn;
@@ -300,6 +302,11 @@ struct ADnoteVoiceParam {
     /* Frequency Envelope of the Modulator */
     unsigned char   PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
+
+    /* Voice is being synced by modulator
+       false = Hardsync disabled (default)
+       true =  Hardsync enabled */
+    bool PsyncEnabled;
 
     unsigned char *GlobalPDetuneType;
 

@@ -609,7 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
-    
+
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
@@ -630,7 +630,7 @@ int main(int argc, char *argv[])
     printf("[INFO] startup OSC\n");
     typedef std::vector<const char *> wait_t;
     wait_t msg_waitlist;
-    middleware->setUiCallback([](void*v,const char*msg) {
+    middleware->setUiCallback(0, [](void*v,const char*msg) {
             wait_t &wait = *(wait_t*)v;
             size_t len = rtosc_message_length(msg, -1);
             char *copy = new char[len];
@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
     printf("[INFO] UI calbacks\n");
     if(!noui)
         gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
-    middleware->setUiCallback(GUI::raiseUi, gui);
+    middleware->setUiCallback(0, GUI::raiseUi, gui);
     middleware->setIdleCallback([](void*){GUI::tickUi(gui);}, NULL);
 
     //Replay Startup Responses
@@ -717,6 +717,7 @@ int main(int argc, char *argv[])
         if(gui_pid == 0) {
             auto exec_fusion = [&addr](const char* path) {
                 execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+#ifndef __APPLE__
             if(fusion_dir && *fusion_dir)
             {
                 std::string fusion = fusion_dir;
@@ -736,6 +737,7 @@ int main(int argc, char *argv[])
                     exec_fusion(fusion.c_str());
                 }
             }
+#endif
             exec_fusion("./zyn-fusion");
             exec_fusion("/opt/zyn-fusion/zyn-fusion");
             exec_fusion("zyn-fusion");

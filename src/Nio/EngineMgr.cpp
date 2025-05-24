@@ -58,6 +58,8 @@ EngineMgr::EngineMgr(const SYNTH_T *synth, const oss_devs_t& oss_devs)
 #if OSS
     engines.push_back(new OssEngine(*synth, oss_devs));
     engines.push_back(new OssMultiEngine(*synth, oss_devs));
+#else
+    (void)oss_devs;
 #endif
 #if ALSA
     engines.push_back(new AlsaEngine(*synth));

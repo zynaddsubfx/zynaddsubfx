@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Distorsion.h - Distorsion Effect
+  Sympathetic.cpp - Distorsion effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -11,19 +11,33 @@
   of the License, or (at your option) any later version.
 */
 
-#ifndef DISTORSION_H
-#define DISTORSION_H
+#ifndef SYMPATHETIC_H
+#define SYMPATHETIC_H
 
 #include "Effect.h"
 
 namespace zyn {
 
-/**Distortion Effect*/
-class Distorsion:public Effect
+// coefficients for calculating gainbwd from Pq
+// gainbwd = gainbwd_offset + Pq * gainbwd_factor
+// designed for gainbwd range up to 1.0 at Pq==127
+const float gainbwd_offset = 0.873f;
+const float gainbwd_factor = 0.001f;
+
+// number of piano keys with single string
+const unsigned int num_single_strings = 12;
+// number of piano keys with triple strings
+const unsigned int num_triple_strings = 48;
+
+// frequencies of a guitar in standard e tuning
+const float guitar_freqs[6] = {82.4f, 110.0f, 146.8f, 196.0f, 246.9f, 329.6f};
+
+class Sympathetic final:public Effect
 {
+
     public:
-        Distorsion(EffectParams pars);
-        ~Distorsion();
+    Sympathetic(EffectParams pars);
+    ~Sympathetic();
         void out(const Stereo<float *> &smp);
         unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
@@ -43,16 +57,29 @@ class Distorsion:public Effect
         unsigned char Plpf;          //lowpass filter
         unsigned char Phpf;          //highpass filter
         unsigned char Pstereo;       //0=mono, 1=stereo
-        unsigned char Pprefiltering; //if you want to do the filtering before the distorsion
-        unsigned char Pfuncpar;      //for parametric functions
-        unsigned char Poffset;       //the input offset
+        unsigned char Pq;            //0=0.95 ... 127=1.05
+        unsigned char Punison_size;  //number of unison strings
+        unsigned char Punison_frequency_spread;
+        unsigned char Pstrings;      //number of strings
+        unsigned char Pbasenote;     //midi note of lowest string
+
+        unsigned char spread, spread_old;
+
+        float freqs[NUM_SYMPATHETIC_STRINGS];
+        float baseFreq;
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
         void sethpf(unsigned char _Phpf);
+        void calcFreqs();
+        void calcFreqsGeneric();
+        void calcFreqsPiano();
+        void calcFreqsGuitar();
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
+
+        class CombFilterBank * filterBank;
 };
 
 }

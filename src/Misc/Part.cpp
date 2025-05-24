@@ -53,8 +53,9 @@ static const Ports partPorts = {
               "How many parts are before this in the Master"),
 #undef  rChangeCb
 #define rChangeCb if(obj->Penabled == false) obj->AllNotesOff();
-    rToggle(Penabled, rShort("enable"), rDefaultDepends(partno),
-            rPresets(true), rDefault(false), "Part enable"),
+    rToggle(Penabled, rShort("enable"),
+            rPreset(0, true), rDefault(false), rDefaultDepends(partno),
+            "Part enable"),
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
@@ -78,19 +79,26 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
     rParamI(Pkeylimit, rShort("limit"), rProp(parameter),
-    rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
 #undef rChangeCb
 #define rChangeCb obj->setvoicelimit(obj->Pvoicelimit);
     rParamI(Pvoicelimit, rShort("vlimit"), rProp(parameter),
-    rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
     rParamZyn(Pmaxkey, rShort("max"), rDefault(127), "Max Used Key"),
-    rParamZyn(Pkeyshift, rShort("shift"), rDefault(64), "Part keyshift"),
-    rParamZyn(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
-              rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
-              "Active MIDI channel"),
+    {"Pkeyshift::i", rShort("shift") rProp(parameter) rLinear(-64,63) rUnit(semitones)
+    rDefault(0) rDoc("Part Key Shift"), 0, [](const char *m, RtData&d) {
+    if(rtosc_narguments(m)==0) {
+        d.reply(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);
+    } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+        ((Part*)d.obj)->Pkeyshift=(limit<char>(rtosc_argument(m,0).i+64,0,127));
+        d.broadcast(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);}}},
+    rOption(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
+            rDefaultDepends(partno),
+            rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
+            "Active MIDI channel"),
     rParamZyn(Pvelsns,   rShort("sense"), rDefault(64), "Velocity sensing"),
     rParamZyn(Pveloffs,  rShort("offset"), rDefault(64),"Velocity offset"),
     rToggle(Pnoteon, rDefault(true), "If the channel accepts note on events"),
@@ -109,10 +117,10 @@ static const Ports partPorts = {
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, rDefault(""),
         "Instrument comments"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "User specified label"),
-    rArrayI(Pefxroute, NUM_PART_EFX,
-            rOptions(Next Effect,Part Out,Dry Out),
-            ":default\0=[\"Next Effect\"S...]\0",
-            "Effect Routing"),
+    rArrayOption(Pefxroute, NUM_PART_EFX,
+        rOptions(Next Effect,Part Out,Dry Out),
+        ":default\0=[\"Next Effect\"S...]\0",
+        "Effect Routing"),
     rArrayT(Pefxbypass, NUM_PART_EFX, rDefault([false...]),
         "If an effect is bypassed"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
@@ -121,7 +129,7 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+    {"polyType::i:c:S", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
         rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
@@ -140,7 +148,15 @@ static const Ports partPorts = {
                 return;
             }
 
-            int i = rtosc_argument(msg, 0).i;
+            int i;
+            if(rtosc_type(msg, 0) == 'S') {
+                auto prop = d.port->meta();
+                i = enum_key(prop, rtosc_argument(msg, 0).s);
+                assert(!prop["min"] || i >= atoi(prop["min"]));
+                assert(!prop["max"] || i <= atoi(prop["max"]));
+            } else {
+                i = rtosc_argument(msg, 0).i;
+            }
             if(i == 0) {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
@@ -231,14 +247,14 @@ static const Ports kitPorts = {
             rPreset(true, true), rPreset(false, false),
             "Kit item enable"),
     rToggle(Pmuted,  rDefault(false), "Kit item mute"),
-    rParamZyn(Pminkey, rDefault(0),  "Kit item min key"),
-    rParamZyn(Pmaxkey, rDefault(127)  "Kit item max key"),
+    rParamZyn(Pminkey, rDefault(0),   "Kit item min key"),
+    rParamZyn(Pmaxkey, rDefault(127), "Kit item max key"),
     rToggle(Padenabled, rDefaultDepends(firstkit),
             rPreset(true, true), rPreset(false, false),
             "ADsynth enable"),
     rToggle(Psubenabled, rDefault(false), "SUBsynth enable"),
     rToggle(Ppadenabled, rDefault(false), "PADsynth enable"),
-    rParamZyn(Psendtoparteffect,
+    rOption(Psendtoparteffect,
             rOptions(FX1, FX2, FX3, Off), rDefault(FX1),
             "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "Kit User Specified Label"),
@@ -270,7 +286,7 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* sync_,
     const int &gzip_compression, const int &interpolation,
     Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),
@@ -286,6 +302,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     memory(alloc),
     synth(synth_),
     time(time_),
+    sync(sync_),
     gzip_compression(gzip_compression),
     interpolation(interpolation)
 {
@@ -310,7 +327,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time);
+        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time, sync);
         Pefxbypass[nefx] = false;
     }
     assert(partefx[0]);
@@ -627,7 +644,7 @@ bool Part::NoteOnInternal(note_t note,
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
-    
+
     // in latch mode release latched notes before creating the new one
     if(Platchmode)
         notePool.releaseLatched();
@@ -847,8 +864,13 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_resonance_bandwidth:
             ctl.setresonancebw(par);
-            kit[0].adpars->GlobalPar.Reson->
-            sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
+            for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
+                if(kit[item].adpars == NULL)
+                    continue;
+                kit[item].adpars->GlobalPar.Reson->
+                sendcontroller(C_resonance_bandwidth,
+                               ctl.resonancebandwidth.relbw);
+            }
             break;
     }
 }
@@ -1439,6 +1461,8 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
                                           Pefxroute[nefx],
                                           0,
                                           NUM_PART_EFX);
+            if(Pefxroute[nefx]>2) // fix for broken savefiles
+                Pefxroute[nefx]=2;
             partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
             Pefxbypass[nefx] = xml.getparbool("bypass", Pefxbypass[nefx]);
             xml.exitbranch();
@@ -1470,7 +1494,8 @@ void Part::getfromXML(XMLwrapper& xml)
     Plegatomode = xml.getparbool("legato_mode", Plegatomode); //older versions
     if(!Plegatomode)
         Plegatomode = xml.getpar127("legato_mode", Plegatomode);
-    Pkeylimit = xml.getpar127("key_limit", Pkeylimit);
+    int keylimit_max = std::atoi(ports["Pkeylimit"]->meta()["max"]);
+    Pkeylimit = std::min(keylimit_max, xml.getpar127("key_limit", Pkeylimit));
     Pvoicelimit = xml.getpar127("voice_limit", Pvoicelimit);
 
 
@@ -1506,7 +1531,7 @@ uint8_t Part::Kit::sendto(void) const
 
 bool Part::Kit::validNote(char note) const
 {
-    return !Pmuted && inRange((uint8_t)note, Pminkey, Pmaxkey);
+    return !Pmuted && Penabled && inRange((uint8_t)note, Pminkey, Pmaxkey);
 }
 
 }

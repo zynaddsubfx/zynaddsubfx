@@ -73,6 +73,9 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
+class  Sync;
+
+
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
@@ -136,6 +139,10 @@ typedef std::complex<fftwf_real> fft_t;
  */
 #define NUM_KIT_ITEMS 16
 
+/*
+ * Maximum number of "strings" in Sympathetic Resonance Effect
+ */
+#define NUM_SYMPATHETIC_STRINGS 228U // 76*3
 
 /*
  * How is applied the velocity sensing
@@ -175,6 +182,11 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_VOWELS 6
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
+
+/*
+ * Maximum length of the reverse delay effect
+ */
+#define MAX_REV_DELAY_SECONDS 4.0f
 
 #define MAX_PRESETTYPE_SIZE 30
 

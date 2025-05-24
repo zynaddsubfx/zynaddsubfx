@@ -19,7 +19,7 @@
 namespace zyn {
 
 /**EQ Effect*/
-class EQ:public Effect
+class EQ final:public Effect
 {
     public:
         EQ(EffectParams pars);

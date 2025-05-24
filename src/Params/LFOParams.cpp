@@ -38,7 +38,7 @@ static const rtosc::Ports _ports = {
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter, unspecified),
             "location of the filter"),
-    rParamF(freq, rShort("freq"), rUnit(HZ), rLog(0.0775679,85.25),
+    rParamF(freq, rShort("freq"), rUnit(HZ), rLogWithLogmin(0.0,85.25,0.0775679),
             rDefaultDepends(loc),
             rPreset(ad_global_amp, 6.49), // 80
             rPreset(ad_global_freq, 3.71), // 70
@@ -78,7 +78,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
             "Frequency Randomness (calculated uniformly at each cycle)"),
     rParamF(delay, rShort("delay"), rSpecial(disable), rUnit(S),
-              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0),
+              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0.0),
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
     rParamF(fadein, rShort("f.in"), rSpecial(disable), rUnit(S),

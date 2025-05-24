@@ -558,13 +558,23 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     (void) argc;
     (void) user_data;
     char buffer[8192];
+    size_t size;
+
+    size = lo_message_length(msg, path);
+    if (size > sizeof(buffer)) {
+        /*
+         * Sometimes search results may return too much data to handle
+         * by the lo_buffer. Just print a warning and ignore such
+         * messages for now.
+         */
+        fprintf(stderr, "guimain.cpp:%u Received too many bytes "
+            "%zu > %zu (ignored)\n", __LINE__, size, sizeof(buffer));
+        return 0;
+    }
     memset(buffer, 0, sizeof(buffer));
-    size_t size = sizeof(buffer);
-    assert(lo_message_length(msg, path) <= sizeof(buffer));
     lo_message_serialise(msg, path, buffer, &size);
     assert(size <= sizeof(buffer));
     lo_buffer.raw_write(buffer);
-
     return 0;
 }
 

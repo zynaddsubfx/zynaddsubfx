@@ -15,7 +15,7 @@
 
 namespace zyn {
 
-//Waveshaping(called by Distorsion effect and waveshape from OscilGen)
+//Waveshaping(called by Distortion effect and waveshape from OscilGen)
 void waveShapeSmps(int n,
                    float *smps,
                    unsigned char type,

@@ -14,7 +14,7 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), type(Ftype), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -23,7 +23,7 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     memset(input, 0, mem_size*sizeof(float));
     memset(output, 0, mem_size*sizeof(float));
 
-    setfreq_and_q(Ffreq, Fq);
+    setfreq_and_q(Ffreq, q);
     settype(type);
 }
 
@@ -38,7 +38,7 @@ inline float CombFilter::tanhX(const float x)
 {
     // Pade approximation of tanh(x) bound to [-1 .. +1]
     // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
-    float x2 = x*x;
+    const float x2 = x*x;
     return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2)); //
 }
 
@@ -46,7 +46,7 @@ inline float CombFilter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos; // integer part (pos >= 0)
     float poslo = pos - (float) poshi; // decimal part
     // linear interpolation between samples
-    return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
+    return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]);
 }
 
 void CombFilter::filterout(float *smp)
@@ -61,8 +61,8 @@ void CombFilter::filterout(float *smp)
         float pos = float(mem_size-buffersize+i)-delay;
         // add the fwd and bwd feedback samples to current sample
         smp[i] = smp[i]*gain + tanhX(
-            gainfwd * sampleLerp( input, pos) - 
-            gainbwd * sampleLerp(output, pos)); 
+            gainfwd * sampleLerp( input, pos) -
+            gainbwd * sampleLerp(output, pos));
         // copy new sample to output buffer
         output[mem_size-buffersize+i] = smp[i];
         // apply output gain
@@ -112,6 +112,18 @@ void CombFilter::settype(unsigned char type_)
         case 2:
             gainfwd = q;
             gainbwd = q;
+            break;
+        case 3:
+            gainfwd = 0.0f;
+            gainbwd = -q;
+            break;
+        case 4:
+            gainfwd = -q;
+            gainbwd = 0.0f;
+            break;
+        case 5:
+            gainfwd = -q;
+            gainbwd = -q;
             break;
     }
 }

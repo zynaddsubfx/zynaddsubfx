@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
+#include <cstdint>
 
 namespace zyn {
 
@@ -60,10 +61,9 @@ class FilterParams:public PresetsArray
         float    freqtracking; //!< Tracking of center frequency with note frequency (percentage)
         float    gain;         //!< filter's output gain (dB)
 
-        int Pq;         //dummy
-        int Pfreq;      //dummy
-        int Pfreqtrack; //dummy
-        int Pgain;      //dummy
+        static float baseqFromOldPq(int Pq);
+        static float gainFromOldPgain(int Pgain);
+        static float basefreqFromOldPreq(int Pfreq);
 
         //Formant filter parameters
         unsigned char Pnumformants; //how many formants are used
@@ -73,6 +73,7 @@ class FilterParams:public PresetsArray
 
         struct Pvowels_t {
             struct formants_t {
+                unsigned char loc; //!< only relevant for DynFilter's default values
                 unsigned char freq, amp, q; //frequency,amplitude,Q
             } formants[FF_MAX_FORMANTS];
         } Pvowels[FF_MAX_VOWELS];
@@ -95,6 +96,7 @@ class FilterParams:public PresetsArray
 
         void defaults(int n); //!< set default for formant @p n
 
+        void updateLoc(int newloc);
         int loc; //!< consumer location
         bool changed;
 
@@ -106,6 +108,7 @@ class FilterParams:public PresetsArray
     private:
         // common
         void setup();
+        void updateLoc(int newloc, int n);
 
         //stored default parameters
         unsigned char Dtype;

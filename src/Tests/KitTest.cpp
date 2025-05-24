@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "../Misc/Time.h"
+#include "../Misc/Sync.h"
 #include "../Misc/Allocator.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
@@ -50,6 +51,7 @@ class KitTest
         Microtonal microtonal;
         Part *part;
         AbsTime *time;
+        Sync *sync;
         float *outL, *outR;
 
         static int getSynthTDefaultOscilSize() {
@@ -64,12 +66,13 @@ class KitTest
         void setUp() {
             synth = new SYNTH_T;
             time  = new AbsTime(*synth);
+            sync  = new Sync();
             outL  = new float[synth->buffersize];
             outR = new float[synth->buffersize];
             memset(outL, 0, synth->bufferbytes);
             memset(outR, 0, synth->bufferbytes);
 
-            part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
+            part = new Part(alloc, *synth, *time, sync, dummy, dummy, &microtonal, &fft);
         }
 
         //Standard poly mode with sustain

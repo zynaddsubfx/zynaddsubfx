@@ -18,6 +18,11 @@ find_package(Alsa)
 find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+find_package(ECM)
+list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    find_package(LibGit2)
+endif()
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
@@ -28,7 +33,10 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_check_modules(NTK_IMAGES ntk_images)
 
     pkg_check_modules(FFTW3F REQUIRED fftw3f)
-    pkg_check_modules(MXML REQUIRED mxml)
+    pkg_check_modules(MXML mxml4)
+    if(NOT MXML_FOUND)
+        pkg_check_modules(MXML REQUIRED mxml)
+    endif()
 
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
@@ -76,6 +84,7 @@ else()
   SET (GuiModule off  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 endif()
 SET (CompileTests ON CACHE BOOL "whether tests should be compiled in or not")
+SET (CompileExtensiveTests OFF CACHE BOOL "whether tests that take a long time should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
@@ -111,6 +120,12 @@ endif()
 if(HAVE_SCHEDULER AND (NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME}))
     # Add scheduler function existence info (OSX compatibility)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
+endif()
+
+if(HAVE_BG_SYNTH_THREAD)
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=1)
+else()
+    add_definitions(-DHAVE_BG_SYNTH_THREAD=0)
 endif()
 
 if(HAVE_ASYNC)
@@ -192,6 +207,7 @@ option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
 option (ExtendedWarnings "Enable all useful warnings" OFF)
+option (Werror "Treat all warnings as errors" ON)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
 mark_as_advanced(IncludeWhatYouUse)
 
@@ -271,17 +287,13 @@ set (BuildOptionsDebug
     CACHE STRING "Debug build flags")
 STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
-if(${CMAKE_VERSION} VERSION_LESS "3.3.0")
-    set(IwyuErr "disabled (cmake < 3.3.0)")
-else()
-    if(IncludeWhatYouUse)
-        find_program(IwyuPath NAMES include-what-you-use iwyu)
-        if(NOT IwyuPath)
-            set(IwyuErr "package NOT found")
-        endif()
-    else()
-        set(IwyuErr "disabled (IncludeWhatYouUse=OFF)")
+if(IncludeWhatYouUse)
+    find_program(IwyuPath NAMES include-what-you-use iwyu)
+    if(NOT IwyuPath)
+        set(IwyuErr "package NOT found")
     endif()
+else()
+    set(IwyuErr "disabled (IncludeWhatYouUse=OFF)")
 endif()
 
 ########### Settings dependent code ###########
@@ -339,7 +351,7 @@ list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 message(STATUS "Compiling with liblo")
 
 # other include directories
-include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${FFTW3F_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
 if(NOT ${X11_X11_LIB} STREQUAL "")
@@ -356,10 +368,22 @@ endif()
 
 add_definitions(
 	 -Wall
-	 -Wextra
-	 )
+	 -Wextra)
 
-# macro similar to "check_cxx_compiler_flag_extra", however,
+check_cxx_compiler_flag("-Wno-stringop-truncation" HAVE_NO_STRINGOP_TRUNCATION)
+if (HAVE_NO_STRINGOP_TRUNCATION)
+    add_definitions(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
+endif()
+check_cxx_compiler_flag("-Wno-vla-cxx-extension" HAVE_NO_VLA_CXX_EXTENSION)
+if (HAVE_NO_VLA_CXX_EXTENSION)
+    add_definitions(-Wno-vla-cxx-extension)
+endif()
+check_cxx_compiler_flag("-Wno-nan-infinity-disabled" HAVE_NO_NAN_INFINITY_DISABLED)
+if (HAVE_NO_NAN_INFINITY_DISABLED)
+    add_definitions(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
+endif()
+
+# macro similar to "check_cxx_compiler_flag", however,
 # it also checks for warnings that are only output if other warnings are active
 macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
     set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
@@ -374,16 +398,10 @@ endmacro ()
 
 check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
     "unrecognized|option"
-    COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE
+    HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
     )
-if(COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE)
+if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
     add_definitions(-Wno-inconsistent-missing-override)
-endif()
-
-check_cxx_compiler_flag("-Wall -Wextra -Werror --system-header-prefix='FL/'"
-    COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
-if(COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
-    add_definitions(--system-header-prefix="FL/")
 endif()
 
 if(HAVE_X86_FISTPL)
@@ -448,37 +466,30 @@ if(NTK_FOUND)
 endif(NTK_FOUND)
 
 if(FltkGui)
-	#UGLY WORKAROUND
-	find_program (FLTK_CONFIG fltk-config)
-	if (FLTK_CONFIG)
-		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
-		string(STRIP "${FLTK_LDFLAGS}" FLTK_LIBRARIES)
-	endif()
-
-	message(STATUS ${FLTK_LDFLAGS})
-
-
-	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
+	
+	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
 
-	include_directories(
-			${FLTK_INCLUDE_DIR}
-			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
-			"${CMAKE_CURRENT_BINARY_DIR}/UI"
-			)
+	include_directories(SYSTEM ${FLTK_INCLUDE_DIR})
+	include_directories(	"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+				"${CMAKE_CURRENT_BINARY_DIR}/UI")
 
 	add_subdirectory(UI)
 endif()
 
 if(NtkGui)
+  unset (FLTK_FLUID_EXECUTABLE)
+  find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
+  if (NOT FLTK_FLUID_EXECUTABLE)
+    message(FATAL_ERROR "ntk-fluid not found. If it's not in PATH, please invoke cmake with -DCMAKE_PROGRAM_PATH=<location/of/ntk-fluid>")
+  endif()
 
-    find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
-
+  message(STATUS "NTK Fluid executable: ${FLTK_FLUID_EXECUTABLE}")
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
-	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
+	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_IMAGES_LIBRARIES} ${NTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	if(X11_FOUND AND X11_Xpm_FOUND)
 	     set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
@@ -488,11 +499,9 @@ if(NtkGui)
 
 	message(STATUS "Will build NTK gui")
 
-	include_directories(BEFORE
-			${NTK_INCLUDE_DIRS}
-			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
-			"${CMAKE_CURRENT_BINARY_DIR}/UI"
-			)
+	include_directories(BEFORE SYSTEM ${NTK_INCLUDE_DIRS})
+	include_directories(BEFORE	"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+					"${CMAKE_CURRENT_BINARY_DIR}/UI")
 
 	add_subdirectory(UI)
 endif()
@@ -615,6 +624,20 @@ endif(CompileTests)
 
 add_executable(zynaddsubfx main.cpp)
 
+if(Werror)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+        foreach(target zynaddsubfx zynaddsubfx_core zynaddsubfx_nio zynaddsubfx_gui_bridge)
+            set_target_properties(${target} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+        endforeach()
+    else()
+        if(MSVC)
+            target_compile_options(zynaddsubfx PUBLIC /WX)
+        else()
+            target_compile_options(zynaddsubfx PUBLIC -Werror)
+        endif()
+    endif()
+endif()
+
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
 target_link_libraries(zynaddsubfx
@@ -703,8 +726,8 @@ package_status(JackEnable       "JACK     " "enabled" ${Yellow})
 package_status(OssEnable        "OSS      " "enabled" ${Yellow})
 package_status(PaEnable         "PA       " "enabled" ${Yellow})
 package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
+package_status(HAVE_BG_SYNTH_THREAD "Background synthesizer thread" "enabled" ${Yellow})
 #TODO GUI MODULE
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
-
 
 message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW3F_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

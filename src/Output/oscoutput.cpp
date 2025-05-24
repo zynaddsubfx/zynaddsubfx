@@ -516,7 +516,7 @@ void ZynOscPlugin::init()
 
     synth.alias();
     middleware = new zyn::MiddleWare(std::move(synth), &config);
-    middleware->setUiCallback(_uiCallback, this);
+    middleware->setUiCallback(0, _uiCallback, this);
     masterChangedCallback(middleware->spawnMaster());
 
     middlewareThread = new std::thread([this]() {

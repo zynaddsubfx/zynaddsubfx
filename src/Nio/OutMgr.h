@@ -15,6 +15,9 @@
 #include "../Misc/Stereo.h"
 #include "../globals.h"
 #include <list>
+#if HAVE_BG_SYNTH_THREAD
+#include <pthread.h>
+#endif
 #include <string>
 #include <semaphore.h>
 
@@ -25,11 +28,13 @@ struct SYNTH_T;
 class OutMgr
 {
     public:
+        enum { FRAME_SIZE_MAX = 1U << 14 };
+
         static OutMgr &getInstance(const SYNTH_T *synth=NULL);
         ~OutMgr();
 
         /**Execute a tick*/
-        const Stereo<float *> tick(unsigned int frameSize) REALTIME;
+        Stereo<float *> tick(unsigned int frameSize) REALTIME;
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)
@@ -51,7 +56,7 @@ class OutMgr
         bool setSink(std::string name);
 
         std::string getSink() const;
-        
+
         void setAudioCompressor(bool isEnabled);
         bool getAudioCompressor(void);
 
@@ -60,26 +65,52 @@ class OutMgr
 
         void setMaster(class Master *master_);
         void applyOscEventRt(const char *msg);
+#if HAVE_BG_SYNTH_THREAD
+        void setBackgroundSynth(bool);
+        static void *_refillThread(void *);
+        void *refillThread();
+#endif
     private:
         OutMgr(const SYNTH_T *synth);
         void addSmps(float *l, float *r);
-        unsigned int  storedSmps() const {return priBuffCurrent.l - priBuf.l; }
+        unsigned int curStoredSmps() const {return priBuffCurrent.l - priBuf.l; }
         void removeStaleSmps();
+#if HAVE_BG_SYNTH_THREAD
+        void refillLock() { pthread_mutex_lock(&bgSynthMtx); }
+        void refillUnlock() { pthread_mutex_unlock(&bgSynthMtx); }
+        void refillWait() { pthread_cond_wait(&bgSynthCond, &bgSynthMtx); }
+        void refillWakeup() { pthread_cond_broadcast(&bgSynthCond); }
+#else
+        void refillLock() { }
+        void refillUnlock() { }
+#endif
+        void refillSmps(unsigned int);
 
         AudioOut *currentOut; /**<The current output driver*/
 
         sem_t requested;
 
         /**Buffer*/
-        Stereo<float *> priBuf;          //buffer for primary drivers
+        Stereo<float *> priBuf;         //buffer for primary drivers
         Stereo<float *> priBuffCurrent; //current array accessor
 
         float *outl;
         float *outr;
         class Master *master;
 
-        int stales;
+        /**Buffer state*/
+        unsigned int stales;
+        unsigned int maxStoredSmps;
+        unsigned int midiFlushOffset;
         const SYNTH_T &synth;
+
+#if HAVE_BG_SYNTH_THREAD
+        /**Background synth*/
+        pthread_mutex_t bgSynthMtx;
+        pthread_cond_t bgSynthCond;
+        pthread_t bgSynthThread;
+        bool bgSynthEnabled;
+#endif
 };
 
 }

@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <string>
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Master.h"
@@ -228,12 +229,30 @@ class PluginTest
 
         void testLoadSave(void)
         {
+            // Do the load/save
             const string fname = string(SOURCE_DIR) + "/guitar-adnote.xmz";
-            const string fdata = loadfile(fname);
+            string fdata = loadfile(fname);
             char *result = NULL;
-            master[0]->putalldata((char*)fdata.c_str());
+            master[0]->loadXML(fname.c_str());
             int res = master[0]->getalldata(&result);
 
+            // Fixup, because d44dc9b corrupted guitar-adnote.xmz:
+            // Replace "1.0f" with "1.0" and "UTF-8" with "utf-8" in `<?xml...`
+            fdata = std::regex_replace(fdata,
+                                       std::regex(R"(<\?xml version="1\.0f" encoding="UTF-8"\?>)"),
+                                       R"(<?xml version="1.0" encoding="utf-8"?>)");
+
+            // Fixups, because guitar-adnote.xmz was saved with MXML3
+#if MXML_MAJOR_VERSION >= 4
+            // guitar-adnote has tags ending on " />" - we remove the space
+            fdata = std::regex_replace(fdata, std::regex(" />"), "/>");
+            // Remove trailing newline
+            if (fdata.size() >= 1 && fdata[fdata.size() - 1] == '\n') {
+                fdata.pop_back();
+            }
+#endif
+
+            // Checks
             TS_ASSERT_EQUAL_INT((int)(fdata.length()+1), res);
             TS_ASSERT(fdata == result);
             if(fdata != result)

@@ -417,13 +417,13 @@ int PADnote::noteout(float *outl, float *outr)
                                                  globalnewamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * NoteGlobalPar.Panning;
-            outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= tmpvol * NoteGlobalPar.Panning;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-            outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outl[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
+            outr[i] *= globalnewamplitude * NoteGlobalPar.Panning;
         }
 
     watch_amp_int(outl,synth.buffersize);

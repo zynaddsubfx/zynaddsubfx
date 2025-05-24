@@ -14,8 +14,12 @@ The LFOs have some basic parameters:
 * *Delay*: This parameter sets how much time it takes since the start of the
            note to the start of the LFO.
 * *Start Phase*: The position that a LFO will start at . 
+* *Fade In*: This parameter sets how much time it takes to ramp up to full depth after delay
+* *Fade Out*: This parameter sets how much time it takes to ramp down at note release
+* *Lowpass*: frequency of a lowpass filter applied to the lfo when usong square or random oscillator shape
 * *Frequency*: How fast the LFO is (i.e. how fast the parameter is controlled by
                the LFO changes)
+* *Numerator&Denominator*: Frequency can also be set relative to global Tempo (BPM)
 * *Depth*: The amplitude of the LFO (i.e. how much the parameter is controlled
            by the LFO changes)
 
@@ -59,6 +63,9 @@ These parameters are:
 * *Start*: LFO Start Phase - 
 If this knob is at the lowest value, the LFO Start Phase will be random.
 * *Delay*: LFO Delay
+* *F.In*: Fade In
+* *F.Out*: Fade Out
+* *LP*: Lowpass
 * *A.R.*: LFO Amplitude Randomness
 * *F.R.*: LFO Frequency Randomness
 * *C.*: LFO Continuous Mode

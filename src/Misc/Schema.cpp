@@ -105,7 +105,8 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
         if(strcmp(m.title, "documentation") &&
                 strcmp(m.title, "parameter") &&
                 strcmp(m.title, "max") &&
-                strcmp(m.title, "min"))
+                strcmp(m.title, "min") &&
+                strcmp(m.title, "logmin"))
         printf("m.title = <%s>\n", m.title);
 
     if(!has_options)
@@ -201,6 +202,7 @@ static bool do_dump(const rtosc::Port *p, const char *full_name, void *v)
 
     const char *min = meta["min"];
     const char *max = meta["max"];
+    const char *logmin = meta["logmin"];
     const char *def = meta["default"];
     def = escape_string(def);
 
@@ -229,7 +231,13 @@ static bool do_dump(const rtosc::Port *p, const char *full_name, void *v)
         o << "        \"scale\"    : \"" << scale.value << "\",\n";
     o << "        \"type\"     : \"" << type  << "\"";
     if(min && max)
-        o << ",\n        \"range\"    : [" << min << "," << max << "]";
+    {
+        o << ",\n        \"range\"    : [" << min << "," << max;
+        if(logmin)
+            o << "," << logmin << "]";
+        else
+            o << "]";
+    }
     if(def)
         o << ",\n        \"default\"  : \"" << def << "\"\n";
     if(!options.empty()) {

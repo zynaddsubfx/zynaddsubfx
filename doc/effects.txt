@@ -137,6 +137,10 @@ with very short LFO delay and little LFO depth. You can imagine a flanger as two
 copies of a sound playing at almost the same time. This leads to interference,
 which can be clearly heard. It is popular to apply flangers to guitars, giving
 them more "character".
+While in standard CHORUS and FLANGER mode there is only one additional voice that
+can be blended with the original one using the amount knob, the DUAL and TRIPLE
+mode adds two/three voices with their LFOs each being phase shifted by 180 / 120 degrees.
+Those have been used by famous roland string synthesizers.
 
 Usage
 ^^^^^
@@ -153,6 +157,7 @@ the *D/W* knob, but we have not applied panning and subtraction yet.
 * Next, the signal can be negated. If the *Subtract* checkbox is activated,
 the amplitude is multiplied by -1.
 * Finally, *Pan* lets you apply panning.
+* *Mode* selector lets you choose between Chorus, Flanger, Dual- and Triple Chorus.
 
 Distortion
 ~~~~~~~~~~
@@ -529,3 +534,67 @@ LFO.
 where the vocal is between "Ahhhhh" and "Eeeeee".
 ** *L/R* applies crossover in the end of every stage. This is currently not 
 implemented for the Analog Phaser.
+
+Sympathetic
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The Sympathetic aims to 'simulate' the sympathetic resonance in a piano.
+That is the effect, that all other strings on a piano are also oscillating
+when one string is played. With high Q setting it's more like playing with sustain pedal.
+
+TIP: map the sustain pedal to the Q parameter
+
+Function
+^^^^^^^^
+
+It is made off a bank of combfilters that are by default tuned like the 
+strings of a piano.
+
+Description
+^^^^^^^^^^^
+
+** *Drive* how much input signal is fed to the strings
+** *Level* Output Volume
+** *Str* Number of strings to use. 12 is a full Octave. On small systems 
+be careful with cpu load
+** *Q* How strong is the reflection
+** *Uni* Unisono - how many strings should have the 'same' frequency. It's used with the
+next paremeter.
+** *Detune* Amount of detune between the unisono strings
+** *Base* midi note of the lowest string
+
+Reverse
+~~~~~~~~
+
+Introduction
+^^^^^^^^^^^^
+
+The reversed effect plays the audio signal backwards. To prevent a time paradoxon
+the input signal is chopped in segments that are reversed one by one.
+One classic usage is the reversing of a decaying sound for example from reverb.
+
+Function
+^^^^^^^^
+With a melotron it was possible to reverse each key by turning the magentic tape around. 
+While exactly this is not possible with this effect, because there is no prerecorded
+sound when hitting a key, this effect can create sounds that resemble those of the melotron.
+
+
+Description
+^^^^^^^^^^^
+
+** *Length* Length of the segments being played backwards.
+** *Numerator&Denominator* Alternatively the length can be set relative
+to the global Tempo (bpm) as note value. For example 1/4 at 120bpm is 0.5s
+** *Phase* adjust the time when the reversed segments start relative to a
+global time reference. It's useful only in combination with another
+timed element like an LFO or delay.
+** *Sync* choose how the recording and reverse playing phase is synchronized
+* *Auto* the effect switches automatically between recording and reverse playing and vice versa after a segment (length)
+* *MIDI* like auto but speed is taken from MIDI timecode
+* *Host* like auto but speed is taken from plugin host (when running as plugin mode)
+* *NoteOn* recording starts at noteOn. Reverse playing starts after a segment (length)
+* *NoteOnOff* recording starts at noteon. Reverse playing starts when the decaying note reaches silence

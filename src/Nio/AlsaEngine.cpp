@@ -221,9 +221,17 @@ void *AlsaEngine::MidiThread(void)
                 break;
 
             default:
-                if(true)
-                    cout << "Info, other non-handled midi event, type: "
-                         << (int)event->type << endl;
+                for (unsigned int x = 0; x < event->data.ext.len; x += 3) {
+                    uint8_t buf[3];
+                    int y = event->data.ext.len - x;
+                    if (y >= 3) {
+                        memcpy(buf, (uint8_t *)event->data.ext.ptr + x, 3);
+                    } else {
+                        memset(buf, 0, sizeof(buf));
+                        memcpy(buf, (uint8_t *)event->data.ext.ptr + x, y);
+                    }
+                    midiProcess(buf[0], buf[1], buf[2]);
+                }
                 break;
         }
         snd_seq_free_event(event);
@@ -318,7 +326,7 @@ bool AlsaEngine::openAudio()
 
     const char *device = getenv("ALSA_DEVICE");
     if(device == 0)
-        device = "hw:0";
+        device = "default";
 
     rc = snd_pcm_open(&audio.handle, device,
                       SND_PCM_STREAM_PLAYBACK, 0);
@@ -326,6 +334,9 @@ bool AlsaEngine::openAudio()
         fprintf(stderr,
                 "unable to open pcm device: %s\n",
                 snd_strerror(rc));
+        fprintf(stderr,
+                "If your device isn't '%s', use the ALSA_DEVICE\n", device);
+        fprintf(stderr,  "environmental variable to choose another\n");
         return false;
     }
 

@@ -101,7 +101,8 @@ static const Ports voicePorts = {
         "FM Oscillator Phase"),
     rToggle(Pfilterbypass,   rShort("bypass"), rDefault(false),
         "Filter Bypass"),
-
+    rToggle(PfilterFcCtlBypass,   rShort("CtlBypass"), rDefault(false),
+        "Filter Fc Controll Bypass"),
     //Freq Stuff
     rToggle(Pfixedfreq,      rShort("fixed"),  rDefault(false),
         "If frequency is fixed"),
@@ -116,7 +117,7 @@ static const Ports voicePorts = {
         rDefault(8192),           "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"),     rDefault(0),
         "Coarse Detune"),
-    rParamZyn(PDetuneType,        rShort("type"),
+    rOption(PDetuneType,        rShort("type"),
         rOptions(L35cents, L10cents, E100cents, E1200cents), rDefault(L35cents),
         "Magnitude of Detune"),
     rToggle(PFreqEnvelopeEnabled, rShort("enable"),     rDefault(false),
@@ -137,8 +138,8 @@ static const Ports voicePorts = {
             else
                 obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
         }},
-    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
-        rDoc("Part Volume"), NULL,
+    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB)
+        rDefault(-0x1.983064p+3) rLinear(-60.0f, 0.0f) rDoc("Part Volume"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -189,18 +190,18 @@ static const Ports voicePorts = {
             rLinear(0, 16383), rDefault(8192), "Modulator Fine Detune"),
     rParamI(PFMCoarseDetune,            rShort("coarse"), rDefault(0),
             "Modulator Coarse Detune"),
-    rParamZyn(PFMDetuneType,            rShort("type"),
-              rOptions(L35cents, L10cents, E100cents, E1200cents),
-              rDefault(L35cents),
-              "Modulator Detune Magnitude"),
+    rOption(PFMDetuneType,            rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            rDefault(L35cents),
+            "Modulator Detune Magnitude"),
     rToggle(PFMFixedFreq,               rShort("fixed"),  rDefault(false),
             "Modulator Frequency Fixed"),
     rToggle(PFMFreqEnvelopeEnabled,  rShort("enable"), rDefault(false),
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
-
-
+    rToggle(PsyncEnabled,               rShort("sync"),  rDefault(false),
+            "Oscillator Hard Sync"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
@@ -343,7 +344,7 @@ static const Ports globalPorts = {
     rParamI(PDetune,              rShort("fine"),
             rLinear(0, 16383), rDefault(8192), "Fine Detune"),
     rParamI(PCoarseDetune,   rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,   rShort("type"),
+    rOption(PDetuneType,   rShort("type"),
               rOptions(L35cents, L10cents, E100cents, E1200cents),
               rDefault(L10cents),
               "Detune Scaling Type"),
@@ -446,11 +447,13 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
     rSelf(ADnoteParameters),
     rPasteRt,
     rArrayPasteRt,
-    rRecurs(VoicePar, NUM_VOICES),
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
      rProp(parameter) rShort("enable") rDoc("Voice Enable")
      rDefault([true false false ...]),
      NULL, rArrayTCbMember(VoicePar, Enabled)},
+    // this must come after "VoicePar#.../..." ports, so rtosc::apropos finds
+    // the more exact path first (bug in apropos)
+    rRecurs(VoicePar, NUM_VOICES, "Voice Parameters"),
     rRecur(GlobalPar, "Adnote Parameters"),
 };
 #undef rChangeCb
@@ -564,6 +567,7 @@ void ADnoteVoiceParam::defaults()
     POffsetHz     = 64;
     Presonance    = 1;
     Pfilterbypass = 0;
+    PfilterFcCtlBypass = 0;
     Pextoscil     = -1;
     PextFMoscil   = -1;
     Poscilphase   = 64;
@@ -600,6 +604,7 @@ void ADnoteVoiceParam::defaults()
     PFMFreqEnvelopeEnabled   = 0;
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
+    PsyncEnabled = false;
 
     OscilGn->defaults();
     FmGn->defaults();
@@ -630,7 +635,7 @@ void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
 }
 
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
-                              Resonance *Reson, const AbsTime *time)
+                              const Resonance *Reson, const AbsTime *time)
 {
     OscilGn  = new OscilGen(synth, fft, Reson);
     FmGn    = new OscilGen(synth, fft, NULL);
@@ -771,8 +776,10 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
     xml.addparbool("filter_enabled", PFilterEnabled);
     xml.addparbool("filter_bypass", Pfilterbypass);
+    xml.addparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
 
     xml.addpar("fm_enabled", (int)PFMEnabled);
+    xml.addparbool("sync_enabled", PsyncEnabled);
 
     xml.beginbranch("OSCIL");
     OscilGn->add2XML(xml);
@@ -852,7 +859,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     }
 
     if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
-       || (!xml.minimal)) {
+       || (!xml.minimal) || PsyncEnabled) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
@@ -881,6 +888,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             FMFreqEnvelope->add2XML(xml);
             xml.endbranch();
         }
+
 
         xml.beginbranch("OSCIL");
         FmGn->add2XML(xml);
@@ -977,7 +985,7 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume = 12.0412f - 60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412f + 60.0f * (vol / 96.0f - 1.0f);
         } else if (upgrade_3_0_5) {
             printf("file version less than 3.0.5\n");
             Volume = 12.0412f + xml.getparreal("volume", Volume);
@@ -1123,6 +1131,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMoscilphase);
     copy(PFilterEnabled);
     copy(Pfilterbypass);
+    copy(PfilterFcCtlBypass);
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
@@ -1182,8 +1191,8 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMDetuneType);
     copy(PFMFreqEnvelopeEnabled);
 
-
     RCopy(FMFreqEnvelope);
+    copy(PsyncEnabled);
 
     RCopy(FmGn);
 
@@ -1236,7 +1245,10 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
 void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 {
     Enabled     = xml.getparbool("enabled", 0);
-    Unison_size = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_in_file = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_min = std::atoi(ports["Unison_size"]->meta()["min"]);
+    unsigned char unison_max = std::atoi(ports["Unison_size"]->meta()["max"]);
+    Unison_size = std::min(std::max(unison_in_file, unison_min), unison_max);
     Unison_frequency_spread = xml.getpar127("unison_frequency_spread",
                                              Unison_frequency_spread);
     Unison_stereo_spread = xml.getpar127("unison_stereo_spread",
@@ -1260,7 +1272,9 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMoscilphase  = xml.getpar127("oscil_fm_phase", PFMoscilphase);
     PFilterEnabled = xml.getparbool("filter_enabled", PFilterEnabled);
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
+    PfilterFcCtlBypass  = xml.getparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
     PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
+    PsyncEnabled   = xml.getparbool("sync_enabled", PsyncEnabled);
 
     if(xml.enterbranch("OSCIL")) {
         OscilGn->getfromXML(xml);
@@ -1275,7 +1289,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            volume    = -60.0f * ( 1.0f - vol / 127.0f);
+            volume    = 60.0f * (vol / 127.0f - 1.0f);
         } else {
             volume    = xml.getparreal("volume", volume);
         }

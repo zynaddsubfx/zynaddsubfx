@@ -15,12 +15,12 @@
 #include "../AbstractFX.hpp"
 
 // ZynAddSubFX includes
-#include "Effects/Distorsion.h"
+#include "Effects/Distortion.h"
 
 /* ------------------------------------------------------------------------------------------------------------
  * Distortion plugin class */
 
-class DistortionPlugin : public AbstractPluginFX<zyn::Distorsion>
+class DistortionPlugin : public AbstractPluginFX<zyn::Distortion>
 {
 public:
     DistortionPlugin()

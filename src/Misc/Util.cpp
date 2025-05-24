@@ -221,20 +221,20 @@ float SYNTH_T::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
-    assert(len > (size_t)pos + 1);
-    const int l_pos      = (int)pos,
-              r_pos      = l_pos + 1;
-    const float leftness = pos - l_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+    assert(len > (size_t)pos + 1 && pos >= 0);
+    const unsigned int l_pos      = (int)pos;
+    const unsigned int r_pos      = l_pos + 1;
+    const float rightness = pos - (float)l_pos;
+    return data[l_pos] + (data[r_pos] - data[l_pos]) * rightness;
 }
 
 float cinterpolate(const float *data, size_t len, float pos)
 {
-    const unsigned int i_pos = pos,
-                       l_pos = i_pos % len,
-                       r_pos = l_pos + 1 < len ? l_pos + 1 : 0;
-    const float leftness = pos - i_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+    const unsigned int i_pos = (int)pos;
+    const unsigned int l_pos = i_pos % len;
+    const unsigned int r_pos = (l_pos + 1) < len ? l_pos + 1 : 0;
+    const float rightness = pos - (float)i_pos;
+    return data[l_pos] + (data[r_pos] - data[l_pos]) * rightness;
 }
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
@@ -253,6 +253,38 @@ char *rtosc_splat(const char *path, std::set<std::string> v)
     char *buf = new char[len];
     rtosc_amessage(buf, len, path, argT, arg);
     return buf;
+}
+
+void expanddirname(std::string &dirname) {
+    if (dirname.empty())
+        return;
+
+    // if the directory name starts with a ~ and the $HOME variable is
+    // defined in the environment, replace ~ by the content of $HOME
+    if (dirname.at(0) == '~') {
+        char *home_dirname = getenv("HOME");
+        if (home_dirname != NULL) {
+            dirname = std::string(home_dirname) + dirname.substr(1);
+        }
+    }
+
+#ifdef ZYN_DATADIR
+    {
+        std::string var = "$ZYN_DATADIR";
+        size_t pos = dirname.find(var);
+        if (pos != std::string::npos) {
+            dirname.replace(pos, var.length(), ZYN_DATADIR);
+        }
+    }
+#endif
+
+    normalizedirsuffix(dirname);
+}
+
+void normalizedirsuffix(std::string &dirname) {
+    if(((dirname[dirname.size() - 1]) != '/')
+       && ((dirname[dirname.size() - 1]) != '\\'))
+        dirname += "/";
 }
 
 }
