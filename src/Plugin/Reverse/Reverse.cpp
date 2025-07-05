@@ -49,8 +49,7 @@ protected:
     */
     const char* getDescription() const noexcept override
     {
-        // TODO
-        return "";
+        return "Reverse is a host synchronized reverse delay effect with multiple trigger modes";
     }
 
    /**
@@ -130,11 +129,11 @@ protected:
     */
 void initParameter(uint32_t index, Parameter& parameter) noexcept override
 {
-    parameter.hints = kParameterIsInteger | kParameterIsAutomable; // Alle Parameter automatisierbar
+    parameter.hints = kParameterIsInteger | kParameterIsAutomable; // All parameters automatable
     parameter.unit  = "";
     parameter.ranges.min = 0.0f;
     parameter.ranges.max = 127.0f;
-    parameter.ranges.def = 64.0f; // Standardwert für die meisten Parameter
+    parameter.ranges.def = 64.0f; // default value for most parameters
 
     switch (index)
     {

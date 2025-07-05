@@ -56,15 +56,13 @@ public:
         filterpar = new zyn::FilterParams();
         std::memset(efxoutl, 0, sizeof(float)*bufferSize);
         std::memset(efxoutr, 0, sizeof(float)*bufferSize);
-        
+
         // set default tempo
         time.tempo = 120;
         time.bar = 0;
         time.beat = 0;
         time.tick = 0.0f;
         time.bpm = 0.0f;
-
-        //~ doReinit(true);
     }
 
     ~AbstractPluginFX() override
@@ -74,7 +72,7 @@ public:
         delete effect;
         delete filterpar;
     }
-    
+
     virtual void doReinit(const bool firstInit)
     {
         // save current param values before recreating effect
@@ -89,7 +87,7 @@ public:
         }
 
         zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
-        
+
         effect = instantiateFX(pars);
 
         if (firstInit)
@@ -209,11 +207,11 @@ protected:
     */
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        
+
         const TimePosition& timePosition = getTimePosition();
         //~ printf("DISTRHO_PLUGIN_WANT_TIMEPOS:  %d\n",DISTRHO_PLUGIN_WANT_TIMEPOS);
-        
-        
+
+
         if (outputs[0] != inputs[0])
             copyWithMultiply(outputs[0], inputs[0], 0.5f, frames);
         else
@@ -287,9 +285,9 @@ protected:
 
     // -------------------------------------------------------------------------------------------------------
     zyn::AbsTime time;
-    
+
     zyn::Effect* effect;
-    
+
 private:
     const uint32_t paramCount;
     const uint32_t programCount;
@@ -297,7 +295,7 @@ private:
     uint32_t bufferSize;
     double   sampleRate;
 
-    
+
     float*  efxoutl;
     float*  efxoutr;
     zyn::FilterParams* filterpar;
