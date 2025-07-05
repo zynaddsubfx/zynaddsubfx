@@ -35,7 +35,7 @@ class CombFilter:public Filter
 
         float* input;
         float* output;
-        float gain;
+        float gain=1.0f;
         float q;
         unsigned char type;
 
@@ -48,7 +48,8 @@ class CombFilter:public Filter
         float gainbwd;
         float delay;
 
-        unsigned int inputIndex, outputIndex;
+        unsigned int inputIndex=0;
+        unsigned int outputIndex=0;
 
         Allocator &memory;
         int mem_size;

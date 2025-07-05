@@ -14,7 +14,7 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), inputIndex(0), outputIndex(0), memory(*alloc)
+    :Filter(srate, bufsize), q(Fq), type(Ftype), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -67,24 +67,24 @@ void CombFilter::filterout(float *smp)
     inputIndex = (inputIndex + buffersize) % mem_size;
 
     for (int i = 0; i < buffersize; i++)
-        {
-            // Calculate the feedback sample positions in the input buffer
-            const float inputPos = fmodf(inputIndex + i - delay + mem_size, mem_size);
-            // Calculate the feedback sample positions in the output buffer
-            const float outputPos = fmodf((outputIndex - delay + mem_size), mem_size);
+    {
+        // Calculate the feedback sample positions in the input buffer
+        const float inputPos = fmodf(inputIndex + i - delay + mem_size, mem_size);
+        // Calculate the feedback sample positions in the output buffer
+        const float outputPos = fmodf(outputIndex - delay + mem_size, mem_size);
 
-            // Add the fwd and bwd feedback samples to current sample
-            smp[i] = smp[i] * gain + tanhX(
-                gainfwd * sampleLerp(input, inputPos) -
-                gainbwd * sampleLerp(output, outputPos));
+        // Add the fwd and bwd feedback samples to current sample
+        smp[i] = smp[i] * gain + tanhX(
+            gainfwd * sampleLerp(input, inputPos) -
+            gainbwd * sampleLerp(output, outputPos));
 
-            // Copy new sample to output buffer
-            output[outputIndex] = smp[i];
-            outputIndex = (outputIndex + 1) % mem_size;
+        // Copy new sample to output buffer
+        output[outputIndex] = smp[i];
+        outputIndex = (outputIndex + 1) % mem_size;
 
-            // Apply output gain
-            smp[i] *= outgain;
-        }
+        // Apply output gain
+        smp[i] *= outgain;
+    }
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
