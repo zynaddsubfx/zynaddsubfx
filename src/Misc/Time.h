@@ -18,18 +18,8 @@ namespace zyn {
 class AbsTime
 {
     public:
-        AbsTime(const SYNTH_T &synth)
-            :tempo(120),
-            hostSamples(0),
-            bar(0),
-            beat(0),
-            tick(0.0f),
-            bpm(120.0f),
-            ppq(1920.0f),
-            frames(0),
-            samplingInterval(synth.dt()),
-            buffersize(synth.buffersize) {};
-        AbsTime(const int dt_, const int buffersize_)
+        AbsTime(const SYNTH_T &synth) : AbsTime(synth.dt(), synth.buffersize) {}
+        AbsTime(const float dt_, const int buffersize_)
             :tempo(120),
             hostSamples(0),
             bar(0),
@@ -59,8 +49,8 @@ class AbsTime
         int   samplerate() const {return buffersize / samplingInterval;}
     private:
         int64_t frames;
-        float samplingInterval;
-        int buffersize;
+        const float samplingInterval;
+        const int buffersize;
 
 };
 
