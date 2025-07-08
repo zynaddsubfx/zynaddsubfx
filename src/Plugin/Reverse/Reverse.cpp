@@ -223,13 +223,9 @@ START_NAMESPACE_DISTRHO
 
 Plugin* createPlugin()
 {
-    Plugin* plugin = new ReversePlugin();
-    ReversePlugin* fxPlugin = dynamic_cast<ReversePlugin*>(plugin);
-    if (fxPlugin)
-    {
-        fxPlugin->doReinit(true);
-        fxPlugin->setSpeedfactor(1.0f);
-    }
+    ReversePlugin* plugin = new ReversePlugin();
+    plugin->doReinit(true);
+    plugin->setSpeedfactor(1.0f);
     return plugin;
 }
 
