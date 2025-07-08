@@ -73,7 +73,7 @@ public:
         delete filterpar;
     }
 
-    virtual void doReinit(const bool firstInit)
+    virtual void doReinit(bool firstInit)
     {
         // save current param values before recreating effect
         uchar params[paramCount];
@@ -84,6 +84,10 @@ public:
                 params[i] = effect->getpar(i+2);
 
             delete effect;
+        }
+        else
+        {
+            firstInit = true;
         }
 
         zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
