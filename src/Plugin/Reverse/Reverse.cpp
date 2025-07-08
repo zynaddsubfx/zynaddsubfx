@@ -76,7 +76,7 @@ protected:
         switch(index)
         {
             case 4:
-                return AbstractPluginFX::getParameterValue(index)-2;
+                return AbstractPluginFX::getParameterValue(index-2);
                 break;
             case 5:
                 return numerator;
