@@ -209,8 +209,8 @@ protected:
 
 
 private:
-    float numerator;
-    float denominator;
+    float numerator = 0.0f;
+    float denominator = 4.0f;
 
 
     DISTRHO_DECLARE_NON_COPY_CLASS(ReversePlugin)
