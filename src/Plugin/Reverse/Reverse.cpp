@@ -110,7 +110,7 @@ protected:
             if(index==5) numerator = value;
             if(index==6) denominator = value;
             if (numerator&&denominator)
-                        effect->speedfactor = (float)denominator / (4.0f *(float)numerator);
+                effect->speedfactor = (float)denominator / (4.0f *(float)numerator);
         }
         else
         {
@@ -127,85 +127,85 @@ protected:
       Initialize the parameter @a index.
       This function will be called once, shortly after the plugin is created.
     */
-void initParameter(uint32_t index, Parameter& parameter) noexcept override
-{
-    parameter.hints = kParameterIsInteger | kParameterIsAutomable; // All parameters automatable
-    parameter.unit  = "";
-    parameter.ranges.min = 0.0f;
-    parameter.ranges.max = 127.0f;
-    parameter.ranges.def = 64.0f; // default value for most parameters
-
-    switch (index)
+    void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
-    case 0: // Delay
-        parameter.name   = "Delay";
-        parameter.symbol = "delay";
-        break;
-    case 1: // Stereo
-        parameter.hints |= kParameterIsBoolean;
-        parameter.name   = "Stereo";
-        parameter.symbol = "stereo";
-        parameter.ranges.max = 1.0f;
-        parameter.ranges.def = 0.0f;
-        break;
-    case 2: // Phase
-        parameter.name   = "Phase";
-        parameter.symbol = "phase";
-        break;
-    case 3: // Crossfade
-        parameter.name   = "Crossfade";
-        parameter.symbol = "crossfade";
-        break;
-    case 4: // Sync Mode
-        parameter.hints |= kParameterIsBoolean;
-        parameter.name   = "Sync Mode";
-        parameter.symbol = "syncMode";
-        parameter.ranges.max = 1.0f; // SYNC
-        parameter.ranges.def = 0.0f; // AUTO
-        break;
-    case 5: // Numerator
-        parameter.name   = "Numerator of BPM ratio";
-        parameter.symbol = "numerator";
-        parameter.ranges.max = 32.0f;
-        parameter.ranges.def = 0.0f;
-        break;
-    case 6: // Denominator
-        parameter.name   = "Denominator of BPM ratio";
-        parameter.symbol = "denominator";
-        parameter.ranges.max = 32.0f;
-        parameter.ranges.def = 4.0f;
-        break;
-    default:
-        // For unused parameters
-        parameter.name   = "Unused";
-        parameter.symbol = "unused";
-        break;
+        parameter.hints = kParameterIsInteger | kParameterIsAutomable; // All parameters automatable
+        parameter.unit  = "";
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 127.0f;
+        parameter.ranges.def = 64.0f; // default value for most parameters
+
+        switch (index)
+        {
+        case 0: // Delay
+            parameter.name   = "Delay";
+            parameter.symbol = "delay";
+            break;
+        case 1: // Stereo
+            parameter.hints |= kParameterIsBoolean;
+            parameter.name   = "Stereo";
+            parameter.symbol = "stereo";
+            parameter.ranges.max = 1.0f;
+            parameter.ranges.def = 0.0f;
+            break;
+        case 2: // Phase
+            parameter.name   = "Phase";
+            parameter.symbol = "phase";
+            break;
+        case 3: // Crossfade
+            parameter.name   = "Crossfade";
+            parameter.symbol = "crossfade";
+            break;
+        case 4: // Sync Mode
+            parameter.hints |= kParameterIsBoolean;
+            parameter.name   = "Sync Mode";
+            parameter.symbol = "syncMode";
+            parameter.ranges.max = 1.0f; // SYNC
+            parameter.ranges.def = 0.0f; // AUTO
+            break;
+        case 5: // Numerator
+            parameter.name   = "Numerator of BPM ratio";
+            parameter.symbol = "numerator";
+            parameter.ranges.max = 32.0f;
+            parameter.ranges.def = 0.0f;
+            break;
+        case 6: // Denominator
+            parameter.name   = "Denominator of BPM ratio";
+            parameter.symbol = "denominator";
+            parameter.ranges.max = 32.0f;
+            parameter.ranges.def = 4.0f;
+            break;
+        default:
+            // For unused parameters
+            parameter.name   = "Unused";
+            parameter.symbol = "unused";
+            break;
+        }
     }
-}
 
    /**
       Set the name of the program @a index.
       This function will be called once, shortly after the plugin is created.
     */
-void initProgramName(uint32_t index, String& programName) noexcept override
-{
-    switch (index)
+    void initProgramName(uint32_t index, String& programName) noexcept override
     {
-    case 0:
-        programName = "Note On";
-        break;
-    case 1:
-        programName = "Note On/Off";
-        break;
-    case 2:
-        programName = "Auto";
-        break;
-    default:
-        programName = "Custom Preset"; // Für alle anderen Presets
-        break;
-    }
+        switch (index)
+        {
+        case 0:
+            programName = "Note On";
+            break;
+        case 1:
+            programName = "Note On/Off";
+            break;
+        case 2:
+            programName = "Auto";
+            break;
+        default:
+            programName = "Custom Preset"; // Für alle anderen Presets
+            break;
+        }
 
-}
+    }
 
 
 private:
