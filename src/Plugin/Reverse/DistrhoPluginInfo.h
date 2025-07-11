@@ -15,8 +15,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_BRAND "ZynAddSubFX"
-#define DISTRHO_PLUGIN_NAME  "ZynEcho"
-#define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net/fx#Echo"
+#define DISTRHO_PLUGIN_NAME  "ZynReverse"
+#define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net/fx#Reverse"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
 #define DISTRHO_PLUGIN_WANT_TIMEPOS  1
@@ -25,6 +25,6 @@
 #define DISTRHO_PLUGIN_NUM_INPUTS    2
 #define DISTRHO_PLUGIN_NUM_OUTPUTS   2
 #define DISTRHO_PLUGIN_WANT_PROGRAMS 1
-#define DISTRHO_PLUGIN_LV2_CATEGORY  "lv2:DelayPlugin"
+#define DISTRHO_PLUGIN_LV2_CATEGORY  "lv2:ReversePlugin"
 
 #endif // DISTRHO_PLUGIN_INFO_H_INCLUDED
