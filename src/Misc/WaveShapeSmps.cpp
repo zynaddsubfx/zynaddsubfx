@@ -85,24 +85,25 @@ void processArctangent(int n, float* smps, float ws, float offs) {
     }
 }
 
-void processAsymmetric(int n, float* smps, float ws) {
+void processAsymmetric(int n, float* smps, float ws, float offs) {
     ws = ws * ws * 32.0f + 0.0001f;
     float tmpv = (ws < 1.0f) ? std::sin(ws) + 0.1f : 1.1f;
     for (int i = 0; i < n; ++i)
-        smps[i] = std::sin(smps[i] * (0.1f + ws - ws * smps[i])) / tmpv;
+        smps[i] = (std::sin((smps[i] + offs) * (0.1f + ws - ws * (smps[i] + offs))) - std::sin(offs * (0.1f + ws - ws * offs))) / tmpv;
 }
 
-void processPow(int n, float* smps, float ws) {
+void processPow(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 20.0f + 0.0001f;
     for (int i = 0; i < n; ++i) {
-        smps[i] *= ws;
-        if (std::fabs(smps[i]) < 1.0f) {
-            smps[i] = (smps[i] - smps[i] * smps[i] * smps[i]) * 3.0f;
-            if (ws < 1.0f)
-                smps[i] /= ws;
-        } else {
-            smps[i] = 0.0f;
+        float x = (smps[i] + offs) * ws;
+        float xo = offs * ws;
+        float v = (std::fabs(x) < 1.0f) ? (x - x * x * x) * 3.0f : 0.0f;
+        float vo = (std::fabs(xo) < 1.0f) ? (xo - xo * xo * xo) * 3.0f : 0.0f;
+        if (ws < 1.0f) {
+            v /= ws;
+            vo /= ws;
         }
+        smps[i] = v - vo;
     }
 }
 
@@ -146,23 +147,46 @@ void processLimiter(int n, float* smps, float ws, float par, float offs) {
     }
 }
 
-void processUpperLimiter(int n, float* smps, float ws) {
+void processUpperLimiter(int n, float* smps, float ws, float par, float offs) {
     ws = std::pow(2.0f, -ws * ws * 8.0f);
+    if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
+        smps[i] += offs;
+        float res = polyblampres(smps[i], ws, par);
         if (smps[i] > ws)
-            smps[i] = ws;
-        smps[i] *= 2.0f;
+            smps[i] = ws - res;
+        else
+            smps[i] = smps[i] - res;
+        // remove offset
+        float res_offs = polyblampres(offs, ws, par);
+        if (offs > ws)
+            smps[i] -= ws - res_offs;
+        else
+            smps[i] -= offs - res_offs;
+        smps[i] /= ws;
     }
 }
 
-void processLowerLimiter(int n, float* smps, float ws) {
+
+void processLowerLimiter(int n, float* smps, float ws, float par, float offs) {
     ws = std::pow(2.0f, -ws * ws * 8.0f);
+    if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
+        smps[i] += offs;
+        float res = polyblampres(smps[i], ws, par);
         if (smps[i] < -ws)
-            smps[i] = -ws;
-        smps[i] *= 2.0f;
+            smps[i] = -ws + res;
+        else
+            smps[i] = smps[i] + res;
+        float res_offs = polyblampres(offs, ws, par);
+        if (offs < -ws)
+            smps[i] -= -ws + res_offs;
+        else
+            smps[i] -= offs + res_offs;
+        smps[i] /= ws;
     }
 }
+
 
 void processInverseLimiter(int n, float* smps, float ws, float par, float offs) {
     ws = (std::pow(2.0f, ws * 6.0f) - 1.0f) / std::pow(2.0f, 6.0f);
@@ -178,33 +202,48 @@ void processInverseLimiter(int n, float* smps, float ws, float par, float offs) 
     }
 }
 
-void processClip(int n, float* smps, float ws) {
+void processClip(int n, float* smps, float ws, float par, float offs) {
     ws = std::pow(5.0f, ws * ws * 1.0f) - 1.0f;
-    for (int i = 0; i < n; ++i)
-        smps[i] = smps[i] * (ws + 0.5f) * 0.9999f - std::floor(0.5f + smps[i] * (ws + 0.5f) * 0.9999f);
-}
-
-void processAsym2(int n, float* smps, float ws) {
-    ws = ws * ws * ws * 30.0f + 0.001f;
-    float tmpv = (ws < 0.3f) ? ws : 1.0f;
+    if (par < 0.0001f) par = 0.0001f; // Verhindere zu kleine Werte
     for (int i = 0; i < n; ++i) {
-        float tmp = smps[i] * ws;
-        if ((tmp > -2.0f) && (tmp < 1.0f))
-            smps[i] = tmp * (1.0f - tmp) * (tmp + 2.0f) / tmpv;
-        else
-            smps[i] = 0.0f;
+        smps[i] += offs;
+        float x = smps[i] * (ws + 0.5f) * 0.9999f;
+        float clipped = x - std::floor(0.5f + x);
+        // PolyBLAMP an den Rändern anwenden
+        float frac = x - std::floor(x);
+        if (frac < par)
+            clipped -= polyblampres(frac, 0.0f, par);
+        else if (1.0f - frac < par)
+            clipped += polyblampres(1.0f - frac, 0.0f, par);
+        smps[i] = clipped;
+        // Offset rückgängig machen
+        float x_offs = offs * (ws + 0.5f) * 0.9999f;
+        float clipped_offs = x_offs - std::floor(0.5f + x_offs);
+        smps[i] -= clipped_offs;
     }
 }
 
-void processPow2(int n, float* smps, float ws) {
+void processAsym2(int n, float* smps, float ws, float offs) {
+    ws = ws * ws * ws * 30.0f + 0.001f;
+    float tmpv = (ws < 0.3f) ? ws : 1.0f;
+    for (int i = 0; i < n; ++i) {
+        float tmp = (smps[i] + offs) * ws;
+        float tmpo = offs * ws;
+        float v = ((tmp > -2.0f) && (tmp < 1.0f)) ? tmp * (1.0f - tmp) * (tmp + 2.0f) : 0.0f;
+        float vo = ((tmpo > -2.0f) && (tmpo < 1.0f)) ? tmpo * (1.0f - tmpo) * (tmpo + 2.0f) : 0.0f;
+        smps[i] = (v - vo) / tmpv;
+    }
+}
+
+void processPow2(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 32.0f + 0.0001f;
     float tmpv = (ws < 1.0f) ? ws * (1.0f + ws) / 2.0f : 1.0f;
     for (int i = 0; i < n; ++i) {
-        float tmp = smps[i] * ws;
-        if ((tmp > -1.0f) && (tmp < 1.618034f))
-            smps[i] = tmp * (1.0f - tmp) / tmpv;
-        else
-            smps[i] = (tmp > 0.0f) ? -1.0f : -2.0f;
+        float x = (smps[i] + offs) * ws;
+        float xo = offs * ws;
+        float v = ((x > -1.0f) && (x < 1.618034f)) ? x * (1.0f - x) : ((x > 0.0f) ? -1.0f : -2.0f);
+        float vo = ((xo > -1.0f) && (xo < 1.618034f)) ? xo * (1.0f - xo) : ((xo > 0.0f) ? -1.0f : -2.0f);
+        smps[i] = (v - vo) / tmpv;
     }
 }
 
@@ -277,18 +316,18 @@ void waveShapeSmps(int n, float* smps, unsigned char type, unsigned char drive, 
 
     switch (type) {
         case 1:  processArctangent(n, smps, ws, offs); break;
-        case 2:  processAsymmetric(n, smps, ws); break;
-        case 3:  processPow(n, smps, ws); break;
+        case 2:  processAsymmetric(n, smps, ws, offs); break;
+        case 3:  processPow(n, smps, ws, offs); break;
         case 4:  processSine(n, smps, ws); break;
         case 5:  processQuantize(n, smps, ws); break;
         case 6:  processZigzag(n, smps, ws); break;
         case 7:  processLimiter(n, smps, ws, par, offs); break;
-        case 8:  processUpperLimiter(n, smps, ws); break;
-        case 9:  processLowerLimiter(n, smps, ws); break;
+        case 8: processUpperLimiter(n, smps, ws, par, offs); break;
+        case 9: processLowerLimiter(n, smps, ws, par, offs); break;
         case 10: processInverseLimiter(n, smps, ws, par, offs); break;
-        case 11: processClip(n, smps, ws); break;
-        case 12: processAsym2(n, smps, ws); break;
-        case 13: processPow2(n, smps, ws); break;
+        case 11: processClip(n, smps, ws, par, offs); break;
+        case 12: processAsym2(n, smps, ws, offs); break;
+        case 13: processPow2(n, smps, ws, offs); break;
         case 14: processSigmoid(n, smps, ws, offs); break;
         case 15: processTanhLimiter(n, smps, ws, par, offs); break;
         case 16: processCubic(n, smps, ws, offs); break;
