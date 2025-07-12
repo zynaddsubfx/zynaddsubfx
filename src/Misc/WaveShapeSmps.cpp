@@ -24,11 +24,6 @@ constexpr float OFFSET_SCALE = 64.0f;
 constexpr float FUNC_PAR_SCALE = 127.0f;
 constexpr float EPSILON = 1e-6f;
 
-// Utility function for safe division
-inline float safe_div(float numerator, float denominator) {
-    return (std::fabs(denominator) < EPSILON) ? 0.0f : numerator / denominator;
-}
-
 // PolyBLAMP residual function
 float polyblampres(float smp, float ws, float dMax)
 {
@@ -322,8 +317,8 @@ void waveShapeSmps(int n, float* smps, unsigned char type, unsigned char drive, 
         case 5:  processQuantize(n, smps, ws); break;
         case 6:  processZigzag(n, smps, ws); break;
         case 7:  processLimiter(n, smps, ws, par, offs); break;
-        case 8: processUpperLimiter(n, smps, ws, par, offs); break;
-        case 9: processLowerLimiter(n, smps, ws, par, offs); break;
+        case 8:  processUpperLimiter(n, smps, ws, par, offs); break;
+        case 9:  processLowerLimiter(n, smps, ws, par, offs); break;
         case 10: processInverseLimiter(n, smps, ws, par, offs); break;
         case 11: processClip(n, smps, ws, par, offs); break;
         case 12: processAsym2(n, smps, ws, offs); break;
