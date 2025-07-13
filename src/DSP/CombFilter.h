@@ -23,6 +23,8 @@ class CombFilter:public Filter
         //! @param Fq resonance, range [0.1,1000], logscale
         CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
                 unsigned int srate, int bufsize);
+        CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
+                unsigned int srate, int bufsize, unsigned char Plpf_, unsigned char Phpf_);
         ~CombFilter() override;
         void filterout(float *smp) override;
         void setfreq(float freq) override;
@@ -40,7 +42,7 @@ class CombFilter:public Filter
         float gain=1.0f;
         float q;
         unsigned char type;
-        
+
         unsigned char Plpf;
         unsigned char Phpf;
 
@@ -53,7 +55,7 @@ class CombFilter:public Filter
         float gainfwd;
         float gainbwd;
         float delay;
-        
+
         class AnalogFilter *lpf, *hpf; //filters
 
         unsigned int inputIndex=0;

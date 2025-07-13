@@ -13,9 +13,14 @@
 
 namespace zyn{
 
+
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), Plpf(127), Phpf(0), 
+    :CombFilter(alloc, Ftype, Ffreq, Fq, srate, bufsize, 127, 0){}
+
+CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
+    unsigned int srate, int bufsize, unsigned char Plpf_, unsigned char Phpf_)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), Plpf(127), Phpf(0),
     lpf(nullptr), hpf(nullptr), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
@@ -27,6 +32,8 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
 
     setfreq_and_q(Ffreq, q);
     settype(type);
+    setlpf(Plpf_);
+    sethpf(Phpf_);
 }
 
 CombFilter::~CombFilter(void)
@@ -34,12 +41,12 @@ CombFilter::~CombFilter(void)
     memory.dealloc(input);
     memory.dealloc(output);
 
-    if(Plpf != 127) { //LowPass
+
         memory.dealloc(lpf);
-    }
-    if(Phpf != 0) { //HighPass
+
+
         memory.dealloc(hpf);
-    }
+
 }
 
 
