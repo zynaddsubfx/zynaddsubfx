@@ -882,12 +882,12 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     if(strcmp(msg, "/get-vu") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
         if(msg_id > 0)
-            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id, msg,
+            fprintf(stdout, "backend[%d]: '%s'<%s>", msg_id, msg,
                     rtosc_argument_string(msg));
         else
-            fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
+            fprintf(stdout, "backend[*]: '%s'<%s>", msg,
                     rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     ports.dispatch(msg, d, true);
@@ -903,11 +903,11 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     }
     if(!d.matches && !d.forwarded) {// && !ports.apropos(msg)) {
         fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
+        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'",
                 offline ? "offline" : "online",
                 uToB->peak(),
                 rtosc_argument_string(uToB->peak()));
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stderr, "%c[0m\n", 0x1B);
         if(unknown_address_cb)
             unknown_address_cb(unknown_address_cb_ptr, offline, uToB->peak());
     }

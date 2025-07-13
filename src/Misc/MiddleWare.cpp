@@ -2255,9 +2255,9 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     //Dump Incoming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
-        fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',
+        fprintf(stdout, "frontend[%c]: '%s'<%s>", forward?'f':broadcast?'b':'N',
                 rtmsg, rtosc_argument_string(rtmsg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     //Activity dot
@@ -2384,8 +2384,8 @@ void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 
     if(strcmp("/get-vu", msg) && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-        fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "middleware: '%s':%s", msg, rtosc_argument_string(msg));
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     const char *last_path = strrchr(msg, '/');
