@@ -13,11 +13,6 @@
 
 namespace zyn{
 
-
-CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
-    unsigned int srate, int bufsize)
-    :CombFilter(alloc, Ftype, Ffreq, Fq, srate, bufsize, 127, 0){}
-
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize, unsigned char Plpf_, unsigned char Phpf_)
     :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), Plpf(127), Phpf(0),
