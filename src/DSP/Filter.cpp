@@ -60,11 +60,8 @@ Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
             break;
         case 4:
             {
-            CombFilter* comb = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
-            comb->setgain(pars->getgain());
-            comb->sethpf(pars->Phpf);
-            comb->setlpf(pars->Plpf);
-            filter = comb;
+            filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize, pars->Phpf, pars->Plpf);
+            filter->setgain(pars->getgain());
             }
             break;
         default:
