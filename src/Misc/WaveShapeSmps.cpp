@@ -22,7 +22,6 @@ constexpr float MAX_DRIVE = 127.0f;
 constexpr float OFFSET_CENTER = 64.0f;
 constexpr float OFFSET_SCALE = 64.0f;
 constexpr float FUNC_PAR_SCALE = 127.0f;
-constexpr float EPSILON = 1e-6f;
 
 // PolyBLAMP residual function
 float polyblampres(float smp, float ws, float dMax)
