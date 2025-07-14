@@ -99,9 +99,6 @@ smp[i] *= outgain;
         // increase ringbuffer index with turnaround
         outputIndex = (outputIndex + 1) % mem_size;
 
-        // Apply output gain
-        smp[i] *= outgain;
-
     }
 
 }
