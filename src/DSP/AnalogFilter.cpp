@@ -367,6 +367,17 @@ inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
     src     = work[2];
 }
 
+void AnalogFilter::filterSample(float& smp)
+{
+    fstage &hist = history[0];
+
+    float y0 = smp * coeff.c[0] + hist.x1 * coeff.c[1]
+               + hist.y1 * coeff.d[1];
+    hist.y1 = y0;
+    hist.x1 = smp;
+    smp  = y0;
+}
+
 void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned int bufsize)
 {
     assert((buffersize % 8) == 0);
