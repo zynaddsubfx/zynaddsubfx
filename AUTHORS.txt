@@ -61,4 +61,4 @@ Contributors:
         David Runge (Fixed Arch Linux support)
         Michele Sorcinelli (Fixed inconsistency in MSB/LSB selection)
         Nik Nyby (Code cleanup)
-        xard-dev (Fixed colored terminal output tearing)
+        xard-dev (Fixed colored term output, LV2 warning mitigation)
