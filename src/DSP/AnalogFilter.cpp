@@ -369,6 +369,12 @@ inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
 
 void AnalogFilter::filterSample(float& smp)
 {
+
+    if (recompute) {
+        computefiltercoefs(freq, q);  // freq und q müssen aktuell gesetzt sein
+        recompute = false;
+    }
+
     fstage &hist = history[0];
 
     float y0 = smp * coeff.c[0] + hist.x1 * coeff.c[1]
