@@ -25,6 +25,7 @@
 
 namespace zyn {
 
+void chua_attractor(float &x, float &y, float &z, float alpha, float beta, float mu0, float mu1, float speed);
 extern bool isPlugin;
 bool fileexists(const char *filename);
 

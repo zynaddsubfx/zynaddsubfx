@@ -188,7 +188,7 @@ void *AlsaEngine::MidiThread(void)
             case SND_SEQ_EVENT_RESET: // reset to power-on state
                 ev.type    = M_CONTROLLER;
                 ev.channel = event->data.control.channel;
-                ev.num     = C_resetallcontrollers;
+                ev.num     = C_Reset_All_Controllers;
                 ev.value   = 0;
                 InMgr::getInstance().putEvent(ev);
                 break;

@@ -84,7 +84,7 @@ class MemoryStressTest
         void testManySimultaneousNotes() {
 
             unsigned char testnote = 42;
-            SynthParams pars{memory, *controller, *synth, *time, 120, 0, testnote / 12.0f, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, 120, 0, testnote / 12.0f, false, prng(), 0};
 
             std::vector<ADnote*> notes;
 
