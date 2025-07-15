@@ -27,7 +27,7 @@ SynthNote::SynthNote(const SynthParams &pars, const char *prefix)
     legato(pars.synth, pars.velocity, pars.portamento,
             pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
 {
-    ScratchString pre = prefix;
+    //ScratchString pre = prefix;
 
 }
 SynthNote::~SynthNote()

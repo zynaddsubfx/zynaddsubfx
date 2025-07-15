@@ -20,14 +20,14 @@
 #include <rtosc/ports.h>
 
 namespace zyn {
-    
+
 using rtosc::Ports;
 using rtosc::RtData;
 
 #define rObject ModulationLocation
 #define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
 #define rEnd }
-        
+
 const Ports ModulationLocation::ports = {
     rSelf(ModulationLocation::location),
     rArrayF(parameter, NUM_MOD_MATRIX_PARAMETERS, rLinear(0.0f,100.0f), rDefault(0.0f), rUnit(%), "Modulation Matrix Factor"),
@@ -35,7 +35,7 @@ const Ports ModulationLocation::ports = {
 
 #undef  rObject
 #define rObject ModulationSource
-        
+
 const Ports ModulationSource::ports = {
     rSelf(ModulationSource::source),
     rRecursp(location, NUM_MOD_MATRIX_LOCATIONS, "Location"),
@@ -58,13 +58,13 @@ const rtosc::Ports ModMatrix::ports = {
           "Modulation Matrix Destination Parameters"),
 };
 #undef rBegin
-#undef rEnd    
-    
-    
+#undef rEnd
+
+
 
 ModMatrix::ModMatrix()
 {
-    
+
     for(int i = 0; i < NUM_MOD_MATRIX_SOURCES; i++)
     {
         source[i] = new ModulationSource();
@@ -86,7 +86,6 @@ ModulationSource::~ModulationSource()
         delete location[i];
     }
 
-    delete[] location;
 }
 
 ModulationLocation::ModulationLocation()
@@ -108,7 +107,7 @@ int ModulationSource::getLocationIndex(int location)
     else if (location < 13 ) index = -1;
     else if (location < NUM_MOD_MATRIX_LOCATIONS) index = location-4;
     return index;
-    
+
 }
 
 float ModulationLocation::getFactor(int par)
