@@ -184,6 +184,11 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_SEQUENCE 8
 
 /*
+ * Maximum length of the reverse delay effect
+ */
+#define MAX_REV_DELAY_SECONDS 4.0f
+
+/*
  * Generic Controler Types
  */
 #define CONTROLER_TYPE_LFO 1
@@ -291,7 +296,7 @@ enum MidiControllers {
     C_Filter_Cutoff = 74,
     C_Bandwidth = 75,
     C_FM_Amp  = 76,
-    C_Resonance_Center = 77, 
+    C_Resonance_Center = 77,
     C_Resonance_Bandwidth = 78,
     C_General_Purpose_On_Off = 80,
     C_Effect_1_Depth = 91,
