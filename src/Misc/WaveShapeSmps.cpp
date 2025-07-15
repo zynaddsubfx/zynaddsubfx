@@ -17,13 +17,20 @@
 
 namespace zyn {
 
-// Constants for magic numbers
+// Constants
 constexpr float MAX_DRIVE = 127.0f;
 constexpr float OFFSET_CENTER = 64.0f;
 constexpr float OFFSET_SCALE = 64.0f;
 constexpr float FUNC_PAR_SCALE = 127.0f;
 
-// PolyBLAMP residual function
+/**
+ * @brief Computes a polynomial residual value for smoothing discontinuities (PolyBLAMP).
+ *
+ * @param smp Sample value
+ * @param ws  Threshold window size
+ * @param dMax Maximum transition width
+ * @return Residual correction to reduce aliasing
+ */
 float polyblampres(float smp, float ws, float dMax)
 {
     // Formula from: Esqueda, Välimäki, Bilbao (2015): ALIASING REDUCTION IN SOFT-CLIPPING ALGORITHMS
@@ -35,10 +42,10 @@ float polyblampres(float smp, float ws, float dMax)
     // [T, 2T] −d^5/120 + d^4/24 − d^3/12 + d^2/12 − d/24 + 1/120
     if (dMax == 0.0f) return 0.0f;
 
-    float dist = std::fabs(smp) - ws;
+    float dist = fabs(smp) - ws;
     float res = 0.0f, d1, d2, d3, d4, d5;
 
-    if (std::fabs(dist) < dMax) {
+    if (fabs(dist) < dMax) {
         if (dist < -dMax / 2.0f) {
             d1 = (dist + dMax) / dMax * 2.0f;
             res = d1 * d1 * d1 * d1 * d1 / 120.0f;
@@ -67,32 +74,55 @@ float polyblampres(float smp, float ws, float dMax)
     return res * dMax / 2.0f;
 }
 
-// Type-specific distortion functions
-namespace {
-
+/**
+ * @brief Apply arctangent waveshaping for soft saturation.
+ *        Non-linear distortion that increases with input amplitude.
+ *
+ * @param n     Number of samples
+ * @param smps  Pointer to sample buffer
+ * @param ws    Waveshaping "drive" amount
+ * @param offs  DC offset added before processing
+ */
 void processArctangent(int n, float* smps, float ws, float offs) {
-    ws = std::pow(10.0f, ws * ws * 3.0f) - 1.0f + 0.001f;
+    ws = pow(10.0f, ws * ws * 3.0f) - 1.0f + 0.001f;
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
-        smps[i] = std::atan(smps[i] * ws) / std::atan(ws);
+        smps[i] = atan(smps[i] * ws) / atan(ws);
         smps[i] -= offs;
     }
 }
 
+/**
+ * @brief Apply asymmetric sine-based waveshaping.
+ *        Produces asymmetric distortion dependent on amplitude.
+ *
+ * @param n     Number of samples
+ * @param smps  Pointer to samples
+ * @param ws    Waveshaping drive
+ * @param offs  DC offset for asymmetry control
+ */
 void processAsymmetric(int n, float* smps, float ws, float offs) {
     ws = ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.0f) ? std::sin(ws) + 0.1f : 1.1f;
+    float tmpv = (ws < 1.0f) ? sin(ws) + 0.1f : 1.1f;
     for (int i = 0; i < n; ++i)
-        smps[i] = (std::sin((smps[i] + offs) * (0.1f + ws - ws * (smps[i] + offs))) - std::sin(offs * (0.1f + ws - ws * offs))) / tmpv;
+        smps[i] = (sin((smps[i] + offs) * (0.1f + ws - ws * (smps[i] + offs))) - sin(offs * (0.1f + ws - ws * offs))) / tmpv;
 }
 
+/**
+ * @brief Apply cubic polynomial-based distortion with soft clipping.
+ *
+ * @param n     Number of samples
+ * @param smps  Sample buffer
+ * @param ws    Waveshaping strength
+ * @param offs  Offset to control symmetry
+ */
 void processPow(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 20.0f + 0.0001f;
     for (int i = 0; i < n; ++i) {
         float x = (smps[i] + offs) * ws;
         float xo = offs * ws;
-        float v = (std::fabs(x) < 1.0f) ? (x - x * x * x) * 3.0f : 0.0f;
-        float vo = (std::fabs(xo) < 1.0f) ? (xo - xo * xo * xo) * 3.0f : 0.0f;
+        float v = (fabs(x) < 1.0f) ? (x - x * x * x) * 3.0f : 0.0f;
+        float vo = (fabs(xo) < 1.0f) ? (xo - xo * xo * xo) * 3.0f : 0.0f;
         if (ws < 1.0f) {
             v /= ws;
             vo /= ws;
@@ -101,28 +131,60 @@ void processPow(int n, float* smps, float ws, float offs) {
     }
 }
 
+/**
+ * @brief Apply sine function-based distortion for harmonic folding effects.
+ *
+ * @param n     Number of samples
+ * @param smps  Sample buffer
+ * @param ws    Frequency scaling
+ * @param offs  Offset (center shift)
+ */
 void processSine(int n, float* smps, float ws) {
     ws = ws * ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.57f) ? std::sin(ws) : 1.0f;
+    float tmpv = (ws < 1.57f) ? sin(ws) : 1.0f;
     for (int i = 0; i < n; ++i)
-        smps[i] = std::sin(smps[i] * ws) / tmpv;
+        smps[i] = sin(smps[i] * ws) / tmpv;
 }
 
+/**
+ * @brief Apply sample quantization (bit crushing-style distortion).
+ *
+ * @param n     Sample count
+ * @param smps  Input/output buffer
+ * @param ws    Step size of quantization
+ */
 void processQuantize(int n, float* smps, float ws) {
     ws = ws * ws + 0.000001f;
     for (int i = 0; i < n; ++i)
-        smps[i] = std::floor(smps[i] / ws + 0.5f) * ws;
+        smps[i] = floor(smps[i] / ws + 0.5f) * ws;
 }
 
+/**
+ * @brief Apply modulated triangle-wave folding (asin of sin input).
+ *
+ * @param n     Number of samples
+ * @param smps  Signal buffer
+ * @param ws    Modulation frequency
+ * @param offs  Input signal bias (offset)
+ */
 void processZigzag(int n, float* smps, float ws) {
     ws = ws * ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.0f) ? std::sin(ws) : 1.0f;
+    float tmpv = (ws < 1.0f) ? sin(ws) : 1.0f;
     for (int i = 0; i < n; ++i)
-        smps[i] = std::asin(std::sin(smps[i] * ws)) / tmpv;
+        smps[i] = asin(sin(smps[i] * ws)) / tmpv;
 }
 
+/**
+ * @brief Soft class A-style limiter with anti-aliasing using PolyBLAMP.
+ *
+ * @param n     Sample count
+ * @param smps  Sample buffer
+ * @param ws    Limiting threshold
+ * @param par   PolyBLAMP smoothing width
+ * @param offs  DC offset applied before limiting
+ */
 void processLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = std::pow(2.0f, -ws * ws * 8.0f);
+    ws = pow(2.0f, -ws * ws * 8.0f);
     par = par / 4.0f;
     if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
@@ -141,8 +203,18 @@ void processLimiter(int n, float* smps, float ws, float par, float offs) {
     }
 }
 
+/**
+ * @brief Clip signal above a threshold using PolyBLAMP.
+ *        Lower half of the waveform remains unaffected.
+ *
+ * @param n     Number of samples
+ * @param smps  Sample buffer
+ * @param ws    Upper clipping threshold
+ * @param par   Anti-aliasing smooth factor (PolyBLAMP)
+ * @param offs  Offset shift before processing
+ */
 void processUpperLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = std::pow(2.0f, -ws * ws * 8.0f);
+    ws = pow(2.0f, -ws * ws * 8.0f);
     if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
@@ -161,9 +233,18 @@ void processUpperLimiter(int n, float* smps, float ws, float par, float offs) {
     }
 }
 
-
+/**
+ * @brief Clip signal below a threshold using PolyBLAMP.
+ *        Upper half stays clean.
+ *
+ * @param n     Number of samples
+ * @param smps  Sample buffer
+ * @param ws    Lower clipping threshold
+ * @param par   PolyBLAMP smoothing width
+ * @param offs  Offset before clipping
+ */
 void processLowerLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = std::pow(2.0f, -ws * ws * 8.0f);
+    ws = pow(2.0f, -ws * ws * 8.0f);
     if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
@@ -181,9 +262,18 @@ void processLowerLimiter(int n, float* smps, float ws, float par, float offs) {
     }
 }
 
-
+/**
+ * @brief Inverted limiter for diode-like distortion curves (gap at zero).
+ *        Uses PolyBLAMP to soften edge transitions.
+ *
+ * @param n     Sample count
+ * @param smps  Sample buffer
+ * @param ws    Window size for clipping
+ * @param par   PolyBLAMP smoothing factor
+ * @param offs  Offset to shift clipping range
+ */
 void processInverseLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = (std::pow(2.0f, ws * 6.0f) - 1.0f) / std::pow(2.0f, 6.0f);
+    ws = (pow(2.0f, ws * 6.0f) - 1.0f) / pow(2.0f, 6.0f);
     if (par > ws - 0.01f) par = ws - 0.01f;
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
@@ -196,15 +286,25 @@ void processInverseLimiter(int n, float* smps, float ws, float par, float offs) 
     }
 }
 
+/**
+ * @brief Distortion via signal wrapping (modulo arithmetic).
+ *        Adds aliasing intentionally; PolyBLAMP can reduce artifacts.
+ *
+ * @param n     Number of samples
+ * @param smps  Input buffer
+ * @param ws    Wrap scaling factor
+ * @param par   PolyBLAMP filter width
+ * @param offs  Offset bias
+ */
 void processClip(int n, float* smps, float ws, float par, float offs) {
-    ws = std::pow(5.0f, ws * ws * 1.0f) - 1.0f;
+    ws = pow(5.0f, ws * ws * 1.0f) - 1.0f;
     if (par < 0.0001f) par = 0.0001f; // Verhindere zu kleine Werte
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
         float x = smps[i] * (ws + 0.5f) * 0.9999f;
-        float clipped = x - std::floor(0.5f + x);
+        float clipped = x - floor(0.5f + x);
         // PolyBLAMP an den Rändern anwenden
-        float frac = x - std::floor(x);
+        float frac = x - floor(x);
         if (frac < par)
             clipped -= polyblampres(frac, 0.0f, par);
         else if (1.0f - frac < par)
@@ -212,11 +312,19 @@ void processClip(int n, float* smps, float ws, float par, float offs) {
         smps[i] = clipped;
         // Offset rückgängig machen
         float x_offs = offs * (ws + 0.5f) * 0.9999f;
-        float clipped_offs = x_offs - std::floor(0.5f + x_offs);
+        float clipped_offs = x_offs - floor(0.5f + x_offs);
         smps[i] -= clipped_offs;
     }
 }
 
+/**
+ * @brief Complex asymmetric polynomial distortion with offset bias.
+ *
+ * @param n     Sample count
+ * @param smps  Signal buffer
+ * @param ws    Nonlinearity thickness
+ * @param offs  Offset shift
+ */
 void processAsym2(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 30.0f + 0.001f;
     float tmpv = (ws < 0.3f) ? ws : 1.0f;
@@ -229,6 +337,14 @@ void processAsym2(int n, float* smps, float ws, float offs) {
     }
 }
 
+/**
+ * @brief Exponential asymmetric distortion that “snaps” outside limits.
+ *
+ * @param n     Sample buffer size
+ * @param smps  Audio data
+ * @param ws    Scaling factor for shaping
+ * @param offs  Input offset
+ */
 void processPow2(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 32.0f + 0.0001f;
     float tmpv = (ws < 1.0f) ? ws * (1.0f + ws) / 2.0f : 1.0f;
@@ -241,42 +357,76 @@ void processPow2(int n, float* smps, float ws, float offs) {
     }
 }
 
+/**
+ * @brief Map signal through sigmoid curve from -1 to 1, centered by offset.
+ *        Offers controllable dynamic compression.
+ *
+ * @param n     Sample count
+ * @param smps  Input/output array
+ * @param ws    Controls slope of activation
+ * @param offs  Pre-bias of signal
+ */
 void processSigmoid(int n, float* smps, float ws, float offs) {
-    ws = std::pow(ws, 5.0f) * 80.0f + 0.0001f;
-    float tmpv = (ws > 10.0f) ? 0.5f : 0.5f - 1.0f / (std::exp(ws) + 1.0f);
+    ws = pow(ws, 5.0f) * 80.0f + 0.0001f;
+    float tmpv = (ws > 10.0f) ? 0.5f : 0.5f - 1.0f / (exp(ws) + 1.0f);
     for (int i = 0; i < n; ++i) {
         smps[i] += offs;
         float tmp = smps[i] * ws;
         if (tmp < -10.0f) tmp = -10.0f;
         else if (tmp > 10.0f) tmp = 10.0f;
-        tmp = 0.5f - 1.0f / (std::exp(tmp) + 1.0f);
+        tmp = 0.5f - 1.0f / (exp(tmp) + 1.0f);
 
         float tmpo = offs * ws;
         if (tmpo < -10.0f) tmpo = -10.0f;
         else if (tmpo > 10.0f) tmpo = 10.0f;
-        tmpo = 0.5f - 1.0f / (std::exp(tmpo) + 1.0f);
+        tmpo = 0.5f - 1.0f / (exp(tmpo) + 1.0f);
 
         smps[i] = tmp / tmpv - tmpo / tmpv;
     }
 }
 
+/**
+ * @brief Parametrized tanh-based soft limiter with adjustable knee.
+ *
+ * @param n     Number of samples
+ * @param smps  Signal buffer
+ * @param ws    Input gain
+ * @param par   Curvature factor
+ * @param offs  DC offset
+ *
+ * f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+ * Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+ */
 void processTanhLimiter(int n, float* smps, float ws, float par, float offs) {
     par = (20.0f) * par * par + (0.1f) * par + 1.0f;
     ws = ws * ws * 35.0f + 1.0f;
     for (int i = 0; i < n; ++i) {
         smps[i] *= ws;
         smps[i] += offs;
-        smps[i] = smps[i] / std::pow(1.0f + std::pow(std::fabs(smps[i]), par), 1.0f / par);
-        smps[i] -= offs / std::pow(1.0f + std::pow(std::fabs(offs), par), 1.0f / par);
+        smps[i] = smps[i] / pow(1.0f + pow(fabs(smps[i]), par), 1.0f / par);
+        smps[i] -= offs / pow(1.0f + pow(fabs(offs), par), 1.0f / par);
     }
 }
 
+/**
+ * @brief Apply waveshaping based on a 3rd-order polynomial approximation of tanh.
+ *        Saturates softly near ±1
+ *
+ * @param n     Sample count
+ * @param smps  Samples
+ * @param ws    Drive amount
+ * @param offs  Offset before shaping
+ *
+ * f(x) = 1.5 * (x-(x^3/3))
+ * Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
+ * modified with factor 1.5 to go through [1,1] and [-1,-1]
+ */
 void processCubic(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 20.0f + 0.168f;
     for (int i = 0; i < n; ++i) {
         smps[i] *= ws;
         smps[i] += offs;
-        if (std::fabs(smps[i]) < 1.0f)
+        if (fabs(smps[i]) < 1.0f)
             smps[i] = 1.5f * (smps[i] - (smps[i] * smps[i] * smps[i] / 3.0f));
         else
             smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
@@ -284,20 +434,30 @@ void processCubic(int n, float* smps, float ws, float offs) {
     }
 }
 
+/**
+ * @brief Apply parabolic soft clipping for signals within [-1, 1],
+ *
+ *
+ * @param n     Number of samples
+ * @param smps  Buffers
+ * @param ws    Drive control
+ * @param offs  Offset control
+ *
+ * f(x) = x*(2-abs(x))
+ * Formula of cubic changed to square but still going through [1,1] and [-1,-1]
+ */
 void processSquare(int n, float* smps, float ws, float offs) {
     ws = ws * ws * ws * 20.0f + 0.168f;
     for (int i = 0; i < n; ++i) {
         smps[i] *= ws;
         smps[i] += offs;
-        if (std::fabs(smps[i]) < 1.0f)
-            smps[i] = smps[i] * (2.0f - std::fabs(smps[i]));
+        if (fabs(smps[i]) < 1.0f)
+            smps[i] = smps[i] * (2.0f - fabs(smps[i]));
         else
             smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-        smps[i] -= offs * (2.0f - std::fabs(offs));
+        smps[i] -= offs * (2.0f - fabs(offs));
     }
 }
-
-} // anonymous namespace
 
 // Main processing function
 void waveShapeSmps(int n, float* smps, unsigned char type, unsigned char drive, unsigned char offset, unsigned char funcpar)
