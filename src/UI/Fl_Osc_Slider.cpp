@@ -47,24 +47,29 @@ void Fl_Osc_Slider::OSC_value(int v)
 {
     const float min_ = min__(minimum(), maximum());//flipped sliders
     Fl_Slider::value(v+min_+value()-floorf(value()));
+    do_callback_bool(false);
 }
 
 void Fl_Osc_Slider::OSC_value(float v)
 {
     const float min_ = min__(minimum(), maximum());//flipped sliders
     Fl_Slider::value(v+min_);
+    do_callback_bool(false);
 }
 
 void Fl_Osc_Slider::OSC_value(char v)
 {
     const float min_ = min__(minimum(), maximum());//flipped sliders
     Fl_Slider::value(v+min_+value()-floorf(value()));
+    do_callback_bool(false);
 }
 
 void Fl_Osc_Slider::cb(void)
 {
+    if(sendOsc()) {
     const float min_ = min__(minimum(), maximum());//flipped sliders
     const float val = Fl_Slider::value();
+    printf("osc_type: %d\n", osc_type);
     if(osc_type == 'f')
         oscWrite(ext, "f", val-min_);
     else if(osc_type == 'i')
@@ -74,6 +79,7 @@ void Fl_Osc_Slider::cb(void)
         oscWrite(ext, "i", (int)(val-min_));
     }
     //OSC_value(val);
+    }
 
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
@@ -154,7 +160,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
                 value(clamp(rounded));
             }
             value_damage();
-            do_callback();
+            do_callback_bool(true);
             break;
         case FL_DRAG: {
             old_mod_state = mod_state;
@@ -225,7 +231,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
             }
             value(rounded);
             value_damage();
-            do_callback();
+            do_callback_bool(true);
 
             handled = 1;
             break;
@@ -253,4 +259,19 @@ void Fl_Osc_Slider::update(void)
 void Fl_Osc_Slider::_cb(Fl_Widget *w, void *)
 {
     static_cast<Fl_Osc_Slider*>(w)->cb();
+}
+
+void Fl_Osc_Slider::do_callback_bool(bool doSendOsc)
+{
+    printf("DCB: %d\n", doSendOsc);
+    if(doSendOsc)
+    {
+        Fl_Slider::do_callback();
+    }
+    else
+    {
+        m_sendOsc = false;
+        Fl_Slider::do_callback();
+        m_sendOsc = true;
+    }
 }

@@ -38,15 +38,22 @@ class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
         virtual void cb(void);
         static void _cb(Fl_Widget *w, void *);
         float reset_value;
+        bool sendOsc() const { return m_sendOsc; }
+        
+
     protected:
         char osc_type;
         std::pair<Fl_Callback*, void*> cb_data;
 
     private:
+        void do_callback_bool(bool doSendOsc);
+
+        bool m_sendOsc = true;
+
         float old_value;
         int mod_state;
         int slow_state;
         int start_pos;
         bool just_pushed;
-    float denominator;
+        float denominator;
 };

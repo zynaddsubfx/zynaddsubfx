@@ -100,10 +100,9 @@ redrawPADnoteApply();}
         class Fl_Osc_Check
       }
       Fl_Slider maxdb {
-        callback {maxdbvo->value(o->value());
-redrawPADnoteApply();}
+        callback { maxdbvo->value(o->value()); redrawPADnoteApply(); }
         xywh {90 285 84 15} box FLAT_BOX type {Horz Knob} minimum 1 maximum 90 step 1 value 30
-        code0 {o->init("PmaxdB", 'i'); o->reset_value = 30;}
+        code0 {o->reset_value = 30; o->init("PmaxdB", 'i');}
         class Fl_Osc_Slider
       }
       Fl_Value_Output maxdbvo {
@@ -186,7 +185,7 @@ redrawPADnoteApply();}
       }
       Fl_Button {} {
         label P
-        callback {presetsui->paste(resonancewindow->loc(),this);}
+        callback {printf("V1:%lf\\n", maxdb->value()); presetsui->paste(resonancewindow->loc(),this); printf("V2:%lf\\n", maxdb->value()); maxdbvo->value(maxdb->value());}
         xywh {655 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button applybutton {
