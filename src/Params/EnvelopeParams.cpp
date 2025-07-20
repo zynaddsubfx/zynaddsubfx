@@ -539,7 +539,7 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
 }
 
 float EnvelopeParams::env_dB2rap(float db) {
-    return (powf(10.0f, db / 20.0f) - 0.01)/.99f;
+    return std::max(powf(10.0f, db / 20.0f) - 0.01,0.0)/.99f;
 }
 
 float EnvelopeParams::env_rap2dB(float rap) {
