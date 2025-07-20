@@ -181,5 +181,7 @@ void ModFilter::cbParamUpdate(CombFilter &cb)
 {
     cb.settype(pars.Ptype);
     cb.setgain(pars.getgain());
+    cb.sethpf(pars.Phpf);
+    cb.setlpf(pars.Plpf);
 }
 }
