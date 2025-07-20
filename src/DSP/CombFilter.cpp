@@ -79,22 +79,22 @@ void CombFilter::filterout(float *smp)
         // Calculate the feedback sample positions in the output buffer
         const float outputPos = fmodf(outputIndex - delay + mem_size, mem_size);
 
-// Feedback berechnen
-float feedback = tanhX(
-    gainfwd * sampleLerp(input, inputPos) -
-    gainbwd * sampleLerp(output, outputPos));
+        // Feedback berechnen
+        float feedback = tanhX(
+            gainfwd * sampleLerp(input, inputPos) -
+            gainbwd * sampleLerp(output, outputPos));
 
-// Optional: Feedback filtern
-if (lpf) lpf->filterSample(feedback);
-if (hpf) hpf->filterSample(feedback);
+        // Optional: Feedback filtern
+        if (lpf) lpf->filterSample(feedback);
+        if (hpf) hpf->filterSample(feedback);
 
-smp[i] = smp[i] * gain + feedback;
+        smp[i] = smp[i] * gain + feedback;
 
-// Output in Ringpuffer schreiben
-output[outputIndex] = smp[i];
+        // Output in Ringpuffer schreiben
+        output[outputIndex] = smp[i];
 
-// Output-Gain anwenden
-smp[i] *= outgain;
+        // Output-Gain anwenden
+        smp[i] *= outgain;
 
         // increase ringbuffer index with turnaround
         outputIndex = (outputIndex + 1) % mem_size;
