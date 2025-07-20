@@ -79,6 +79,9 @@ class  Sync;
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
+#define MSK_CONSTPOWPAN     0b00000001
+#define MSK_CONSTPOWDRYWET  0b00000010
+
 /**
  * The number of harmonics of additive synth
  * This must be smaller than OSCIL_SIZE/2
@@ -317,7 +320,7 @@ public:
 struct SYNTH_T {
 
     SYNTH_T(void)
-        :samplerate(44100), buffersize(256), oscilsize(1024)
+        :samplerate(44100), buffersize(256), oscilsize(1024), compatibility(0)
     {
         alias(false);
     }
@@ -349,6 +352,15 @@ struct SYNTH_T {
      * Increase this => CPU requirements gets high (only at start of the note)
      */
     int oscilsize;
+    
+    
+    /**
+     * compatibility mask
+     * Bit0 (MSK_CONSTPOWDRYWET) 1: constant power dry/wet mixing active 0: compatibility mode
+     * Bit1 (MSK_CONSTPOWMIX) 1: constant power panning active 0: compatibility mode
+     * Bit2 (BIT_???) reserverd
+     */
+    int compatibility;
 
     //Alias for above terms
     float samplerate_f;

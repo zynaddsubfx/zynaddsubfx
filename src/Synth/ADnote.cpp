@@ -1842,15 +1842,22 @@ int ADnote::noteout(float *outl, float *outr)
                    (is_pwm && vce.unison_size == 2))
                     stereo_pos = 0.0f;
                 float panning = (stereo_pos + 1.0f) * 0.5f;
+                float lvol, rvol;
+                if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
+                {
+                    lvol = sqrtf(1.0f - panning);
+                    rvol = sqrtf(panning);
+                }
+                else
+                {
+                    lvol = (1.0f - panning) * 2.0f;
+                    if(lvol > 1.0f)
+                        lvol = 1.0f;
 
-
-                float lvol = (1.0f - panning) * 2.0f;
-                if(lvol > 1.0f)
-                    lvol = 1.0f;
-
-                float rvol = panning * 2.0f;
-                if(rvol > 1.0f)
-                    rvol = 1.0f;
+                    rvol = panning * 2.0f;
+                    if(rvol > 1.0f)
+                        rvol = 1.0f;
+                }
 
                 if(vce.unison_invert_phase[k]) {
                     lvol = -lvol;
