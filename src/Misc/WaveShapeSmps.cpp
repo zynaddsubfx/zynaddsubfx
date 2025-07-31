@@ -40,30 +40,31 @@ float polyblampres(float smp, float ws, float dMax)
     // [−T, 0] −d^5/40 + d^4/24 + d^3/12 + d^2/12 + d/24 + 1/120
     // [0, T] d^5/40 − d^4/12 + d^2/3 − d/2 + 7/30
     // [T, 2T] −d^5/120 + d^4/24 − d^3/12 + d^2/12 − d/24 + 1/120
-    if (dMax == 0.0f) return 0.0f;
+    if(dMax == 0.0f) return 0.0f;
 
-    float dist = fabs(smp) - ws;
+    float dist = fabsf(smp) - ws;
     float res = 0.0f, d1, d2, d3, d4, d5;
 
-    if (fabs(dist) < dMax) {
-        if (dist < -dMax / 2.0f) {
-            d1 = (dist + dMax) / dMax * 2.0f;
+    if(fabsf(dist) < dMax) {
+        if(dist < -dMax / 2.0f) {
+            d1 = (dist + dMax) / dMax * 2.0f;// [-dMax ... -dMax/2] -> [0 ... 1]
             res = d1 * d1 * d1 * d1 * d1 / 120.0f;
-        } else if (dist < 0.0f) {
-            d1 = (dist + dMax / 2.0f) / dMax * 2.0f;
+        } else if(dist < 0.0f) {
+            d1 = (dist + dMax / 2.0f) / dMax * 2.0f;// [-dMax/2 ... 0] -> [0 ... 1]
             d2 = d1 * d1;
             d3 = d2 * d1;
             d4 = d3 * d1;
             d5 = d4 * d1;
             res = (-d5 / 40.0f) + (d4 / 24.0f) + (d3 / 12.0f) + (d2 / 12.0f) + (d1 / 24.0f) + (1.0f / 120.0f);
-        } else if (dist < dMax / 2.0f) {
-            d1 = dist / dMax * 2.0f;
+        } else if(dist < dMax / 2.0f) {
+            d1 = dist / dMax * 2.0f;//[0 ... dMax/2] -> [0 ... 1]
             d2 = d1 * d1;
             d4 = d2 * d2;
             d5 = d4 * d1;
             res = (d5 / 40.0f) - (d4 / 12.0f) + (d2 / 3.0f) - (d1 / 2.0f) + (7.0f / 30.0f);
         } else {
-            d1 = (dist - dMax / 2.0f) / dMax * 2.0f;
+            d1 = (dist - dMax / 2.0f) / dMax * 2.0f;//[dMax/2 ... dMax] -> [0 ... 1]
+
             d2 = d1 * d1;
             d3 = d2 * d1;
             d4 = d3 * d1;
@@ -72,6 +73,13 @@ float polyblampres(float smp, float ws, float dMax)
         }
     }
     return res * dMax / 2.0f;
+}
+
+// f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+// Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+static float YehAbelSmith(float x, float exp)
+{
+    return x / (powf((1+powf(fabsf(x),exp)),(1/exp)));
 }
 
 /**
@@ -84,11 +92,13 @@ float polyblampres(float smp, float ws, float dMax)
  * @param offs  DC offset added before processing
  */
 void processArctangent(int n, float* smps, float ws, float offs) {
-    ws = pow(10.0f, ws * ws * 3.0f) - 1.0f + 0.001f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] += offs;
-        smps[i] = atan(smps[i] * ws) / atan(ws);
-        smps[i] -= offs;
+    ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; // Compute ws, scale factor for the waveshaper
+    float offsetCompensation = atanf(offs * ws) / atanf(ws); // Calculate offset compensation
+    for(int i = 0; i < n; ++i) {
+        smps[i] += offs; // Add offset to the sample
+        smps[i] *= ws; // Apply scaling
+        smps[i] = atanf(smps[i]) / atanf(ws); // Apply arctangent waveshaping
+        smps[i] -= offsetCompensation; // Subtract offset compensation
     }
 }
 
@@ -103,9 +113,9 @@ void processArctangent(int n, float* smps, float ws, float offs) {
  */
 void processAsymmetric(int n, float* smps, float ws, float offs) {
     ws = ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.0f) ? sin(ws) + 0.1f : 1.1f;
-    for (int i = 0; i < n; ++i)
-        smps[i] = (sin((smps[i] + offs) * (0.1f + ws - ws * (smps[i] + offs))) - sin(offs * (0.1f + ws - ws * offs))) / tmpv;
+    float tmpv = (ws < 1.0f) ? sinf(ws) + 0.1f : 1.1f;
+    for(int i = 0; i < n; ++i)
+        smps[i] = (sinf((smps[i] + offs) * (1.1f + ws - ws * (smps[i] + offs))) - sinf(offs * (0.1f + ws - ws * offs))) / tmpv;
 }
 
 /**
@@ -117,13 +127,13 @@ void processAsymmetric(int n, float* smps, float ws, float offs) {
  * @param offs  Offset to control symmetry
  */
 void processPow(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 20.0f + 0.0001f;
-    for (int i = 0; i < n; ++i) {
+    ws = ws * ws * ws * 20.0f + 0.0001f; //Pow
+    for(int i = 0; i < n; ++i) {
         float x = (smps[i] + offs) * ws;
         float xo = offs * ws;
-        float v = (fabs(x) < 1.0f) ? (x - x * x * x) * 3.0f : 0.0f;
-        float vo = (fabs(xo) < 1.0f) ? (xo - xo * xo * xo) * 3.0f : 0.0f;
-        if (ws < 1.0f) {
+        float v = (fabsf(x) < 1.0f) ? (x - x * x * x) * 3.0f : 0.0f;
+        float vo = (fabsf(xo) < 1.0f) ? (xo - xo * xo * xo) * 3.0f : 0.0f;
+        if(ws < 1.0f) {
             v /= ws;
             vo /= ws;
         }
@@ -140,10 +150,10 @@ void processPow(int n, float* smps, float ws, float offs) {
  * @param offs  Offset (center shift)
  */
 void processSine(int n, float* smps, float ws) {
-    ws = ws * ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.57f) ? sin(ws) : 1.0f;
-    for (int i = 0; i < n; ++i)
-        smps[i] = sin(smps[i] * ws) / tmpv;
+    ws = ws * ws * ws * 32.0f + 0.0001f; //Sine
+    float tmpv = (ws < 1.57f) ? sinf(ws) : 1.0f;
+    for(int i = 0; i < n; ++i)
+        smps[i] = sinf(smps[i] * ws) / tmpv;
 }
 
 /**
@@ -154,8 +164,8 @@ void processSine(int n, float* smps, float ws) {
  * @param ws    Step size of quantization
  */
 void processQuantize(int n, float* smps, float ws) {
-    ws = ws * ws + 0.000001f;
-    for (int i = 0; i < n; ++i)
+    ws = ws * ws + 0.000001f; //Quantisize
+    for(int i = 0; i < n; ++i)
         smps[i] = floor(smps[i] / ws + 0.5f) * ws;
 }
 
@@ -168,10 +178,10 @@ void processQuantize(int n, float* smps, float ws) {
  * @param offs  Input signal bias (offset)
  */
 void processZigzag(int n, float* smps, float ws) {
-    ws = ws * ws * ws * 32.0f + 0.0001f;
-    float tmpv = (ws < 1.0f) ? sin(ws) : 1.0f;
-    for (int i = 0; i < n; ++i)
-        smps[i] = asin(sin(smps[i] * ws)) / tmpv;
+    ws = ws * ws * ws * 32.0f + 0.0001f; //Zigzag
+    float tmpv = (ws < 1.0f) ? sinf(ws) : 1.0f;
+    for(int i = 0; i < n; ++i)
+        smps[i] = asinf(sinf(smps[i] * ws)) / tmpv;
 }
 
 /**
@@ -184,22 +194,25 @@ void processZigzag(int n, float* smps, float ws) {
  * @param offs  DC offset applied before limiting
  */
 void processLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = pow(2.0f, -ws * ws * 8.0f);
-    par = par / 4.0f;
-    if (par > ws - 0.01f) par = ws - 0.01f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] += offs;
-        float res = polyblampres(smps[i], ws, par);
+    ws = powf(2.0f, -ws * ws * 8.0f); // Compute ws, scale factor for the waveshaper
+    par = par / 4; // Scale parameter
+    if(par > ws - 0.01f) par = ws - 0.01f; // Ensure par is within bounds
+
+            // Precalculate offset compensation with distortion function
+    float resOffset = polyblampres(offs, ws, par);
+    float offsetCompensation = offs >= 0 ?
+                ( offs >= ws ? ws - resOffset : offs - resOffset ) :
+                ( offs <= -ws ? -ws + resOffset : offs + resOffset );
+
+    for(int i = 0; i < n; ++i) {
+        smps[i] += offs; // Add offset to the sample
+        float res = polyblampres(smps[i], ws, par); // Apply limiter distortion function
         if (smps[i] >= 0)
-            smps[i] = (smps[i] > ws ? ws - res : smps[i] - res);
+            smps[i] = (smps[i] > ws ? ws - res : smps[i] - res); // Positive sample handling
         else
-            smps[i] = (smps[i] < -ws ? -ws + res : smps[i] + res);
-        res = polyblampres(offs, ws, par);
-        if (offs >= 0)
-            smps[i] -= (offs >= ws ? ws - res : offs - res);
-        else
-            smps[i] -= (offs <= -ws ? -ws + res : offs + res);
-        smps[i] /= ws;
+            smps[i] = (smps[i] < -ws ? -ws + res : smps[i] + res); // Negative sample handling
+        smps[i] -= offsetCompensation; // Subtract offset compensation
+        smps[i] /= ws; // Apply inverse scaling
     }
 }
 
@@ -214,9 +227,9 @@ void processLimiter(int n, float* smps, float ws, float par, float offs) {
  * @param offs  Offset shift before processing
  */
 void processUpperLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = pow(2.0f, -ws * ws * 8.0f);
+    ws = powf(2.0f, -ws * ws * 8.0f); //Upper Limiter
     if (par > ws - 0.01f) par = ws - 0.01f;
-    for (int i = 0; i < n; ++i) {
+    for(int i = 0; i < n; ++i) {
         smps[i] += offs;
         float res = polyblampres(smps[i], ws, par);
         if (smps[i] > ws)
@@ -244,9 +257,9 @@ void processUpperLimiter(int n, float* smps, float ws, float par, float offs) {
  * @param offs  Offset before clipping
  */
 void processLowerLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = pow(2.0f, -ws * ws * 8.0f);
-    if (par > ws - 0.01f) par = ws - 0.01f;
-    for (int i = 0; i < n; ++i) {
+    ws = powf(2.0f, -ws * ws * 8.0f); //Lower Limiter
+    if(par > ws - 0.01f) par = ws - 0.01f;
+    for(int i = 0; i < n; ++i) {
         smps[i] += offs;
         float res = polyblampres(smps[i], ws, par);
         if (smps[i] < -ws)
@@ -273,16 +286,23 @@ void processLowerLimiter(int n, float* smps, float ws, float par, float offs) {
  * @param offs  Offset to shift clipping range
  */
 void processInverseLimiter(int n, float* smps, float ws, float par, float offs) {
-    ws = (pow(2.0f, ws * 6.0f) - 1.0f) / pow(2.0f, 6.0f);
-    if (par > ws - 0.01f) par = ws - 0.01f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] += offs;
-        float res = polyblampres(smps[i], ws, par);
-        if (smps[i] >= 0)
-            smps[i] = (smps[i] > ws ? smps[i] - ws + res : res);
+    ws = (powf(2.0f, ws * 6.0f) - 1.0f) / powf(2.0f, 6.0f); // Compute ws, scale factor for the waveshaper
+    if (par > ws - 0.01f) par = ws - 0.01f; // Ensure par is within bounds
+
+            // Precalculate offset compensation with distortion function
+    float resOffset = polyblampres(offs, ws, par);
+    float offsetCompensation = offs >= 0 ?
+            (offs > ws ? offs - ws + resOffset : resOffset) :
+            (offs < -ws ? offs + ws - resOffset : -resOffset);
+
+    for(int i = 0; i < n; ++i) {
+        smps[i] += offs; // Add offset to the sample
+        float res = polyblampres(smps[i], ws, par); // Compute polyblamp edge smoothing function
+        if(smps[i] >= 0)
+            smps[i] = (smps[i] > ws ? smps[i] - ws + res : res); // Positive sample handling
         else
-            smps[i] = (smps[i] < -ws ? smps[i] + ws - res : -res);
-        smps[i] -= offs;
+            smps[i] = (smps[i] < -ws ? smps[i] + ws - res : -res); // Negative sample handling
+        smps[i] -= offsetCompensation; // Subtract offset compensation
     }
 }
 
@@ -297,17 +317,17 @@ void processInverseLimiter(int n, float* smps, float ws, float par, float offs) 
  * @param offs  Offset bias
  */
 void processClip(int n, float* smps, float ws, float par, float offs) {
-    ws = pow(5.0f, ws * ws * 1.0f) - 1.0f;
-    if (par < 0.0001f) par = 0.0001f; // Verhindere zu kleine Werte
-    for (int i = 0; i < n; ++i) {
+    ws = powf(5.0f, ws * ws * 1.0f) - 1.0f; //Clip
+    if(par < 0.0001f) par = 0.0001f; // Verhindere zu kleine Werte
+    for(int i = 0; i < n; ++i) {
         smps[i] += offs;
         float x = smps[i] * (ws + 0.5f) * 0.9999f;
         float clipped = x - floor(0.5f + x);
         // PolyBLAMP an den Rändern anwenden
         float frac = x - floor(x);
-        if (frac < par)
+        if(frac < par)
             clipped -= polyblampres(frac, 0.0f, par);
-        else if (1.0f - frac < par)
+        else if(1.0f - frac < par)
             clipped += polyblampres(1.0f - frac, 0.0f, par);
         smps[i] = clipped;
         // Offset rückgängig machen
@@ -326,9 +346,9 @@ void processClip(int n, float* smps, float ws, float par, float offs) {
  * @param offs  Offset shift
  */
 void processAsym2(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 30.0f + 0.001f;
+    ws = ws * ws * ws * 30.0f + 0.001f; //Asym2
     float tmpv = (ws < 0.3f) ? ws : 1.0f;
-    for (int i = 0; i < n; ++i) {
+    for(int i = 0; i < n; ++i) {
         float tmp = (smps[i] + offs) * ws;
         float tmpo = offs * ws;
         float v = ((tmp > -2.0f) && (tmp < 1.0f)) ? tmp * (1.0f - tmp) * (tmp + 2.0f) : 0.0f;
@@ -346,9 +366,9 @@ void processAsym2(int n, float* smps, float ws, float offs) {
  * @param offs  Input offset
  */
 void processPow2(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 32.0f + 0.0001f;
+    ws = ws * ws * ws * 32.0f + 0.0001f; //Pow2
     float tmpv = (ws < 1.0f) ? ws * (1.0f + ws) / 2.0f : 1.0f;
-    for (int i = 0; i < n; ++i) {
+    for(int i = 0; i < n; ++i) {
         float x = (smps[i] + offs) * ws;
         float xo = offs * ws;
         float v = ((x > -1.0f) && (x < 1.618034f)) ? x * (1.0f - x) : ((x > 0.0f) ? -1.0f : -2.0f);
@@ -367,21 +387,24 @@ void processPow2(int n, float* smps, float ws, float offs) {
  * @param offs  Pre-bias of signal
  */
 void processSigmoid(int n, float* smps, float ws, float offs) {
-    ws = pow(ws, 5.0f) * 80.0f + 0.0001f;
-    float tmpv = (ws > 10.0f) ? 0.5f : 0.5f - 1.0f / (exp(ws) + 1.0f);
-    for (int i = 0; i < n; ++i) {
+    ws = powf(ws, 5.0f) * 80.0f + 0.0001f; // Compute ws, scale factor for the waveshaper
+    // Calculate tmpv for normalization
+    float tmpv = (ws > 10.0f) ? 0.5f : 0.5f - 1.0f / (expf(ws) + 1.0f);
+    for(int i = 0; i < n; ++i) {
         smps[i] += offs;
         float tmp = smps[i] * ws;
-        if (tmp < -10.0f) tmp = -10.0f;
-        else if (tmp > 10.0f) tmp = 10.0f;
-        tmp = 0.5f - 1.0f / (exp(tmp) + 1.0f);
+        if(tmp < -10.0f) tmp = -10.0f;
+        else if(tmp > 10.0f) tmp = 10.0f;
+        tmp = 0.5f - 1.0f / (expf(tmp) + 1.0f);
 
         float tmpo = offs * ws;
-        if (tmpo < -10.0f) tmpo = -10.0f;
-        else if (tmpo > 10.0f) tmpo = 10.0f;
-        tmpo = 0.5f - 1.0f / (exp(tmpo) + 1.0f);
+        if(tmpo < -10.0f) tmpo = -10.0f;
+        else if(tmpo > 10.0f) tmpo = 10.0f;
+        tmpo = 0.5f - 1.0f / (expf(tmpo) + 1.0f); // Apply sigmoid waveshaping
 
-        smps[i] = tmp / tmpv - tmpo / tmpv;
+
+        smps[i] = tmp / tmpv; //Normalize
+        smps[i] -= tmpo / tmpv; // Subtract offset compensation
     }
 }
 
@@ -398,13 +421,15 @@ void processSigmoid(int n, float* smps, float ws, float offs) {
  * Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
  */
 void processTanhLimiter(int n, float* smps, float ws, float par, float offs) {
-    par = (20.0f) * par * par + (0.1f) * par + 1.0f;
+    par = (20.0f) * par * par + (0.1f) * par + 1.0f; //Pfunpar=32 -> n=2.5
     ws = ws * ws * 35.0f + 1.0f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] *= ws;
-        smps[i] += offs;
-        smps[i] = smps[i] / pow(1.0f + pow(fabs(smps[i]), par), 1.0f / par);
-        smps[i] -= offs / pow(1.0f + pow(fabs(offs), par), 1.0f / par);
+    // precalc offset with distortion function applied
+    float offsetCompensation = YehAbelSmith(offs, par);
+    for(int i = 0; i < n; ++i) {
+        smps[i] *= ws;      // multiply signal to drive it in the saturation of the function
+        smps[i] += offs;    // add dc offset
+        smps[i] = YehAbelSmith(smps[i], par);
+        smps[i] -= offsetCompensation;
     }
 }
 
@@ -422,15 +447,19 @@ void processTanhLimiter(int n, float* smps, float ws, float par, float offs) {
  * modified with factor 1.5 to go through [1,1] and [-1,-1]
  */
 void processCubic(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 20.0f + 0.168f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] *= ws;
-        smps[i] += offs;
-        if (fabs(smps[i]) < 1.0f)
+    ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+    // precalc offset with distortion function applied
+    float offsetCompensation = 1.5 * (offs - (offs*offs*offs / 3.0));
+
+    for(int i = 0; i < n; ++i) {
+        smps[i] *= ws; // multiply signal to drive it in the saturation of the function
+        smps[i] += offs; // add dc offset
+        if(fabsf(smps[i]) < 1.0f)
             smps[i] = 1.5f * (smps[i] - (smps[i] * smps[i] * smps[i] / 3.0f));
         else
             smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-        smps[i] -= 1.5f * (offs - (offs * offs * offs / 3.0f));
+        //subtract offset with distortion function applied
+        smps[i] -= offsetCompensation;
     }
 }
 
@@ -447,15 +476,19 @@ void processCubic(int n, float* smps, float ws, float offs) {
  * Formula of cubic changed to square but still going through [1,1] and [-1,-1]
  */
 void processSquare(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 20.0f + 0.168f;
-    for (int i = 0; i < n; ++i) {
-        smps[i] *= ws;
-        smps[i] += offs;
-        if (fabs(smps[i]) < 1.0f)
-            smps[i] = smps[i] * (2.0f - fabs(smps[i]));
+    // Square distortion waveshaper
+    ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
+    // precalc offset with distortion function applied
+    float offsetCompensation = offs*(2-fabsf(offs));
+    for(int i = 0; i < n; ++i) {
+        smps[i] *= ws; // multiply signal to drive it in the saturation of the function
+        smps[i] += offs; // add dc offset
+        if(fabsf(smps[i]) < 1.0f)
+            smps[i] = smps[i] * (2.0f - fabsf(smps[i]));
         else
             smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-        smps[i] -= offs * (2.0f - fabs(offs));
+        //subtract offset with distortion function applied
+        smps[i] -= offsetCompensation;
     }
 }
 
