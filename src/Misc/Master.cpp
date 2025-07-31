@@ -1316,16 +1316,17 @@ bool Master::AudioOut(float *outl, float *outr)
         Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
-#ifdef USE_COMPATIBLE_MIXING
-        if(pan < 0.5f)
-            newvol.r *= pan * 2.0f;
-        else
-            newvol.l *= (1.0f - pan) * 2.0f;
-#else
-        newvol.r *= sqrtf(pan);
-        newvol.l *= sqrtf(1.0f - pan);
-#endif
 
+        if(constPowerMixing) {
+            newvol.r *= sqrtf(pan);
+            newvol.l *= sqrtf(1.0f - pan);
+        } else {
+            // compatibility mode
+            if(pan < 0.5f)
+                newvol.r *= pan * 2.0f;
+            else
+                newvol.l *= (1.0f - pan) * 2.0f;
+        }
 
         /* This is where the part volume (and pan) smoothing and application happens */
         if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
@@ -1752,6 +1753,8 @@ int Master::loadXML(const char *filename)
 
 void Master::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
+
     if (xml.hasparreal("volume")) {
         Volume = xml.getparreal("volume", Volume);
     } else {
