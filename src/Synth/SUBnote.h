@@ -24,7 +24,7 @@ class SUBnote:public SynthNote
 {
     public:
         SUBnote(const SUBnoteParameters *parameters, const SynthParams &pars,
-                WatchManager *wm = 0, const char *prefix = 0);
+                WatchManager *wm = 0, const char *prefix = 0, bool constPowerMixing = true);
         ~SUBnote();
 
         SynthNote *cloneLegato(void);

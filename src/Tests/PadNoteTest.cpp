@@ -161,9 +161,9 @@ class PadNoteTest
             note->releasekey();
 
             TS_ASSERT(!tr->hasNext());
-            
-            
-            TS_ASSERT((synth->compatibility&MSK_CONSTPOWPAN)!=MSK_CONSTPOWPAN);
+
+
+            TS_ASSERT(!note->constPowerMixing());
             w->add_watch("noteout");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;

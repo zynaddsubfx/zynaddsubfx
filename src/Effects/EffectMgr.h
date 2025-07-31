@@ -110,7 +110,7 @@ class EffectMgr:public Presets
         bool dryonly;
         Allocator &memory;
         const SYNTH_T &synth;
-        
+        bool constPowerMixing = true;
         
 };
 

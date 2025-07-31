@@ -39,7 +39,8 @@ class ADnote:public SynthNote
          * @param pars Note Parameters
          * @param spars Synth Engine Agnostic Parameters*/
         ADnote(ADnoteParameters *pars, const SynthParams &spars,
-                WatchManager *wm=0, const char *prefix=0);
+                WatchManager *wm=0, const char *prefix=0,
+                bool constPowerMixing = true);
         /**Destructor*/
         ~ADnote();
 

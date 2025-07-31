@@ -533,13 +533,13 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     //Insertion effect
     if(insertion != 0) {
         float v1, v2;
-        
-    if((synth.compatibility&MSK_CONSTPOWDRYWET)==MSK_CONSTPOWDRYWET)
+
+    if(constPowerMixing)
     {
         v1 = sqrtf(1.0f-volume);
         v2 = sqrtf(volume);
-    } else
-    {
+    } else {
+        // compatibility mode
         if(volume < 0.5f) {
             v1 = 1.0f;
             v2 = volume * 2.0f;
@@ -645,6 +645,8 @@ void EffectMgr::add2XML(XMLwrapper& xml)
 
 void EffectMgr::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
+
     changeeffect(xml.getpar127("type", geteffect()));
 
     if(!geteffect())

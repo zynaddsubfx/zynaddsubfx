@@ -232,6 +232,7 @@ class Part
         const SYNTH_T &synth;
         const AbsTime &time;
         const int &gzip_compression, &interpolation;
+        bool constPowerMixing = true;
 };
 
 }

@@ -28,8 +28,8 @@ namespace zyn {
 
 PADnote::PADnote(const PADnoteParameters *parameters,
                  const SynthParams &pars, const int& interpolation, WatchManager *wm,
-                 const char *prefix)
-    :SynthNote(pars),
+                 const char *prefix, bool constPowerMixing)
+    :SynthNote(pars, constPowerMixing),
     watch_int(wm, prefix, "noteout/after_interpolation"), watch_punch(wm, prefix, "noteout/after_punch"),
     watch_amp_int(wm, prefix, "noteout/after_amp_interpolation"), watch_legato(wm, prefix, "noteout/after_legato"),
      pars(*parameters),interpolation(interpolation)
@@ -409,14 +409,13 @@ int PADnote::noteout(float *outl, float *outr)
         }
 
     watch_punch(outl,synth.buffersize);
-    // compute panning factors 
+    // compute panning factors
     float pan_l, pan_r;
-    if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
+    if(constPowerMixing())
     {   // sqrt 3dB constant power mode
         pan_l = sqrtf(1.0f - NoteGlobalPar.Panning);
         pan_r = sqrtf(NoteGlobalPar.Panning);
-    } else 
-    {   // compatibility mode
+    } else {   // compatibility mode
         pan_l = (1.0f - NoteGlobalPar.Panning);
         pan_r = (NoteGlobalPar.Panning);
     }
