@@ -1474,7 +1474,7 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
 
 void Part::getfromXML(XMLwrapper& xml)
 {
-    constPowerMixing = xml.fileversion() < version_type(3,0,7);
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
     Penabled = xml.getparbool("enabled", Penabled);
     if (xml.hasparreal("volume")) {
         setVolumedB(xml.getparreal("volume", Volume));

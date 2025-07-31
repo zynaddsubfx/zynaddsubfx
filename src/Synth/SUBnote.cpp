@@ -585,7 +585,8 @@ int SUBnote::noteout(float *outl, float *outr)
     {   // sqrt 3dB constant power mode
         pan_l = sqrtf(1.0f - panning);
         pan_r = sqrtf(panning);
-    } else 
+    }
+    else
     {   // compatibility mode
         pan_l = (1.0f - panning);
         pan_r = (panning);
