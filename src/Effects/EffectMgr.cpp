@@ -547,6 +547,13 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     //Insertion effect
     if(insertion != 0) {
         float v1, v2;
+        
+    if((synth.compatibility&MSK_CONSTPOWDRYWET)==MSK_CONSTPOWDRYWET)
+    {
+        v1 = sqrtf(1.0f-volume);
+        v2 = sqrtf(volume);
+    } else
+    {
         if(volume < 0.5f) {
             v1 = 1.0f;
             v2 = volume * 2.0f;
@@ -555,6 +562,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v1 = (1.0f - volume) * 2.0f;
             v2 = 1.0f;
         }
+    }
         if((nefx == 1) || (nefx == 2))
             v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
 

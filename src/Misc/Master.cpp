@@ -1302,7 +1302,7 @@ bool Master::AudioOut(float *outl, float *outr)
         if(Pinsparts[nefx] >= 0) {
             int efxpart = Pinsparts[nefx];
             if(part[efxpart]->Penabled)
-                insefx[nefx]->out(part[efxpart]->partoutl,
+                insefx[nefx]->out(part[efxpart]->partoutl, // drywet: compensate by raising Part->gain
                                   part[efxpart]->partoutr);
         }
 
@@ -1316,13 +1316,15 @@ bool Master::AudioOut(float *outl, float *outr)
         Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
+#ifdef USE_COMPATIBLE_MIXING
         if(pan < 0.5f)
             newvol.r *= pan * 2.0f;
         else
             newvol.l *= (1.0f - pan) * 2.0f;
-        //if(npart==0)
-        //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
-
+#else
+        newvol.r *= sqrtf(pan);
+        newvol.l *= sqrtf(1.0f - pan);
+#endif
 
 
         /* This is where the part volume (and pan) smoothing and application happens */
@@ -1388,7 +1390,7 @@ bool Master::AudioOut(float *outl, float *outr)
                 }
             }
 
-        sysefx[nefx]->out(tmpmixl, tmpmixr);
+        sysefx[nefx]->out(tmpmixl, tmpmixr); // drywet: compensate by raising outvolume
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx]->sysefxgetvolume();
@@ -1409,7 +1411,7 @@ bool Master::AudioOut(float *outl, float *outr)
     //Insertion effects for Master Out
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         if(Pinsparts[nefx] == -2)
-            insefx[nefx]->out(outl, outr);
+            insefx[nefx]->out(outl, outr); // drywet: compensate by raising Master Volume
 
     float vol = dB2rap(Volume);
 
