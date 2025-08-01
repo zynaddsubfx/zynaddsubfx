@@ -198,7 +198,7 @@ void processLimiter(int n, float* smps, float ws, float par, float offs) {
     par = par / 4; // Scale parameter
     if(par > ws - 0.01f) par = ws - 0.01f; // Ensure par is within bounds
 
-            // Precalculate offset compensation with distortion function
+    // Precalculate offset compensation with distortion function
     float resOffset = polyblampres(offs, ws, par);
     float offsetCompensation = offs >= 0 ?
                 ( offs >= ws ? ws - resOffset : offs - resOffset ) :
@@ -422,7 +422,7 @@ void processSigmoid(int n, float* smps, float ws, float offs) {
  */
 void processTanhLimiter(int n, float* smps, float ws, float par, float offs) {
     par = (20.0f) * par * par + (0.1f) * par + 1.0f; //Pfunpar=32 -> n=2.5
-    ws = ws * ws * 35.0f + 1.0f;
+    ws = powf(10, ws * ws * 2.0f) - 1.0f + 0.1f; // Compute ws, scale factor for the waveshaper
     // precalc offset with distortion function applied
     float offsetCompensation = YehAbelSmith(offs, par);
     for(int i = 0; i < n; ++i) {
@@ -447,7 +447,8 @@ void processTanhLimiter(int n, float* smps, float ws, float par, float offs) {
  * modified with factor 1.5 to go through [1,1] and [-1,-1]
  */
 void processCubic(int n, float* smps, float ws, float offs) {
-    ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+    //~ ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+    ws = powf(10, ws * ws * 1.5f) - 1.0f + 0.1f; // Compute ws, scale factor for the waveshaper
     // precalc offset with distortion function applied
     float offsetCompensation = 1.5 * (offs - (offs*offs*offs / 3.0));
 
@@ -477,7 +478,8 @@ void processCubic(int n, float* smps, float ws, float offs) {
  */
 void processSquare(int n, float* smps, float ws, float offs) {
     // Square distortion waveshaper
-    ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
+    //~ ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
+    ws = powf(10, ws * ws * 1.5f) - 1.0f + 0.1f; // Compute ws, scale factor for the waveshaper
     // precalc offset with distortion function applied
     float offsetCompensation = offs*(2-fabsf(offs));
     for(int i = 0; i < n; ++i) {
