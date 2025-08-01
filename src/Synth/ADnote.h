@@ -191,6 +191,9 @@ class ADnote:public SynthNote
             /* Waveform of the Voice */
             float *OscilSmp;
 
+            /* max freq inside OscilSmp */
+            float OscilFreqMin;
+
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
 
