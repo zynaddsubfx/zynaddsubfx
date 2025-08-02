@@ -24,7 +24,11 @@ namespace zyn {
  * The size of the windowes sinc kernel
  * This must be an odd number
  */
-#define WSKERNELSIZE 321
+#define WSBASESIZE 10
+#define WSCUTOFF 0.05f
+#define WSOVERSAMPLING 32.0f
+const int WSKERNELSIZE = WSBASESIZE * WSOVERSAMPLING + 1;
+const float WSREALCUTOFF = WSCUTOFF / WSOVERSAMPLING;
 
 enum class FMTYPE {
     NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD

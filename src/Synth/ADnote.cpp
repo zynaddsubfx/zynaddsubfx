@@ -1232,9 +1232,8 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
         int freqhi = vce.oscfreqhi[k];
         int freqlo = static_cast<int>(vce.oscfreqlo[k] * 16777216.0f);
         float* tw  = tmpwave_unison[k];
-
+        //~ printf("freqhi: %d\n", freqhi);
         assert(vce.oscfreqlo[k] < 1.0f);  // sanity check
-
         for (int i = 0; i < synth.buffersize; ++i) {
             // advance phase (fixed-point)
             poslo += freqlo;
@@ -1243,32 +1242,50 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
             poshi &= synth.oscilsize - 1;     // wrap around table size
 
             float out = 0.0f;
-float value = (vce.oscposhi[k] * vce.OscilSmpMax) / synth.samplerate_f;
-//~ printf("oscposhi[%d] = %d\n", k, vce.oscposhi[k]);
-printf("OscilSmpMax = %f\n", vce.OscilSmpMax);
-//~ printf("samplerate_f = %.3f\n", synth.samplerate_f);
-//~ printf("Interpolated value = %.6f\n", value);
-//~ printf("needsAA = %s\n", (value > 0.4f ? "true" : "false"));
 
-            bool needsAA = (vce.oscposhi[k] * vce.OscilSmpMax / synth.samplerate_f) > 0.4f;
+            // Determine if Anti-Aliasing is needed:
+            // freq * harmonics > 40% of Wavetable length (empirical safe threshold)
+            const bool needsAA = (freqhi * vce.OscilSmpMax) > (0.5f * synth.oscilsize_f);
 
             if (NoteVoicePar[nvoice].AAEnabled && needsAA) {
-                // resampling factor
-                const int rsmpfactor = freqhi;
-                const int startoffset = 2 * rsmpfactor;
+
+                // maximum frequency in the WT
+                //~ const float maxWTfreq = freqhi * vce.OscilSmpMax * 2.0f / synth.oscilsize;
+
+                // Calculate how many kernel samples to skip per step in the convolution loop.
+                // Higher oversampling → smaller step size → better filtering but more computation.
+                // If the highest frequency in the WT is low, we need less filtering so we increase the stpsize
+                int stpsize = roundf(2.0f*WSOVERSAMPLING / freqhi);
+
+                // Begrenzen für sinnvolle Fenstergröße
+                stpsize = clamp(stpsize, 1, WSKERNELSIZE / 4); // maximal die 1/4 überspringen
+
+                // Calculate the number of wavetable samples that are supported in the filter window
+                const int conv_steps = WSKERNELSIZE/(stpsize);
+                // We have to start half of the steps left of the sample position
+                const int startoffset = conv_steps/2;
+                // Calculate the initial position in the wavetable for the convolution.
+                // Apply wrapping to stay within the bounds of the wavetable size.
                 int ovsmpposhi = (poshi - startoffset) & (synth.oscilsize - 1);
 
-                const int stpsize = std::max(1, 40 / rsmpfactor);
-                const int startpos = ((16777216 - poslo) * stpsize);
-                const int startposhi = startpos >> 24;
+                // Use the fractional part of the phase (poslo) to align the start of the kernel
+                // This helps preserve phase continuity and prevents audible stepping or artifacts.
+                const int startpos = ((16777216 - poslo) * stpsize);  // 2^24 = fixed-point phase resolution
+                const int startposhi = startpos >> 24;  // Normalize to 0..WSKERNELSIZE range
 
+                // Apply the kernel convolution:
+                // Multiply the selected samples from the wavetable with the corresponding kernel values.
+                // Move forward in both kernel and wavetable positions according to the current step size.
                 for (int l = startposhi; l < WSKERNELSIZE; l += stpsize) {
                     const float kernel_sample = pars.GlobalPar.wskernel[l];
                     out += kernel_sample * smps[ovsmpposhi];
-                    ovsmpposhi = (ovsmpposhi + 1) & (synth.oscilsize - 1);
+                    ovsmpposhi = (ovsmpposhi + 1) & (synth.oscilsize - 1);  // wrap around wavetable
                 }
 
+                // Since we use fewer kernel samples at high frequencies (larger stpsize),
+                // scale the result to preserve amplitude consistency across frequencies.
                 tw[i] = out * static_cast<float>(stpsize);
+
             } else {
                 // linear interpolation with wrapping
                 int poship1 = (poshi + 1) & (synth.oscilsize - 1);
