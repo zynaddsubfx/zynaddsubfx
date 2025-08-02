@@ -496,7 +496,7 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
     Reson     = new Resonance();
 
     wskernel = new float[WSKERNELSIZE];
-    windowedsinc(0.00625, 1.0f, WSKERNELSIZE, wskernel);
+    windowedsinc(WSREALCUTOFF, 1.0f, WSKERNELSIZE, wskernel);
 
 }
 

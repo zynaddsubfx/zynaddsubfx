@@ -1133,13 +1133,13 @@ bool OscilGen::needPrepare(OscilGenBuffers& bfrs) const
 
 short int OscilGen::getMaxFreq(OscilGenBuffers& bfrs) const
 {
-    int maxFreq = 0;
     int nyquist = synth.oscilsize / 2;
-    int i;
-    for(i = 1; i < nyquist - 1; ++i)
-        if (bfrs.outoscilFFTfreqs[i].real() != 0.0f)
-            maxFreq = i;
-    return maxFreq;
+    for (int i = nyquist - 1; i > 0; --i)
+        {
+            if (fabsf(bfrs.outoscilFFTfreqs[i].real()) > 1e-6f || fabsf(bfrs.outoscilFFTfreqs[i].imag()) > 1e-6f)
+                return i;
+        }
+        return 0;
 
 }
 /*
