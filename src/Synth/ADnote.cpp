@@ -1244,21 +1244,15 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
             float out = 0.0f;
 
             // Determine if Anti-Aliasing is needed:
-            // freq * harmonics > 40% of Wavetable length (empirical safe threshold)
             const bool needsAA = (freqhi * vce.OscilSmpMax) > (0.5f * synth.oscilsize_f);
 
             if (NoteVoicePar[nvoice].AAEnabled && needsAA) {
-
-                // maximum frequency in the WT
-                //~ const float maxWTfreq = freqhi * vce.OscilSmpMax * 2.0f / synth.oscilsize;
 
                 // Calculate how many kernel samples to skip per step in the convolution loop.
                 // Higher oversampling → smaller step size → better filtering but more computation.
                 // If the highest frequency in the WT is low, we need less filtering so we increase the stpsize
                 int stpsize = roundf(2.0f*WSOVERSAMPLING / freqhi);
-
-                // Begrenzen für sinnvolle Fenstergröße
-                stpsize = clamp(stpsize, 1, WSKERNELSIZE / 4); // maximal die 1/4 überspringen
+                stpsize = clamp(stpsize, 1, WSKERNELSIZE / 2);
 
                 // Calculate the number of wavetable samples that are supported in the filter window
                 const int conv_steps = WSKERNELSIZE/(stpsize);
@@ -1298,8 +1292,6 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
         vce.oscposlo[k] = static_cast<float>(poslo) / 16777216.0f;
     }
 }
-
-
 
 /*
  * Computes the Oscillator (Mixing)
@@ -1576,14 +1568,11 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
     for(int k = 0; k < vce.unison_size; ++k) {
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
+        float  fmold = vce.FMoldsmp[k];
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
-        float  fmold = vce.FMoldsmp[k];
-
-        // variables to store the sampling position and underflow during AA filtering
-        int    ovsmpposhi;
 
         for(int i = 0; i < synth.buffersize; ++i) {
 
@@ -1593,27 +1582,17 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                 poshi = 0.0f;
                 poslo = 0.0f;
             }
+            fmold = tw[i];
 
-            float fmpos;
-            // FM: accumulate tw to transform freq to pos
-            // PM: use tw as pos
-            fmold += tw[i];
-            if(FMmode == FMTYPE::FREQ_MOD)
-                fmpos=fmold;
-            else
-                fmpos = tw[i];
+            int FMmodfreqhi = 0;
+            F2I(tw[i], FMmodfreqhi);
+            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            if(FMmodfreqhi < 0)
+                FMmodfreqlo++;
 
-            int FMmodposhi = 0;
-            F2I(fmpos, FMmodposhi);
-            int FMmodposlo = ((fmpos-FMmodposhi) * (1<<24));//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
-            // make the rounding error symmetric
-            if(FMmodposlo < 0)
-                FMmodposlo++;
-
-            //carrier position
-            int carposhi = poshi + FMmodposhi;
-            int carposlo = poslo + FMmodposlo;
-
+            //carrier
+            int carposhi = poshi + FMmodfreqhi;
+            int carposlo = (int)(poslo + FMmodfreqlo);
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 carposhi += NoteVoicePar[nvoice].phase_offset;
 
@@ -1623,50 +1602,45 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             carposhi &= (synth.oscilsize - 1);
 
-            if(NoteVoicePar[nvoice].AAEnabled && abs(tw[i]+freqhi) > 4.0f) {
-            //if(NoteVoicePar[nvoice].AAEnabled) {
-                // carrier frequency
-                const int carfreqhi = (FMmode == FMTYPE::FREQ_MOD) ? tw[i]+freqhi : freqhi;
-                // resampling factor
-                const int rsmpfactor = (abs(carfreqhi)<1) ? 1 : abs(carfreqhi);
-                // offset of the oscillator sample to be multplied with first kernel position
-                const int startoffset = 2*rsmpfactor;
-                // position of that oscillator sample
-                ovsmpposhi  = carposhi - startoffset;
-                ovsmpposhi &= synth.oscilsize - 1;
-                //for resampling factor up to 40 we reduce the kernel step size down to 1.
-                // -> lower cut off frequency
 
-                #define minstep 8 // <-----      this factor reduces the needed multiplications  <----------------
-                                 // it's best to use integer factors of 40
+            // do AA stuff
+            // Determine if anti-aliasing is necessary based on effective frequency
+            const float absfreq = fabsf(tw[i] + freqhi);  // includes FM offset
+            const bool needsAA = (absfreq * vce.OscilSmpMax) > (0.5f * synth.oscilsize_f);
 
-                const int stpsize = rsmpfactor>40/minstep ? minstep : 40/rsmpfactor;
-                // for resampling factor above 40 start scipping oscillator samples
-                const int ovsmpfreqhi = rsmpfactor<minstep ? 1 : rsmpfactor/minstep;
-                // first kernel sample to be used
-                const int startpos = (((1<<24)-carposlo) * stpsize);
-                const int startposhi = startpos>>24;
-                const int kernelposlo = (startpos - (startposhi<<24) ) / stpsize;
-                // reset output value
-                float out = 0;
-                for (int l = startposhi; l<(WSKERNELSIZE-2); l+=stpsize) {
-                    const float kernelsample =
-                        (pars.GlobalPar.wskernel[l] * ((1<<24) - kernelposlo) +
-                        pars.GlobalPar.wskernel[l+1] * kernelposlo)/(1.0f*(1<<24));
+            if (vce.AAEnabled && needsAA) {
+                printf(".");
+                // Determine kernel step size based on frequency (higher freq = lower step size)
+                int stpsize = roundf(WSOVERSAMPLING / absfreq);
+                stpsize = clamp(stpsize, 1, WSKERNELSIZE / 2);
 
-                    out += kernelsample*smps[ovsmpposhi];
+                // Calculate convolution range and position in wavetable
+                const int conv_steps = WSKERNELSIZE / stpsize;
+                const int startoffset = conv_steps / 2;
+                int ovsmpposhi = (carposhi - startoffset) & (synth.oscilsize - 1);
 
-                    // advance to next oscillator sample
-                    ovsmpposhi += ovsmpfreqhi;
-                    ovsmpposhi &= synth.oscilsize - 1;
+                // Initial kernel sample index based on fractional position
+                const int startpos = ((16777216 - carposlo) * stpsize);
+                const int startposhi = startpos >> 24;
+
+                // Convolve wavetable with kernel
+                float out = 0.0f;
+                for (int l = startposhi; l < WSKERNELSIZE; l += stpsize) {
+                    const float kernel_sample = pars.GlobalPar.wskernel[l];
+                    out += kernel_sample * smps[ovsmpposhi];
+                    ovsmpposhi = (ovsmpposhi + 1) & (synth.oscilsize - 1);
                 }
-                tw[i] = out*(float)(stpsize);
-            }
-            else {
-                tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
-                    + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
-            }
 
+                // Scale output based on step size
+                tw[i] = out * static_cast<float>(stpsize);
+            } else {
+
+
+
+
+                        tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
+                                + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
+            }
             poslo += freqlo;
             if(poslo >= (1<<24)) {
                 poslo &= 0xffffff;//fmod(poslo, 1.0f);
@@ -1678,7 +1652,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         }
         vce.oscposhi[k] = poshi;
         vce.oscposlo[k] = (poslo)/((1<<24)*1.0f);
-        vce.FMoldsmp[k] = fmold;
     }
 }
 
