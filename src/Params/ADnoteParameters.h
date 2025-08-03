@@ -24,7 +24,7 @@ namespace zyn {
  * The size of the windowes sinc kernel
  * This must be an odd number
  */
-#define WSBASESIZE 10
+#define WSBASESIZE 8
 #define WSCUTOFF 0.05f
 #define WSOVERSAMPLING 32.0f
 const int WSKERNELSIZE = WSBASESIZE * WSOVERSAMPLING + 1;
