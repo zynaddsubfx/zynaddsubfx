@@ -40,13 +40,8 @@ CombFilter::~CombFilter(void)
 {
     memory.dealloc(input);
     memory.dealloc(output);
-
-
-        memory.dealloc(lpf);
-
-
-        memory.dealloc(hpf);
-
+    memory.dealloc(lpf);
+    memory.dealloc(hpf);
 }
 
 
