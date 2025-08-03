@@ -240,11 +240,9 @@ static const rtosc::Ports localPorts = {
         } else {
             for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f);
-
             }
             char part_loc[128];
-            strncpy(part_loc, d.loc, sizeof(part_loc));
-            part_loc[sizeof(part_loc) - 1] = '\0';
+            fast_strcpy(part_loc, d.loc, sizeof(part_loc));
             char *end = strrchr(part_loc, '/');
             if(end) {
                 end[1] = '\0';
@@ -275,13 +273,13 @@ static const rtosc::Ports localPorts = {
         const int N = MAX_ENVELOPE_CPOINTS;
         const int M = rtosc_narguments(msg);
         rtosc_arg_t args[N];
-        char arg_types[N+1] = {};
         if(M == 0) {
-
+            char arg_types[N+1];
             for(int i=0; i<N; ++i) {
                     args[i].f    = env->envcpy[i];
                     arg_types[i] = 'f';
             }
+            arg_types[N] = 0;
             d.replyArray(d.loc, arg_types, args);
         } else {
             for(int i=0; i<N && i<M; ++i) {
@@ -584,7 +582,8 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
             xml.beginbranch("POINT", i);
             if(i != 0) {
                 xml.addparreal("dt", envdt[i]);
-                xml.addparreal("envcpy", envcpy[i]);
+                xml.addparreal("envcpy", envcpy[2*i-1]);
+                xml.addparreal("envcpy", envcpy[2*i]);
             }
             xml.addpar("val", Penvval[i]);
 
@@ -667,7 +666,10 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
             else {
                 envdt[i] = xml.getparreal("dt", envdt[i]);
             }
-            if(xml.hasparreal("envcpy")) envcpy[i] = xml.getparreal("envcpy", 0.0f);
+            if(xml.hasparreal("envcpy")) {
+                 envcpy[2*i-1] = xml.getparreal("envcpy", 0.0f);
+                 envcpy[2*i] = xml.getparreal("envcpy", 0.0f);
+             }
         }
         Penvval[i] = version_fix(xml.getpar127("val", Penvval[i]));
         xml.exitbranch();

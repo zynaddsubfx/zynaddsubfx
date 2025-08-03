@@ -78,15 +78,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         }
     }
 
-    envdt[0] = 1.0f;
-
-    currentpoint = 1; //the envelope starts from 1
-    keyreleased  = false;
-    t = 0.0f;
-    tRelease = 0.0f;
-    envfinish = false;
     inct      = envdt[1];
-    envoutval = 0.0f;
 }
 
 Envelope::~Envelope()
@@ -149,10 +141,10 @@ void Envelope::watch(float time, float value)
 inline float bezier3(float a, float bRel, float cRel, float d, float t)
 {
     const float mt = 1.0f-t;
- 
+
     const float t2 = t*t;
     const float mt2 = mt*mt;
- 
+
     const float t3 = t2*t;
     const float mt3 = mt2*mt;
 
@@ -162,7 +154,7 @@ inline float bezier3(float a, float bRel, float cRel, float d, float t)
     // Calculate the second control point (P2) for linear slope
     const float c0 = a + 2.0f * (d - a) / 3.0f;
 
-    // add offset 
+    // add offset
     const float b = b0 + bRel;
     const float c = c0 + cRel;
 
@@ -234,15 +226,9 @@ float Envelope::envout(bool doWatch)
     if(t >= 1.0f) {
         if(currentpoint >= envpoints - 1) // if last point reached
             envfinish = true;
-        // but if reached sustain point, repeating activated and key still pressed or sustained
-        else if (repeating && currentpoint == envsustain && !keyreleased) {
-            // set first value to sustain value to prevent jump
-            envval[0] = envval[currentpoint];
-            // reset current point
-            currentpoint = 1;
-        }
-        // otherwise proceed to the next segment
-        else currentpoint++;
+        // otherwise proceed only if not reached sustain point, repeating activated and key still pressed or sustained
+        else if (not (repeating && currentpoint == envsustain && !keyreleased))
+            currentpoint++;
 
         t    = 0.0f;
         inct = envdt[currentpoint];
