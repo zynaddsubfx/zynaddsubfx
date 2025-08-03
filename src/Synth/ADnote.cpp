@@ -1609,7 +1609,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             const bool needsAA = (absfreq * vce.OscilSmpMax) > (0.5f * synth.oscilsize_f);
 
             if (vce.AAEnabled && needsAA) {
-                printf(".");
                 // Determine kernel step size based on frequency (higher freq = lower step size)
                 int stpsize = roundf(WSOVERSAMPLING / absfreq);
                 stpsize = clamp(stpsize, 1, WSKERNELSIZE / 2);
