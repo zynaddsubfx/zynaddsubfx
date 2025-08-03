@@ -25,6 +25,13 @@
 
 namespace zyn {
 
+void windowedsinc(float fc, float gain, int N, float *h);
+
+template <typename T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+    return (v < lo) ? lo : (v > hi) ? hi : v;
+}
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 
@@ -142,7 +149,7 @@ inline void sprng(prng_t p)
  * The random generator (0.0f..1.0f)
  */
 #ifndef INT32_MAX_FLOAT
-#define INT32_MAX_FLOAT   0x7fffff80	/* the float mantissa is only 24-bit */
+#define INT32_MAX_FLOAT   0x7fffff80    /* the float mantissa is only 24-bit */
 #endif
 #define RND (prng() / (INT32_MAX_FLOAT * 1.0f))
 
