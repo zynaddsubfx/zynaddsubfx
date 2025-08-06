@@ -221,7 +221,8 @@ class AdNoteTest
 
             TS_ASSERT_EQUAL_INT(sampleCount, 30208);
 
-            lfop = new LFOParams(time);
+            ModMatrix* Matrix = new ModMatrix();
+            lfop = new LFOParams(time, Matrix);
             lfop->fel  = zyn::consumer_location_type_t::amp;
             lfop->freq = 2.0f;
             lfop->delay = 0.0f;

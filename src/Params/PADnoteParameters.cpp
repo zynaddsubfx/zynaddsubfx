@@ -338,18 +338,20 @@ PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
     oscilgen  = new OscilGen(synth, fft_, resonance);
     oscilgen->ADvsPAD = true;
 
+    ModMatrix* Matrix = new ModMatrix();
+
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
     FreqEnvelope->init(ad_global_freq);
-    FreqLfo = new LFOParams(ad_global_freq, time_);
+    FreqLfo = new LFOParams(ad_global_freq, time_, Matrix);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
     AmpEnvelope->init(ad_global_amp);
-    AmpLfo = new LFOParams(ad_global_amp, time_);
+    AmpLfo = new LFOParams(ad_global_amp, time_, Matrix);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
     FilterEnvelope = new EnvelopeParams(0, 1, time_);
     FilterEnvelope->init(ad_global_filter);
-    FilterLfo = new LFOParams(ad_global_filter, time_);
+    FilterLfo = new LFOParams(ad_global_filter, time_, Matrix);
 
     for(int i = 0; i < PAD_MAX_SAMPLES; ++i)
         sample[i].smp = NULL;
