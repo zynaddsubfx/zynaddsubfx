@@ -233,6 +233,7 @@ class Part
         const AbsTime &time;
         Sync* sync;
         const int &gzip_compression, &interpolation;
+        bool constPowerMixing = true;
 };
 
 }

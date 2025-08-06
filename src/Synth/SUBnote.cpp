@@ -37,8 +37,8 @@
 namespace zyn {
 
 SUBnote::SUBnote(const SUBnoteParameters *parameters, const SynthParams &spars,
-    WatchManager *wm, const char *prefix) :
-    SynthNote(spars),
+    WatchManager *wm, const char *prefix, bool constPowerMixing) :
+    SynthNote(spars, constPowerMixing),
     watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
     watch_legato(wm, prefix, "noteout/legato"),
     pars(*parameters),
@@ -579,13 +579,14 @@ int SUBnote::noteout(float *outl, float *outr)
         }
         firsttick = false;
     }
-    // compute panning factors 
+    // compute panning factors
     float pan_l, pan_r;
-    if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
+    if(constPowerMixing())
     {   // sqrt 3dB constant power mode
         pan_l = sqrtf(1.0f - panning);
         pan_r = sqrtf(panning);
-    } else 
+    }
+    else
     {   // compatibility mode
         pan_l = (1.0f - panning);
         pan_r = (panning);
@@ -606,7 +607,6 @@ int SUBnote::noteout(float *outl, float *outr)
             outl[i] *= newamplitude * pan_l;
             outr[i] *= newamplitude * pan_r;
         }
-        
 
     watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;

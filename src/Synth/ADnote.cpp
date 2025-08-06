@@ -32,8 +32,8 @@
 
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
-        WatchManager *wm, const char *prefix)
-    :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
+               WatchManager *wm, const char *prefix, bool constPowerMixing)
+    :SynthNote(spars, constPowerMixing), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
     watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
 {
     memory.beginTransaction();
@@ -1843,13 +1843,14 @@ int ADnote::noteout(float *outl, float *outr)
                     stereo_pos = 0.0f;
                 float panning = (stereo_pos + 1.0f) * 0.5f;
                 float lvol, rvol;
-                if((synth.compatibility&MSK_CONSTPOWPAN)==MSK_CONSTPOWPAN)
+                if(constPowerMixing())
                 {
                     lvol = sqrtf(1.0f - panning);
                     rvol = sqrtf(panning);
                 }
                 else
                 {
+                    // compatibility mode
                     lvol = (1.0f - panning) * 2.0f;
                     if(lvol > 1.0f)
                         lvol = 1.0f;

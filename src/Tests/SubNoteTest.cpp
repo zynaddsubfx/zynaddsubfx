@@ -84,7 +84,7 @@ class SubNoteTest
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
 
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-            note = new SUBnote(defaultPreset, pars, w);
+            note = new SUBnote(defaultPreset, pars, w, nullptr, false /* compatibility mode */);
             this->pars = defaultPreset;
         }
 
@@ -125,8 +125,8 @@ class SubNoteTest
 
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout/filter");
-            
-            TS_ASSERT((synth->compatibility&MSK_CONSTPOWPAN)!=MSK_CONSTPOWPAN);
+
+            TS_ASSERT(!note->constPowerMixing());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
