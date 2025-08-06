@@ -667,16 +667,16 @@ bool Part::NoteOnInternal(note_t note,
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i},
+                            wm, (pre+"kit"+i+"/adpars/").c_str, constPowerMixing), 0, i},
                                     portamento_realtime);
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i},
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str, constPowerMixing), 1, i},
                                     portamento_realtime);
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/padpars/").c_str), 2, i},
+                            (pre+"kit"+i+"/padpars/").c_str, constPowerMixing), 2, i},
                                     portamento_realtime);
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
@@ -1381,6 +1381,7 @@ void Part::monomemClear(void)
 
 void Part::getfromXMLinstrument(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
     if(xml.enterbranch("INFO")) {
         xml.getparstr("name", (char *)Pname, PART_MAX_NAME_LEN);
         xml.getparstr("author", (char *)info.Pauthor, MAX_INFO_TEXT_SIZE);
@@ -1473,6 +1474,7 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
 
 void Part::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
     Penabled = xml.getparbool("enabled", Penabled);
     if (xml.hasparreal("volume")) {
         setVolumedB(xml.getparreal("volume", Volume));

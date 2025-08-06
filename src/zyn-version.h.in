@@ -61,6 +61,11 @@ public:
         return v_strcmp(other, 0) < 0;
     }
 
+    constexpr bool operator>=(const version_type& other) const
+    {
+        return !operator<(other);
+    }
+
     //! prints version as <major>.<minor>.<revision>
     friend std::ostream& operator<< (std::ostream& os,
                                      const version_type& v);
