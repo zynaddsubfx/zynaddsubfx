@@ -38,7 +38,7 @@ namespace zyn {
 
 SUBnote::SUBnote(const SUBnoteParameters *parameters, const SynthParams &spars,
     WatchManager *wm, const char *prefix) :
-    SynthNote(spars),
+    SynthNote(spars, prefix),
     watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
     watch_legato(wm, prefix, "noteout/legato"),
     pars(*parameters),
@@ -208,7 +208,7 @@ void SUBnote::setup(float velocity_,
 SynthNote *SUBnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
-                   portamento, legato.param.note_log2_freq, true, legato.param.seed};
+                   portamento, legato.param.note_log2_freq, true, legato.param.seed, 0};
     return memory.alloc<SUBnote>(&pars, sp);
 }
 

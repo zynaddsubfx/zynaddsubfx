@@ -138,7 +138,7 @@ class AdNoteTest
 
             //lets go with.... 50! as a nice note
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
-            SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng(), 0};
 
             note = new ADnote(defaultPreset, pars,w);
 
@@ -221,7 +221,8 @@ class AdNoteTest
 
             TS_ASSERT_EQUAL_INT(sampleCount, 30208);
 
-            lfop = new LFOParams(time);
+            ModMatrix* Matrix = new ModMatrix();
+            lfop = new LFOParams(time, Matrix);
             lfop->fel  = zyn::consumer_location_type_t::amp;
             lfop->freq = 2.0f;
             lfop->delay = 0.0f;

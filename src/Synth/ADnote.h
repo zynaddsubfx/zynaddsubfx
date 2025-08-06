@@ -17,6 +17,7 @@
 #include "SynthNote.h"
 #include "Envelope.h"
 #include "LFO.h"
+#include "ModMatrix.h"
 #include "Portamento.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
@@ -53,6 +54,8 @@ class ADnote:public SynthNote
 
 
         virtual SynthNote *cloneLegato(void) override;
+
+        
     private:
 
         void setupVoice(int nvoice);
@@ -113,6 +116,8 @@ class ADnote:public SynthNote
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
 
+
+
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
@@ -120,14 +125,19 @@ class ADnote:public SynthNote
         float velocity;
 
         ONOFFTYPE   NoteEnabled;
+        //~ ModMatrix* mod;  
+        bool genericEnvelopeEnabled;
+        bool genericLFOEnabled;
 
-        /*****************************************************************/
-        /*                    GLOBAL PARAMETERS                          */
-        /*****************************************************************/
+
+
+  /*****************************************************************/
+  /*                    GLOBAL PARAMETERS                          */
+  /*****************************************************************/
 
         struct Global {
             void kill(Allocator &memory);
-            void initparameters(const ADnoteGlobalParam &param,
+            void initparameters(const ADnoteGlobalParam &param_,
                                 const SYNTH_T &synth,
                                 const AbsTime &time,
                                 class Allocator &memory,
@@ -135,6 +145,7 @@ class ADnote:public SynthNote
                                 bool stereo,
                                 WatchManager *wm,
                                 const char *prefix);
+            const ADnoteGlobalParam* globalParam;
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
@@ -159,12 +170,22 @@ class ADnote:public SynthNote
                 float initialvalue, dt, t;
             } Punch;
 
-            /******************************************
-            *        FILTER GLOBAL PARAMETERS        *
-            ******************************************/
+
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
+
+            /******************************************
+            *        GENERIC MOD PARAMETERS        *
+            ******************************************/
+            Envelope  *GenericEnvelope1;
+            LFO       *GenericLfo1;
+            Envelope  *GenericEnvelope2;
+            LFO       *GenericLfo2;
+            
+            float* modValue;
+            void calcMod();
+
         } NoteGlobalPar;
 
 
@@ -236,7 +257,6 @@ class ADnote:public SynthNote
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
-
 
             /****************************
             *   MODULLATOR PARAMETERS   *
