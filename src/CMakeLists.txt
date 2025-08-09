@@ -44,11 +44,13 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     mark_as_advanced(DSSI_LIBRARIES)
     pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
     mark_as_advanced(LIBLO_LIBRARIES)
+    set(ZYN_LIBLO_LIBRARIES "${LIBLO_LIBRARIES}")
 else()
     find_package(FFTW3F REQUIRED)
     pkg_check_modules(MXML mxml4)
     find_package(LIBLO REQUIRED)
     find_package(PORTAUDIO)
+    set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
@@ -345,7 +347,7 @@ endif()
 
 include_directories(${LIBLO_INCLUDE_DIRS})
 add_definitions(-DUSE_NSM=1)
-list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+list(APPEND AUDIO_LIBRARIES ${ZYN_LIBLO_LIBRARIES})
 list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 message(STATUS "Compiling with liblo")
 
@@ -664,7 +666,7 @@ if (DssiEnable)
 	target_link_libraries(zynaddsubfx_dssi
 		zynaddsubfx_core
 		${OS_LIBRARIES}
-		${LIBLO_LIBRARIES}
+		${ZYN_LIBLO_LIBRARIES}
 		${PLATFORM_LIBRARIES}
 		-Wl,--no-undefined
 		)
