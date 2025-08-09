@@ -365,9 +365,11 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
     add_definitions(-D_GNU_SOURCE=1 -D_POSIX_THREAD_PRIO_INHERIT=1)
 endif()
 
-add_definitions(
-	 -Wall
-	 -Wextra)
+if (MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra)
+endif()
 
 check_cxx_compiler_flag("-Wno-stringop-truncation" HAVE_NO_STRINGOP_TRUNCATION)
 if (HAVE_NO_STRINGOP_TRUNCATION)
