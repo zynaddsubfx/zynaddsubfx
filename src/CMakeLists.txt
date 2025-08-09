@@ -48,7 +48,7 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 else()
     find_package(FFTW3F REQUIRED)
     pkg_check_modules(MXML mxml4)
-    find_package(LIBLO REQUIRED)
+    find_package(liblo REQUIRED)
     find_package(PORTAUDIO)
     set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
 endif()
