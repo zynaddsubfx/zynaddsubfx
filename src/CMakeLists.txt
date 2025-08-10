@@ -369,7 +369,7 @@ endif()
 
 if (MSVC)
     # like gcc's "-Wextra", but disable some type narrowing and non-portable string warnings
-    add_compile_options(/w4 /wd4244 /wd4267 /wd4305 /wd4996)
+    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996)
 else()
     add_compile_options(-Wall -Wextra)
 endif()
