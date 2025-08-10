@@ -18,6 +18,7 @@
 
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
+#include "../globals.h"
 
 namespace zyn {
 
@@ -31,7 +32,7 @@ class EffectMgr:public Presets
 {
     public:
         EffectMgr(Allocator &alloc, const SYNTH_T &synth, const bool insertion_,
-              const AbsTime *time_ = nullptr);
+              const AbsTime *time_ = nullptr, Sync *sync_ = nullptr);
         ~EffectMgr() override;
 
         void paste(EffectMgr &e);
@@ -73,10 +74,11 @@ class EffectMgr:public Presets
         int     nefx;
         Effect *efx;
         const AbsTime *time;
-        
+        Sync *sync;
+
         int numerator;
         int denominator;
-        
+
     private:
 
         //Parameters Prior to initialization
@@ -110,8 +112,9 @@ class EffectMgr:public Presets
         bool dryonly;
         Allocator &memory;
         const SYNTH_T &synth;
+
+
         bool constPowerMixing = true;
-        
 };
 
 }
