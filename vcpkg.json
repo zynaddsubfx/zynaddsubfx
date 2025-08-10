@@ -1,6 +1,6 @@
 {
   "dependencies": [
-    "ecm", "liblo", "mxml", "zlib", "fftw3"
+    "pthreads", "ecm", "liblo", "mxml", "zlib", "fftw3"
   ]
 }
 
