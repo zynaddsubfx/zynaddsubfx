@@ -368,8 +368,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
 endif()
 
 if (MSVC)
-    # like gcc's "-Wextra", but disable some type narrowing and non-portable string warnings
-    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996)
+    # like gcc's "-Wextra", but disable some type narrowing, non-portable string warnings, declaration hides class member
+    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996 /wd4458)
 else()
     add_compile_options(-Wall -Wextra)
 endif()
