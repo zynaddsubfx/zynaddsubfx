@@ -33,11 +33,11 @@
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars, prefix), 
-        watch_be4_add(wm, prefix, "noteout/be4_mix"), 
+    :SynthNote(spars, prefix),
+        watch_be4_add(wm, prefix, "noteout/be4_mix"),
         watch_after_add(wm,prefix,"noteout/after_mix"),
-        watch_punch(wm, prefix, "noteout/punch"), 
-        watch_legato(wm, prefix, "noteout/legato"), 
+        watch_punch(wm, prefix, "noteout/punch"),
+        watch_legato(wm, prefix, "noteout/legato"),
         pars(*pars_)
 {
     memory.beginTransaction();
@@ -54,8 +54,8 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
     initial_seed = spars.seed;
     current_prng_state = spars.seed;
     stereo = pars.GlobalPar.PStereo;
-    
-    NoteGlobalPar.modValue = new float[NUM_MOD_MATRIX_SOURCES];
+
+    NoteGlobalPar.modValue = new float[NUM_MOD_MATRIX_SOURCES]();
     NoteGlobalPar.modValue[MOD_VEL] = velocity;
     NoteGlobalPar.modValue[MOD_PITCH] = powf(2.0f, note_log2_freq)/440.0f;
 
@@ -791,7 +791,7 @@ void ADnote::KillNote()
     NoteGlobalPar.kill(memory);
 
     NoteEnabled = OFF;
-    
+
 }
 
 ADnote::~ADnote()
@@ -1099,10 +1099,10 @@ void ADnote::computecurrentparameters()
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
-    
+
     APPLY_MODMATRIX_DIRECT(pars.GlobalPar.Matrix, AD_GLOBAL_AMP, globalnewamplitude);
-    
-    
+
+
     NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
     //compute the portamento, if it is used by this note
@@ -1777,7 +1777,7 @@ int ADnote::noteout(float *outl, float *outr)
     }
     // calculate generic modulation sources
     NoteGlobalPar.calcMod();
-    
+
     computecurrentparameters();
 
     for(unsigned nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
@@ -2088,12 +2088,12 @@ void ADnote::entomb(void)
 
 void ADnote::Global::calcMod() {
 
-    
+
     if(globalParam->PGenEnvelope1Enabled)
         modValue[MOD_ENV1] = GenericEnvelope1->envout();
     else
         modValue[MOD_ENV1] = 0.0f;
-    
+
     if(globalParam->PGenEnvelope2Enabled)
         modValue[MOD_ENV2] = GenericEnvelope2->envout();
     else
@@ -2104,7 +2104,7 @@ void ADnote::Global::calcMod() {
     }
     else
         modValue[MOD_LFO1] = 0.0f;
-    
+
     if(globalParam->PGenLfo2Enabled) {
         modValue[MOD_LFO2] = (GenericLfo2->lfoout()/4094.0f);
     }
@@ -2168,9 +2168,9 @@ void ADnote::Global::kill(Allocator &memory)
     //~ if(genericLfoEnabled)
          memory.dealloc(GenericLfo1);
          memory.dealloc(GenericLfo2);
-    
+
     delete[] modValue;
-         
+
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,

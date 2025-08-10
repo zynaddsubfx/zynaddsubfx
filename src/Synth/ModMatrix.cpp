@@ -97,7 +97,7 @@ ModulationLocation::ModulationLocation()
 }
 
 
-int ModulationSource::getLocationIndex(int location)
+int ModulationSource::getLocationIndex(int location) const
 {
     // map the location numbering from preset.h to the order in mod matrix
     int index;
@@ -112,7 +112,7 @@ int ModulationSource::getLocationIndex(int location)
 
 float ModulationLocation::getFactor(int par)
 {
-    return parameter[par] * 0.01f;
+    return parameter[par];
 }
 
 void ModulationLocation::setFactor(int par, float value)
@@ -120,7 +120,7 @@ void ModulationLocation::setFactor(int par, float value)
     parameter[par] = value;
 }
 
-float ModulationSource::getDestinationFactor(int loc, int par)
+float ModulationSource::getDestinationFactor(int loc, int par) const
 {
     const int locationIndex = getLocationIndex(loc);
     if (locationIndex==-1)

@@ -91,8 +91,8 @@ class ModulationLocation {
     void setFactor(int parameter, float value);
     
     // public for ports:
-    float parameter[NUM_MOD_MATRIX_PARAMETERS];
-    
+    float parameter[NUM_MOD_MATRIX_PARAMETERS] = {};
+
     static const rtosc::Ports ports;
 
 };
