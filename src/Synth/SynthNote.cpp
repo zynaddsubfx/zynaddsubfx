@@ -11,6 +11,9 @@
 */
 #include "SynthNote.h"
 #include "../Params/Controller.h"
+#include "../Params/LFOParams.h"
+#include "../Params/EnvelopeParams.h"
+#include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include <cstring>
@@ -19,12 +22,18 @@
 
 namespace zyn {
 
-SynthNote::SynthNote(const SynthParams &pars)
+SynthNote::SynthNote(const SynthParams &pars, const char *prefix)
     :memory(pars.memory),
     legato(pars.synth, pars.velocity, pars.portamento,
             pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
-{}
+{
+    //ScratchString pre = prefix;
 
+}
+SynthNote::~SynthNote()
+{
+
+}
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
                           Portamento *portamento,
                           float note_log2_freq, bool quiet, prng_t seed)

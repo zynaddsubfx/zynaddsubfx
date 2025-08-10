@@ -304,8 +304,9 @@ const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
                                unsigned char Pforcedrelease_,
-                               const AbsTime *time_):
-        time(time_), last_update_timestamp(0)
+                               const AbsTime *time_, 
+                               const ModMatrix* mod_):
+        time(time_), mod(mod_), last_update_timestamp(0)
 {
     A_dt  = 0.009;
     D_dt  = 0.009;
@@ -379,6 +380,11 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
         case ad_voice_fm_amp:  ADSRinit(1.876f, 3.620f, 127, 6.978f); break;
         case sub_freq:         ASRinit(30, 0.254f, 64, 0.499f); break;
         case sub_bandwidth:    ASRinit_bw(100, 0.970f, 64, 0.499f); break;
+        case loc_generic1:    
+        case loc_generic2:      
+            ADSRinit(1.876f, 3.620f, 127, 6.978f); 
+            Plinearenvelope = 1;
+            break;
         default: throw std::logic_error("Invalid envelope consumer location");
     };
 }

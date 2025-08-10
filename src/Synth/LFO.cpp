@@ -22,7 +22,7 @@
 namespace zyn {
 
 LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchManager *m,
-        const char *watch_prefix)
+        const char *watch_prefix, float* modValue_)
     :first_half(-1),
     time(t),
     delayTime(t, lfopars_.delay), //0..4 sec
@@ -30,6 +30,7 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     dt(t.dt()),
     lfopars(lfopars_),
     basefreq(basefreq_),
+    modValue(modValue_),
     watchOut(m, watch_prefix, "out")
 {
     updatePars();
@@ -49,6 +50,7 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
 
     switch(lfopars.fel) {
         case consumer_location_type_t::amp:
+        case consumer_location_type_t::generic:
             lfointensity = lfopars.Pintensity / 127.0f;
             break;
         case consumer_location_type_t::filter:
@@ -73,6 +75,9 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     computeNextFreqRnd(); //twice because I want incrnd & nextincrnd to be random
     z1 = 0.0;
     z2 = 0.0;
+    x = 0.5f * RND;
+    y = 0.1f * RND;
+    z = 0.1f * RND;
 }
 
 LFO::~LFO()
@@ -133,6 +138,9 @@ float LFO::baseOut(const char waveShape, const float phase)
             }
             return biquad(last_random);
             break;
+        case LFO_CHUA_X: return x;
+        case LFO_CHUA_Y: return y;
+        case LFO_CHUA_Z: return z;
         default:
             return cosf(phase * 2.0f * PI); //LFO_SINE
     }
@@ -197,6 +205,7 @@ float LFO::lfoout()
         switch(lfopars.fel) {
 
             case consumer_location_type_t::amp:
+            case consumer_location_type_t::generic:
                 lfointensity = lfopars.Pintensity / 127.0f; // [0...1]
                 break;
             case consumer_location_type_t::filter:
@@ -208,13 +217,15 @@ float LFO::lfoout()
                 break;
         }
     }
+    updatePars();
 
-    // refresh freq if tempo has changed
-    if (lfopars.numerator && lfopars.denominator && tempo != time.tempo) {
-        tempo = time.tempo;
-        float lfofreq = float(tempo) * float(lfopars.denominator)/(240.0f * float(lfopars.numerator));
-        phaseInc = fabsf(lfofreq) * dt;
-    }
+    APPLY_MODMATRIX_FACTOR(lfopars, lfointensity, LFO_DEPTH);
+    APPLY_MODMATRIX_FACTOR(lfopars, lfofreq, LFO_FREQ);
+
+    phaseInc = fabsf(lfofreq) * dt;
+    //Limit the Frequency(or else...)
+    if(phaseInc > 0.49999999f)
+        phaseInc = 0.499999999f;
     float phaseWithStartphase = fmod(phase + (lfopars.Pstartphase + 63.0f) / 127.0f, 1.0f);
     float out = baseOut(waveShape, phaseWithStartphase);
     if(waveShape == LFO_SINE || waveShape == LFO_TRIANGLE)
@@ -279,7 +290,7 @@ float LFO::lfoout()
         phase += phaseInc;
     else {
         const float tmp = (incrnd * (1.0f - phase) + nextincrnd * phase);
-        phase += phaseInc * tmp;
+        phase += phaseInc * limit(tmp, 0.0f, 1.0f);
     }
     if(phase >= 1) {
         phase    = fmod(phase, 1.0f);
@@ -293,6 +304,21 @@ float LFO::lfoout()
     watchOut(watch_data, 2);
 
     return out;
+}
+
+float LFO::getX()
+{
+    return x;
+}
+
+float LFO::getY()
+{
+    return y;
+}
+
+float LFO::getZ()
+{
+    return z;
 }
 
 /*
@@ -309,13 +335,7 @@ void LFO::computeNextFreqRnd()
     if(deterministic)
         return;
     incrnd     = nextincrnd;
-    lfofreqrnd = powf(lfopars.Pfreqrand / 127.0f, 2.0f) * 4.0f;
-    // old implementation:
-    // nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
-    // problem with that old implementation is that it changes the center frequency.
-    // the new one doesn't
-    const float rndValue = lfofreqrnd*(RND*2.0f - 1.0);
-    nextincrnd = powf(2.0f, rndValue);
+    nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
 }
 
 }

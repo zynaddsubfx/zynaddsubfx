@@ -51,7 +51,8 @@ class WatchTest
             s   = new SYNTH_T;
             at  = new AbsTime(*s);
             w   = new WatchManager(tr);
-            par = new LFOParams(at);
+            ModMatrix* Matrix = new ModMatrix();
+            par = new LFOParams(at, Matrix);
             l   = new LFO(*par, 440.0, *at, w);
         }
 

@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "../Misc/Time.h"
+#include "ModMatrix.h"
 #include "WatchPoint.h"
 
 
@@ -32,10 +33,13 @@ class LFO
          * @param basefreq base frequency of LFO
          */
         LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchManager *m=0,
-                const char *watch_prefix=0);
+                const char *watch_prefix=0, float* modValue_=NULL);
         ~LFO();
 
         float lfoout();
+        float getX();
+        float getY();
+        float getZ();
         float amplfoout();
         void releasekey();
     private:
@@ -62,6 +66,7 @@ class LFO
         float incrnd, nextincrnd;
         //Amplitude Randomness
         float amp1, amp2;
+        float lfofreq;
 
         // RND mode
         int first_half;
@@ -76,6 +81,7 @@ class LFO
         const AbsTime &time;
         //Delay before starting
         RelTime delayTime;
+
 
         int64_t fadeInDuration;
         //Timestamp of begin fadein
@@ -106,9 +112,18 @@ class LFO
         float a2 = 0.0007508914611009499;
         float b1 = -1.519121359805288;
         float b2 =  0.5221249256496917;
+        // variables and parameters for chua chaos attractor oscillator
+        float x=0.01f;
+        float y=0.0f;
+        float z=0.0f;
+
+        float alpha=15.6f;
+        float beta=37.5f;
+        float mu0=-0.714285714286f;
+        float mu1=-1.14285714286f;
 
         char cutoff = 127;
-
+        float* modValue;
         VecWatchPoint watchOut;
 
         void computeNextFreqRnd(void);
