@@ -14,6 +14,8 @@
 #ifndef FORMANT_FILTER_H
 #define FORMANT_FILTER_H
 
+#include <vector>
+
 #include "../globals.h"
 #include "Filter.h"
 #include "Value_Smoothing_Filter.h"
@@ -54,6 +56,8 @@ class FormantFilter:public Filter
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
         Allocator &memory;
+        // temporary buffers of size "buffersize" for use in "filterout"
+        std::vector<float> filteroutInbuffer, filteroutFormantbuf, filteroutTmpbuf;
 
         Value_Smoothing_Filter formant_amp_smoothing[FF_MAX_FORMANTS];
 };
