@@ -56,7 +56,7 @@ class FormantFilter:public Filter
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
         Allocator &memory;
-        // temporary buffers of size "buffersize" for use in "filterout"
+        // temporary buffers of size "buffersize" for use only in "filterout"
         std::vector<float> filteroutInbuffer, filteroutFormantbuf, filteroutTmpbuf;
 
         Value_Smoothing_Filter formant_amp_smoothing[FF_MAX_FORMANTS];

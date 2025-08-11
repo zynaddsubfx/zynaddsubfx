@@ -13,8 +13,9 @@
 #include <cassert>
 #include <cstdio>
 
-#define INVALID ((int32_t)0xffffffff)
-#define MAX     ((int32_t)0x7fffffff)
+#define INVALID   (( int32_t)0xffffffff)
+#define INVALID_U ((uint32_t)0xffffffff)
+#define MAX       (( int32_t)0x7fffffff)
 
 namespace zyn {
 
@@ -28,7 +29,7 @@ LockFreeQueue::LockFreeQueue(qli_t *data_, int n)
 {
     tag  = new std::atomic<uint32_t>[n];
     for(int i=0; i<n; ++i)
-        tag[i] = INVALID;
+        tag[i] = INVALID_U;
 }
 
 LockFreeQueue::~LockFreeQueue(void)
@@ -54,7 +55,7 @@ retry:
         //attempt to remove tagged element
         //if and only if it's next
         if(((uint32_t)next_tag) == elm_tag) {
-            if(!tag[i].compare_exchange_strong(elm_tag, INVALID))
+            if(!tag[i].compare_exchange_strong(elm_tag, INVALID_U))
                 goto retry;
 
             //Ok, now there is no element that can be removed from the list
@@ -86,7 +87,7 @@ retry:
     if(!next_w.compare_exchange_strong(write_tag, next_write_tag))
         goto retry;
 
-    uint32_t invalid_tag = INVALID;
+    uint32_t invalid_tag = INVALID_U;
 
     //Update tag
     int sane_write = tag[Q-data].compare_exchange_strong(invalid_tag, write_tag);

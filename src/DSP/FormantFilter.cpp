@@ -23,6 +23,7 @@ namespace zyn {
 
 FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize)
     :Filter(srate, bufsize), memory(*alloc)
+    ,filteroutInbuffer(bufsize), filteroutFormantbuf(bufsize), filteroutTmpbuf (bufsize)
 {
     numformants = pars->Pnumformants;
     for(int i = 0; i < numformants; ++i)
