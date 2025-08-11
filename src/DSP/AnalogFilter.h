@@ -77,7 +77,7 @@ class AnalogFilter:public Filter
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
 
-        std::vector<float> tmpbufFilterout;
+        std::vector<float> filteroutTmpbuf;
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
         bool beforeFirstTick; // reset the smoothing at first Tick
 };
