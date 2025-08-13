@@ -17,7 +17,11 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#ifdef MSC_VER
+#include <windows.h>
+#else
 #include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <algorithm>
 
@@ -30,9 +34,6 @@
 #include "Util.h"
 #include "Part.h"
 #include "BankDb.h"
-#ifdef WIN32
-#include <windows.h>
-#endif
 
 #ifdef __APPLE__
 #include <dlfcn.h>
@@ -224,69 +225,116 @@ int Bank::loadfromslot(unsigned int ninstrument, Part *part)
 /*
  * Makes current a bank directory
  */
-int Bank::loadbank(string bankdirname)
+int Bank::loadbank(std::string bankdirname)
 {
     normalizedirsuffix(bankdirname);
-    DIR *dir = opendir(bankdirname.c_str());
     clearbank();
 
-    if(dir == NULL)
-        return -1;
-
-    //set msb when possible
     bank_msb = 0;
-    for(unsigned i=0; i<banks.size(); i++)
-        if(banks[i].dir == bankdirname)
+    for (unsigned i = 0; i < banks.size(); i++)
+        if (banks[i].dir == bankdirname)
             bank_msb = i;
 
     dirname = bankdirname;
-
     bankfiletitle = dirname;
 
-    struct dirent *fn;
+    // TODO: Check AI code
+#ifdef _MSC_VER
+    // Windows version
+    WIN32_FIND_DATA findData;
+    HANDLE hFind = INVALID_HANDLE_VALUE;
 
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
+    std::string searchPath = bankdirname + "\\*";
+    hFind = FindFirstFile(searchPath.c_str(), &findData);
 
-        //check for extension
-        if(strstr(filename, INSTRUMENT_EXTENSION) == NULL)
+    if (hFind == INVALID_HANDLE_VALUE)
+        return -1;
+
+    do {
+        const char *filename = findData.cFileName;
+
+        // Skip "." and ".."
+        if (strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0)
             continue;
 
-        //verify if the name is like this NNNN-name (where N is a digit)
+        // Check extension
+        if (strstr(filename, INSTRUMENT_EXTENSION) == NULL)
+            continue;
+
+        // Parse leading digits
         int no = 0;
         unsigned int startname = 0;
-
-        for(unsigned int i = 0; i < 4; ++i) {
-            if(strlen(filename) <= i)
+        for (unsigned int i = 0; i < 4; ++i) {
+            if (strlen(filename) <= i)
                 break;
-
-            if((filename[i] >= '0') && (filename[i] <= '9')) {
+            if ((filename[i] >= '0') && (filename[i] <= '9')) {
                 no = no * 10 + (filename[i] - '0');
                 startname++;
             }
         }
+        if ((startname + 1) < strlen(filename))
+            startname++;  // remove '-'
 
-        if((startname + 1) < strlen(filename))
-            startname++;  //to take out the "-"
-
-        string name = filename;
-
-        //remove the file extension
-        for(int i = name.size() - 1; i >= 2; i--)
-            if(name[i] == '.') {
+        std::string name = filename;
+        for (int i = (int)name.size() - 1; i >= 2; i--) {
+            if (name[i] == '.') {
                 name = name.substr(0, i);
                 break;
             }
+        }
 
-        if(no != 0) //the instrument position in the bank is found
+        if (no != 0)
+            addtobank(no - 1, filename, name.substr(startname));
+        else
+            addtobank(-1, filename, name);
+
+    } while (FindNextFile(hFind, &findData) != 0);
+
+    FindClose(hFind);
+
+#else
+    // Linux / POSIX version
+    DIR *dir = opendir(bankdirname.c_str());
+    if (dir == NULL)
+        return -1;
+
+    struct dirent *fn;
+    while ((fn = readdir(dir))) {
+        const char *filename = fn->d_name;
+
+        if (strstr(filename, INSTRUMENT_EXTENSION) == NULL)
+            continue;
+
+        int no = 0;
+        unsigned int startname = 0;
+        for (unsigned int i = 0; i < 4; ++i) {
+            if (strlen(filename) <= i)
+                break;
+            if ((filename[i] >= '0') && (filename[i] <= '9')) {
+                no = no * 10 + (filename[i] - '0');
+                startname++;
+            }
+        }
+        if ((startname + 1) < strlen(filename))
+            startname++;
+
+        std::string name = filename;
+        for (int i = (int)name.size() - 1; i >= 2; i--) {
+            if (name[i] == '.') {
+                name = name.substr(0, i);
+                break;
+            }
+        }
+
+        if (no != 0)
             addtobank(no - 1, filename, name.substr(startname));
         else
             addtobank(-1, filename, name);
     }
-
     closedir(dir);
+#endif
 
-    if(!dirname.empty())
+    if (!dirname.empty())
         config->cfg.currentBankDir = dirname;
 
     return 0;

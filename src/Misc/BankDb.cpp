@@ -3,8 +3,12 @@
 #include "Util.h"
 #include "../globals.h"
 #include <cstring>
-#include <dirent.h>
 #include <sys/stat.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dirent.h>
+#endif
 
 namespace zyn {
 
@@ -187,40 +191,58 @@ static void saveCache(bvec vec)
     xml.saveXMLfile(getCacheName(), 0);
 }
 
+// TODO: Check AI code in git diff
 void BankDb::scanBanks(void)
 {
     fields.clear();
     bvec cache = loadCache();
     bmap cc;
-    for(auto c:cache)
+    for (auto c : cache)
         cc[c.bank + c.file] = c;
 
     bvec ncache;
-    for(auto bank:banks)
-    {
-        DIR *dir = opendir(bank.c_str());
 
-        if(!dir)
+    for (auto bank : banks)
+    {
+#ifdef _MSC_VER
+        WIN32_FIND_DATAA findData;
+        std::string searchPath = bank + "\\*" + INSTRUMENT_EXTENSION;
+        HANDLE hFind = FindFirstFileA(searchPath.c_str(), &findData);
+
+        if (hFind != INVALID_HANDLE_VALUE)
+        {
+            do {
+                const char *filename = findData.cFileName;
+
+                auto xiz = processXiz(filename, bank, cc);
+                fields.push_back(xiz);
+                ncache.push_back(xiz);
+            } while (FindNextFileA(hFind, &findData));
+
+            FindClose(hFind);
+        }
+
+#else
+        DIR *dir = opendir(bank.c_str());
+        if (!dir)
             continue;
 
-
         struct dirent *fn;
-
-        while((fn = readdir(dir))) {
+        while ((fn = readdir(dir)))
+        {
             const char *filename = fn->d_name;
 
-            //check for extension
-            if(!strstr(filename, INSTRUMENT_EXTENSION))
+            if (!strstr(filename, INSTRUMENT_EXTENSION))
                 continue;
 
             auto xiz = processXiz(filename, bank, cc);
             fields.push_back(xiz);
             ncache.push_back(xiz);
         }
-
         closedir(dir);
-
+#endif
     }
+
     saveCache(ncache);
 }
 
