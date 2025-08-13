@@ -283,10 +283,6 @@ enum LegatoMsg {
 
 
 
-#ifndef  O_BINARY
-#define O_BINARY 0
-#endif
-
 template<class T>
 class m_unique_array
 {
