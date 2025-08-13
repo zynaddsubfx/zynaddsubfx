@@ -21,6 +21,7 @@
 #include "../Containers/NotePool.h"
 
 #include <functional>
+#include <vector>
 
 namespace zyn {
 
@@ -233,6 +234,8 @@ class Part
         const AbsTime &time;
         Sync* sync;
         const int &gzip_compression, &interpolation;
+
+        std::vector<float> tmpOutL, tmpOutR;  // only used in ComputePartSmps
 };
 
 }

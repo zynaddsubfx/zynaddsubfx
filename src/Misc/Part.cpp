@@ -304,7 +304,9 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* 
     time(time_),
     sync(sync_),
     gzip_compression(gzip_compression),
-    interpolation(interpolation)
+    interpolation(interpolation),
+    tmpOutL(synth.buffersize),
+    tmpOutR(synth.buffersize)
 {
     loaded_file[0] = '\0';
 
@@ -1057,14 +1059,13 @@ void Part::ComputePartSmps()
     for(auto &d:notePool.activeDesc()) {
         d.age++;
         for(auto &s:notePool.activeNotes(d)) {
-            float tmpoutr[synth.buffersize];
-            float tmpoutl[synth.buffersize];
+
             auto &note = *s.note;
-            note.noteout(&tmpoutl[0], &tmpoutr[0]);
+            note.noteout(tmpOutL.data(), tmpOutR.data());
 
             for(int i = 0; i < synth.buffersize; ++i) { //add the note to part(mix)
-                partfxinputl[d.sendto][i] += tmpoutl[i];
-                partfxinputr[d.sendto][i] += tmpoutr[i];
+                partfxinputl[d.sendto][i] += tmpOutL[i];
+                partfxinputr[d.sendto][i] += tmpOutR[i];
             }
 
             if(note.finished())
