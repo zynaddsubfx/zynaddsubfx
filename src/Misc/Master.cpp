@@ -770,7 +770,9 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     microtonal(config->cfg.GzipCompression), bank(config),
     automate(16,4,8),
     frozenState(false), pendingMemory(false),
-    synth(synth_), gzip_compression(config->cfg.GzipCompression)
+    synth(synth_), gzip_compression(config->cfg.GzipCompression),
+    audioOutGainBuf(synth.buffersize),
+    audioOutTmpMixL(synth.buffersize), audioOutTmpMixR(synth.buffersize)
 {
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
@@ -1305,8 +1307,6 @@ bool Master::AudioOut(float *outl, float *outr)
                                   part[efxpart]->partoutr);
         }
 
-    float gainbuf[synth.buffersize];
-
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         if(!part[npart]->Penabled)
@@ -1325,10 +1325,10 @@ bool Master::AudioOut(float *outl, float *outr)
 
 
         /* This is where the part volume (and pan) smoothing and application happens */
-        if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
+        if ( smoothing_part_l[npart].apply( audioOutGainBuf.data(), synth.buffersize, newvol.l ) )
         {
             for ( int i = 0; i < synth.buffersize; ++i )
-                part[npart]->partoutl[i] *= gainbuf[i];
+                part[npart]->partoutl[i] *= audioOutGainBuf[i];
         }
         else
         {
@@ -1336,10 +1336,10 @@ bool Master::AudioOut(float *outl, float *outr)
                 part[npart]->partoutl[i] *= newvol.l;
         }
 
-        if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
+        if ( smoothing_part_r[npart].apply( audioOutGainBuf.data(), synth.buffersize, newvol.r ) )
         {
             for ( int i = 0; i < synth.buffersize; ++i )
-                part[npart]->partoutr[i] *= gainbuf[i];
+                part[npart]->partoutr[i] *= audioOutGainBuf[i];
         }
         else
         {
@@ -1353,11 +1353,9 @@ bool Master::AudioOut(float *outl, float *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue;  //the effect is disabled
 
-        float tmpmixl[synth.buffersize];
-        float tmpmixr[synth.buffersize];
         //Clean up the samples used by the system effects
-        memset(tmpmixl, 0, synth.bufferbytes);
-        memset(tmpmixr, 0, synth.bufferbytes);
+        std::fill(audioOutTmpMixL.begin(), audioOutTmpMixL.end(), 0);
+        std::fill(audioOutTmpMixR.begin(), audioOutTmpMixR.end(), 0);
 
         //Mix the channels according to the part settings about System Effect
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1372,8 +1370,8 @@ bool Master::AudioOut(float *outl, float *outr)
             //the output volume of each part to system effect
             const float vol = sysefxvol[nefx][npart];
             for(int i = 0; i < synth.buffersize; ++i) {
-                tmpmixl[i] += part[npart]->partoutl[i] * vol;
-                tmpmixr[i] += part[npart]->partoutr[i] * vol;
+                audioOutTmpMixL[i] += part[npart]->partoutl[i] * vol;
+                audioOutTmpMixR[i] += part[npart]->partoutr[i] * vol;
             }
         }
 
@@ -1382,18 +1380,18 @@ bool Master::AudioOut(float *outl, float *outr)
             if(Psysefxsend[nefxfrom][nefx] != 0) {
                 const float vol = sysefxsend[nefxfrom][nefx];
                 for(int i = 0; i < synth.buffersize; ++i) {
-                    tmpmixl[i] += sysefx[nefxfrom]->efxoutl[i] * vol;
-                    tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
+                    audioOutTmpMixL[i] += sysefx[nefxfrom]->efxoutl[i] * vol;
+                    audioOutTmpMixR[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
                 }
             }
 
-        sysefx[nefx]->out(tmpmixl, tmpmixr);
+        sysefx[nefx]->out(audioOutTmpMixL.data(), audioOutTmpMixR.data());
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx]->sysefxgetvolume();
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] += tmpmixl[i] * outvol;
-            outr[i] += tmpmixr[i] * outvol;
+            outl[i] += audioOutTmpMixL[i] * outvol;
+            outr[i] += audioOutTmpMixR[i] * outvol;
         }
     }
 
@@ -1414,12 +1412,12 @@ bool Master::AudioOut(float *outl, float *outr)
 
     //Master Volume
     /* this is where the master volume smoothing and application happens */
-    if ( smoothing.apply( gainbuf, synth.buffersize, vol ) )
+    if ( smoothing.apply( audioOutGainBuf.data(), synth.buffersize, vol ) )
     {
         for ( int i = 0; i < synth.buffersize; ++i )
         {
-            outl[i] *= gainbuf[i];
-            outr[i] *= gainbuf[i];
+            outl[i] *= audioOutGainBuf[i];
+            outr[i] *= audioOutGainBuf[i];
         }
     }
     else
