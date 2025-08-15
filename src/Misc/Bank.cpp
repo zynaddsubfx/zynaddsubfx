@@ -17,7 +17,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#ifdef MSC_VER
+#ifdef _MSC_VER
 #include <windows.h>
 #else
 #include <dirent.h>

@@ -552,7 +552,7 @@ int XMLwrapper::getpar127(const string &name, int defaultpar) const
     return getpar(name, defaultpar, 0, 127);
 }
 
-int XMLwrapper::getparbool(const string &name, int defaultpar) const
+bool XMLwrapper::getparbool(const string &name, bool defaultpar) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
                                              node,
@@ -568,10 +568,7 @@ int XMLwrapper::getparbool(const string &name, int defaultpar) const
     if(strval == NULL)
         return defaultpar;
 
-    if((strval[0] == 'Y') || (strval[0] == 'y'))
-        return 1;
-    else
-        return 0;
+    return (strval[0] == 'Y') || (strval[0] == 'y');
 }
 
 void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
