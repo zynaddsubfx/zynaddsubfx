@@ -141,7 +141,7 @@ void Controller::defaults()
     fmamp.receive                = 1;
     volume.receive               = 1;
     sustain.receive              = 1;
-    NRPN.receive                 = 1;
+    NRPN.receive                 = true;
 
     portamento.portamento        = 0;
     portamento.automode          = 1;
@@ -393,7 +393,7 @@ void Controller::setresonancebw(void)
 //Returns 0 if there is NRPN or 1 if there is not
 int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo)
 {
-    if(NRPN.receive == 0)
+    if(!NRPN.receive)
         return 1;
     if((NRPN.parhi < 0) || (NRPN.parlo < 0) || (NRPN.valhi < 0)
        || (NRPN.vallo < 0))
