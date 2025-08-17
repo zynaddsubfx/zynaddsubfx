@@ -22,6 +22,7 @@
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 #include "../Params/ADnoteParameters.h"
+#include "../Params/FilterParams.h"
 #include "../Containers/ScratchString.h"
 #include "../Containers/NotePool.h"
 #include "ModFilter.h"
@@ -874,11 +875,13 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
+
+            const float filterFreq = param.VoiceFilter->Pcategory==4 ? getvoicebasefreq(nvoice): basefreq;
+
             vce.Filter = memory.alloc<ModFilter>(*param.VoiceFilter, synth, time, memory, stereo,
-                      basefreq);
+                      filterFreq);
             vce.Filter->updateSense(velocity, param.PFilterVelocityScale,
                     param.PFilterVelocityScaleFunction);
-
 
             if(param.PFilterEnvelopeEnabled) {
                 vce.FilterEnvelope =
