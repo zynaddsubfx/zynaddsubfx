@@ -53,6 +53,7 @@ class CombFilter:public Filter
         float gainfwd;
         float gainbwd;
         float delay;
+        float lpfDelay;
 
         class AnalogFilter *lpf, *hpf; //filters
 

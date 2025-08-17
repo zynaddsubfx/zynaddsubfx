@@ -112,7 +112,7 @@ void CombFilter::setfreq_and_q(float freq, float q)
 void CombFilter::setfreq(float freq)
 {
     float ff = limit(freq, 25.0f, 40000.0f);
-    delay = ((float)samplerate)/ff;
+    delay = ((float)samplerate)/ff - lpfDelay;
 }
 
 void CombFilter::setq(float q_)
@@ -186,6 +186,8 @@ void CombFilter::setlpf(unsigned char _Plpf)
             lpf = memory.alloc<AnalogFilter>(0, fr, 1, 0, samplerate, buffersize);
         else
             lpf->setfreq(fr);
+        const float a = expf(-2.0f * PI * fr / samplerate);
+        lpfDelay = a / (1.0f - a);
     }
 }
 
