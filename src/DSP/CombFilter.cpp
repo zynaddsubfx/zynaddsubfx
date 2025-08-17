@@ -111,8 +111,7 @@ void CombFilter::setfreq_and_q(float freq, float q)
 
 void CombFilter::setfreq(float freq)
 {
-    float ff = limit(freq, 25.0f, 40000.0f);
-    delay = ((float)samplerate)/ff - lpfDelay;
+    delay = limit(((float)samplerate)/ff - lpfDelay, 0.0f, float(mem_size-buffersize-2));
 }
 
 void CombFilter::setq(float q_)
