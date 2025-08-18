@@ -46,7 +46,7 @@ struct LegatoParams
 class SynthNote
 {
     public:
-        SynthNote(const SynthParams &pars);
+        SynthNote(const SynthParams &pars, bool constPowerMixing);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples
@@ -81,6 +81,8 @@ class SynthNote
         /* Random numbers with own seed */
         float getRandomFloat();
         prng_t getRandomUint();
+
+        bool constPowerMixing() const { return m_constPowerMixing; }
 
         //Realtime Safe Memory Allocator For notes
         class Allocator  &memory;
@@ -133,6 +135,8 @@ class SynthNote
         const AbsTime    &time;
         WatchManager     *wm;
         smooth_float     filtercutoff_relfreq;
+    private:
+        bool m_constPowerMixing;
 };
 
 }
