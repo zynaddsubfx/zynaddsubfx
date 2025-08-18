@@ -9,6 +9,7 @@ set(zynaddsubfx_synth_SRCS
 	Synth/Portamento.cpp
 	Synth/Resonance.cpp
     Synth/SUBnote.cpp
-        Synth/WatchPoint.cpp
+    Synth/WatchPoint.cpp
+    Synth/ModMatrix.cpp
 	PARENT_SCOPE
 )

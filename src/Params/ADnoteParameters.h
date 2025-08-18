@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include "../Synth/ModMatrix.h"
 #include <cstdint>
 
 namespace zyn {
@@ -94,8 +95,21 @@ struct ADnoteGlobalParam {
 
     LFOParams *FilterLfo;
 
+
+    unsigned char   PGenEnvelope1Enabled;
+    unsigned char   PGenLfo1Enabled;
+    unsigned char   PGenEnvelope2Enabled;
+    unsigned char   PGenLfo2Enabled;
+
+    EnvelopeParams *GenericEnvelope1;
+    EnvelopeParams *GenericEnvelope2;
+    LFOParams    *GenericLfo1;
+    LFOParams    *GenericLfo2;
+
     // RESONANCE
     Resonance *Reson;
+    // Modulation Matrix
+    ModMatrix *Matrix;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
     unsigned char Hrandgrouping;
@@ -117,8 +131,8 @@ struct ADnoteVoiceParam {
     void add2XML(XMLwrapper& xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
-    void enable(const SYNTH_T &synth, FFTwrapper *fft, const Resonance *Reson,
-                const AbsTime *time);
+    void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson,
+                const AbsTime *time, ModMatrix *Matrix);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
     /** If the voice is enabled */

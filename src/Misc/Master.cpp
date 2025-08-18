@@ -1019,8 +1019,8 @@ void Master::setController(char chan, int type, int par)
         return;
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
-    if((type == C_dataentryhi) || (type == C_dataentrylo)
-       || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
+    if((type == C_Data_Entry_MSB) || (type == C_Data_Entry_LSB)
+       || (type == C_NRPN_MSB) || (type == C_NRPN_LSB)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;
@@ -1046,7 +1046,7 @@ void Master::setController(char chan, int type, int par)
             if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
                 part[npart]->SetController(type, par);
 
-        if(type == C_allsoundsoff) { //cleanup insertion/system FX
+        if(type == C_Channel_Mute) { //cleanup insertion/system FX
             for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
                 sysefx[nefx]->cleanup();
             for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -1263,7 +1263,6 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
  */
 bool Master::AudioOut(float *outl, float *outr)
 {
-
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
@@ -1278,10 +1277,12 @@ bool Master::AudioOut(float *outl, float *outr)
     if(!runOSC(outl, outr, false))
         return false;
 
+
     //Handle watch points
     if(bToU)
         watcher.write_back = bToU;
     watcher.tick();
+
 
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -1305,6 +1306,7 @@ bool Master::AudioOut(float *outl, float *outr)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
+
 
     float gainbuf[synth.buffersize];
 

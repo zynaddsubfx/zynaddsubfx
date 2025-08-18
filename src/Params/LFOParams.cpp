@@ -72,7 +72,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pcutoff, rShort("lp"), rDefault(127),
             "RND/SQR lp-filter freq"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
-                exp1, exp2, random), rLinear(0,127), rDefault(sine), "Shape of LFO"),
+                exp1, exp2, random, chuax, chuay, chuaz), rLinear(0,127), rDefault(sine), "Shape of LFO"),
     rParamZyn(Prandomness, rShort("a.r."), rSpecial(disable), rDefault(0),
             "Amplitude Randomness (calculated uniformly at each cycle)"),
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
@@ -102,7 +102,7 @@ static const rtosc::Ports _ports = {
      }},
 
     rToggle(Pcontinous, rShort("c"), rDefault(false),
-            "Enable for global operation"),
+        "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
         "Note frequency stretch"),
     rParamZyn(numerator, rShort("num"), rLinear(0,99), rDefault(0),
@@ -132,7 +132,8 @@ const rtosc::Ports &LFOParams::ports = _ports;
 void LFOParams::setup()
 {
     switch(loc) {
-        case loc_unspecified:
+        case loc_generic1:
+        case loc_generic2:
             fel = consumer_location_type_t::unspecified;
             break;
         case ad_global_freq:
@@ -158,8 +159,9 @@ void LFOParams::setup()
 }
 
 // TODO: reuse
-LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_)
+LFOParams::LFOParams(const AbsTime *time_,
+                  const ModMatrix* mod_) :
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_generic1, time_, mod_)
 {
 }
 
@@ -174,9 +176,12 @@ LFOParams::LFOParams(float freq_,
                      float fadeout_,
                      char Pcontinous_,
                      consumer_location_t loc,
-                     const AbsTime *time_) : loc(loc),
+                     const AbsTime *time_,
+                     const ModMatrix *mod_) : loc(loc),
                                              time(time_),
+                                             mod(mod_),
                                              last_update_timestamp(0) {
+    assert(mod != nullptr);
     Dfreq       = freq_;
     Dintensity  = Pintensity_;
     Dstartphase = Pstartphase_;
@@ -192,8 +197,9 @@ LFOParams::LFOParams(float freq_,
 }
 
 LFOParams::LFOParams(consumer_location_t loc,
-                     const AbsTime *time_) : loc(loc),
+                     const AbsTime *time_, const ModMatrix* mod_) : loc(loc),
                                              time(time_),
+                                             mod(mod_),
                                              last_update_timestamp(0) {
 
     auto init =
@@ -220,6 +226,9 @@ LFOParams::LFOParams(consumer_location_t loc,
         case ad_voice_amp:     init(11.25, 32, 64, 0.94f); break;
         case ad_voice_freq:    init(1.19, 40,  0, 0.0f); break;
         case ad_voice_filter:  init(1.19, 20, 64, 0.0f); break;
+        case loc_generic1:
+        case loc_generic2:      
+            init(6.49, 0, 64, 0.0f); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 

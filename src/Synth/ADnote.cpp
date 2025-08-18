@@ -34,8 +34,12 @@
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
-    watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
+    :SynthNote(spars, prefix),
+        watch_be4_add(wm, prefix, "noteout/be4_mix"),
+        watch_after_add(wm,prefix,"noteout/after_mix"),
+        watch_punch(wm, prefix, "noteout/punch"),
+        watch_legato(wm, prefix, "noteout/legato"),
+        pars(*pars_)
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
@@ -51,6 +55,10 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
     initial_seed = spars.seed;
     current_prng_state = spars.seed;
     stereo = pars.GlobalPar.PStereo;
+
+    NoteGlobalPar.modValue = new float[NUM_MOD_MATRIX_SOURCES]();
+    NoteGlobalPar.modValue[MOD_VEL] = velocity;
+    NoteGlobalPar.modValue[MOD_PITCH] = powf(2.0f, note_log2_freq)/440.0f;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
@@ -505,7 +513,7 @@ SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
                 portamento, legato.param.note_log2_freq, true,
-                initial_seed };
+                initial_seed, 0};
     return memory.alloc<ADnote>(&pars, sp);
 }
 
@@ -784,6 +792,7 @@ void ADnote::KillNote()
     NoteGlobalPar.kill(memory);
 
     NoteEnabled = OFF;
+
 }
 
 ADnote::~ADnote()
@@ -1093,6 +1102,9 @@ void ADnote::computecurrentparameters()
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
+
+    APPLY_MODMATRIX_DIRECT(pars.GlobalPar.Matrix, AD_GLOBAL_AMP, globalnewamplitude);
+
 
     NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
@@ -1766,6 +1778,8 @@ int ADnote::noteout(float *outl, float *outr)
         setupVoiceDetune(nvoice);
         setupVoiceMod(nvoice, false);
     }
+    // calculate generic modulation sources
+    NoteGlobalPar.calcMod();
 
     computecurrentparameters();
 
@@ -2075,6 +2089,32 @@ void ADnote::entomb(void)
     NoteGlobalPar.AmpEnvelope->forceFinish();
 }
 
+void ADnote::Global::calcMod() {
+
+
+    if(globalParam->PGenEnvelope1Enabled)
+        modValue[MOD_ENV1] = GenericEnvelope1->envout();
+    else
+        modValue[MOD_ENV1] = 0.0f;
+
+    if(globalParam->PGenEnvelope2Enabled)
+        modValue[MOD_ENV2] = GenericEnvelope2->envout();
+    else
+        modValue[MOD_ENV2] = 0.0f;
+
+    if(globalParam->PGenLfo1Enabled) {
+        modValue[MOD_LFO1] = (GenericLfo1->lfoout()/4094.0f);
+    }
+    else
+        modValue[MOD_LFO1] = 0.0f;
+
+    if(globalParam->PGenLfo2Enabled) {
+        modValue[MOD_LFO2] = (GenericLfo2->lfoout()/4094.0f);
+    }
+    else
+        modValue[MOD_LFO2] = 0.0f;
+}
+
 void ADnote::Voice::releasekey()
 {
     if(!Enabled)
@@ -2124,6 +2164,16 @@ void ADnote::Global::kill(Allocator &memory)
     memory.dealloc(Filter);
     memory.dealloc(FilterEnvelope);
     memory.dealloc(FilterLfo);
+
+    //~ if(genericEnvelopeEnabled)
+         memory.dealloc(GenericEnvelope1);
+         memory.dealloc(GenericEnvelope2);
+    //~ if(genericLfoEnabled)
+         memory.dealloc(GenericLfo1);
+         memory.dealloc(GenericLfo2);
+
+    delete[] modValue;
+
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
@@ -2135,16 +2185,17 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     WatchManager *wm,
                                     const char *prefix)
 {
+    globalParam = &param;
     ScratchString pre = prefix;
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str);
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/FreqLfo/").c_str);
+                   (pre+"GlobalPar/FreqLfo/").c_str, modValue);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/AmpLfo/").c_str);
+                   (pre+"GlobalPar/AmpLfo/").c_str, modValue);
 
     Volume = dB2rap(param.Volume)
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -2155,11 +2206,19 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str);
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
-                   (pre+"GlobalPar/FilterLfo/").c_str);
+                   (pre+"GlobalPar/FilterLfo/").c_str, modValue);
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);
 
+    GenericEnvelope1 = memory.alloc<Envelope>(*param.GenericEnvelope1, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope1/").c_str);
+    GenericLfo1      = memory.alloc<LFO>(*param.GenericLfo1, basefreq, time, wm,
+                   (pre+"GlobalPar/GenericLfo1/").c_str);
+    GenericEnvelope2 = memory.alloc<Envelope>(*param.GenericEnvelope2, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope2/").c_str);
+    GenericLfo2      = memory.alloc<LFO>(*param.GenericLfo2, basefreq, time, wm,
+                   (pre+"GlobalPar/GenericLfo2/").c_str);
     {
         Filter->updateSense(velocity, param.PFilterVelocityScale,
                 param.PFilterVelocityScaleFunction);
