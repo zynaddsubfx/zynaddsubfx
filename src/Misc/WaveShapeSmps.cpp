@@ -322,14 +322,7 @@ void processClip(int n, float* smps, float ws, float par, float offs) {
     for(int i = 0; i < n; ++i) {
         smps[i] += offs;
         float x = smps[i] * (ws + 0.5f) * 0.9999f;
-        float clipped = x - floor(0.5f + x);
-        // PolyBLAMP an den Rändern anwenden
-        float frac = x - floor(x);
-        if(frac < par)
-            clipped -= polyblampres(frac, 0.0f, par);
-        else if(1.0f - frac < par)
-            clipped += polyblampres(1.0f - frac, 0.0f, par);
-        smps[i] = clipped;
+        smps[i] = x - floor(0.5f + x);
         // Offset rückgängig machen
         float x_offs = offs * (ws + 0.5f) * 0.9999f;
         float clipped_offs = x_offs - floor(0.5f + x_offs);
