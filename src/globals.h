@@ -204,7 +204,6 @@ typedef std::complex<fftwf_real> fft_t;
  * Envelope Limits
  */
 #define MAX_ENVELOPE_POINTS 40
-#define MIN_ENVELOPE_DB -400
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude
