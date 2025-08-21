@@ -25,7 +25,7 @@ class PADnote:public SynthNote
 {
     public:
         PADnote(const PADnoteParameters *parameters, const SynthParams &pars,
-                const int &interpolation, WatchManager *wm=0, const char *prefix=0);
+                const int &interpolation, WatchManager *wm=0, const char *prefix=0, bool constPowerMixing = true);
         ~PADnote();
 
         SynthNote *cloneLegato(void);

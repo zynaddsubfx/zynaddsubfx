@@ -111,7 +111,7 @@ class PadNoteTest
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
             SynthParams pars_{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
 
-            note = new PADnote(pars, pars_, interpolation);
+            note = new PADnote(pars, pars_, interpolation, nullptr, nullptr, false /* compatibility mode */);
         }
 
         void tearDown() {
@@ -161,6 +161,9 @@ class PadNoteTest
             note->releasekey();
 
             TS_ASSERT(!tr->hasNext());
+
+
+            TS_ASSERT(!note->constPowerMixing());
             w->add_watch("noteout");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;

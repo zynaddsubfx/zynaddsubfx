@@ -19,10 +19,11 @@
 
 namespace zyn {
 
-SynthNote::SynthNote(const SynthParams &pars)
+SynthNote::SynthNote(const SynthParams &pars, bool constPowerMixing)
     :memory(pars.memory),
     legato(pars.synth, pars.velocity, pars.portamento,
-            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
+            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time),
+            m_constPowerMixing(constPowerMixing)
 {}
 
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
