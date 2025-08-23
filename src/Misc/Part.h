@@ -26,12 +26,6 @@ namespace zyn {
 
 struct PortamentoParams;
 
-enum PortamentoAssignment {
-    PORTAMENTO_FIFO,        // Jupiter 8 style - first released -> first new (crossing glides)
-    PORTAMENTO_LIFO,        // Stack order - most recent released gets used first (reverse crossing)
-    PORTAMENTO_INTELLIGENT  // Closest frequency matching
-};
-
 class RecentNotePool {
     //~ const SYNTH_T &synth = NULL;
     public:
@@ -60,7 +54,7 @@ public:
                         PortamentoRealtime *port_ptr);
 
     // Get best matching source for a new note
-    RecentNote* getBestSource(float target_freq_log2, PortamentoAssignment mode);
+    RecentNote* getBestSource(float target_freq_log2, unsigned char mode);
 
     // Clean up old entries and advance time
     void advance() {
@@ -276,7 +270,6 @@ class Part
 
         // ADD polyphonic tracking:
         RecentNotePool recent_note_pool;
-        PortamentoAssignment portamento_assignment_mode;
 
         // Keep legato portamento separate as it works differently
         // PortamentoRealtime *legatoportamento;  // KEEP this existing member

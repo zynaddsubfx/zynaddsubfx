@@ -339,7 +339,6 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* 
 
     killallnotes = false;
     silent = false;
-    portamento_assignment_mode = PORTAMENTO_LIFO; // Default to Jupiter 8 style
     legatoportamento = NULL;
 
     cleanup();
@@ -408,7 +407,6 @@ void Part::defaults()
     Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
-    portamento_assignment_mode = PORTAMENTO_LIFO;
     recent_note_pool.clear();
 }
 
@@ -525,9 +523,9 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
 }
 
 RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2,
-                                                         PortamentoAssignment mode)
+                                                         unsigned char mode)
 {
-    if (mode == PORTAMENTO_FIFO) {
+    if (mode == FIFO) {
         // Jupiter 8 style: Return oldest available note (FIFO order)
         // This creates crossing glides when chord intervals change
         uint32_t oldest_time = UINT32_MAX;
@@ -536,7 +534,7 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
         for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
             if (!recent_notes[i].available) continue;
 
-                printf("Pool entry %d: freq=%f, time=%d\n", i, recent_notes[i].freq_log2, recent_notes[i].timestamp);
+                //~ printf("Pool entry %d: freq=%f, time=%d\n", i, recent_notes[i].freq_log2, recent_notes[i].timestamp);
 
             if (recent_notes[i].timestamp < oldest_time) {
                 oldest = &recent_notes[i];
@@ -549,7 +547,7 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
         }
         return oldest;
 
-    } else if (mode == PORTAMENTO_LIFO) {
+    } else if (mode == LIFO) {
         // Most recent released note for each new note (LIFO/stack order)
         // Each released note is used once, starting with most recently released
         uint32_t newest_time = 0;
@@ -571,7 +569,7 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
         }
         return newest;
 
-    } else { // PORTAMENTO_INTELLIGENT
+    } else { // SMART
         // Strategy: find closest frequency match, or most recent if no close match
         RecentNote* best = nullptr;
         float best_distance = 999999.0f;
@@ -604,10 +602,10 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2)
 {
     // Find best source frequency from recent note pool
     RecentNotePool::RecentNote* source = recent_note_pool.getBestSource(target_freq_log2,
-                                                                        portamento_assignment_mode);
+                                            ctl.portamento.polyMode);
 
     if (!source) {
-        printf("No source found in recent_note_pool\n");
+        //~ printf("No source found in recent_note_pool\n");
         return nullptr;
     }
 
@@ -638,6 +636,7 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2)
  */
 bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_freq)
 {
+
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
@@ -1671,8 +1670,8 @@ void RecentNotePool::clear()
 
 void RecentNotePool::cleanup()
 {
-    // Remove entries older than ~10 seconds TBD: use samplerate
-    const uint32_t max_age = 480000;
+    // Remove entries older than ~5 seconds TBD: use samplerate
+    const uint32_t max_age = 240000;
 
     for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
         if (recent_notes[i].available &&
