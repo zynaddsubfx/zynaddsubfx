@@ -25,6 +25,61 @@
 namespace zyn {
 
 struct PortamentoParams;
+
+enum PortamentoAssignment {
+    PORTAMENTO_FIFO,        // Jupiter 8 style - first released -> first new (crossing glides)
+    PORTAMENTO_LIFO,        // Stack order - most recent released gets used first (reverse crossing)
+    PORTAMENTO_INTELLIGENT  // Closest frequency matching
+};
+
+class RecentNotePool {
+    //~ const SYNTH_T &synth = NULL;
+    public:
+    struct RecentNote {
+        float freq_log2;
+        PortamentoRealtime *portamento_ptr;
+        uint32_t timestamp;  // frame counter for aging
+        bool available;
+    };
+
+    static const int MAX_RECENT_NOTES = 16;  // configurable
+    RecentNote recent_notes[MAX_RECENT_NOTES];
+    int write_index;
+    uint32_t current_time;
+
+public:
+    RecentNotePool() : write_index(0), current_time(0) {
+        for(int i = 0; i < MAX_RECENT_NOTES; ++i) {
+            recent_notes[i].available = false;
+            recent_notes[i].portamento_ptr = nullptr;
+        }
+    }
+
+    // Add a note when it's released
+    void addReleasedNote(float freq_log2,
+                        PortamentoRealtime *port_ptr);
+
+    // Get best matching source for a new note
+    RecentNote* getBestSource(float target_freq_log2, PortamentoAssignment mode);
+
+    // Clean up old entries and advance time
+    void advance() {
+        current_time++;
+        if(current_time % 1000 == 0) // cleanup every ~20 seconds at 48kHz
+            cleanup();
+    }
+
+    // Check if we have any recent notes for portamento
+    bool hasRecentNotes() const;
+
+    // Clear all recent notes
+    void clear();
+
+private:
+    void cleanup();
+};
+
+
 /** Part implementation*/
 class Part
 {
@@ -219,9 +274,19 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq_log2;    // previous note pitch, used for portamento
-        float oldportamentofreq_log2; // previous portamento pitch
-        PortamentoRealtime *oldportamento; // previous portamento
+        // ADD polyphonic tracking:
+        RecentNotePool recent_note_pool;
+        PortamentoAssignment portamento_assignment_mode;
+
+        // Keep legato portamento separate as it works differently
+        // PortamentoRealtime *legatoportamento;  // KEEP this existing member
+
+        // Helper methods for polyphonic portamento
+        PortamentoRealtime* createPortamentoForNote(float target_freq_log2);
+        void recordNoteRelease(float freq_log2, PortamentoRealtime *port_ptr);
+
+
+
         PortamentoRealtime *legatoportamento; // last used legato portamento
 
         Microtonal *microtonal;
