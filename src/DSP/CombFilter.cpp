@@ -51,8 +51,9 @@ inline float CombFilter::tanhX(const float x)
 inline float CombFilter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos; // integer part (pos >= 0)
     float poslo = pos - (float) poshi; // decimal part
+    int poshi_next = (poshi + 1) % mem_size;
     // linear interpolation between samples
-    return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]);
+    return smp[poshi] + poslo * (smp[poshi_next]-smp[poshi]);
 }
 
 void CombFilter::filterout(float *smp)
@@ -70,7 +71,6 @@ void CombFilter::filterout(float *smp)
         // Copy new input samples to the buffer
         memcpy(&input[inputIndex], smp, buffersize * sizeof(float));
     }
-    inputIndex = (inputIndex + buffersize) % mem_size;
 
     for (int i = 0; i < buffersize; i++)
     {
@@ -100,6 +100,9 @@ void CombFilter::filterout(float *smp)
         outputIndex = (outputIndex + 1) % mem_size;
 
     }
+
+    //update inputIndex
+    inputIndex = (inputIndex + buffersize) % mem_size;
 
 }
 
