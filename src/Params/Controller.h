@@ -21,6 +21,14 @@
 
 namespace zyn {
 
+#define POLYMODES FIFO, \
+LIFO, \
+SMART
+
+enum {
+    POLYMODES
+};
+
 /**(Midi) Controllers implementation*/
 class Controller
 {
@@ -136,6 +144,8 @@ class Controller
             int data;
             unsigned char portamento;
             /**Whether the portamento midi events are received or not*/
+            unsigned char polyMode = SMART;
+            /**Mode how polyphonic portamento starts*/
             unsigned char receive;
             /**Whether legato playing is needed to get portamento*/
             unsigned char automode;
