@@ -67,7 +67,8 @@ public:
     bool hasRecentNotes() const;
 
     // Clear all recent notes
-    void clear();
+    void clearAll();
+    void clear(int i);
 
 private:
     void cleanup();

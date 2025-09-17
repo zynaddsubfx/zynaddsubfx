@@ -91,6 +91,7 @@ class PortamentoRealtime {
                            Allocator &memory,
                            std::function<void(PortamentoRealtime *)> cleanup,
                            const Portamento &portamento);
+        PortamentoRealtime(const PortamentoRealtime &other);
 
         ~PortamentoRealtime();
 

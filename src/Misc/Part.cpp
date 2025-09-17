@@ -407,7 +407,7 @@ void Part::defaults()
     Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
-    recent_note_pool.clear();
+    recent_note_pool.clearAll();
 }
 
 void Part::defaultsinstrument()
@@ -466,6 +466,7 @@ void Part::cleanup(bool final_)
             partfxinputl[n][i] = final_ ? 0.0f : synth.denormalkillbuf[i];
             partfxinputr[n][i] = final_ ? 0.0f : synth.denormalkillbuf[i];
         }
+    recent_note_pool.clearAll();
 }
 
 Part::~Part()
@@ -678,7 +679,7 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
 
         // Legacy single-portamento logic for legato mode
         float oldfreq_log2 = note_log2_freq; // fallback
-        float oldportamentofreq_log2 = oldfreq_log2;
+        float oldportamentofreq_log2 = note_log2_freq;
 
         // Try to get frequency from existing legato portamento
         if (legatoportamento && legatoportamento->portamento.active) {
@@ -709,6 +710,7 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
 
         LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
         notePool.applyLegato(note, pars, portamento_realtime);
+        recent_note_pool.addReleasedNote(note_log2_freq, portamento_realtime);
         return true;
     }
 
@@ -1643,11 +1645,17 @@ bool Part::Kit::validNote(char note) const
 void RecentNotePool::addReleasedNote(float freq_log2,
                                     PortamentoRealtime *port_ptr)
 {
+    if (!port_ptr) return;
+    PortamentoRealtime* new_port = new PortamentoRealtime(*port_ptr);
+    clear(write_index);
     recent_notes[write_index] = {
-        freq_log2, port_ptr,
+        freq_log2, new_port,
         current_time, true
     };
     write_index = (write_index + 1) % MAX_RECENT_NOTES;
+
+    cleanup();
+
 }
 
 
@@ -1659,13 +1667,19 @@ bool RecentNotePool::hasRecentNotes() const
     return false;
 }
 
-void RecentNotePool::clear()
+void RecentNotePool::clearAll()
 {
     for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
-        recent_notes[i].available = false;
-        recent_notes[i].portamento_ptr = nullptr;
+        clear(i);
     }
     write_index = 0;
+}
+
+void RecentNotePool::clear(int i)
+{
+    recent_notes[i].available = false;
+    if (recent_notes[i].portamento_ptr) delete recent_notes[i].portamento_ptr;
+
 }
 
 void RecentNotePool::cleanup()
@@ -1677,7 +1691,7 @@ void RecentNotePool::cleanup()
         if (recent_notes[i].available &&
             (current_time - recent_notes[i].timestamp) > max_age) {
             recent_notes[i].available = false;
-            recent_notes[i].portamento_ptr = nullptr;
+            delete recent_notes[i].portamento_ptr;
         }
     }
 }

@@ -103,6 +103,15 @@ PortamentoRealtime::PortamentoRealtime(void *handle,
 {
 }
 
+PortamentoRealtime::PortamentoRealtime(const PortamentoRealtime& other)
+    : handle(other.handle),
+      memory(other.memory),
+      cleanup(other.cleanup),
+      portamento(other.portamento)
+{
+
+}
+
 PortamentoRealtime::~PortamentoRealtime()
 {
     cleanup(this);
