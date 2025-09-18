@@ -268,6 +268,9 @@ class Part
            monomem[] is used in conjunction with the list to
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
+        float oldfreq_log2;    // previous note pitch, used for portamento
+        float oldportamentofreq_log2; // previous portamento pitch
+        PortamentoRealtime *oldportamento; // previous portamento
 
         // ADD polyphonic tracking:
         RecentNotePool recent_note_pool;

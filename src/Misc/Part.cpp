@@ -339,6 +339,8 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* 
 
     killallnotes = false;
     silent = false;
+    oldfreq_log2 = -1.0f;
+    oldportamento = NULL;
     legatoportamento = NULL;
 
     cleanup();
@@ -635,9 +637,10 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2)
 /*
  * Note On Messages
  */
-bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_freq)
+bool Part::NoteOnInternal(note_t note,
+                  unsigned char velocity,
+                  float note_log2_freq)
 {
-
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
@@ -655,6 +658,7 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
         monomemPush(note);
         monomem[note].velocity  = velocity;
         monomem[note].note_log2_freq = note_log2_freq;
+
     } else if(!monomemEmpty())
         monomemClear();
 
@@ -665,7 +669,7 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
     lastlegatomodevalid = isLegatoMode();
 
     //Compute Note Parameters
-    const float vel = getVelocity(velocity, Pvelsns, Pveloffs);
+    const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
 
     //Portamento
     lastnote = note;
@@ -673,48 +677,82 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
     // Advance time counter for recent note pool
     recent_note_pool.advance();
 
-    // For legato mode, use existing single portamento logic
-    if(doingLegato) {
-        PortamentoRealtime *portamento_realtime = NULL;
+        /* check if first note is played */
+    if(oldfreq_log2 < 0.0f)
+        oldfreq_log2 = note_log2_freq;
 
-        // Legacy single-portamento logic for legato mode
-        float oldfreq_log2 = note_log2_freq; // fallback
-        float oldportamentofreq_log2 = note_log2_freq;
-
-        // Try to get frequency from existing legato portamento
-        if (legatoportamento && legatoportamento->portamento.active) {
-            oldportamentofreq_log2 += legatoportamento->portamento.freqdelta_log2;
-        }
-
-        Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2,
-                             oldportamentofreq_log2, note_log2_freq);
-        if(portamento.active) {
-            if (legatoportamento) {
-                portamento_realtime = legatoportamento;
-                portamento_realtime->portamento = portamento;
-            } else {
-                portamento_realtime = memory.alloc<PortamentoRealtime>
-                    (this, memory,
-                     [](PortamentoRealtime *realtime) {
-                         Part *part = static_cast<Part *>(realtime->handle);
-                         if (realtime == part->legatoportamento)
-                             part->legatoportamento = NULL;
-                     },
-                     portamento);
+    // For Mono/Legato: Force Portamento Off on first
+    // notes. That means it is required that the previous note is
+    // still held down or sustained for the Portamento to activate
+    // (that's like Legato).
+    PortamentoRealtime *portamento_realtime = NULL;
+    // If there is a currently ongoing glide, shift the starting point
+    // for any new portamento to where the current glide is right now
+    if (oldportamento && oldportamento->portamento.active)
+        oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
+    // Non-portamento settings and conditions say the note may have
+    // portamento, but it remains for Portamento.init to make the
+    // final decision depending on the portamento enable, threshold and
+    // other parameters.
+    Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2, oldportamentofreq_log2, note_log2_freq);
+    if(portamento.active) {
+        // If we're doing legato and we already have a portamento structure,
+        // reuse it.
+        if (doingLegato && legatoportamento) {
+            portamento_realtime = legatoportamento;
+            portamento_realtime->portamento = portamento;
+        } else {
+            // Create new one if we don't already have one, or for each
+            // note in poly/mono mode
+            portamento_realtime = memory.alloc<PortamentoRealtime>
+                (this,
+                 memory,
+                 // Cleanup function: Destroy any references we might
+                 // have to the current realtime pointer so that it
+                 // can not be (re)used, with disastrous results.
+                 [](PortamentoRealtime *realtime)
+                    {
+                        assert(realtime);
+                        Part *part = static_cast<Part *>(realtime->handle);
+                        assert(part);
+                        if (realtime == part->oldportamento) {
+                            // Since the last note is going away, capture
+                            // the portamento:ed pitch offset to our saved
+                            // previous note. This will be our starting
+                            // point for the next portamento glide.
+                            if (realtime->portamento.active)
+                                part->oldportamentofreq_log2 +=
+                                    realtime->portamento.freqdelta_log2;
+                            part->oldportamento = NULL;
+                        }
+                        if (realtime == part->legatoportamento)
+                            part->legatoportamento = NULL;
+                    },
+                 portamento
+                );
+            if (doingLegato)
                 legatoportamento = portamento_realtime;
             }
-        }
+
+    }
 
         Portamento *portamentoptr = portamento_realtime ?
             &portamento_realtime->portamento : nullptr;
 
+    // Save note freq and pointer to portamento state for next note
+    oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = portamento_realtime;
+
+    //Adjust Existing Notes
+    if(doingLegato) {
         LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
         notePool.applyLegato(note, pars, portamento_realtime);
-        recent_note_pool.addReleasedNote(note_log2_freq, portamento_realtime);
         return true;
     }
 
-    // We know now that we are not doing legato
+    // We know now that we are not doing legato, so we destroy the reference
+    // to the previous legato portamento info so we don't try to reuse it
     legatoportamento = NULL;
 
     if(Ppolymode)
@@ -724,21 +762,24 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
     if(Platchmode)
         notePool.releaseLatched();
 
-    //Create New Notes with individual portamento instances
+    //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
         ScratchString pre = prefix;
         auto &item = kit[i];
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
+        //~ SynthParams pars{memory, ctl, synth, time, vel,
+            //~ portamentoptr, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
-        // Enforce voice limit before we trigger new note
+        // Enforce voice limit, before we trigger new note
         limit_voices(note);
 
         try {
             PortamentoRealtime* port_rt = createPortamentoForNote(note_log2_freq);
-            Portamento* port_ptr = port_rt ? &port_rt->portamento : nullptr;
+            if (!port_rt) port_rt = portamento_realtime; // fall back
+            Portamento* port_ptr = port_rt ? &port_rt->portamento : NULL;
 
             if(item.Padenabled) {
 
