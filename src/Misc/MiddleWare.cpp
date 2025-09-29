@@ -26,8 +26,6 @@
 #include <rtosc/port-sugar.h>
 #include <lo/lo.h>
 
-#include <unistd.h>
-
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
 
