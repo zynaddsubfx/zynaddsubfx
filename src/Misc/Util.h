@@ -14,6 +14,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <stdint.h>
@@ -64,7 +65,10 @@ extern float getdetune(unsigned char type,
  * pthread_attr_t*/
 void set_realtime();
 
-/**Os independent sleep in microsecond*/
+/** OS independent return of PID */
+std::uint32_t os_getpid();
+
+/** OS independent sleep in microseconds */
 void os_usleep(long length);
 
 //! returns pid padded to maximum pid length, posix conform

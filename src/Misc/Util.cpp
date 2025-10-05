@@ -13,20 +13,23 @@
 
 #include "globals.h"
 #include "Util.h"
-#include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
 
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
+#endif
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #define errx(...) {}
@@ -138,8 +141,6 @@ void set_realtime()
 
 
 #ifdef WIN32
-#include <windows.h>
-
 //https://stackoverflow.com/questions/5801813/c-usleep-is-obsolete-workarounds-for-windows-mingw
 void os_usleep(long usec)
 {
@@ -160,6 +161,15 @@ void os_usleep(long length)
     usleep(length);
 }
 #endif
+
+std::uint32_t os_getpid()
+{
+#if defined(_MSC_VER)
+    return static_cast<std::uint32_t>(GetCurrentProcessId());
+#else
+    return static_cast<std::uint32_t>(getpid());
+#endif
+}
 
 //!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
@@ -193,7 +203,7 @@ std::string os_pid_as_padded_string()
     char result_str[max_pid_len << 1];
     std::fill_n(result_str, max_pid_len, '0');
     std::size_t written = snprintf(result_str + max_pid_len, max_pid_len,
-        "%d", (int)getpid());
+        "%" PRIu32, os_getpid());
     // the below pointer should never cause segfaults:
     return result_str + max_pid_len + written - os_guess_pid_length();
 }

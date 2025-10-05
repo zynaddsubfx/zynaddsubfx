@@ -1942,7 +1942,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             auto master = this->master;
             this->doReadOnlyOp([master](){
                 std::string home = getenv("HOME");
-                std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
+                std::string save_file = home+"/.local/zynaddsubfx-"+to_s(os_getpid())+"-autosave.xmz";
                 printf("doing an autosave <%s>...\n", save_file.c_str());
                 int res = master->saveXML(save_file.c_str());
                 (void)res;});})
@@ -2522,7 +2522,7 @@ int MiddleWare::checkAutoSave(void) const
 void MiddleWare::removeAutoSave(void)
 {
     std::string home = getenv("HOME");
-    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
+    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(os_getpid())+"-autosave.xmz";
     remove(save_file.c_str());
 }
 
