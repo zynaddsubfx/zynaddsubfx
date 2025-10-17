@@ -87,10 +87,6 @@ class ADnote:public SynthNote
         /**Compute the Oscillator's samples.
          * Affects tmpwave_unison and updates oscposhi/oscposlo
          * @todo remove this declaration if it is commented out*/
-        inline void ComputeVoiceOscillator_SincInterpolation(int nvoice);
-        /**Compute the Oscillator's samples.
-         * Affects tmpwave_unison and updates oscposhi/oscposlo
-         * @todo remove this declaration if it is commented out*/
         inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
         /**Computes the Oscillator samples with mixing.
          * updates tmpwave_unison*/
@@ -194,6 +190,9 @@ class ADnote:public SynthNote
 
             /* Waveform of the Voice */
             float *OscilSmp;
+
+            /* max freq inside OscilSmp */
+            float OscilFreqMin;
 
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
