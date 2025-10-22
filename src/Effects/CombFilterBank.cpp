@@ -14,6 +14,7 @@ namespace zyn {
     inputgain(1.0f),
     outgain(1.0f),
     gainbwd(initgain),
+    pitchOffset(0),
     baseFreq(110.0f),
     nrOfStrings(0),
     memory(*alloc),
