@@ -73,6 +73,7 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(125, 125, 125, 110, 110), "Pitch Drop Rate"),
     rEffPar(PmaxDrop, 13, rShort("max"), rDefault(64), "Max Drop"),
     rEffPar(PfadingTime, 14, rShort("fade"), rDefault(64), "Fading Time"),
+    rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "detune"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -99,6 +100,7 @@ Sympathetic::Sympathetic(EffectParams pars)
       PdropRate(64),
       PmaxDrop(0),
       PfadingTime(96),
+      PfreqOffset(64),
       baseFreq(220.0f),
       srate(pars.srate)
 {
@@ -245,7 +247,8 @@ void Sympathetic::calcFreqsPitchDrop()
     {
         filterBank->delays[i] = ((float)samplerate) * freeverb_freqs[i] / 44100.0f;
     }
-    const unsigned int mem_size_new = (int)ceilf(( filterBank->delays[0] * 16.0f * 1.03f + buffersize + 2)/16) * 16;
+    //          factor for pitchdrop Maxdrop: 2^4 = 16, Pitchoffset: 2  -> 32.0f
+    const unsigned int mem_size_new = (int)ceilf(( filterBank->delays[0] * 32.0f * 1.03f + buffersize + 2)/16) * 16;
 
     filterBank->setStrings(Pstrings,mem_size_new);
 }
@@ -417,7 +420,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 12:
             PdropRate = value;
-            filterBank->dropRate = (float)(PdropRate-64)/(256.0f * float(srate));
+            filterBank->dropRate = (float)(PdropRate-64)/(-256.0f * float(srate));
             break;
         case 13:
             PmaxDrop = value;
@@ -426,6 +429,10 @@ void Sympathetic::changepar(int npar, unsigned char value)
         case 14:
             PfadingTime = value;
             filterBank->fadingTime = (float)value/127.0f;
+            break;
+        case 15:
+            PfreqOffset = value;
+            filterBank->pitchOffset = (float)(PfreqOffset-64)/-64.0f;
             break;
 
         default:
@@ -451,6 +458,7 @@ unsigned char Sympathetic::getpar(int npar) const
         case 12: return PdropRate;
         case 13: return PmaxDrop;
         case 14: return PfadingTime;
+        case 15: return PfreqOffset;
         default: return 0; //in case of bogus parameter number
     }
 }

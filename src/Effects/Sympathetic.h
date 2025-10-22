@@ -63,10 +63,10 @@ class Sympathetic final:public Effect
         unsigned char Punison_frequency_spread;
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
-        unsigned char PdropRate;       //
+        unsigned char PdropRate;     //
         unsigned char PmaxDrop;
         unsigned char PfadingTime;
-        //~ unsigned char Pfreq_offset;
+        unsigned char PfreqOffset;
 
 
         unsigned char spread, spread_old;

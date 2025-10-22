@@ -6,8 +6,8 @@
 namespace zyn {
 
     struct FloatTuple {
-        float A;  // Gain for read head A
-        float B;  // Gain for read head B
+        float A;  // Gain or Phase for read head A
+        float B;  // Gain or Phase for read head B
     };
 
     CombFilterBank::CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_, float initgain):
@@ -101,18 +101,18 @@ namespace zyn {
 
 
     /**
-     * Generiert zwei 180° phasenverschobene Sägezahn-Funktionen
-     * Bei positiver dropRate: 0 bis +maxDrop
-     * Bei negativer dropRate: 0 bis -maxDrop
+     * Generates two 180° phase shifted rising sawtooth signals
+     * at positive dropRate: 0 ... +maxDrop
+     * at negative dropRate: 0 ... -maxDrop
      */
     inline FloatTuple generatePhasedSawtooth(float& masterCounter, float dropRate, float maxDrop) {
         FloatTuple result;
 
-        // Gemeinsamen Zähler aktualisieren
+        // increase(decrease) master
         masterCounter += dropRate;
 
         if (dropRate >= 0) {
-            // Positive Richtung: 0 bis +maxDrop
+            // Positive direction: 0 ... +maxDrop
             if (masterCounter >= maxDrop) {
                 masterCounter -= floorf(masterCounter);
             }
@@ -124,7 +124,7 @@ namespace zyn {
             }
 
         } else {
-            // Negative Richtung: 0 bis -maxDrop
+            // Negative direction: 0 ... -maxDrop
             if (masterCounter <= -maxDrop) {
                 masterCounter = 0;
             }
@@ -150,7 +150,7 @@ namespace zyn {
 
         FloatTuple gains;
 
-        // crossoverWidth = 0 → hartes Umschalten
+        // crossoverWidth = 0 → hard switch
         if (crossoverWidth <= 1e-6f) {
             gains.A = (phase < 0.5f) ? 1.0f : 0.0f;
             gains.B = (phase < 0.5f) ? 0.0f : 1.0f;
@@ -176,7 +176,7 @@ namespace zyn {
             gains.B = 0.0f;
         }
         else if (phase < zone2End) {
-            // Zone 2: A→B equal-power crossfade
+            // Zone 2: A→B linear crossfade
             float fadeFactor = (phase - zone1End) / transitionZone;
             assert(fadeFactor <= 1.0f);
             assert(fadeFactor >= 0.0f);
@@ -189,7 +189,7 @@ namespace zyn {
             gains.B = 1.0f;
         }
         else {
-            // Zone 4: B→A equal-power crossfade
+            // Zone 4: B→A linear crossfade
             float fadeFactor = (phase - zone3End) / transitionZone;
             assert(fadeFactor <= 1.0f);
             assert(fadeFactor >= 0.0f);
@@ -206,16 +206,17 @@ namespace zyn {
         {
             const float input_smp = smp[i] * inputgain;
             const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
-
             const float normalizedPhase = sampleCounter>0.0f ? fmodf(sampleCounter / maxDrop + 0.5f, 1.0f)
                                                              : fmodf((-sampleCounter) / maxDrop + 0.5f, 1.0f) ;
+                                                        // TBD: should be equal to using fabsf(sampleCounter)
             const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
 
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 if (delays[j] == 0.0f) continue;
-                const float baseDelay = delays[j];  // Grund-Delay des Comb-Filters
+                const float baseDelay = delays[j] * powf(2.0f, pitchOffset);
 
+                // Reading Head A
                 float sampleA = 0.0f;
                 if (gains.A > 0.0f)
                 {
@@ -224,6 +225,8 @@ namespace zyn {
                     sampleA = sampleLerp(comb_smps[j], pos_reader1) * gains.A;
 
                 }
+
+                // Reading Head B
                 float sampleB = 0.0f;
                 if (gains.B > 0.0f) {
                     const float delay2 = min(baseDelay * powf(2.0f, phases.B), float(mem_size));
@@ -231,17 +234,6 @@ namespace zyn {
                     sampleB = sampleLerp(comb_smps[j], pos_reader2)* gains.B;
 
                 }
-
-    //~ if (j == 0 && i == 0) {  // Nur erste 10 Samples des ersten Strings
-    //~ printf(" -------------------------- \n");
-    //~ printf("sampleCounter: %f \n", sampleCounter);
-    //~ printf("  Phases: A=%.3f, B=%.3f\n", phases.A/ maxDrop, phases.B/ maxDrop);
-    //~ printf("  Gains: A=%.3f, B=%.3f, squaresum: %f\n", gains.A, gains.B, sqrtf(gains.A*gains.A + gains.B*gains.B));
-
-    //~ }
-
-
-
 
                 float feedbackSample = (sampleA + sampleB);
                 comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbwd);
@@ -260,6 +252,7 @@ namespace zyn {
             // division by zero is catched at the beginning filterOut()
             smp[i] *= outgain / (float)nrOfNonZeroStrings;
 
+        // proceed to next position in ringbuffer
         ++pos_writer %= mem_size;
         }
     }
