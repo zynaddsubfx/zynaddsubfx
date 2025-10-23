@@ -226,7 +226,7 @@ namespace zyn {
         {
 
             const float input_smp = smp[i] * inputgain;
-            if (maxDrop == maxDrop_min)
+            if (maxDrop <= maxDrop_min)
             {   //Pitch drop deactivated
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {

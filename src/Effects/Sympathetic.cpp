@@ -73,7 +73,7 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(64, 64, 64, 64, 64, 32), "Pitch Drop Rate"),
     rEffPar(PmaxDrop, 13, rShort("max"), rDefault(64),
             rPresets(0, 0, 0, 0, 0, 32),  "Max Drop"),
-    rEffPar(PfadingTime, 14, rShort("fade"), rDefault(64),
+    rEffPar(PfadingTime, 14, rShort("fade"), rDefault(5),
             rPresets(0, 0, 0, 0, 0, 32),  "Fading Time"),
     rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "detune"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
