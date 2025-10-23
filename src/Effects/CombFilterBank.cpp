@@ -231,17 +231,27 @@ namespace zyn {
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {
                     if (delays[j] == 0.0f) continue;
+                    // apply pitchoffset to comb delay
                     const float delay = delays[j] * powf(2.0f, offsetbuf[i/16]);
+                    // calculate reading position and care for ring buffer range
                     const float pos_reader = fmodf(float(pos_writer + mem_size - delay), float(mem_size));
+                    // sample at that position
                     const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
+                    // add saturated feedback to comb
                     comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
                 }
             }
             else
             {   // Pitch drop Feature
+                // instead of reading with constant delay or with offset
+                // pitch drop keeps constantly changing the delay
+                // because the delay is limited, we use two alternating reading heads
+                // they jump back to 0 while their gain is 0
+
+                // calculate phases for both reading heads
                 const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
                 const float normalizedPhase = fmodf(fabsf(sampleCounter) / maxDrop + 0.5f, 1.0f);
-
+                // calculate the gains with given cross fadeing time
                 const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
 
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
