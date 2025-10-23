@@ -28,7 +28,7 @@ namespace zyn {
         gain_smoothing.reset(gainbwd);
         pos_writer = 0;
         // setup the smoother for offset parameter
-        offset_smoothing.sample_rate(samplerate/16);
+        offset_smoothing.sample_rate(samplerate);
         offset_smoothing.thresh(0.02f); // TBD: 2% jump audible?
         offset_smoothing.cutoff(0.2f);
         offset_smoothing.reset(0.0f);
@@ -213,14 +213,15 @@ namespace zyn {
         // interpolate gainbuf values over buffer length using value smoothing filter (lp)
         // this should prevent popping noise when controlled binary with 0 / 127
         // new control rate = samplerate / 16
-        const unsigned int smoothing_bufsize = buffersize / 16;
-        float gainbuf[smoothing_bufsize]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, smoothing_bufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+smoothing_bufsize, gainbwd); // if nothing to interpolate (constant value)
+        const unsigned int gain_bufsize = buffersize / 16;
+        //~ const unsigned int offset_bufsize = buffersize / 4;
+        float gainbuf[gain_bufsize]; // buffer for value smoothing filter
+        if (!gain_smoothing.apply( gainbuf, gain_bufsize, gainbwd ) ) // interpolate the gain value
+            std::fill(gainbuf, gainbuf+gain_bufsize, gainbwd); // if nothing to interpolate (constant value)
 
-        float offsetbuf[smoothing_bufsize]; // buffer for value smoothing filter
-        if (!offset_smoothing.apply( offsetbuf, smoothing_bufsize, pitchOffset ) ) // interpolate the offset value
-            std::fill(offsetbuf, offsetbuf+smoothing_bufsize, pitchOffset); // if nothing to interpolate (constant value)
+        float offsetbuf[buffersize]; // buffer for value smoothing filter
+        if (!offset_smoothing.apply( offsetbuf, buffersize, pitchOffset ) ) // interpolate the offset value
+            std::fill(offsetbuf, offsetbuf+buffersize, pitchOffset); // if nothing to interpolate (constant value)
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
@@ -232,7 +233,7 @@ namespace zyn {
                 {
                     if (delays[j] == 0.0f) continue;
                     // apply pitchoffset to comb delay
-                    const float delay = min(delays[j] * powf(2.0f, offsetbuf[i/16]), float(mem_size));
+                    const float delay = min(delays[j] * powf(2.0f, offsetbuf[i]), float(mem_size));
                     // calculate reading position and care for ring buffer range
                     const float pos_reader = fmodf(float(pos_writer + mem_size) - delay, float(mem_size));
                     // sample at that position
@@ -257,7 +258,7 @@ namespace zyn {
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {
                     if (delays[j] == 0.0f) continue;
-                    const float baseDelay = delays[j] * powf(2.0f, offsetbuf[i/16]);
+                    const float baseDelay = delays[j] * powf(2.0f, offsetbuf[i]);
 
                     // Reading Head A
                     float sampleA = 0.0f;
