@@ -24,11 +24,10 @@ class CombFilterBank
     void setStrings(unsigned int nr, const float basefreq);
     void setStrings(unsigned int nrOfStringsNew, unsigned int mem_size_new);
 
-    float fadingTime;
-
     float maxDrop = 2.0f;
-    float dropRate;
-    float pitchOffset;
+    float dropRate = 0.0f;
+    float fadingTime = 0.03937007874f;
+    float pitchOffset = 0.0f;
 
     private:
     static float tanhX(const float x);

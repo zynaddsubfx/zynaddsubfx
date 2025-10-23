@@ -39,7 +39,7 @@ namespace zyn {
         // limit nrOfStringsNew
         nrOfStringsNew = min(NUM_SYMPATHETIC_STRINGS,nrOfStringsNew);
 
-        if(nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq)
+        if((nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq) || baseFreqNew < 27.50f)
             return;
 
         baseFreq = baseFreqNew;
@@ -203,41 +203,67 @@ namespace zyn {
 
     void CombFilterBank::filterout(float *smp)
     {
+
+        // interpolate gainbuf values over buffer length using value smoothing filter (lp)
+        // this should prevent popping noise when controlled binary with 0 / 127
+        // new control rate = samplerate / 16
+        const unsigned int gainbufsize = buffersize / 16;
+        float gainbuf[gainbufsize]; // buffer for value smoothing filter
+        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
+            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
+
         for (unsigned int i = 0; i < buffersize; ++i)
         {
+
             const float input_smp = smp[i] * inputgain;
-            const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
-            const float normalizedPhase = sampleCounter>0.0f ? fmodf(sampleCounter / maxDrop + 0.5f, 1.0f)
-                                                             : fmodf((-sampleCounter) / maxDrop + 0.5f, 1.0f) ;
-                                                        // TBD: should be equal to using fabsf(sampleCounter)
-            const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
-
-            for (unsigned int j = 0; j < nrOfStrings; ++j)
-            {
-                if (delays[j] == 0.0f) continue;
-                const float baseDelay = delays[j] * powf(2.0f, pitchOffset);
-
-                // Reading Head A
-                float sampleA = 0.0f;
-                if (gains.A > 0.0f)
+            if (maxDrop < 1e-6f)
+            {   //Pitch drop deactivated
+                for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {
-                    const float delay1 = min(baseDelay * powf(2.0f, phases.A), float(mem_size));
-                    const float pos_reader1 = fmodf(float(pos_writer + mem_size - delay1), float(mem_size));
-                    sampleA = sampleLerp(comb_smps[j], pos_reader1) * gains.A;
+                    if (delays[j] == 0.0f) continue;
+
+                    const float pos_reader = fmodf(float(pos_writer + mem_size), float(mem_size));
+                    const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
+                    comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
 
                 }
+            }
+            else
+            {   // Pitch drop Feature
+                const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
+                //~ const float normalizedPhase = sampleCounter>0.0f ? fmodf(sampleCounter / maxDrop + 0.5f, 1.0f)
+                                                                 //~ : fmodf((-sampleCounter) / maxDrop + 0.5f, 1.0f) ;
+                const float normalizedPhase = fmodf(fabsf(sampleCounter) / maxDrop + 0.5f, 1.0f);
 
-                // Reading Head B
-                float sampleB = 0.0f;
-                if (gains.B > 0.0f) {
-                    const float delay2 = min(baseDelay * powf(2.0f, phases.B), float(mem_size));
-                    const float pos_reader2 = fmodf(float(pos_writer + mem_size) - delay2, float(mem_size));
-                    sampleB = sampleLerp(comb_smps[j], pos_reader2)* gains.B;
+                const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
 
+                for (unsigned int j = 0; j < nrOfStrings; ++j)
+                {
+                    if (delays[j] == 0.0f) continue;
+                    const float baseDelay = delays[j] * powf(2.0f, pitchOffset);
+
+                    // Reading Head A
+                    float sampleA = 0.0f;
+                    if (gains.A > 0.0f)
+                    {
+                        const float delay1 = min(baseDelay * powf(2.0f, phases.A), float(mem_size));
+                        const float pos_reader1 = fmodf(float(pos_writer + mem_size - delay1), float(mem_size));
+                        sampleA = sampleLerp(comb_smps[j], pos_reader1) * gains.A;
+
+                    }
+
+                    // Reading Head B
+                    float sampleB = 0.0f;
+                    if (gains.B > 0.0f) {
+                        const float delay2 = min(baseDelay * powf(2.0f, phases.B), float(mem_size));
+                        const float pos_reader2 = fmodf(float(pos_writer + mem_size) - delay2, float(mem_size));
+                        sampleB = sampleLerp(comb_smps[j], pos_reader2)* gains.B;
+
+                    }
+
+                    float feedbackSample = (sampleA + sampleB);
+                    comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
                 }
-
-                float feedbackSample = (sampleA + sampleB);
-                comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbwd);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
@@ -246,12 +272,13 @@ namespace zyn {
                 if (delays[j] != 0.0f) {
                     smp[i] += comb_smps[j][pos_writer];
                     nrOfNonZeroStrings++;
-            }
+                }
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value
-            // division by zero is catched at the beginning filterOut()
-            smp[i] *= outgain / (float)nrOfNonZeroStrings;
+            smp[i] *= outgain;
+            if(nrOfNonZeroStrings>0)
+                smp[i] /= (float)nrOfNonZeroStrings;
 
         // proceed to next position in ringbuffer
         ++pos_writer %= mem_size;
