@@ -350,7 +350,9 @@ int Bank::newbank(string newbankdirname)
     expanddirname(bankdir);
 
     bankdir += newbankdirname;
-#ifdef _WIN32
+#ifdef _MSC_VER
+    if(_mkdir(bankdir.c_str()) < 0)
+#elif _WIN32
     if(mkdir(bankdir.c_str()) < 0)
 #else
     if(mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
