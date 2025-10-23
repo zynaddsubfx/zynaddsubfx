@@ -34,12 +34,13 @@ class CombFilterBank
     float sampleLerp(const float *smp, const float pos) const;
 
     float* comb_smps[NUM_SYMPATHETIC_STRINGS] = {};
-    float baseFreq;
+    float baseFreq=110.0f;
     unsigned int nrOfStrings=0;
     unsigned int pos_writer = 0;
 
     /* for smoothing gain jump when using binary valued sustain pedal */
     Value_Smoothing_Filter gain_smoothing;
+    Value_Smoothing_Filter offset_smoothing;
 
     Allocator &memory;
     unsigned int mem_size=0;

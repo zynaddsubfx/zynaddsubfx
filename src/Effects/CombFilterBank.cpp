@@ -3,6 +3,9 @@
 #include "../Misc/Util.h"
 #include "CombFilterBank.h"
 
+//maxDrop = (float)(PmaxDrop+1)/32.0f
+#define maxDrop_min 0.03125f // 1/32
+
 namespace zyn {
 
     struct FloatTuple {
@@ -14,9 +17,6 @@ namespace zyn {
     inputgain(1.0f),
     outgain(1.0f),
     gainbwd(initgain),
-    pitchOffset(0),
-    baseFreq(110.0f),
-    nrOfStrings(0),
     memory(*alloc),
     samplerate(samplerate_),
     buffersize(buffersize_)
@@ -26,6 +26,12 @@ namespace zyn {
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
         gain_smoothing.cutoff(1.0f);
         gain_smoothing.reset(gainbwd);
+        pos_writer = 0;
+        // setup the smoother for offset parameter
+        offset_smoothing.sample_rate(samplerate/16);
+        offset_smoothing.thresh(0.02f); // TBD: 2% jump audible?
+        offset_smoothing.cutoff(0.2f);
+        offset_smoothing.reset(0.0f);
         pos_writer = 0;
     }
 
@@ -207,32 +213,33 @@ namespace zyn {
         // interpolate gainbuf values over buffer length using value smoothing filter (lp)
         // this should prevent popping noise when controlled binary with 0 / 127
         // new control rate = samplerate / 16
-        const unsigned int gainbufsize = buffersize / 16;
-        float gainbuf[gainbufsize]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
+        const unsigned int smoothing_bufsize = buffersize / 16;
+        float gainbuf[smoothing_bufsize]; // buffer for value smoothing filter
+        if (!gain_smoothing.apply( gainbuf, smoothing_bufsize, gainbwd ) ) // interpolate the gain value
+            std::fill(gainbuf, gainbuf+smoothing_bufsize, gainbwd); // if nothing to interpolate (constant value)
+
+        float offsetbuf[smoothing_bufsize]; // buffer for value smoothing filter
+        if (!offset_smoothing.apply( offsetbuf, smoothing_bufsize, pitchOffset ) ) // interpolate the offset value
+            std::fill(offsetbuf, offsetbuf+smoothing_bufsize, pitchOffset); // if nothing to interpolate (constant value)
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
 
             const float input_smp = smp[i] * inputgain;
-            if (maxDrop < 1e-6f)
+            if (maxDrop == maxDrop_min)
             {   //Pitch drop deactivated
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {
                     if (delays[j] == 0.0f) continue;
-
-                    const float pos_reader = fmodf(float(pos_writer + mem_size), float(mem_size));
+                    const float delay = delays[j] * powf(2.0f, offsetbuf[i/16]);
+                    const float pos_reader = fmodf(float(pos_writer + mem_size - delay), float(mem_size));
                     const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
                     comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
-
                 }
             }
             else
             {   // Pitch drop Feature
                 const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
-                //~ const float normalizedPhase = sampleCounter>0.0f ? fmodf(sampleCounter / maxDrop + 0.5f, 1.0f)
-                                                                 //~ : fmodf((-sampleCounter) / maxDrop + 0.5f, 1.0f) ;
                 const float normalizedPhase = fmodf(fabsf(sampleCounter) / maxDrop + 0.5f, 1.0f);
 
                 const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
@@ -240,7 +247,7 @@ namespace zyn {
                 for (unsigned int j = 0; j < nrOfStrings; ++j)
                 {
                     if (delays[j] == 0.0f) continue;
-                    const float baseDelay = delays[j] * powf(2.0f, pitchOffset);
+                    const float baseDelay = delays[j] * powf(2.0f, offsetbuf[i/16]);
 
                     // Reading Head A
                     float sampleA = 0.0f;
