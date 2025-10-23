@@ -232,9 +232,9 @@ namespace zyn {
                 {
                     if (delays[j] == 0.0f) continue;
                     // apply pitchoffset to comb delay
-                    const float delay = delays[j] * powf(2.0f, offsetbuf[i/16]);
+                    const float delay = min(delays[j] * powf(2.0f, offsetbuf[i/16]), float(mem_size));
                     // calculate reading position and care for ring buffer range
-                    const float pos_reader = fmodf(float(pos_writer + mem_size - delay), float(mem_size));
+                    const float pos_reader = fmodf(float(pos_writer + mem_size) - delay, float(mem_size));
                     // sample at that position
                     const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
                     // add saturated feedback to comb

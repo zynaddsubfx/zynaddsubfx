@@ -310,7 +310,7 @@ void Sympathetic::calcFreqsGuitar()
 
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define PRESET_SIZE 16
+#define PRESET_SIZE 15
 #define NUM_PRESETS 6
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note
@@ -334,6 +334,9 @@ unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar
         }
         return presets[npreset][npar];
     }
+    else if (npreset < NUM_PRESETS && npar==15)
+        return 64;
+
     return 0;
 }
 
