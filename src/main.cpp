@@ -716,7 +716,7 @@ int main(int argc, char *argv[])
         gui_pid = fork();
         if(gui_pid == 0) {
             auto exec_fusion = [&addr](const char* path) {
-                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload", nullptr); };
 #ifndef __APPLE__
             if(fusion_dir && *fusion_dir)
             {
