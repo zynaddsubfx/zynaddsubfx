@@ -86,6 +86,8 @@ const rtosc::Ports Controller::ports = {
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(SMART),
+        "Polyphonic Mode"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
