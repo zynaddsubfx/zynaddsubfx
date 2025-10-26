@@ -1,3 +1,5 @@
+set (CMAKE_CXX_STANDARD 17)
+
 #checking include/library paths
 message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_PATH})
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
@@ -52,7 +54,6 @@ else()
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
-set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 CHECK_CXX_SOURCE_COMPILES(
     "#include <future>
     #if ATOMIC_INT_LOCK_FREE<2
@@ -277,13 +278,13 @@ set (BuildOptions_SSE
 check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
 
 set (BuildOptionsBasic
-    "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
+    "-Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 compiler options"
 )
 STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
 
 set (BuildOptionsDebug
-    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+    "-O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
     CACHE STRING "Debug build flags")
 STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
