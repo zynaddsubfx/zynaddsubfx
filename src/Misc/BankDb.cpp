@@ -4,11 +4,10 @@
 #include "../globals.h"
 #include <cstring>
 #include <sys/stat.h>
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <dirent.h>
-#endif
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <filesystem>
 
 namespace zyn {
 
@@ -192,55 +191,41 @@ static void saveCache(bvec vec)
 }
 
 // TODO: Check AI code in git diff
-void BankDb::scanBanks(void)
+void BankDb::scanBanks()
 {
+    namespace fs = std::filesystem;
+
     fields.clear();
     bvec cache = loadCache();
+
+    // Build lookup map from cached items
     bmap cc;
-    for (auto c : cache)
+    for (const auto& c : cache)
         cc[c.bank + c.file] = c;
 
     bvec ncache;
 
-    for (auto bank : banks)
+    // Iterate over known bank directories
+    for (const auto& bank : banks)
     {
-#ifdef _MSC_VER
-        WIN32_FIND_DATAA findData;
-        std::string searchPath = bank + "\\*" + INSTRUMENT_EXTENSION;
-        HANDLE hFind = FindFirstFileA(searchPath.c_str(), &findData);
-
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            do {
-                const char *filename = findData.cFileName;
-
-                auto xiz = processXiz(filename, bank, cc);
-                fields.push_back(xiz);
-                ncache.push_back(xiz);
-            } while (FindNextFileA(hFind, &findData));
-
-            FindClose(hFind);
-        }
-
-#else
-        DIR *dir = opendir(bank.c_str());
-        if (!dir)
+        if (!fs::exists(bank) || !fs::is_directory(bank))
             continue;
 
-        struct dirent *fn;
-        while ((fn = readdir(dir)))
+        for (const auto& entry : fs::directory_iterator(bank))
         {
-            const char *filename = fn->d_name;
+            if (!entry.is_regular_file())
+                continue;
 
-            if (!strstr(filename, INSTRUMENT_EXTENSION))
+            std::string filename = entry.path().filename().string();
+
+            // Skip non-instrument files
+            if (filename.find(INSTRUMENT_EXTENSION) == std::string::npos)
                 continue;
 
             auto xiz = processXiz(filename, bank, cc);
             fields.push_back(xiz);
             ncache.push_back(xiz);
         }
-        closedir(dir);
-#endif
     }
 
     saveCache(ncache);
