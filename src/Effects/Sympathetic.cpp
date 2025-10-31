@@ -75,7 +75,10 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(0, 0, 0, 0, 0, 32),  "Max Drop"),
     rEffPar(PfadingTime, 14, rShort("fade"), rDefault(5),
             rPresets(0, 0, 0, 0, 0, 32),  "Fading Time"),
-    rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "detune"),
+    rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "offset"),
+    rEffPar(PfreqOffset, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
+    rEffPar(PfreqOffset, 17, rShort("beta"), rDefault(127), "beta"),
+    rEffPar(PfreqOffset, 18, rShort("gamma"), rDefault(64), "gamma"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -263,7 +266,8 @@ void Sympathetic::calcFreqsGeneric()
 
     for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
     {
-        const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
+        const float n = (float)i + inharmonicity * powf(i, gamma);
+        const float centerFreq = powf(2.0f, powf(n, beta) / 36.0f) * baseFreq;
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
         if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
         if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
@@ -439,6 +443,23 @@ void Sympathetic::changepar(int npar, unsigned char value)
             PfreqOffset = value;
             filterBank->pitchOffset = (float)(PfreqOffset-64)/-64.0f;
             break;
+        case 16: // Inharmonizität (I)
+            Pinharmonicity = value;
+            // Skaliert 0..127 → 0.0 .. 1.0
+            inharmonicity = (float)value / 127.0f;
+            break;
+
+        case 17: // Beta-Exponent
+            Pbeta = value;
+            // Skaliert 0..127 → 0.5 .. 3.0 (Saiten bis Metall)
+            beta = 0.5f + ((float)value / 127.0f) * 2.5f;
+            break;
+
+        case 18: // Gamma-Exponent
+            Pgamma = value;
+            // Skaliert 0..127 → 1.0 .. 3.0 (harmonisch bis stark inharmonisch)
+            gamma = 1.0f + ((float)value / 127.0f) * 2.0f;
+            break;
 
         default:
             break;
@@ -464,6 +485,9 @@ unsigned char Sympathetic::getpar(int npar) const
         case 13: return PmaxDrop;
         case 14: return PfadingTime;
         case 15: return PfreqOffset;
+        case 16: return Pinharmonicity;
+        case 17: return Pbeta;
+        case 18: return Pgamma;
         default: return 0; //in case of bogus parameter number
     }
 }
