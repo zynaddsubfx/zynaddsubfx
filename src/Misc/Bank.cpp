@@ -32,6 +32,10 @@
 #include "Part.h"
 #include "BankDb.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
+
 #ifdef __APPLE__
 #include <dlfcn.h>
 
