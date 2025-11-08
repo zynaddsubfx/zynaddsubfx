@@ -68,17 +68,17 @@ class Sympathetic final:public Effect
         unsigned char PfadingTime;
         unsigned char PfreqOffset;
 
-        unsigned char Pinharmonicity;
-        unsigned char Pbeta;
-        unsigned char Pgamma;
+        unsigned char Pinharmonicity = 0;
+        unsigned char Pbeta=64;
+        unsigned char Pgamma=64;
 
 
         unsigned char spread, spread_old;
         float freqs[NUM_SYMPATHETIC_STRINGS];
         float baseFreq;
-        float inharmonicity;
-        float beta;
-        float gamma;
+        float inharmonicity = 0.0f;
+        float beta = 1.0f;
+        float gamma = 2.0f;
 
         unsigned int srate;
 

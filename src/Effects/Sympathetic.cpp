@@ -20,6 +20,8 @@
 #include <rtosc/port-sugar.h>
 #include "../globals.h"
 
+#define INH_MAX_OCTAVES 6.0f
+
 namespace zyn {
 
 #define rObject Sympathetic
@@ -76,9 +78,9 @@ rtosc::Ports Sympathetic::ports = {
     rEffPar(PfadingTime, 14, rShort("fade"), rDefault(5),
             rPresets(0, 0, 0, 0, 0, 32),  "Fading Time"),
     rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "offset"),
-    rEffPar(PfreqOffset, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
-    rEffPar(PfreqOffset, 17, rShort("beta"), rDefault(127), "beta"),
-    rEffPar(PfreqOffset, 18, rShort("gamma"), rDefault(64), "gamma"),
+    rEffPar(Pinharmonicity, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
+    rEffPar(Pbeta, 17, rShort("beta"), rDefault(64), "beta"),
+    rEffPar(Pgamma, 18, rShort("gamma"), rDefault(64), "gamma"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -264,16 +266,46 @@ void Sympathetic::calcFreqsGeneric()
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
     const float unison_real_spread_down = 1.0f/unison_real_spread_up;
 
-    for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
-    {
-        const float n = (float)i + inharmonicity * powf(i, gamma);
-        const float centerFreq = powf(2.0f, powf(n, beta) / 36.0f) * baseFreq;
-        filterBank->delays[i] = ((float)samplerate)/centerFreq;
-        if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
-        if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
-    }
-    filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+    // Set minimum frequency to 1/8 of base frequency (3 octaves down)
+    // This prevents excessively low frequencies that cause long delays
+    const float min_freq = baseFreq * 0.125f;
 
+    // Alternative: set minimum based on practical musical considerations
+    // const float min_freq = 20.0f; // 20Hz absolute minimum
+
+    for(unsigned int i = 0; i < Punison_size*Pstrings; i += Punison_size)
+    {
+        const float n_norm = (float)(i/Punison_size) / (float)(Pstrings - 1);
+
+        // Positive-only inharmonicity
+        float harmonicOffset = powf(n_norm, beta) * INH_MAX_OCTAVES;
+        float inharmonicOffset = 0.0f;
+        if (inharmonicity > 0.0f) {
+            inharmonicOffset = inharmonicity * powf(n_norm, gamma) * INH_MAX_OCTAVES;
+        }
+
+        float log2Offset = harmonicOffset + inharmonicOffset;
+        float centerFreq = baseFreq * powf(2.0f, log2Offset);
+
+        // Skip frequencies that are too low to be useful
+        if (centerFreq < min_freq) {
+            filterBank->delays[i] = 0.0f;
+            if (Punison_size > 1) filterBank->delays[i+1] = 0.0f;
+            if (Punison_size > 2) filterBank->delays[i+2] = 0.0f;
+            continue;
+        }
+
+        // Calculate delays for valid frequencies
+        filterBank->delays[i] = ((float)samplerate)/centerFreq;
+        if (Punison_size > 1) {
+            filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
+        }
+        if (Punison_size > 2) {
+            filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
+        }
+    }
+
+    filterBank->setStrings(Pstrings*Punison_size, baseFreq);
 }
 
 void Sympathetic::calcFreqsPiano()
@@ -444,21 +476,30 @@ void Sympathetic::changepar(int npar, unsigned char value)
             filterBank->pitchOffset = (float)(PfreqOffset-64)/-64.0f;
             break;
         case 16: // Inharmonizität (I)
-            Pinharmonicity = value;
-            // Skaliert 0..127 → 0.0 .. 1.0
-            inharmonicity = (float)value / 127.0f;
+            if (Pinharmonicity!=value) {
+                Pinharmonicity = value;
+                // Skaliert 0..127 → 0.0 .. 1.0
+                inharmonicity = (float)value / 127.0f;
+                calcFreqs();
+            }
             break;
 
         case 17: // Beta-Exponent
-            Pbeta = value;
-            // Skaliert 0..127 → 0.5 .. 3.0 (Saiten bis Metall)
-            beta = 0.5f + ((float)value / 127.0f) * 2.5f;
+            if (Pbeta!=value) {
+                Pbeta = value;
+                // Skaliert 0..127 → 1.5 .. 0.5 (Saiten bis Metall)
+                beta = 1.5f - ((float)value / 256.0f) * 2.0f;
+                calcFreqs();
+            }
             break;
 
         case 18: // Gamma-Exponent
-            Pgamma = value;
-            // Skaliert 0..127 → 1.0 .. 3.0 (harmonisch bis stark inharmonisch)
-            gamma = 1.0f + ((float)value / 127.0f) * 2.0f;
+            if (Pgamma!=value) {
+                Pgamma = value;
+                // Skaliert 0..127 → 1.0 .. 3.0 (harmonisch bis stark inharmonisch)
+                gamma = 3.0f - ((float)value / 64.0f);
+                calcFreqs();
+            }
             break;
 
         default:
