@@ -164,13 +164,14 @@ void os_usleep(long length)
 
 std::uint32_t os_getpid()
 {
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
     return static_cast<std::uint32_t>(GetCurrentProcessId());
 #else
     return static_cast<std::uint32_t>(getpid());
 #endif
 }
 
+#ifndef _MSC_VER
 //!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
@@ -207,6 +208,8 @@ std::string os_pid_as_padded_string()
     // the below pointer should never cause segfaults:
     return result_str + max_pid_len + written - os_guess_pid_length();
 }
+
+#endif
 
 std::string legalizeFilename(std::string filename)
 {

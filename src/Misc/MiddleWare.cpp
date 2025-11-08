@@ -11,12 +11,12 @@
 */
 #include "MiddleWare.h"
 
+#include <csignal>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <mutex>
 
@@ -28,9 +28,6 @@
 
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
-
-#include <map>
-#include <queue>
 
 #include "Util.h"
 #include "CallbackRepeater.h"
@@ -52,10 +49,16 @@
 #include "../Synth/OscilGen.h"
 #include "../Nio/Nio.h"
 
-#include <string>
-#include <future>
+#include <algorithm>
 #include <atomic>
+#include <filesystem>
+#include <fstream>
+#include <future>
 #include <list>
+#include <map>
+#include <queue>
+#include <string>
+#include <vector>
 
 #define errx(...) {}
 #define warnx(...) {}
@@ -1117,52 +1120,36 @@ class MwDataObj:public rtosc::RtData
         MiddleWareImpl   *mwi;
 };
 
-static std::vector<std::string> getFiles(const char *folder, bool finddir)
+static std::vector<std::string> getFiles(const std::string &folder, bool finddir)
 {
-    DIR *dir = opendir(folder);
+    namespace fs = std::filesystem;
 
-    if(dir == NULL) {
-        return {};
-    }
-
-    struct dirent *fn;
-    std::vector<string> files;
+    std::vector<std::string> files;
     bool has_updir = false;
 
-    while((fn = readdir(dir))) {
-#ifndef WIN32
-        bool is_dir = fn->d_type == DT_DIR;
-        //it could still be a symbolic link
-        if(!is_dir) {
-            string path = string(folder) + "/" + fn->d_name;
-            struct stat buf;
-            memset((void*)&buf, 0, sizeof(buf));
-            int err = stat(path.c_str(), &buf);
-            if(err)
-                printf("[Zyn:Error] stat cannot handle <%s>:%d\n", path.c_str(), err);
-            if(S_ISDIR(buf.st_mode)) {
-                is_dir = true;
-            }
-        }
-#else
-        std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
-        //printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
-        //printf("desired mask =  %x\n", mask);
-        //printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
-        bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
-#endif
-        if(finddir == is_dir && strcmp(".", fn->d_name))
-            files.push_back(fn->d_name);
+    std::error_code ec;
+    if (!fs::exists(folder, ec) || !fs::is_directory(folder, ec))
+        return {};
 
-        if(!strcmp("..", fn->d_name))
+    for (const auto &entry : fs::directory_iterator(folder, ec)) {
+        if (ec) break;
+
+        const auto &path = entry.path();
+        bool is_dir = entry.is_directory(ec);
+        std::string name = path.filename().string();
+
+        if (finddir == is_dir && name != ".")
+            files.push_back(name);
+
+        if (name == "..")
             has_updir = true;
     }
 
-    if(finddir == true && has_updir == false)
+    // Mimic the original behavior: if looking for dirs and ".." was missing, add it.
+    if (finddir && !has_updir)
         files.push_back("..");
 
-    closedir(dir);
-    std::sort(begin(files), end(files));
+    std::sort(files.begin(), files.end());
     return files;
 }
 
@@ -2478,47 +2465,77 @@ void MiddleWare::enableAutoSave(int interval_sec)
     impl->autoSave.dt = interval_sec;
 }
 
-int MiddleWare::checkAutoSave(void) const
+int MiddleWare::checkAutoSave() const
 {
-    //save spec zynaddsubfx-PID-autosave.xmz
-    const std::string home     = getenv("HOME");
-    const std::string save_dir = home+"/.local/";
+    namespace fs = std::filesystem;
 
-    DIR *dir = opendir(save_dir.c_str());
-
-    if(dir == NULL)
+    const char *home_env = std::getenv("HOME");
+#ifdef _WIN32
+    if (!home_env)
+        home_env = std::getenv("USERPROFILE");
+#endif
+    if (!home_env)
         return -1;
 
-    struct dirent *fn;
-    int    reload_save = -1;
+    const std::string save_dir = std::string(home_env) + "/.local";
+    if (!fs::exists(save_dir) || !fs::is_directory(save_dir))
+        return -1;
 
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
-        const char *prefix = "zynaddsubfx-";
+    const std::string prefix = "zynaddsubfx-";
+    int reload_save = -1;
 
-        //check for manditory prefix
-        if(strstr(filename, prefix) != filename)
+    for (const auto &entry : fs::directory_iterator(save_dir)) {
+        const std::string filename = entry.path().filename().string();
+
+        // Must start with prefix
+        if (filename.rfind(prefix, 0) != 0)
             continue;
 
-        int id = atoi(filename+strlen(prefix));
+        // Extract PID
+        const std::string after_prefix = filename.substr(prefix.size());
+        const size_t dash_pos = after_prefix.find('-');
+        if (dash_pos == std::string::npos)
+            continue;
+
+        const std::string pid_str = after_prefix.substr(0, dash_pos);
+        const int pid = std::atoi(pid_str.c_str());
+        if (pid <= 0)
+            continue;
 
         bool in_use = false;
 
-        std::string proc_file = "/proc/" + to_s(id) + "/comm";
+#ifdef __linux__
+        // Linux: check /proc/<pid>/comm for process name
+        const std::string proc_file = "/proc/" + std::to_string(pid) + "/comm";
         std::ifstream ifs(proc_file);
-        if(ifs.good()) {
+        if (ifs.good()) {
             std::string comm_name;
             ifs >> comm_name;
             in_use = (comm_name == "zynaddsubfx");
         }
 
-        if(!in_use) {
-            reload_save = id;
+#elif defined(__APPLE__)
+        // macOS: check if the PID exists and belongs to current user
+        // kill(pid, 0) returns 0 if process exists, -1 otherwise
+        if (kill(pid, 0) == 0) {
+            // Process exists, but we can't easily check its name on macOS
+            // (You could use sysctl(), but that’s overkill here)
+            in_use = true;
+        }
+
+#elif defined(_WIN32)
+        HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+        if (hProc) {
+            CloseHandle(hProc);
+            in_use = true;
+        }
+#endif
+
+        if (!in_use) {
+            reload_save = pid;
             break;
         }
     }
-
-    closedir(dir);
 
     return reload_save;
 }
