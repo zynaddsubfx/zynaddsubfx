@@ -60,6 +60,9 @@ static const Ports sysefxPort =
             // go backto the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -92,6 +95,9 @@ static const Ports sysefsendto =
             //go backto the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);

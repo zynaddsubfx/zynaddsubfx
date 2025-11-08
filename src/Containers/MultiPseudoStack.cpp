@@ -63,7 +63,11 @@ retry:
 
             //Set the next element
             int sane_read = next_r.compare_exchange_strong(next_tag, next_next_tag);
+#ifdef NDEBUG
+            (void)sane_read;
+#else
             assert(sane_read && "No double read on a single tag");
+#endif
 
             //Decrement available elements
             int32_t free_elms_next = avail.load();
@@ -91,7 +95,11 @@ retry:
 
     //Update tag
     int sane_write = tag[Q-data].compare_exchange_strong(invalid_tag, write_tag);
+#ifdef NDEBUG
+    (void)sane_write;
+#else
     assert(sane_write);
+#endif
 
     //Increment available elements
     int32_t free_elms = avail.load();

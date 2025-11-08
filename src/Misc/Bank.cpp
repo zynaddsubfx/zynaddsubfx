@@ -288,14 +288,13 @@ int Bank::newbank(string newbankdirname)
     expanddirname(bankdir);
 
     bankdir += newbankdirname;
-#ifdef _MSC_VER
-    if(_mkdir(bankdir.c_str()) < 0)
-#elif _WIN32
-    if(mkdir(bankdir.c_str()) < 0)
-#else
-    if(mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
-#endif
+    
+    try {
+        if (!std::filesystem::exists(bankdir))
+            std::filesystem::create_directories(bankdir);
+    } catch (...) {
         return -1;
+    }
 
     const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 
@@ -370,7 +369,7 @@ void Bank::rescanforbanks()
     {
         //Search the VST Directory for banks/preset/etc
         char path[1024];
-        GetModuleFileName(GetModuleHandle("ZynAddSubFX.dll"), path, sizeof(path));
+        GetModuleFileNameA(GetModuleHandleA("ZynAddSubFX.dll"), path, sizeof(path));
         if(strstr(path, "ZynAddSubFX.dll")) {
             strstr(path, "ZynAddSubFX.dll")[0] = 0;
             strcat(path, "banks");
@@ -453,7 +452,7 @@ void Bank::scanrootdir(std::string rootdir)
             continue;
 
         bankstruct bank;
-        bank.dir  = (entry.path().string() + fs::path::preferred_separator);
+        bank.dir  = (entry.path().string() + std::string(1, fs::path::preferred_separator));
         bank.name = dirname;
 
         bool isbank = false;
