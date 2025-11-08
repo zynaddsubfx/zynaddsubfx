@@ -114,7 +114,7 @@ mark_as_advanced(FORCE ZynFusionDir)
 
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND NOT MSVC)
   add_definitions(-static)
 endif()
 

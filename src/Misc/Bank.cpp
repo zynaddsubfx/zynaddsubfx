@@ -288,7 +288,7 @@ int Bank::newbank(string newbankdirname)
     expanddirname(bankdir);
 
     bankdir += newbankdirname;
-    
+
     try {
         if (!std::filesystem::exists(bankdir))
             std::filesystem::create_directories(bankdir);

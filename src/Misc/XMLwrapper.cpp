@@ -136,7 +136,11 @@ XMLwrapper::XMLwrapper()
 #else
         mxmlNewDeclaration(tree, "DOCTYPE ZynAddSubFX-data");
 #endif
+#ifdef NDEBUG
+    (void)doctype;
+#else
     assert(doctype);
+#endif
 
     node = root = addparams("ZynAddSubFX-data", 4,
                             "version-major", stringFrom<int>(
