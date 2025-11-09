@@ -344,8 +344,8 @@ void Sympathetic::calcFreqsGeneric()
             printf("[%d]: %f", i+2, filterBank->delays[i+2]);
         }
     }
-
-    filterBank->setStrings(Pstrings*Punison_size, baseFreq);
+    // factor for pitchdrop Maxdrop: 2^4 = 16, Pitchoffset: 2^1 = 2  -> 2^5 = 32.0f
+    filterBank->setStrings(Pstrings*Punison_size, baseFreq/32.0f);
 }
 
 void Sympathetic::calcFreqsPiano()

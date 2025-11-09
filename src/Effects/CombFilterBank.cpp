@@ -45,11 +45,11 @@ namespace zyn {
         // limit nrOfStringsNew
         nrOfStringsNew = min(NUM_SYMPATHETIC_STRINGS,nrOfStringsNew);
 
-        if((nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq) || baseFreqNew < 27.50f)
+        if((nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq) || baseFreqNew < 0.85f)
             return;
 
         baseFreq = baseFreqNew;
-        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew*1.03f + maxDrop + buffersize + 2)/16) * 16;
+        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew*1.03f + buffersize + 2)/16) * 16;
         setStrings(nrOfStringsNew, mem_size_new);
     }
 
