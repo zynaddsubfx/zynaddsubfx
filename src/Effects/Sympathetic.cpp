@@ -263,45 +263,85 @@ void Sympathetic::calcFreqsPitchDrop()
 void Sympathetic::calcFreqsGeneric()
 {
     const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
-    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
-    const float unison_real_spread_down = 1.0f/unison_real_spread_up;
+    const float unison_real_spread_up   = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    const float unison_real_spread_down = 1.0f / unison_real_spread_up;
 
-    // Set minimum frequency to 1/8 of base frequency (3 octaves down)
-    // This prevents excessively low frequencies that cause long delays
-    const float min_freq = baseFreq * 0.125f;
+    const float min_freq = baseFreq * 0.125f; // Prevent overly long delays (3 octaves down)
 
-    // Alternative: set minimum based on practical musical considerations
-    // const float min_freq = 20.0f; // 20Hz absolute minimum
-
-    for(unsigned int i = 0; i < Punison_size*Pstrings; i += Punison_size)
+    for (unsigned int i = 0; i < Punison_size * Pstrings; i += Punison_size)
     {
-        const float n_norm = (float)(i/Punison_size) / (float)(Pstrings - 1);
+        // normalized index along the string set (0..1)
+        const float n_norm = (float)(i / Punison_size) / (float)(Pstrings - 1);
+        const float n = (float)(i / Punison_size); // integer index for semitone spacing
 
-        // Positive-only inharmonicity
-        float harmonicOffset = powf(n_norm, beta) * INH_MAX_OCTAVES;
-        float inharmonicOffset = 0.0f;
-        if (inharmonicity > 0.0f) {
-            inharmonicOffset = inharmonicity * powf(n_norm, gamma) * INH_MAX_OCTAVES;
+        // --- Base linear distribution: exact semitone spacing ---
+        // Each "string" corresponds to one semitone relative to baseFreq
+        float log2Base = n / 12.0f; // 12 semitones per octave
+
+        // --- Nonlinear deformation controlled by beta ---
+        // When beta = 1.0 → no deformation (pure semitone spacing)
+        // beta > 1.0  → high partials are stretched (metallic)
+        // beta < 1.0  → low partials are stretched (softer, string-like)
+        float nonlinearDeform = 0.0f;
+        if (beta != 1.0f && n_norm > 0.0f) {
+            // power curve relative to linear spacing
+            // result normalized so that the end of the range stays at INH_MAX_OCTAVES
+            float scaled = powf(n_norm, beta) - n_norm;
+            nonlinearDeform = scaled * (INH_MAX_OCTAVES / 12.0f); // scale to octave range
         }
 
-        float log2Offset = harmonicOffset + inharmonicOffset;
+        // --- Inharmonic Offset Calculation ---
+        // Goal:
+        //   Add inharmonicity *above* the regular harmonic (log2-based) distribution,
+        //   so that the parameter acts independently from the harmonic stretch (beta).
+        //   The idea is: 'beta' shapes the overall spacing of harmonics (macro scale),
+        //   while 'inharmonicity' adds local deviations (micro scale) mainly in upper regions.
+
+        float inharmonicOffset = 0.0f;
+
+        if (inharmonicity > 0.0f) {
+            // Nonlinear weighting that emphasizes higher string indices
+            // n_norm = 0 -> lowest string, n_norm = 1 -> highest string
+            //
+            // Using powf(n_norm, gamma) ensures we can shape where the inharmonicity starts:
+            //   gamma < 1.0 → affects more of the range (softer curve)
+            //   gamma > 1.0 → concentrated toward the top (steeper curve)
+            //
+            // The (1 - powf(...)) term makes the offset start at 0 for n_norm=0
+            // and smoothly reach its maximum near n_norm=1.
+
+            float shaped = powf(n_norm, gamma);           // shape curve along strings
+            float rising = 1.0f - powf(1.0f - shaped, 2); // emphasize top-end effect
+
+            // Apply inharmonic scaling and clamp to maximum range
+            // INH_MAX_OCTAVES defines the maximum allowed offset range (e.g., 2 = 2 octaves)
+            inharmonicOffset = inharmonicity * rising * INH_MAX_OCTAVES;
+        }
+
+        // Combine base (halftone) + deformation + inharmonicity
+        float log2Offset = log2Base + nonlinearDeform + inharmonicOffset;
+
         float centerFreq = baseFreq * powf(2.0f, log2Offset);
 
-        // Skip frequencies that are too low to be useful
+        // Skip frequencies that are too low
         if (centerFreq < min_freq) {
             filterBank->delays[i] = 0.0f;
-            if (Punison_size > 1) filterBank->delays[i+1] = 0.0f;
-            if (Punison_size > 2) filterBank->delays[i+2] = 0.0f;
+            if (Punison_size > 1) filterBank->delays[i + 1] = 0.0f;
+            if (Punison_size > 2) filterBank->delays[i + 2] = 0.0f;
             continue;
         }
 
+
         // Calculate delays for valid frequencies
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
+        printf("\ndelays[%d]: %f", i, filterBank->delays[i]);
         if (Punison_size > 1) {
             filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
+            printf(" [%d]: %f", i+1, filterBank->delays[i+1]);
         }
         if (Punison_size > 2) {
             filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
+            printf("[%d]: %f", i+2, filterBank->delays[i+2]);
         }
     }
 
