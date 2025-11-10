@@ -183,6 +183,7 @@ void CombFilter::setlpf(unsigned char _Plpf)
     Plpf = _Plpf;
     if(Plpf == 127) { //No LowPass
         memory.dealloc(lpf);
+        lpfDelay = 0.0f;
     } else {
         const float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
         if(!lpf)
