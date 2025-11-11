@@ -95,7 +95,7 @@ class UnisonTest
             params->VoicePar[0].Unison_invert_phase     = f;
 
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-            ADnote* note = new ADnote(params, pars);
+            ADnote* note = new ADnote(params, pars, nullptr, nullptr, false /* compatibility mode */);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(values[0], outL[80], 2.5e-4);
             printf("{%f,", outL[80]);
