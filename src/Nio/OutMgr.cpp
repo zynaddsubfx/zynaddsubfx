@@ -223,7 +223,6 @@ string OutMgr::getSink() const
         cerr << "BUG: No current output in OutMgr " << __LINE__ << endl;
         return "ERROR";
     }
-    return "ERROR";
 }
 
 void OutMgr::setAudioCompressor(bool isEnabled)
