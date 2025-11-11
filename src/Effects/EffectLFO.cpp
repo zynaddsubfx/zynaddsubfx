@@ -63,12 +63,12 @@ float EffectLFO::biquad(float input)
 
     if (Pfreq!=freq ) // calculate coeffs only if cutoff changed
     {
-        freq = Pfreq;
+        freq = (float)Pfreq;
         // calculate biquad coefficients
-        FcAbs = (freq + 7.0f)*(freq + 7.0f) / 8192; // max value < 40
-        K = tan(PI * limit(FcAbs * dt,0.001f,0.4f)); // FcRel * dt_ max 40 * 0.01 = 0.4,
+        const float FcAbs = (freq + 2.0f)*(freq + 2.0f) / 8192; // max value < 40
+        const float K = tan(PI * limit(FcAbs * dt,0.001f,0.4f)); // FcRel * dt_ max 40 * 0.01 = 0.4,
         // LIMIT in case of LFO sampling frequency lower than 100 Hz
-        norm = 1.0f / (1.0f + K / 0.7071f + K * K);
+        const float norm = 1.0f / (1.0f + K / 0.7071f + K * K);
         a0 = K * K * norm;
         a1 = 2.0f * a0;
         a2 = a0;
@@ -99,7 +99,7 @@ float EffectLFO::getlfoshape(float x)
                 out = 4.0f * x - 4.0f;
             break;
         case 2: //EffectLFO_NOISE
-            last_random = 2*RND-1;
+            last_random = 8.0f*RND-4.0f; // range -4 ... +4
             return biquad(last_random);
 
 

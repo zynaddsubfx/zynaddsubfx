@@ -78,7 +78,7 @@ private:
     float buffersize_f;  //!< Buffer size
     float dt;
     float last_random;
-    float FcAbs, K, norm, freq;
+    float freq;
 
 
     //biquad coefficients for lp filtering in noise-LFO
