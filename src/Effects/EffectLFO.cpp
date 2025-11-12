@@ -21,7 +21,6 @@ namespace zyn {
 
     constexpr float SAMPLE_RATE_SCALE = 8192.0f;  // 2^13, used for frequency normalization
     constexpr float FREQUENCY_OFFSET = 2.0f;      // Frequency offset to prevent division by zero
-    constexpr float MAX_FC_NORMALIZED = 40.0f;    // Maximum normalized cutoff frequency
 
     // Resonance and Q factor constants
     constexpr float DEFAULT_RESONANCE = 0.7071f;  // Butterworth response (Q = 1/sqrt(2))
