@@ -121,8 +121,9 @@ float EffectLFO::getlfoshape(float x)
                 out = 4.0f * x - 4.0f;
             break;
         case 2: //EffectLFO_NOISE
-            last_random = 8.0f*RND-4.0f; // range -4 ... +4
-            return biquad(last_random);
+            float rnd_val;
+            rnd_val = 8.0f*RND-4.0f; // range -4 ... +4
+            return biquad(rnd_val);
 
 
         //when adding more, ensure ::updateparams() gets updated
