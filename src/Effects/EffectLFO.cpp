@@ -19,6 +19,18 @@
 
 namespace zyn {
 
+    constexpr float SAMPLE_RATE_SCALE = 8192.0f;  // 2^13, used for frequency normalization
+    constexpr float FREQUENCY_OFFSET = 2.0f;      // Frequency offset to prevent division by zero
+    constexpr float MAX_FC_NORMALIZED = 40.0f;    // Maximum normalized cutoff frequency
+
+    // Resonance and Q factor constants
+    constexpr float DEFAULT_RESONANCE = 0.7071f;  // Butterworth response (Q = 1/sqrt(2))
+
+    // Stability limits for K calculation
+    constexpr float MIN_NORMALIZED_FREQ = 0.001f;
+    constexpr float MAX_NORMALIZED_FREQ = 0.4f;
+
+
 EffectLFO::EffectLFO(float srate_f, float bufsize_f)
     :Pfreq(40),
       Prandomness(0),
@@ -64,16 +76,26 @@ float EffectLFO::biquad(float input)
     if (Pfreq!=freq ) // calculate coeffs only if cutoff changed
     {
         freq = (float)Pfreq;
-        // calculate biquad coefficients
-        const float FcAbs = (freq + 2.0f)*(freq + 2.0f) / 8192; // max value < 40
-        const float K = tan(PI * limit(FcAbs * dt,0.001f,0.4f)); // FcRel * dt_ max 40 * 0.01 = 0.4,
-        // LIMIT in case of LFO sampling frequency lower than 100 Hz
-        const float norm = 1.0f / (1.0f + K / 0.7071f + K * K);
+        // Normalize cutoff frequency to prevent extreme values
+        // FcAbs represents the normalized angular frequency
+        const float normalizedCutoff = (freq + FREQUENCY_OFFSET) * (freq + FREQUENCY_OFFSET) / SAMPLE_RATE_SCALE;
+
+        // Apply frequency warping using bilinear transform
+        // Limit the normalized frequency to ensure numerical stability
+        const float normalizedFreq = limit(normalizedCutoff * dt, MIN_NORMALIZED_FREQ, MAX_NORMALIZED_FREQ);
+        const float K = tan(PI * normalizedFreq);  // Frequency warping for digital domain
+
+        // Calculate filter coefficients for normalized low-pass filter
+        const float norm = 1.0f / (1.0f + K / DEFAULT_RESONANCE + K * K);
+
+        // Numerator coefficients (feedforward path)
         a0 = K * K * norm;
         a1 = 2.0f * a0;
         a2 = a0;
+
+        // Denominator coefficients (feedback path)
         b1 = 2.0f * (K * K - 1.0f) * norm;
-        b2 = (1.0f - K / 0.7071f + K * K) * norm;
+        b2 = (1.0f - K / DEFAULT_RESONANCE + K * K) * norm;
     }
 
     // lp filter the (s&h) random LFO
@@ -105,7 +127,7 @@ float EffectLFO::getlfoshape(float x)
 
         //when adding more, ensure ::updateparams() gets updated
         default:
-            out = cosf(x * 2.0f * PI); //EffectLFO_SINE // TODO: use M_PI ?
+            out = cosf(x * 2.0f * PI); //EffectLFO_SINE
     }
     return out;
 }
