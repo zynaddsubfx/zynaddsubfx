@@ -38,7 +38,7 @@ public:
      * @param srate_f Sample rate in Hz.
      * @param bufsize_f Buffer size in samples.
      */
-    EffectLFO(float srate_f, float bufsize_f);
+    EffectLFO(const float srate_f, const float bufsize_f);
 
     /**
      * Destructs the EffectLFO object.
@@ -56,7 +56,7 @@ public:
      * @param phaseOffset Phase offset in radians or normalized units (0.0 = no offset)
      *                   Non-zero values return phase-shifted output without state update
      */
-    void effectlfoout(float *outl, float *outr, float phaseOffset = 0.0f);
+    void effectlfoout(float* const outl, float* const outr, const float phaseOffset = 0.0f);
 
     /**
      * Updates the LFO parameters based on the current settings.
@@ -84,7 +84,7 @@ private:
      * @param x Normalized phase value (0.0 to 1.0)
      * @return The calculated LFO shape value in range [-1.0, 1.0]
      */
-    float getlfoshape(float x);
+    float getlfoshape(const float x);
 
     /**
      * Processes a sample through the biquad low-pass filter.
@@ -96,7 +96,7 @@ private:
      * @param input Input sample to filter
      * @return Filtered output sample
      */
-    float biquad(float input);
+    float biquad(const float input);
 
     // Phase management
     float xl;       //!< Phase accumulator for left channel (0.0 to 1.0)
