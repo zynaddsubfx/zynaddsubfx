@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <mutex>
+#include <thread>
 
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
@@ -747,6 +748,7 @@ public:
 
                 doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
                 {
+                    using namespace std::literals::chrono_literals;
                     savefile = master->saveOSC(savefile, alreadyWritten);
 #if 1
                     // load the savefile string into another master to compare the results
@@ -754,7 +756,7 @@ public:
                     // this requires a temporary master switch
                     Master* old_master = master;
                     dispatcher.updateMaster(&master2);
-                    while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(old_master->isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 
                     res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
                     // TODO: compare MiddleWare, too?
@@ -764,7 +766,7 @@ public:
                     // We need to wait until savefile has been loaded into master2
                     int i;
                     for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
-                        os_usleep(50000);
+                        std::this_thread::sleep_for(50ms);
                     if(i >= 20) // >= 1 second?
                     {
                         // Master failed to fetch its messages
@@ -773,7 +775,7 @@ public:
                     printf("Saved in less than %d ms.\n", 50*i);
 
                     dispatcher.updateMaster(old_master);
-                    while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(master2.isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 #endif
                     if(res < 0)
                     {
@@ -2050,7 +2052,8 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     int tries = 0;
     while(tries++ < 10000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();
@@ -2154,7 +2157,8 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     int tries = 0;
     while(tries++ < 2000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();

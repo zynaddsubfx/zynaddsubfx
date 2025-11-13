@@ -70,9 +70,6 @@ void set_realtime();
 /** OS independent return of PID */
 std::uint32_t os_getpid();
 
-/** OS independent sleep in microseconds */
-void os_usleep(long length);
-
 #ifndef _MSC_VER
 //! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
