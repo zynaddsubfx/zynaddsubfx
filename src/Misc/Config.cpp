@@ -194,7 +194,7 @@ void Config::init()
     cfg.SampleRate      = 44100;
     cfg.SoundBufferSize = 256;
     cfg.OscilSize  = 1024;
-    cfg.SwapStereo = 0;
+    cfg.SwapStereo = false;
     cfg.AudioOutputCompressor = 0;
 
     cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
@@ -205,14 +205,14 @@ void Config::init()
     cfg.WindowsWaveOutId = 0;
     cfg.WindowsMidiInId  = 0;
 
-    cfg.BankUIAutoClose = 0;
+    cfg.BankUIAutoClose = false;
 
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
-    cfg.SaveFullXml = 0;
-    cfg.CheckPADsynth = 1;
-    cfg.IgnoreProgramChange = 0;
+    cfg.SaveFullXml = false;
+    cfg.CheckPADsynth = true;
+    cfg.IgnoreProgramChange = false;
 
     cfg.UserInterfaceMode = 0;
     cfg.VirKeybLayout     = 1;
@@ -320,7 +320,7 @@ void Config::readConfig(const char *filename)
                                       cfg.OscilSize,
                                       MAX_AD_HARMONICS * 2,
                                       131072);
-        cfg.SwapStereo = xmlcfg.getpar("swap_stereo",
+        cfg.SwapStereo = (bool) xmlcfg.getpar("swap_stereo",
                                        cfg.SwapStereo,
                                        0,
                                        1);
@@ -328,7 +328,7 @@ void Config::readConfig(const char *filename)
                                        cfg.AudioOutputCompressor,
                                        0,
                                        1);
-        cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
+        cfg.BankUIAutoClose = (bool) xmlcfg.getpar("bank_window_auto_close",
                                             cfg.BankUIAutoClose,
                                             0,
                                             1);
@@ -344,17 +344,17 @@ void Config::readConfig(const char *filename)
                                            0,
                                            1);
 
-        cfg.SaveFullXml  = xmlcfg.getpar("SaveFullXml",
+        cfg.SaveFullXml  = (bool) xmlcfg.getpar("SaveFullXml",
                                            cfg.SaveFullXml,
                                            0,
                                            1);
 
-        cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
+        cfg.CheckPADsynth = (bool) xmlcfg.getpar("check_pad_synth",
                                           cfg.CheckPADsynth,
                                           0,
                                           1);
 
-        cfg.IgnoreProgramChange = xmlcfg.getpar("ignore_program_change",
+        cfg.IgnoreProgramChange = (bool) xmlcfg.getpar("ignore_program_change",
                                           cfg.IgnoreProgramChange,
                                           0,
                                           1);

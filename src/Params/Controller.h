@@ -78,7 +78,7 @@ class Controller
         struct { //Expression
             int   data;
             float relvolume;
-            unsigned char receive;
+            SafeBool receive;
         } expression;
 
         struct { //Panning
@@ -104,41 +104,41 @@ class Controller
             int   data;
             float relbw;
             unsigned char depth;
-            unsigned char exponential;
+            SafeBool exponential;
         } bandwidth;
 
         struct { //Modulation Wheel
             int   data;
             float relmod;
             unsigned char depth;
-            unsigned char exponential;
+            SafeBool exponential;
         } modwheel;
 
         struct { //FM amplitude
             int   data;
             float relamp;
-            unsigned char receive;
+            SafeBool receive;
         } fmamp;
 
         struct { //Volume
             int   data;
             float volume;
-            unsigned char receive;
+            SafeBool receive;
         } volume;
 
         struct { //Sustain
             int data, sustain;
-            unsigned char receive;
+            SafeBool receive;
         } sustain;
 
         struct { /**<Portamento*/
             //parameters
             int data;
-            unsigned char portamento;
+            SafeBool portamento;
             /**Whether the portamento midi events are received or not*/
-            unsigned char receive;
+            SafeBool receive;
             /**Whether legato playing is needed to get portamento*/
-            unsigned char automode;
+            SafeBool automode;
             /** The time that it takes for the portamento to complete
              *
              * Translates in an expontal fashion to 0 Seconds to 1.93f Seconds
@@ -148,7 +148,7 @@ class Controller
              *
              * 0 - constant time(default)
              * 1 - proportional*/
-            unsigned char proportional;
+            SafeBool proportional;
             /**Rate of proportinal portamento*/
             unsigned char propRate;
             /**Depth of proportinal portamento*/
@@ -156,7 +156,7 @@ class Controller
             /**pitchthresh is the threshold of enabling protamento*/
             unsigned char pitchthresh;
             /**enable the portamento only below(0)/above(1) the threshold*/
-            unsigned char pitchthreshtype;
+            SafeBool pitchthreshtype;
 
             /**this value represent how the portamento time is reduced
              * 0      - for down portamento

@@ -481,16 +481,16 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
 ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
-    FreqEnvelope = new EnvelopeParams(0, 0, time_);
+    FreqEnvelope = new EnvelopeParams(0, false, time_);
     FreqEnvelope->init(ad_global_freq);
     FreqLfo = new LFOParams(ad_global_freq, time_);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
     AmpLfo = new LFOParams(ad_global_amp, time_);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
-    FilterEnvelope = new EnvelopeParams(0, 1, time_);
+    FilterEnvelope = new EnvelopeParams(0, true, time_);
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
@@ -510,7 +510,7 @@ void ADnoteParameters::defaults()
 void ADnoteGlobalParam::defaults()
 {
     /* Frequency Global Parameters */
-    PStereo = 1; //stereo
+    PStereo = true; //stereo
     PDetune = 8192; //zero
     PCoarseDetune = 0;
     PDetuneType   = 1;
@@ -529,7 +529,7 @@ void ADnoteGlobalParam::defaults()
     PPunchTime     = 60;
     PPunchStretch  = 64;
     PPunchVelocitySensing = 72;
-    Hrandgrouping = 0;
+    Hrandgrouping = false;
 
     /* Filter Global Parameters*/
     PFilterVelocityScale = 0;
@@ -561,33 +561,33 @@ void ADnoteVoiceParam::defaults()
     Unison_phase_randomness = 127;
 
     Type = 0;
-    Pfixedfreq    = 0;
+    Pfixedfreq    = false;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz     = 64;
-    Presonance    = 1;
-    Pfilterbypass = 0;
-    PfilterFcCtlBypass = 0;
+    Presonance    = true;
+    Pfilterbypass = false;
+    PfilterFcCtlBypass = false;
     Pextoscil     = -1;
     PextFMoscil   = -1;
     Poscilphase   = 64;
     PFMoscilphase = 64;
     PDelay                    = 0;
     volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
-    PVolumeminus              = 0;
+    PVolumeminus              = false;
     PAAEnabled                = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
     PCoarseDetune             = 0;
     PDetuneType               = 0;
-    PFreqLfoEnabled           = 0;
-    PFreqEnvelopeEnabled      = 0;
-    PAmpEnvelopeEnabled       = 0;
-    PAmpLfoEnabled            = 0;
+    PFreqLfoEnabled           = false;
+    PFreqEnvelopeEnabled      = false;
+    PAmpEnvelopeEnabled       = false;
+    PAmpLfoEnabled            = false;
     PAmpVelocityScaleFunction = 127;
-    PFilterEnabled            = 0;
-    PFilterEnvelopeEnabled    = 0;
-    PFilterLfoEnabled         = 0;
+    PFilterEnabled            = false;
+    PFilterEnvelopeEnabled    = false;
+    PFilterLfoEnabled         = false;
     PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
     PFMEnabled                = FMTYPE::NONE;
@@ -601,8 +601,8 @@ void ADnoteVoiceParam::defaults()
     PFMDetune       = 8192;
     PFMCoarseDetune = 0;
     PFMDetuneType   = 0;
-    PFMFreqEnvelopeEnabled   = 0;
-    PFMAmpEnvelopeEnabled    = 0;
+    PFMFreqEnvelopeEnabled   = false;
+    PFMAmpEnvelopeEnabled    = false;
     PFMVelocityScaleFunction = 64;
     PsyncEnabled = false;
 
@@ -640,22 +640,22 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     OscilGn  = new OscilGen(synth, fft, Reson);
     FmGn    = new OscilGen(synth, fft, NULL);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time);
+    AmpEnvelope = new EnvelopeParams(64, true, time);
     AmpEnvelope->init(ad_voice_amp);
     AmpLfo = new LFOParams(ad_voice_amp, time);
 
-    FreqEnvelope = new EnvelopeParams(0, 0, time);
+    FreqEnvelope = new EnvelopeParams(0, false, time);
     FreqEnvelope->init(ad_voice_freq);
     FreqLfo = new LFOParams(ad_voice_freq, time);
 
     VoiceFilter    = new FilterParams(ad_voice_filter, time);
-    FilterEnvelope = new EnvelopeParams(0, 0, time);
+    FilterEnvelope = new EnvelopeParams(0, false, time);
     FilterEnvelope->init(ad_voice_filter);
     FilterLfo = new LFOParams(ad_voice_filter, time);
 
-    FMFreqEnvelope = new EnvelopeParams(0, 0, time);
+    FMFreqEnvelope = new EnvelopeParams(0, false, time);
     FMFreqEnvelope->init(ad_voice_fm_freq);
-    FMAmpEnvelope = new EnvelopeParams(64, 1, time);
+    FMAmpEnvelope = new EnvelopeParams(64, true, time);
     FMAmpEnvelope->init(ad_voice_fm_amp);
 }
 
@@ -1002,8 +1002,8 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
         PPunchStretch  = xml.getpar127("punch_stretch", PPunchStretch);
         PPunchVelocitySensing = xml.getpar127("punch_velocity_sensing",
                                                PPunchVelocitySensing);
-        Hrandgrouping = xml.getpar127("harmonic_randomness_grouping",
-                                       Hrandgrouping);
+        Hrandgrouping = (bool) xml.getpar("harmonic_randomness_grouping",
+                                       Hrandgrouping, 0, 1);
 
         if(xml.enterbranch("AMPLITUDE_ENVELOPE")) {
             AmpEnvelope->getfromXML(xml);

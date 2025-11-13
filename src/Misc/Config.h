@@ -14,6 +14,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "../globals.h"
 #include <string>
 #define MAX_STRING_SIZE 4000
 #define MAX_BANK_ROOT_DIRS 100
@@ -41,18 +42,19 @@ class Config
 
         struct {
             oss_devs_t oss_devs;
-            int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+            int   SampleRate, SoundBufferSize, OscilSize;
+            SafeBool SwapStereo;
             bool  AudioOutputCompressor;
             int   WindowsWaveOutId, WindowsMidiInId;
-            int   BankUIAutoClose;
+            SafeBool   BankUIAutoClose;
             int   GzipCompression;
             int   Interpolation;
-            int   SaveFullXml; // when saving to a file save entire tree including disabled parts (Zynmuse)
+            SafeBool   SaveFullXml; // when saving to a file save entire tree including disabled parts (Zynmuse)
             std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
             std::string presetsDirList[MAX_BANK_ROOT_DIRS];
             std::string favoriteList[MAX_BANK_ROOT_DIRS];
-            int CheckPADsynth;
-            int IgnoreProgramChange;
+            SafeBool CheckPADsynth;
+            SafeBool IgnoreProgramChange;
             int UserInterfaceMode;
             int VirKeybLayout;
             std::string LinuxALSAaudioDev;

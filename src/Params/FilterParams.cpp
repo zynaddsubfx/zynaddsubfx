@@ -455,7 +455,7 @@ void FilterParams::defaults()
         Psequence[i].nvowel = i % FF_MAX_VOWELS;
 
     Psequencestretch  = 40;
-    Psequencereversed = 0;
+    Psequencereversed = false;
     Pcenterfreq     = 64; //1 kHz
     Poctavesfreq    = 64;
     Pvowelclearness = 64;
