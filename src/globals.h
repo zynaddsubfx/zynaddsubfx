@@ -79,6 +79,45 @@ class  Sync;
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
+template<class T>
+class SafeClass
+{
+    T val;
+public:
+    explicit SafeClass() = default;
+        template<typename U,
+             typename = std::enable_if_t<std::is_same_v<std::decay_t<U>, T>>>
+    explicit SafeClass(U&& initVal)
+        : val{std::forward<U>(initVal)} {}
+    SafeClass(const SafeClass<T>& other) = default;
+    SafeClass& operator=(const SafeClass<T>& other) = default;
+    template<typename U,
+             typename = std::enable_if_t<std::is_same_v<std::decay_t<U>, T>>>
+    SafeClass& operator=(U&& newVal)
+    {
+        val = std::forward<U>(newVal);
+        return *this;
+    }
+        operator T() const { return val; }
+        
+        
+            template<typename U,
+             typename = std::enable_if_t<std::is_same_v<U, T>>>
+    bool operator==(const SafeClass<U>& other) const noexcept
+    {
+        return val == static_cast<T>(other);
+    }
+
+    template<typename U,
+             typename = std::enable_if_t<std::is_same_v<U, T>>>
+    bool operator!=(const SafeClass<U>& other) const noexcept
+    {
+        return val != static_cast<T>(other);
+    }
+};
+
+using SafeBool = SafeClass<bool>;
+
 /**
  * The number of harmonics of additive synth
  * This must be smaller than OSCIL_SIZE/2

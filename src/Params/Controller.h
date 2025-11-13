@@ -189,7 +189,7 @@ class Controller
         struct { //nrpn
             int parhi, parlo;
             int valhi, vallo;
-            bool receive; //this is saved to disk by Master
+            SafeBool receive; //this is saved to disk by Master
         } NRPN;
 
 
