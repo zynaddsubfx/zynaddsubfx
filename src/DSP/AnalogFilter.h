@@ -46,13 +46,15 @@ class AnalogFilter:public Filter
 
         struct Coeff {
             float c[3], //Feed Forward
-                  d[3];    //Feed Back
+                  d[3],    //Feed Back
+                  gain;
         } coeff, oldCoeff;
 
         static Coeff computeCoeff(int type, float cutoff, float q, int stages,
-                float gain, float fs, int &order);
+                float gain, float fs, int &order, bool equalPower=false);
         void filterSample(float& smp);
 
+        bool equalPower=false;
     private:
         struct fstage {
             float x1, x2; //Input History

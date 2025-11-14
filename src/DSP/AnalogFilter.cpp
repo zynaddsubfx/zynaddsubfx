@@ -68,7 +68,7 @@ void AnalogFilter::cleanup()
 }
 
 AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
-        int stages, float gain, float fs, int &order)
+        int stages, float gain, float fs, int &order, bool equalPower)
 {
     AnalogFilter::Coeff coeff;
     bool  zerocoefs = false; //this is used if the freq is too high
@@ -261,13 +261,52 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
             assert(false && "wrong type for a filter");
             break;
     }
+
+    if (equalPower)
+    {
+        // Analytical solution for white noise RMS gain
+        // Based on: ∫|H(e^jω)|² dω from 0 to π = π * (c0² + c1² + c2² + 2(c0c1 + c1c2)(-d1) + 2c0c2 d2) / (1 - d1² - d2² + d1² d2)
+        // RMS gain = sqrt( [∫|H(ω)|² dω] / [∫1 dω] ) = sqrt( [∫|H(ω)|² dω] / π )
+
+        const float c0 = coeff.c[0], c1 = coeff.c[1], c2 = coeff.c[2];
+        const float d1 = coeff.d[1], d2 = coeff.d[2];
+
+        // Calculate numerator: c0² + c1² + c2² + 2(c0c1 + c1c2)(-d1) + 2c0c2 d2
+        const float numerator = c0*c0 + c1*c1 + c2*c2
+                              + 2.0f * (c0*c1 + c1*c2) * (-d1)
+                              + 2.0f * c0*c2 * d2;
+
+        // Calculate denominator: 1 - d1² - d2² + d1² d2
+        const float denominator = 1.0f - d1*d1 - d2*d2 + d1*d1*d2;
+
+        // Avoid division by zero - should not happen for stable filters
+        if (fabsf(denominator) < 1e-12f) {
+            coeff.gain = 1.0f; // Return unity gain for unstable case
+            return coeff;
+        }
+
+        // Total power of filtered white noise
+        const float filtered_power = M_PI * numerator / denominator;
+
+        // Power of unfiltered white noise: ∫1 dω from 0 to π = π
+        const float reference_power = M_PI;
+
+        // RMS gain = sqrt(P_filtered / P_reference)
+        const float reductionFactor = 1.0f / sqrtf(filtered_power / reference_power);
+
+        c[0] *= reductionFactor;
+        c[1] *= reductionFactor;
+        c[2] *= reductionFactor;
+    }
+
+    // return result including gain
     return coeff;
 }
 
 void AnalogFilter::computefiltercoefs(float freq, float q)
 {
     coeff = AnalogFilter::computeCoeff(type, freq, q, stages, gain,
-            samplerate_f, order);
+            samplerate_f, order, equalPower);
 }
 
 

@@ -66,6 +66,12 @@ static rtosc::Ports filterports {
         rBegin;
         rEQ(4);
         rEnd},
+    {"PequalPower::i", rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(0)
+        rShort("eqPow"), 0,
+        rBegin;
+        rEQ(5);
+        rEnd},
 };
 
 rtosc::Ports EQ::ports = {
@@ -237,6 +243,10 @@ void EQ::changepar(int npar, unsigned char value)
             filter[nb].l->setstages(value);
             filter[nb].r->setstages(value);
             break;
+        case 5:
+            filter[nb].l->equalPower=value;
+            filter[nb].r->equalPower=value;
+            break;
     }
 }
 
@@ -270,6 +280,9 @@ unsigned char EQ::getpar(int npar) const
             break;
         case 4:
             return filter[nb].Pstages;
+            break;
+        case 5:
+            return filter[nb].l->equalPower;
             break;
         default: return 0; //in case of bogus parameter number
     }
