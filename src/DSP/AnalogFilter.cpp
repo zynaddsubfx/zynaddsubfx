@@ -68,7 +68,7 @@ void AnalogFilter::cleanup()
 }
 
 AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
-        int stages, float gain, float fs, int &order, bool equalPower)
+        int stages, float gain, float fs, int &order, bool loudnessCompEnabled)
 {
     AnalogFilter::Coeff coeff;
     bool  zerocoefs = false; //this is used if the freq is too high
@@ -262,51 +262,100 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
             break;
     }
 
-    if (equalPower)
+    if (loudnessCompEnabled)
+{
+    // Bark band center frequencies (24 critical bands of human hearing)
+    // These represent the psychoacoustic frequency resolution of the human ear
+    const float barkCenterFreq[] = {
+        50.0f, 150.0f, 250.0f, 350.0f, 450.0f, 570.0f, 700.0f, 840.0f,
+        1000.0f, 1170.0f, 1370.0f, 1600.0f, 1850.0f, 2150.0f, 2500.0f, 2900.0f,
+        3400.0f, 4000.0f, 4800.0f, 5800.0f, 7000.0f, 8500.0f, 10500.0f, 13500.0f
+    };
+
+    // Bark band bandwidths (approximate ERB - Equivalent Rectangular Bandwidth)
+    // These widths correspond to human frequency resolution at each critical band
+    const float barkBandwidth[] = {
+        80.0f,  90.0f,  100.0f, 110.0f, 120.0f, 130.0f, 140.0f, 150.0f,
+        160.0f, 170.0f, 180.0f, 190.0f, 200.0f, 210.0f, 220.0f, 230.0f,
+        240.0f, 250.0f, 260.0f, 270.0f, 280.0f, 290.0f, 300.0f, 310.0f
+    };
+
+    const int numBarkBands = sizeof(barkCenterFreq) / sizeof(float);
+
+    float referenceLoudness = 0.0f;  // Loudness of flat frequency response
+    float filterLoudness = 0.0f;     // Loudness of current filter response
+
+    // Calculate loudness for each Bark band
+    for (int band = 0; band < numBarkBands; ++band)
     {
-        // Analytical solution for white noise RMS gain
-        // Based on: ∫|H(e^jω)|² dω from 0 to π = π * (c0² + c1² + c2² + 2(c0c1 + c1c2)(-d1) + 2c0c2 d2) / (1 - d1² - d2² + d1² d2)
-        // RMS gain = sqrt( [∫|H(ω)|² dω] / [∫1 dω] ) = sqrt( [∫|H(ω)|² dω] / π )
+        float centerFreq = barkCenterFreq[band];
+        float bandwidth = barkBandwidth[band];
 
-        const float c0 = coeff.c[0], c1 = coeff.c[1], c2 = coeff.c[2];
-        const float d1 = coeff.d[1], d2 = coeff.d[2];
+        // Get magnitude response at Bark band center frequency
+        // calculateH returns |H(f)|^(stages+1), so we need to convert to linear magnitude
+        float magnitudeResponse = AnalogFilter::calculateH(centerFreq, fs, c, d, stages);
+        float linearMagnitude = 0.0f;
 
-        // Calculate numerator: c0² + c1² + c2² + 2(c0c1 + c1c2)(-d1) + 2c0c2 d2
-        const float numerator = c0*c0 + c1*c1 + c2*c2
-                              + 2.0f * (c0*c1 + c1*c2) * (-d1)
-                              + 2.0f * c0*c2 * d2;
-
-        // Calculate denominator: 1 - d1² - d2² + d1² d2
-        const float denominator = 1.0f - d1*d1 - d2*d2 + d1*d1*d2;
-
-        // Avoid division by zero - should not happen for stable filters
-        if (fabsf(denominator) < 1e-12f) {
-            coeff.gain = 1.0f; // Return unity gain for unstable case
-            return coeff;
+        if (stages == 0) {
+            // stages=0: calculateH returns |H(f)| directly
+            linearMagnitude = sqrtf(magnitudeResponse);
+        } else {
+            // stages>=1: calculateH returns |H(f)|^(stages+1)
+            // Convert back to linear magnitude: |H(f)| = response^(1/(stages+1))
+            linearMagnitude = powf(magnitudeResponse, 0.5f / (stages + 1.0f));
         }
 
-        // Total power of filtered white noise
-        const float filtered_power = M_PI * numerator / denominator;
+        // Get psychoacoustic weighting for this frequency
+        float weighting = calculateBS1770Weighting(centerFreq);
 
-        // Power of unfiltered white noise: ∫1 dω from 0 to π = π
-        const float reference_power = M_PI;
+        // Accumulate reference loudness (flat response = magnitude 1.0)
+        referenceLoudness += 1.0f * weighting * bandwidth;
 
-        // RMS gain = sqrt(P_filtered / P_reference)
-        const float reductionFactor = 1.0f / sqrtf(filtered_power / reference_power);
-
-        c[0] *= reductionFactor;
-        c[1] *= reductionFactor;
-        c[2] *= reductionFactor;
+        // Accumulate filter loudness (current filter response)
+        filterLoudness += linearMagnitude * weighting * bandwidth;
     }
+
+    // Calculate compensation factor
+    // This factor will scale the filter to have the same overall loudness as flat response
+    float compensationFactor = 1.0f;
+    if (filterLoudness > 0.0f) {
+        compensationFactor = referenceLoudness / filterLoudness;
+
+        // Apply reasonable limits to prevent extreme gain values
+        compensationFactor = fmaxf(0.1f, fminf(10.0f, compensationFactor));
+    }
+
+    // Debug output to verify compensation behavior
+    //~ printf("Bark Band Loudness Compensation:\n");
+    //~ printf("  Reference Loudness: %.6f\n", referenceLoudness);
+    //~ printf("  Filter Loudness:    %.6f\n", filterLoudness);
+    //~ printf("  Compensation Factor: %.6f\n", compensationFactor);
+    //~ printf("  Filter Gain Param:  %.6f\n", gain);
+
+    // Apply compensation to feedforward coefficients only
+    // This preserves the filter characteristics while adjusting overall loudness
+    c[0] *= compensationFactor;
+    c[1] *= compensationFactor;
+    c[2] *= compensationFactor;
+}
 
     // return result including gain
     return coeff;
 }
 
+void AnalogFilter::setEqualPower(bool loudnessCompEnabled_)
+{
+    if(loudnessCompEnabled != loudnessCompEnabled_)
+    {
+        loudnessCompEnabled = loudnessCompEnabled_;
+        recompute = true;
+    }
+}
+
 void AnalogFilter::computefiltercoefs(float freq, float q)
 {
     coeff = AnalogFilter::computeCoeff(type, freq, q, stages, gain,
-            samplerate_f, order, equalPower);
+            samplerate_f, order, loudnessCompEnabled);
 }
 
 
@@ -485,24 +534,41 @@ void AnalogFilter::filterout(float *smp)
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
 }
-
-float AnalogFilter::H(float freq)
+float AnalogFilter::calculateH(float freq, float fs, const float c[3], const float d[3], int stages)
 {
-    float fr = freq / samplerate_f * PI * 2.0f;
-    float x  = coeff.c[0], y = 0.0f;
+    float fr = freq / fs * PI * 2.0f;
+    float x = c[0], y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x += cosf(n * fr) * coeff.c[n];
-        y -= sinf(n * fr) * coeff.c[n];
+        x += cosf(n * fr) * c[n];
+        y -= sinf(n * fr) * c[n];
     }
     float h = x * x + y * y;
     x = 1.0f;
     y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x -= cosf(n * fr) * coeff.d[n];
-        y += sinf(n * fr) * coeff.d[n];
+        x -= cosf(n * fr) * d[n];
+        y += sinf(n * fr) * d[n];
     }
     h = h / (x * x + y * y);
     return powf(h, (stages + 1.0f) / 2.0f);
+}
+
+float AnalogFilter::H(float freq)
+{
+    return calculateH(freq, samplerate_f, coeff.c, coeff.d, stages);
+}
+
+float AnalogFilter::calculateBS1770Weighting(float freq)
+{
+    // ITU-R BS.1770 High-frequency shelf filter
+    //~ float f2 = freq * freq;
+
+    // RLB Weighting (Revised Low Frequency B-weighting)
+    float numerator = 1.0f;
+    float denominator = 1.0f + (12194.0f / freq) * (12194.0f / freq);
+
+    float weighting = numerator / denominator;
+    return weighting * weighting;
 }
 
 }

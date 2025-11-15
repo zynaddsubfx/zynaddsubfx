@@ -20,13 +20,14 @@
 
 namespace zyn {
 #define N_FILT_PARAMS 6
+#define FILT_PARAM_OFFS 10
 using rtosc::RtData;
 #define rObject EQ
 #define rBegin [](const char *msg, RtData &d) {\
     rObject *obj = (rObject*)d.obj;
 #define rEQ(offset) \
     int nfilt = atoi(msg-2); \
-    int id    = 10+nfilt*N_FILT_PARAMS+offset; \
+    int id    = FILT_PARAM_OFFS+nfilt*N_FILT_PARAMS+offset; \
     if(rtosc_narguments(msg)) \
     { \
         obj->changepar(id, enum_key_from_msg(d.port->meta(), msg)); \
@@ -174,7 +175,7 @@ unsigned char EQ::getpresetpar(unsigned char npreset, unsigned int npar)
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         return presets[npreset][npar];
-    } else if (npar >= 10 && npar < (10 + MAX_EQ_BANDS * N_FILT_PARAMS)) {
+    } else if (npar >= FILT_PARAM_OFFS && npar < (FILT_PARAM_OFFS + MAX_EQ_BANDS * N_FILT_PARAMS)) {
         static const unsigned char bp_preset[N_FILT_PARAMS] = { 0, 64, 64, 64, 0 , 0};
         return bp_preset[npar % N_FILT_PARAMS];
     }
@@ -199,14 +200,14 @@ void EQ::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
     }
-    if(npar < 10)
+    if(npar < FILT_PARAM_OFFS)
         return;
 
-    int nb = (npar - 10) / N_FILT_PARAMS; //number of the band (filter)
+    int nb = (npar - FILT_PARAM_OFFS) / N_FILT_PARAMS; //number of the band (filter)
     if(nb >= MAX_EQ_BANDS)
         return;
-    int bp = npar % N_FILT_PARAMS; //band paramenter
-
+    int bp = (npar-FILT_PARAM_OFFS) % N_FILT_PARAMS; //band paramenter
+    printf("npar: %d - nb: %d   bp: %d\n", npar, nb, bp);
     float tmp;
     switch(bp) {
         case 0:
@@ -244,8 +245,8 @@ void EQ::changepar(int npar, unsigned char value)
             filter[nb].r->setstages(value);
             break;
         case 5:
-            filter[nb].l->equalPower=(value!=0);
-            filter[nb].r->equalPower=(value!=0);
+            filter[nb].l->setEqualPower(value!=0);
+            filter[nb].r->setEqualPower(value!=0);
             break;
     }
 }
@@ -258,10 +259,10 @@ unsigned char EQ::getpar(int npar) const
             break;
     }
 
-    if(npar < 10)
+    if(npar < FILT_PARAM_OFFS)
         return 0;
 
-    int nb = (npar - 10) / N_FILT_PARAMS; //number of the band (filter)
+    int nb = (npar - FILT_PARAM_OFFS) / N_FILT_PARAMS; //number of the band (filter)
     if(nb >= MAX_EQ_BANDS)
         return 0;
     int bp = npar % N_FILT_PARAMS; //band paramenter
@@ -282,7 +283,7 @@ unsigned char EQ::getpar(int npar) const
             return filter[nb].Pstages;
             break;
         case 5:
-            return filter[nb].l->equalPower ? 1 : 0;
+            return filter[nb].l->loudnessCompEnabled ? 1 : 0;
             break;
         default: return 0; //in case of bogus parameter number
     }

@@ -36,6 +36,7 @@ class AnalogFilter:public Filter
         void setfreq_and_q(float frequency, float q_);
         void setq(float q_);
 
+        void setEqualPower(bool equalPower_);
         void settype(int type_);
         void setgain(float dBgain);
         void setstages(int stages_);
@@ -51,10 +52,10 @@ class AnalogFilter:public Filter
         } coeff, oldCoeff;
 
         static Coeff computeCoeff(int type, float cutoff, float q, int stages,
-                float gain, float fs, int &order, bool equalPower=false);
+                float gain, float fs, int &order, bool loudnessCompEnabled=false);
         void filterSample(float& smp);
 
-        bool equalPower=false;
+        bool loudnessCompEnabled=false;
     private:
         struct fstage {
             float x1, x2; //Input History
@@ -64,9 +65,12 @@ class AnalogFilter:public Filter
         //old coeffs are used for interpolation when parameters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history
-    void singlefilterout(float *smp, fstage &hist, float f, unsigned int bufsize);// const Coeff &coeff);
-        //Update coeff and order
-    void computefiltercoefs(float freq, float q);
+        void singlefilterout(float *smp, fstage &hist, float f, unsigned int bufsize);// const Coeff &coeff);
+
+        static float calculateBS1770Weighting(float freq);
+            //Update coeff and order
+        void computefiltercoefs(float freq, float q);
+        static float calculateH(float freq, float fs, const float c[3], const float d[3], int stages);
 
         int   type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int   stages; //how many times the filter is applied (0->1,1->2,etc.)
