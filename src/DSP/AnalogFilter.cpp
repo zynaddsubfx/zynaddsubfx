@@ -262,7 +262,7 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
             break;
     }
 
-    if (loudnessCompEnabled)
+    if (loudnessCompEnabled && type >= 6)
 {
     // Bark band center frequencies (24 critical bands of human hearing)
     // These represent the psychoacoustic frequency resolution of the human ear
