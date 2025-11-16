@@ -207,7 +207,7 @@ void EQ::changepar(int npar, unsigned char value)
     if(nb >= MAX_EQ_BANDS)
         return;
     int bp = (npar-FILT_PARAM_OFFS) % N_FILT_PARAMS; //band paramenter
-    printf("npar: %d - nb: %d   bp: %d\n", npar, nb, bp);
+    //~ printf("npar: %d - nb: %d   bp: %d\n", npar, nb, bp);
     float tmp;
     switch(bp) {
         case 0:
