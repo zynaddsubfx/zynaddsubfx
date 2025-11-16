@@ -22,7 +22,7 @@
 
 
 const float MAX_FREQ = 20000.0f;
-const int windowSize = 1024;
+const int windowSize = 8192;
 
 namespace zyn {
 
@@ -527,10 +527,12 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
                 }
 
                 if (windowIndex == 0 && type >= 6) {
-                    compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+
+                    compensationfactor = 0.95f * compensationfactor + 0.05f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                    //~ compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
                     //printf("compensationfactor: %f\n", compensationfactor);
-                    sumIn = 0.0f;
-                    sumOut = 0.0f;
+                    sumIn *= 0.1f;  // Behalte 10% der alten Werte
+                    sumOut *= 0.1f;
                 }
             }
         }
