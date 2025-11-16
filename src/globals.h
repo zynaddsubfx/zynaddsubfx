@@ -99,8 +99,8 @@ public:
         return *this;
     }
         operator T() const { return val; }
-        
-        
+
+
             template<typename U,
              typename = std::enable_if_t<std::is_same_v<U, T>>>
     bool operator==(const SafeClass<U>& other) const noexcept

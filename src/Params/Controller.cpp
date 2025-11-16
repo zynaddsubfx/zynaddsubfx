@@ -152,7 +152,7 @@ void Controller::defaults()
     portamento.time              = 64;
     portamento.updowntimestretch = 64;
     portamento.pitchthresh       = 3;
-    portamento.pitchthreshtype   = false;
+    portamento.pitchthreshtype   = true;
 
     resonancecenter.depth        = 64;
     resonancebandwidth.depth     = 64;
