@@ -501,13 +501,14 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
             smp[i]  = y0;
             sumOut += smp[i]*smp[i]*window;
 
-            if (windowIndex==0)
+            if (windowIndex==0 && loudnessCompEnabled)
             {
                 compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
                 printf("compensationfactor: %f\n", compensationfactor);
                 sumIn = 0.0f;
                 sumOut = 0.0f;
             }
+            else compensationfactor = 1.0f;
 
         }
     } else if(order == 2) {//Second order filter
@@ -526,7 +527,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
                     AnalogBiquadFilterB(coeff_, smp[i + j], work, sumIn, sumOut, window);
                 }
 
-                if (windowIndex == 0 && type >= 6) {
+                if (windowIndex == 0 && type >= 6 && loudnessCompEnabled) {
 
                     compensationfactor = 0.95f * compensationfactor + 0.05f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
                     //~ compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
@@ -534,6 +535,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
                     sumIn *= 0.1f;  // Behalte 10% der alten Werte
                     sumOut *= 0.1f;
                 }
+                else compensationfactor = 1.0f;
             }
         }
 
