@@ -80,10 +80,18 @@ class AnalogFilter:public Filter
         float gain;   //the gain of the filter (if are shelf/peak) filters
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
+        float sumIn=0.0f;
+        float sumOut=0.0f;
+        unsigned int windowCounter = 0;
+        unsigned int windowPos = 0;
+
+        float compensationfactor = 1.0f;
 
         int freqbufsize;
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
         bool beforeFirstTick; // reset the smoothing at first Tick
+
+        float compensationfactor_hist = 0.0f;
 };
 
 }

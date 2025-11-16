@@ -22,6 +22,7 @@
 
 
 const float MAX_FREQ = 20000.0f;
+const int windowSize = 2048;
 
 namespace zyn {
 
@@ -433,8 +434,9 @@ void AnalogFilter::setstages(int stages_)
     }
 }
 
-inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4])
+inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4], float &sumIn, float &sumOut, float window)
 {
+    sumIn += src*src*window;
     work[3] = src*coeff[0]
         + work[0]*coeff[1]
         + work[1]*coeff[2]
@@ -442,10 +444,12 @@ inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4])
         + work[3]*coeff[4];
     work[1] = src;
     src     = work[3];
+    sumOut += src*src;
 }
 
-inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
+inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4], float &sumIn, float &sumOut, float window)
 {
+    sumIn += src*src*window;
     work[2] = src*coeff[0]
         + work[1]*coeff[1]
         + work[0]*coeff[2]
@@ -453,6 +457,7 @@ inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
         + work[2]*coeff[4];
     work[0] = src;
     src     = work[2];
+    sumOut += src*src;
 }
 
 void AnalogFilter::filterSample(float& smp)
@@ -484,30 +489,79 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
 
     if(order == 1) {  //First order filter
         for(unsigned int i = 0; i < bufsize; ++i) {
+            int windowIndex = (windowPos + i) % windowSize;
+            if (windowIndex==0)
+            {
+                compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                sumIn = 0.0f;
+                sumOut = 0.0f;
+            }
+            float winPos = float(windowIndex) / float(windowSize);
+            const float window = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
+
+            sumIn += smp[i]*smp[i]*window;
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
                        + hist.y1 * coeff.d[1];
             hist.y1 = y0;
             hist.x1 = smp[i];
             smp[i]  = y0;
+            sumOut += smp[i]*smp[i]*window;
+
+
         }
     } else if(order == 2) {//Second order filter
         const float coeff_[5] = {coeff.c[0], coeff.c[1], coeff.c[2],  coeff.d[1], coeff.d[2]};
         float work[4]  = {hist.x1, hist.x2, hist.y1, hist.y2};
+        float window = 0.0f;
         for(unsigned int i = 0; i < bufsize; i+=8) {
-            AnalogBiquadFilterA(coeff_, smp[i + 0], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 1], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 2], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 3], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 4], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 5], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 6], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 7], work);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 0) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterA(coeff_, smp[i + 0], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 1) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterB(coeff_, smp[i + 1], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 2) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterA(coeff_, smp[i + 2], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 3) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterB(coeff_, smp[i + 3], work, sumIn, sumOut, window);
+            if ((windowPos + i + 3) % windowSize < 3)
+            {
+                compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                sumIn = 0.0f;
+                sumOut = 0.0f;
+            }
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 4) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterA(coeff_, smp[i + 4], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 5) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterB(coeff_, smp[i + 5], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 6) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterA(coeff_, smp[i + 6], work, sumIn, sumOut, window);
+            window = 0.5f * (1.0f - cosf(2.0f * M_PI * ((windowPos + i + 7) % windowSize) / (windowSize - 1)));
+            AnalogBiquadFilterB(coeff_, smp[i + 7], work, sumIn, sumOut, window);
+            if ((windowPos + i + 7) % windowSize < 3)
+            {
+                compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                sumIn = 0.0f;
+                sumOut = 0.0f;
+            }
         }
         hist.x1 = work[0];
         hist.x2 = work[1];
         hist.y1 = work[2];
         hist.y2 = work[3];
     }
+
+    if (type >= 6 && sumOut > bufsize/256)
+    {
+
+
+        for(unsigned int i = 0; i < bufsize; ++i) {
+            const float t = float(i) / (bufsize - 1);
+            const float interpolatedFactor = compensationfactor_hist + t * (compensationfactor - compensationfactor_hist);
+            smp[i] *= (interpolatedFactor);
+        }
+        compensationfactor_hist = compensationfactor;
+    }
+
+    windowPos += bufsize;
 }
 
 void AnalogFilter::filterout(float *smp)
