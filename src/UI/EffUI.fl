@@ -83,14 +83,14 @@ if (filterwindow!=NULL){
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
-      xywh {621 881 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {621 881 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {}
   }
   Function {make_reverb_window()} {} {
     Fl_Window effreverbwindow {
-      xywh {386 705 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {386 705 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -244,7 +244,7 @@ if (filterwindow!=NULL){
   }
   Function {make_echo_window()} {} {
     Fl_Window effechowindow {
-      xywh {897 680 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {897 680 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -337,7 +337,7 @@ if (filterwindow!=NULL){
   }
   Function {make_chorus_window()} {} {
     Fl_Window effchoruswindow {
-      xywh {476 811 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {476 811 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -485,12 +485,12 @@ if (filterwindow!=NULL){
           label DUAL
           xywh {45 45 100 20} labelfont 1 labelsize 10
         }
-      }    
+      }
     }
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      xywh {110 301 380 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {110 301 410 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -653,7 +653,7 @@ if (filterwindow!=NULL){
   }
   Function {make_alienwah_window()} {} {
     Fl_Window effalienwahwindow {
-      xywh {262 422 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {262 422 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -760,7 +760,7 @@ if (filterwindow!=NULL){
   }
   Function {make_distortion_window()} {} {
     Fl_Window effdistortionwindow {
-      xywh {553 286 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {553 286 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -946,7 +946,7 @@ if (filterwindow!=NULL){
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      xywh {691 881 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {700 900 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -960,18 +960,19 @@ if (filterwindow!=NULL){
       Fl_Counter bandcounter {
         label {B.}
         callback {eqband=(int) o->value();
-int npb=eqband*5+10;
+int npb=eqband*6+10;
 
 typechoice->oscMove("parameter"+to_s(npb));
 freqdial->oscMove("parameter"+to_s(npb+1));
 gaindial->oscMove("parameter"+to_s(npb+2));
 qdial->oscMove("parameter"+to_s(npb+3));
-stagescounter->oscMove("parameter"+to_s(npb+4));}
+stagescounter->oscMove("parameter"+to_s(npb+4));
+loudnesscomp->oscMove("parameter"+to_s(npb+5));}
         tooltip {Band no.} xywh {240 20 45 15} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 11
         code0 {o->bounds(0,MAX_EQ_BANDS-1);}
       }
       Fl_Group bandgroup {
-        xywh {245 40 130 50} box ENGRAVED_FRAME
+        xywh {245 40 190 50} box ENGRAVED_FRAME
       } {
         Fl_Dial freqdial {
           label Freq
@@ -997,9 +998,16 @@ stagescounter->oscMove("parameter"+to_s(npb+4));}
         Fl_Counter stagescounter {
           label {St.}
           callback {eqgraph->update();}
-          tooltip {Additional filter stages} xywh {340 60 30 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textfont 1 textsize 11
+          tooltip {Additional filter stages} xywh {370 60 30 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textfont 1 textsize 11
           code0 {o->init("parameter14");}
           class Fl_Osc_Counter
+        }
+        Fl_Dial loudnesscomp {
+          label {loud}
+          callback {eqgraph->update();}
+          tooltip {loudness compensation mode} xywh {340 50 25 25} type Simple labelfont 1 labelsize 10 minimum 0 maximum 1 step 1 textfont 1 textsize 11
+          code0 {o->init("parameter15");}
+          class Fl_Osc_Dial
         }
       }
       Fl_Choice typechoice {
@@ -1064,7 +1072,7 @@ eqgraph->update();}
   }
   Function {make_dynamicfilter_window()} {} {
     Fl_Window effdynamicfilterwindow {
-      xywh {828 359 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
+      xywh {828 359 410 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -1177,7 +1185,7 @@ eqgraph->update();}
   }
   Function {make_sympathetic_window()} {} {
     Fl_Window effsympatheticwindow {
-      xywh {974 596 380 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
+      xywh {974 596 410 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -1958,7 +1966,7 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
       Fl_Counter bandcounter {
         label Band
         callback {eqband=(int) o->value();
-int npb=eqband*5+10;
+int npb=eqband*6+10;
 typechoice->oscMove("parameter"+to_s(npb));
 freqdial->oscMove("parameter"+to_s(npb+1));
 gaindial->oscMove("parameter"+to_s(npb+2));
@@ -2131,7 +2139,7 @@ eqgraph->redraw();}
   }
   Function {make_sympathetic_window()} {} {
     Fl_Window effsympatheticwindow {
-      xywh {974 596 380 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
+      xywh {974 596 410 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -2277,33 +2285,34 @@ switch(efftype){
         effreverbwindow->show();
         break;
      case 2:
-    effechowindow->show();
+        effechowindow->show();
         break;
      case 3:
-    effchoruswindow->show();
+        effchoruswindow->show();
         break;
      case 4:
-    effphaserwindow->show();
+        effphaserwindow->show();
         break;
      case 5:
-    effalienwahwindow->show();
+        effalienwahwindow->show();
         break;
      case 6:
-    effdistortionwindow->show();
+        effdistortionwindow->show();
         break;
      case 7:
-    bandcounter->value(eqband);
-    bandcounter->do_callback();
-    effeqwindow->show();
+        bandcounter->value(eqband);
+        bandcounter->do_callback();
+        effeqwindow->show();
         break;
      case 8:
-    effdynamicfilterwindow->show();
-    break;
+        effdynamicfilterwindow->show();
+        break;
      case 9:
-    effsympatheticwindow->show();
-    break;
-    default:effnullwindow->show();
-            break;
+        effsympatheticwindow->show();
+        break;
+    default:
+        effnullwindow->show();
+        break;
 };
 
 this->show();} {}
