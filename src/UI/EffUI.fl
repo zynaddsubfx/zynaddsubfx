@@ -2007,6 +2007,13 @@ stagescounter->oscMove("parameter"+to_s(npb+4));}
           code1 {o->init("parameter14");}
           class Fl_Osc_Counter
         }
+        Fl_Dial loudnesscomp {
+          label Loud
+          callback {eqgraph->update();}
+          tooltip {loudness compensation mode} xywh {70 50 25 25} type Simple labelfont 1 labelsize 10 minimum 0 maximum 1 step 1 textfont 1 textsize 11
+          code0 {o->init("parameter15");}
+          class Fl_Osc_Dial
+        }
       }
       Fl_Choice typechoice {
         label Type
