@@ -18,7 +18,7 @@
 namespace zyn {
 
 const float MAX_FREQ = 20000.0f;
-const int windowSize = 2048;
+const int windowSize = 1024;
 
 float polyblampres(float smp, float ws, float dMax)
 {
@@ -109,7 +109,7 @@ void waveShapeSmps(int buffersize,
             const int windowIndex = (windowPos + i) % windowSize;
             if (windowIndex==0 && sumOut >= 0.0001f)
             {
-                compensationfactor = 0.8f * compensationfactor + 0.2f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                compensationfactor = 0.8f * compensationfactor + 0.2f * (sumIn/windowSize)/(sumOut/windowSize);
                 sumIn *= 0.1f;
                 sumOut *= 0.1f;
                 printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
