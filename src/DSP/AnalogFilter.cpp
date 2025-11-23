@@ -527,12 +527,11 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
                     AnalogBiquadFilterB(coeff_, smp[i + j], work, sumIn, sumOut, window);
                 }
 
-                if (windowIndex == 0 && type >= 6 && loudnessCompEnabled) {
+                if (windowIndex == 0 && loudnessCompEnabled) {
 
+                    // poor persons IIR filtering
                     compensationfactor = 0.95f * compensationfactor + 0.05f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
-                    //~ compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
-                    //printf("compensationfactor: %f\n", compensationfactor);
-                    sumIn *= 0.1f;  // Behalte 10% der alten Werte
+                    sumIn *= 0.1f;
                     sumOut *= 0.1f;
                 }
                 else compensationfactor = 1.0f;
@@ -545,9 +544,8 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
         hist.y2 = work[3];
     }
 
-    if (type >= 6 && sumOut > bufsize/256)
+    if ( loudnessCompEnabled && sumOut > bufsize/256)
     {
-
 
         for(unsigned int i = 0; i < bufsize; ++i) {
             int windowIndex = (windowPos + i) % windowSize;
