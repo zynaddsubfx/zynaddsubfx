@@ -13,8 +13,12 @@
 
 #include "WaveShapeSmps.h"
 #include <cmath>
+#include <cstdio>
 
 namespace zyn {
+
+const float MAX_FREQ = 20000.0f;
+const int windowSize = 2048;
 
 float polyblampres(float smp, float ws, float dMax)
 {
@@ -63,18 +67,59 @@ float polyblampres(float smp, float ws, float dMax)
     return res*dMax/2.0f;
 }
 
-void waveShapeSmps(int n,
+void waveShapeSmps(int buffersize,
                    float *smps,
                    unsigned char type,
                    unsigned char drive,
                    unsigned char offset,
-                   unsigned char funcpar)
+                   unsigned char funcpar,
+                   bool loudnessCompEnabled) {
+
+    unsigned int dummyWindowPos = 4;
+    float dummySumIn = 0.22222f, dummySumOut = 0.33333f;
+    float dummycompensationfactor = 0.234f;
+
+    waveShapeSmps(buffersize, smps, type, drive, offset, funcpar,
+                  false, dummyWindowPos, dummySumIn, dummySumOut,
+                  dummycompensationfactor);
+}
+
+void waveShapeSmps(int buffersize,
+                   float *smps,
+                   unsigned char type,
+                   unsigned char drive,
+                   unsigned char offset,
+                   unsigned char funcpar,
+                   bool loudnessCompEnabled,
+                   unsigned int &windowPos,
+                   float &sumIn, float &sumOut,
+                   float &compensationfactor)
 {
+    const int n = buffersize;
     int   i;
     float ws = drive / 127.0f;
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
+    float window[buffersize];
+
+    if (loudnessCompEnabled)
+        for(i = 0; i < n; ++i) {
+
+            const int windowIndex = (windowPos + i) % windowSize;
+            if (windowIndex==0 && sumOut >= 0.0001f)
+            {
+                compensationfactor = 0.8f * compensationfactor + 0.2f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                sumIn *= 0.1f;
+                sumOut *= 0.1f;
+                printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
+            }
+
+            float winPos = float(windowIndex) / float(windowSize);
+            window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
+            sumIn += smps[i]*smps[i]*window[i];
+        }
+
 
     switch(type) {
         case 1:
@@ -296,6 +341,14 @@ void waveShapeSmps(int n,
                 smps[i] -= offs*(2-fabsf(offs));
             }
             break;
+    }
+
+    if (loudnessCompEnabled) {
+        windowPos += buffersize;
+        for(i = 0; i < n; ++i) {
+            sumOut += smps[i]*smps[i]*window[i];
+            smps[i] *= compensationfactor;
+        }
     }
 }
 

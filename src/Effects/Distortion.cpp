@@ -71,6 +71,8 @@ rtosc::Ports Distortion::ports = {
             rLinear(0, 127), "Shape of the wave shaping function"),
     rEffPar(Poffset,   12, rShort("offset"), rDefault(64),
             rLinear(0, 127), "Input DC Offset"),
+    rEffPar(Ploud,   13, rShort("loud"), rDefault(64),
+            rLinear(0, 1), "Enable Loudness Compensation"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
             Distortion  &dd = *(Distortion*)d.obj;
@@ -168,9 +170,19 @@ void Distortion::out(const Stereo<float *> &smp)
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar);
-    if(Pstereo)
-        waveShapeSmps(buffersize, efxoutr, Ptype + 1, Pdrive, Poffset, Pfuncpar);
+    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
+                   windowPos,
+                   sumInL, sumOutL,
+                   compensationfactorL);
+
+    if(Pstereo) {
+        waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
+                   windowPos,
+                   sumInR, sumOutR,
+                   compensationfactorR);
+    }
+
+
 
     if(!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
@@ -226,8 +238,8 @@ void Distortion::sethpf(unsigned char _Phpf)
 
 unsigned char Distortion::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define	PRESET_SIZE 13
-#define	NUM_PRESETS 6
+#define PRESET_SIZE 13
+#define NUM_PRESETS 6
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Overdrive 1
         {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0, 32, 64},
@@ -310,6 +322,9 @@ void Distortion::changepar(int npar, unsigned char value)
         case 12:
             Poffset = value;
             break;
+        case 13:
+            Ploud = value;
+            break;
     }
 }
 
@@ -329,6 +344,7 @@ unsigned char Distortion::getpar(int npar) const
         case 10: return Pprefiltering;
         case 11: return Pfuncpar;
         case 12: return Poffset;
+        case 13: return Ploud;
         default: return 0; //in case of bogus parameter number
     }
 }
