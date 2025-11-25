@@ -25,6 +25,7 @@ void waveShapeSmps(int buffersize,
                    bool loudnessCompEnabled,
                    unsigned int &windowPos,
                    float &sumIn, float &sumOut,
+                   float &aWeightHistIn, float &aWeightHistOut,
                    float &compensationfactor);
 
 // Überladene Version OHNE die neuen Parameter

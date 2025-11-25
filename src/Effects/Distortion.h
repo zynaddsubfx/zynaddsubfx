@@ -60,6 +60,10 @@ class Distortion final :public Effect
         float sumInR=0.0f;
         float sumOutL=0.0f;
         float sumOutR=0.0f;
+        float aWeightHistInL=0.0f;
+        float aWeightHistInR=0.0f;
+        float aWeightHistOutL=0.0f;
+        float aWeightHistOutR=0.0f;
         unsigned int windowCounter = 0;
         unsigned int windowPos = 0;
 

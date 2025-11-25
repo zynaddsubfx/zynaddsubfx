@@ -76,11 +76,13 @@ void waveShapeSmps(int buffersize,
                    bool loudnessCompEnabled) {
 
     unsigned int dummyWindowPos = 4;
-    float dummySumIn = 0.22222f, dummySumOut = 0.33333f;
+    float dummySumIn = 0.123, dummySumOut = 0.321;
     float dummycompensationfactor = 0.234f;
+    float dummyaWeightHistIn = 0.345, dummyaWeightHistOut=0.543;
 
     waveShapeSmps(buffersize, smps, type, drive, offset, funcpar,
                   false, dummyWindowPos, dummySumIn, dummySumOut,
+                  dummyaWeightHistIn, dummyaWeightHistOut,
                   dummycompensationfactor);
 }
 
@@ -93,6 +95,7 @@ void waveShapeSmps(int buffersize,
                    bool loudnessCompEnabled,
                    unsigned int &windowPos,
                    float &sumIn, float &sumOut,
+                   float &aWeightHistIn, float &aWeightHistOut,
                    float &compensationfactor)
 {
     const int n = buffersize;
@@ -109,7 +112,7 @@ void waveShapeSmps(int buffersize,
             const int windowIndex = (windowPos + i) % windowSize;
             if (windowIndex==0 && sumOut >= 0.0001f)
             {
-                compensationfactor = 0.8f * compensationfactor + 0.2f * (sumIn/windowSize)/(sumOut/windowSize);
+                compensationfactor = 0.8f * compensationfactor + 0.2f * sqrtf(sumIn/windowSize)/sqrtf(sumOut/windowSize);
                 sumIn *= 0.1f;
                 sumOut *= 0.1f;
                 printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
@@ -117,7 +120,13 @@ void waveShapeSmps(int buffersize,
 
             float winPos = float(windowIndex) / float(windowSize);
             window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
-            sumIn += smps[i]*smps[i]*window[i];
+
+
+            float aWeighted = smps[i] - 0.95f * aWeightHistIn;  // HP ~500Hz
+            aWeightHistIn = smps[i];
+            aWeighted *= 1.5f;  // +3.5dB Boost
+            sumIn += aWeighted * aWeighted * window[i];
+            //sumIn += smps[i]*smps[i]*window[i]; // original rms
         }
 
 
@@ -346,7 +355,11 @@ void waveShapeSmps(int buffersize,
     if (loudnessCompEnabled) {
         windowPos += buffersize;
         for(i = 0; i < n; ++i) {
-            sumOut += smps[i]*smps[i]*window[i];
+            float aWeightedOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
+            aWeightHistOut = smps[i];
+            aWeightedOut *= 1.5f;  // +3.5dB Boost
+            sumOut += aWeightedOut * aWeightedOut * window[i];
+            // sumOut += smps[i]*smps[i]*window[i]; // original rms only
             smps[i] *= compensationfactor;
         }
     }

@@ -172,13 +172,13 @@ void Distortion::out(const Stereo<float *> &smp)
 
     waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
                    windowPos,
-                   sumInL, sumOutL,
+                   sumInL, sumOutL, aWeightHistInL, aWeightHistOutL,
                    compensationfactorL);
 
     if(Pstereo) {
         waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
                    windowPos,
-                   sumInR, sumOutR,
+                   sumInR, sumOutR, aWeightHistInR, aWeightHistOutR,
                    compensationfactorR);
     }
 
