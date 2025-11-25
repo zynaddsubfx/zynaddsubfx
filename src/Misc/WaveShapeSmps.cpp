@@ -112,11 +112,13 @@ void waveShapeSmps(int buffersize,
             const int windowIndex = (windowPos + i) % windowSize;
             if (windowIndex==0 && sumOut >= 0.0001f)
             {
-                compensationfactor = 0.8f * compensationfactor + 0.2f * sqrtf(sumIn/windowSize)/sqrtf(sumOut/windowSize);
+                // calculate compensation factor with heuristic exponent
+                compensationfactor = powf(0.8f * compensationfactor + 0.2f * sqrtf(sumIn/windowSize)/sqrtf(sumOut/windowSize),1.1f);
                 sumIn *= 0.1f;
                 sumOut *= 0.1f;
                 printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
             }
+            else compensationfactor = 1.0f;
 
             float winPos = float(windowIndex) / float(windowSize);
             window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
