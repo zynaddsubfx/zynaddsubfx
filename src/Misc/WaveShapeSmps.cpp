@@ -19,6 +19,7 @@ namespace zyn {
 
 const float MAX_FREQ = 20000.0f;
 const int windowSize = 1024;
+bool silence = false;
 
 float polyblampres(float smp, float ws, float dMax)
 {
@@ -110,17 +111,32 @@ void waveShapeSmps(int buffersize,
         for(i = 0; i < n; ++i) {
 
             const int windowIndex = (windowPos + i) % windowSize;
-            if (windowIndex==0 && sumOut >= 0.001f)
+            if (silence && sumIn >= 0.0001f && sumOut >= 0.0001f)
             {
-                // calculate compensation factor with heuristic exponent
-                const float aRmsIn = sqrtf(sumIn/windowSize);
-                const float aRmsOut = sqrtf(sumOut/windowSize);
-                const float rawFactor= aRmsIn/aRmsOut;
-                //~ const float quickness = absf(logf(rawFactor)-logf(compensationfactor));
-                compensationfactor = powf(0.6f * compensationfactor + 0.4f * rawFactor,1.1f);
-                sumIn *= 0.1f;
-                sumOut *= 0.1f;
-                printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
+
+
+                silence = false;
+                printf("after silence sumIn: %f  sumOut: %f  windowIndex: %d  compensationfactor: %f\n", sumIn, sumOut, windowIndex, compensationfactor);
+            }
+
+            if (windowIndex==0) {
+                if(sumIn >= 0.0001f && sumOut >= 0.0001f)
+                {
+                    // calculate compensation factor with heuristic exponent
+                    const float aRmsIn = sqrtf(sumIn/windowSize);
+                    const float aRmsOut = sqrtf(sumOut/windowSize);
+                    const float rawFactor= aRmsIn/aRmsOut;
+                    compensationfactor = powf(0.6f * compensationfactor + 0.4f * rawFactor,1.1f);
+                    sumIn *= 0.1f;
+                    sumOut *= 0.1f;
+                    silence = false;
+                    printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
+                }
+                else
+                {
+                    compensationfactor = 1.0 - 0.9 * ws;
+                }
+
             }
 
             float winPos = float(windowIndex) / float(windowSize);
