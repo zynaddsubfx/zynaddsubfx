@@ -142,11 +142,10 @@ void waveShapeSmps(int buffersize,
             window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
 
 
-            float aWeighted = smps[i] - 0.95f * aWeightHistIn;  // HP ~500Hz
+            float aWeightedIn = smps[i] - 0.95f * aWeightHistIn;  // HP ~500Hz
             aWeightHistIn = smps[i];
-            aWeighted *= 1.5f;  // +3.5dB Boost
-            sumIn += aWeighted * aWeighted * window[i];
-            //sumIn += smps[i]*smps[i]*window[i]; // original rms
+            aWeightedIn *= 1.5f;  // +3.5dB Boost
+            sumIn += aWeightedIn * aWeightedIn * window[i];
         }
 
 

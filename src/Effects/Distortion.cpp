@@ -71,7 +71,7 @@ rtosc::Ports Distortion::ports = {
             rLinear(0, 127), "Shape of the wave shaping function"),
     rEffPar(Poffset,   12, rShort("offset"), rDefault(64),
             rLinear(0, 127), "Input DC Offset"),
-    rEffPar(Ploud,   13, rShort("loud"), rDefault(64),
+    rEffPar(Ploud,   13, rShort("loud"), rDefault(0),
             rLinear(0, 1), "Enable Loudness Compensation"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
@@ -112,7 +112,7 @@ Distortion::Distortion(EffectParams pars)
       Pprefiltering(0),
       Pfuncpar(32),
       Poffset(64),
-      Ploud(64)
+      Ploud(0)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
