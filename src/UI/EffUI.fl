@@ -837,11 +837,11 @@ if (filterwindow!=NULL){
         code0 {o->init("parameter11");}
         class Fl_Osc_Dial
       }
-      Fl_Dial distp13 {
-        label Loudn
-        tooltip {Enable Loudness Compensation} xywh {255 40 20 20} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+      Fl_Check_Button distp13 {
+        label Comp
+        xywh {120 15 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 1
         code0 {o->init("parameter13");}
-        class Fl_Osc_Dial
+        class Fl_Osc_Check
       }
       Fl_Dial distp7 {
         label LPF
@@ -1872,11 +1872,11 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
         code0 {o->init("parameter11");}
         class Fl_Osc_Dial
       }
-      Fl_Dial distp13 {
-        label Loudn
-        tooltip {Enable Loudness Compensation} xywh {255 40 20 20} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+      Fl_Check_Button distp13 {
+        label Comp
+        xywh {120 15 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 1
         code0 {o->init("parameter13");}
-        class Fl_Osc_Dial
+        class Fl_Osc_Check
       }
       Fl_Dial distp7 {
         label LPF
