@@ -17,7 +17,6 @@
 
 namespace zyn {
 
-const float MAX_FREQ = 20000.0f;
 const int windowSize = 1024;
 bool silence = false;
 
@@ -112,16 +111,13 @@ void waveShapeSmps(int buffersize,
             const int windowIndex = (windowPos + i) % windowSize;
             if (silence && sumIn >= 0.0001f && sumOut >= 0.0001f)
             {
-
-
                 silence = false;
-                printf("after silence sumIn: %f  sumOut: %f  windowIndex: %d  compensationfactor: %f\n", sumIn, sumOut, windowIndex, compensationfactor);
             }
 
             if (windowIndex==0) {
                 if(sumIn >= 0.0001f && sumOut >= 0.0001f)
                 {
-                    // calculate compensation factor with heuristic exponent
+                    // calculate compensation factor as rms ratio with heuristic exponent
                     const float aRmsIn = sqrtf(sumIn/windowSize);
                     const float aRmsOut = sqrtf(sumOut/windowSize);
                     const float rawFactor= aRmsIn/aRmsOut;
@@ -129,7 +125,6 @@ void waveShapeSmps(int buffersize,
                     sumIn *= 0.1f;
                     sumOut *= 0.1f;
                     silence = false;
-                    printf("sumIn: %f  sumOut: %f  compensationfactor: %f\n", sumIn, sumOut, compensationfactor);
                 }
                 else
                 {
@@ -139,9 +134,12 @@ void waveShapeSmps(int buffersize,
             }
 
             float winPos = float(windowIndex) / float(windowSize);
+
+            // Hann window function: w(n) = 0.5 * (1 - cos(2π * n/(N-1)))
             window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
 
-
+            // Simplified A-weighting approximation:
+            // High-pass filter (~500Hz) + 3.5dB boost to approximate A-weighting curve
             float aWeightedIn = smps[i] - 0.95f * aWeightHistIn;  // HP ~500Hz
             aWeightHistIn = smps[i];
             aWeightedIn *= 1.5f;  // +3.5dB Boost
@@ -372,13 +370,13 @@ void waveShapeSmps(int buffersize,
     }
 
     if (loudnessCompEnabled) {
+        // update windowPos
         windowPos += buffersize;
         for(i = 0; i < n; ++i) {
             float aWeightedOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
             aWeightHistOut = smps[i];
             aWeightedOut *= 1.5f;  // +3.5dB Boost
             sumOut += aWeightedOut * aWeightedOut * window[i];
-            // sumOut += smps[i]*smps[i]*window[i]; // original rms only
             smps[i] *= compensationfactor;
         }
     }
