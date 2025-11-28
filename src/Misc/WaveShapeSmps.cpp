@@ -73,8 +73,7 @@ void waveShapeSmps(int buffersize,
                    unsigned char type,
                    unsigned char drive,
                    unsigned char offset,
-                   unsigned char funcpar,
-                   bool loudnessCompEnabled) {
+                   unsigned char funcpar) {
 
     unsigned int dummyWindowPos = 4;
     float dummySumIn = 0.123, dummySumOut = 0.321;

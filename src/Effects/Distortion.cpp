@@ -111,7 +111,8 @@ Distortion::Distortion(EffectParams pars)
       Pstereo(0),
       Pprefiltering(0),
       Pfuncpar(32),
-      Poffset(64)
+      Poffset(64),
+      Ploud(64)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
