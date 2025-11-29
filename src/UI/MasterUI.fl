@@ -97,7 +97,7 @@ decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#endif} {private local
 }
 
-decl {\#if !defined(PLUGINVERSION) && HAS_X11
+decl {\#if !defined(PLUGINVERSION) && HAS_X11 && !defined(NTK_GUI)
 \#include <FL/platform.H>
 \#endif} {private local
 }
