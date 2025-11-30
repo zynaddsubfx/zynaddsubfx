@@ -103,52 +103,34 @@ void waveShapeSmps(int buffersize,
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
-    float window[buffersize];
-    const float compensationAmount = loudnessComp / 127.0f;
-    const float ws_sqrt_095 = 1.0f - (0.95f * sqrtf(sqrtf(ws)));
+    float rmsIn[buffersize];
+    const float compensationAmount = loudnessComp / 110.0f;
+
+    // EWMA RMS parameters (fast)
+    const float rmsAlpha = 0.02f;  // ≈ Attack ~2–4 ms, Release ~50–70 ms
+
+    // Attack/Release für Kompensationsfaktor
+    const float attack  = 0.20f;   // schnelle Reaktion
+    const float release = 0.02f;   // langsamer Rücklauf
+
+
+    //~ const float ws_sqrt_095 = 1.0f - (0.95f * sqrtf(sqrtf(ws)));
     // make the compensation parameter smoother for lower gains to prevent audible clicks
-    float smoothingFactor = 0.7f - (0.2f * ws * ws);     // How much history to keep
-    float newDataWeight  = 0.3f + (0.2f * ws * ws);      // How much new data to incorporate
+    //~ float smoothingFactor = 0.7f - (0.5f * ws);     // How much history to keep
+    //~ float newDataWeight  = 0.3f + (0.5f * ws);      // How much new data to incorporate
 
     if (loudnessComp>0)
         for(i = 0; i < n; ++i) {
 
-            const int windowIndex = (windowPos + i) % windowSize;
-            if (silence && sumIn >= 0.0001f && sumOut >= 0.0001f)
-            {
-                silence = false;
-            }
-
-            if (windowIndex==0) {
-                if(sumIn >= 0.0001f && sumOut >= 0.0001f)
-                {
-                    // calculate compensation factor as rms ratio with heuristic exponent
-                    const float aRmsIn = sqrtf(sumIn/windowSize);
-                    const float aRmsOut = sqrtf(sumOut/windowSize);
-                    const float rawFactor= aRmsIn/aRmsOut;
-                    compensationfactor = powf(smoothingFactor * compensationfactor + newDataWeight * rawFactor,1.1f);
-                    sumIn *= 0.1f;
-                    sumOut *= 0.1f;
-                    silence = false;
-                }
-                else
-                {
-                    compensationfactor = ws_sqrt_095;
-                }
-
-            }
-
-            float winPos = float(windowIndex) / float(windowSize);
-
-            // Hann window function: w(n) = 0.5 * (1 - cos(2π * n/(N-1)))
-            window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * winPos));
-
-            // Simplified A-weighting approximation:
-            // High-pass filter (~500Hz) + 3.5dB boost to approximate A-weighting curve
-            float aWeightedIn = smps[i] - 0.95f * aWeightHistIn;  // HP ~500Hz
+            // ------ A-weighting (vereinfacht) ------
+            float aIn = smps[i] - 0.95f * aWeightHistIn;
             aWeightHistIn = smps[i];
-            aWeightedIn *= 1.5f;  // +3.5dB Boost
-            sumIn += aWeightedIn * aWeightedIn * window[i];
+            aIn *= 1.5f;
+
+
+            // ------ EWMA RMS ------
+            sumIn  = (1.0f - rmsAlpha) * sumIn  + rmsAlpha * (aIn  * aIn);
+            rmsIn[i]  = sqrtf(sumIn);
         }
 
 
@@ -375,15 +357,35 @@ void waveShapeSmps(int buffersize,
     }
 
     if (loudnessComp>0) {
-        // update windowPos
-        windowPos += buffersize;
+
         // precalculate out of hot zone
         const float one_minus_compAmount = (1.0f - compensationAmount);
         for(i = 0; i < n; ++i) {
-            float aWeightedOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
+
+            float aOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
             aWeightHistOut = smps[i];
-            aWeightedOut *= 1.5f;  // +3.5dB Boost
-            sumOut += aWeightedOut * aWeightedOut * window[i];
+            aOut *= 1.5f;  // +3.5dB Boost
+            sumOut = (1.0f - rmsAlpha) * sumOut + rmsAlpha * (aOut * aOut);
+
+            float rmsOut = sqrtf(sumOut);
+
+            if (rmsOut < 1e-6f) rmsOut = 1e-6f;
+            float rawFactor = rmsIn[i] / rmsOut;
+
+
+            if (rawFactor > compensationfactor)
+            {
+                // schneller Attack
+                compensationfactor =
+                    attack * rawFactor + (1.0f - attack) * compensationfactor;
+            }
+            else
+            {
+                // langsamer Release
+                compensationfactor =
+                    release * rawFactor + (1.0f - release) * compensationfactor;
+            }
+
             // lerp between zero and full compensation
             smps[i] *=  compensationAmount * compensationfactor + one_minus_compAmount;
         }
