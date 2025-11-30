@@ -493,7 +493,8 @@ void FilterParams::updateLoc(int newloc, int n)
         } else if (newloc == dynfilter_4 && i < 2 && j < 2) {
             Pvowels[j].formants[i].loc  = j * 3 + i; /* 6 .. 9 */
         } else {
-            Pvowels[j].formants[i].loc = -1;
+            Pvowels[j].formants[i].loc =
+                std::numeric_limits<decltype(Pvowels[j].formants[i].loc)>::max();
         }
     }
 }

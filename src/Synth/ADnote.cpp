@@ -285,7 +285,7 @@ int ADnote::setupVoiceUnison(int nvoice)
             break;
         default: //unison for more than 2 subvoices
         {
-            float unison_values[true_unison];
+            STACKALLOC(float, unison_values, true_unison);
             float min = -1e-6f, max = 1e-6f;
             for(int k = 0; k < true_unison; ++k) {
                 const float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform

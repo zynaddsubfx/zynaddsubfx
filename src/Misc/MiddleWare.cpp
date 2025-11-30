@@ -207,7 +207,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     assert(!path.empty());
     path += "sample";
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_MSC_VER)
     unsigned num = p->sampleGenerator([&path,&d]
                        (unsigned N, PADnoteParameters::Sample &&s)
                        {
@@ -587,7 +587,7 @@ public:
         assert(filename);
 
         //load part in async fashion when possible
-#ifndef WIN32
+#if !defined(WIN32) || defined(_MSC_VER)
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -617,11 +617,12 @@ public:
         }
 
         Part *p = alloc.get();
-#else
-        Part *p = new Part(*master->memory, synth, master->time,
+#else  // Windows without MSVC
+        Part *p = new Part(*master->memory, synth, master->time, master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
-                &master->microtonal, master->fft);
+                &master->microtonal, master->fft, &master->watcher,
+		("/part"+to_s(npart)+"/").c_str());
         p->partno  = npart % NUM_MIDI_CHANNELS;
         p->Prcvchn = npart % NUM_MIDI_CHANNELS;
 
@@ -784,10 +785,10 @@ public:
                         std::cerr << savefile << std::endl;
                         std::cerr << "first entry that could not be parsed:" << std::endl;
 
-                        for(int i = -res + 1; savefile[i]; ++i)
-                        if(savefile[i] == '\n')
+                        for(int j = -res + 1; savefile[j]; ++j)
+                        if(savefile[j] == '\n')
                         {
-                            savefile.resize(i);
+                            savefile.resize(j);
                             break;
                         }
                         std::cerr << (savefile.c_str() - res) << std::endl;
@@ -1203,15 +1204,15 @@ const rtosc::Ports bankPorts = {
             impl.loadbank(impl.banks[0].dir);
 
             //Reload bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
+            for(int j=0; j<BANK_SIZE; ++j) {
                 d.reply("/bankview", "iss",
-                    i, impl.ins[i].name.c_str(),
-                    impl.ins[i].filename.c_str());
+                    j, impl.ins[j].name.c_str(),
+                    impl.ins[j].filename.c_str());
             }
         } else {
             //Clear all bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
-                d.reply("/bankview", "iss", i, "", "");
+            for(int j=0; j<BANK_SIZE; ++j) {
+                d.reply("/bankview", "iss", j, "", "");
             }
         }
         d.broadcast("/damage", "s", "/bank/");
