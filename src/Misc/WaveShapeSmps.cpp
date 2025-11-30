@@ -106,6 +106,10 @@ void waveShapeSmps(int buffersize,
     float window[buffersize];
     const float compensationAmount = loudnessComp / 127.0f;
     const float ws_sqrt_095 = 1.0f - (0.95f * sqrtf(sqrtf(ws)));
+    // make the compensation parameter smoother for lower gains to prevent audible clicks
+    float smoothingFactor = 0.7f - (0.2f * ws * ws);     // How much history to keep
+    float newDataWeight  = 0.3f + (0.2f * ws * ws);      // How much new data to incorporate
+
     if (loudnessComp>0)
         for(i = 0; i < n; ++i) {
 
@@ -122,7 +126,7 @@ void waveShapeSmps(int buffersize,
                     const float aRmsIn = sqrtf(sumIn/windowSize);
                     const float aRmsOut = sqrtf(sumOut/windowSize);
                     const float rawFactor= aRmsIn/aRmsOut;
-                    compensationfactor = powf(0.7f * compensationfactor + 0.3f * rawFactor,1.1f);
+                    compensationfactor = powf(smoothingFactor * compensationfactor + newDataWeight * rawFactor,1.1f);
                     sumIn *= 0.1f;
                     sumOut *= 0.1f;
                     silence = false;
