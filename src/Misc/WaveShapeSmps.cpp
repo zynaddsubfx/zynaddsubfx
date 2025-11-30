@@ -91,7 +91,7 @@ void waveShapeSmps(int buffersize,
                    unsigned char drive,
                    unsigned char offset,
                    unsigned char funcpar,
-                   bool loudnessCompEnabled,
+                   unsigned char loudnessComp,
                    unsigned int &windowPos,
                    float &sumIn, float &sumOut,
                    float &aWeightHistIn, float &aWeightHistOut,
@@ -104,8 +104,9 @@ void waveShapeSmps(int buffersize,
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
     float window[buffersize];
-
-    if (loudnessCompEnabled)
+    const float compensationAmount = loudnessComp / 127.0f;
+    const float ws_sqrt_095 = 1.0f - (0.95f * sqrtf(sqrtf(ws)));
+    if (loudnessComp>0)
         for(i = 0; i < n; ++i) {
 
             const int windowIndex = (windowPos + i) % windowSize;
@@ -121,14 +122,14 @@ void waveShapeSmps(int buffersize,
                     const float aRmsIn = sqrtf(sumIn/windowSize);
                     const float aRmsOut = sqrtf(sumOut/windowSize);
                     const float rawFactor= aRmsIn/aRmsOut;
-                    compensationfactor = powf(0.6f * compensationfactor + 0.4f * rawFactor,1.1f);
+                    compensationfactor = powf(0.7f * compensationfactor + 0.3f * rawFactor,1.1f);
                     sumIn *= 0.1f;
                     sumOut *= 0.1f;
                     silence = false;
                 }
                 else
                 {
-                    compensationfactor = 1.0 - 0.9 * ws;
+                    compensationfactor = ws_sqrt_095;
                 }
 
             }
@@ -369,15 +370,18 @@ void waveShapeSmps(int buffersize,
             break;
     }
 
-    if (loudnessCompEnabled) {
+    if (loudnessComp>0) {
         // update windowPos
         windowPos += buffersize;
+        // precalculate out of hot zone
+        const float one_minus_compAmount = (1.0f - compensationAmount);
         for(i = 0; i < n; ++i) {
             float aWeightedOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
             aWeightHistOut = smps[i];
             aWeightedOut *= 1.5f;  // +3.5dB Boost
             sumOut += aWeightedOut * aWeightedOut * window[i];
-            smps[i] *= compensationfactor;
+            // lerp between zero and full compensation
+            smps[i] *=  compensationAmount * compensationfactor + one_minus_compAmount;
         }
     }
 }

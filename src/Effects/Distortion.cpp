@@ -72,7 +72,7 @@ rtosc::Ports Distortion::ports = {
     rEffPar(Poffset,   12, rShort("offset"), rDefault(64),
             rLinear(0, 127), "Input DC Offset"),
     rEffPar(Ploud,   13, rShort("loud"), rDefault(0),
-            rLinear(0, 1), "Enable Loudness Compensation"),
+            rLinear(0, 127), "Enable Loudness Compensation"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
             Distortion  &dd = *(Distortion*)d.obj;
@@ -171,13 +171,13 @@ void Distortion::out(const Stereo<float *> &smp)
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
+    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud,
                    windowPos,
                    sumInL, sumOutL, aWeightHistInL, aWeightHistOutL,
                    compensationfactorL);
 
     if(Pstereo) {
-        waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud!=0,
+        waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud,
                    windowPos,
                    sumInR, sumOutR, aWeightHistInR, aWeightHistOutR,
                    compensationfactorR);
