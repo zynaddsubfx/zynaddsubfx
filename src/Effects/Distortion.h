@@ -66,6 +66,7 @@ class Distortion final :public Effect
         float aWeightHistOutR=0.0f;
         unsigned int windowCounter = 0;
         unsigned int windowPos = 0;
+        unsigned int PdriveHist = 0;
 
         float compensationfactorL = 1.0f;
         float compensationfactorR = 1.0f;

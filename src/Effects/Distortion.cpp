@@ -171,13 +171,13 @@ void Distortion::out(const Stereo<float *> &smp)
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud,
+    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, PdriveHist, Poffset, Pfuncpar, Ploud,
                    windowPos,
                    sumInL, sumOutL, aWeightHistInL, aWeightHistOutL,
                    compensationfactorL);
 
     if(Pstereo) {
-        waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar, Ploud,
+        waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, PdriveHist, Poffset, Pfuncpar, Ploud,
                    windowPos,
                    sumInR, sumOutR, aWeightHistInR, aWeightHistOutR,
                    compensationfactorR);
@@ -288,6 +288,8 @@ void Distortion::changepar(int npar, unsigned char value)
             setlrcross(value);
             break;
         case 3:
+            //~ printf("PdriveHist: %d  Pdrive: %d\n", PdriveHist, Pdrive); // works
+            PdriveHist = Pdrive;
             Pdrive = value;
             break;
         case 4:
