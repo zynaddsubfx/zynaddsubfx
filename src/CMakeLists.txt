@@ -214,7 +214,7 @@ mark_as_advanced(IncludeWhatYouUse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
-set(BuildOptions_ExtendedWarnings)
+set(ZynBuildOptions_ExtendedWarnings)
 if (ExtendedWarnings)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         # The following generates a list of warning exceptions
@@ -226,7 +226,7 @@ if (ExtendedWarnings)
         # often about the code base. If you want to add exceptions,
         # be VERY CAREFUL, ask the project maintainers for
         # their consent.
-        list (APPEND BuildOptions_ExtendedWarnings
+        list (APPEND ZynBuildOptions_ExtendedWarnings
         "-Wextra" "-Weverything" # start with really everything
         "-Wno-c++98-compat" "-Wno-c++98-compat-extra-semi" "-Wno-c++98-compat-pedantic" # C++11 is a zyn build requirement
         "-Wno-cast-align" # not relevant for our case
@@ -248,46 +248,46 @@ if (ExtendedWarnings)
         "-Wno-unsafe-buffer-usage" # used too often in zyn
         "-Wimplicit-int-float-conversion" # used too often in zyn
         )
-        MESSAGE(STATUS "Using extended Warning options: ${BuildOptions_ExtendedWarnings}")
+        MESSAGE(STATUS "Using extended Warning options: ${ZynBuildOptions_ExtendedWarnings}")
     else()
         MESSAGE(WARNING "\"ExtendedWarnings\" selected, but this is only supported for clang - ignoring")
     endif()
 endif()
 
-set (BuildOptions_x86_64AMD
+set (ZynBuildOptions_x86_64AMD
      -march=athlon64;-m64;-Wno-unused-parameter
   CACHE STRING "X86_64 compiler options"
 )
 
-set (BuildOptions_X86_64Core2
+set (ZynBuildOptions_X86_64Core2
      -march=core2;-m64;-Wno-unused-parameter
   CACHE STRING "X86_64 compiler options"
 )
 
-set (BuildOptions_NEON
+set (ZynBuildOptions_NEON
      -march=armv7-a;-mfloat-abi=hard;-mfpu=neon;-mcpu=cortex-a9;-mtune=cortex-a9;-pipe;-mvectorize-with-neon-quad;-funsafe-loop-optimizations
   CACHE STRING "Cortex_a9 compiler options"
 )
 
-check_cxx_compiler_flag("${BuildOptions_NEON} -Werror" SUPPORT_NEON)
+check_cxx_compiler_flag("${ZynBuildOptions_NEON} -Werror" SUPPORT_NEON)
 
-set (BuildOptions_SSE
+set (ZynBuildOptions_SSE
      -msse;-msse2;-mfpmath=sse
   CACHE STRING "SSE compiler options"
 )
 
-check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
+check_cxx_compiler_flag("${ZynBuildOptions_SSE} -Werror" SUPPORT_SSE)
 
-set (BuildOptionsBasic
+set (ZynBuildOptionsBasic
     -Wno-unused-parameter;-O3;-ffast-math;-fomit-frame-pointer
     CACHE STRING "basic X86 compiler options"
 )
-list(APPEND BuildOptionsBasic ${BuildOptions_ExtendedWarnings})
+list(APPEND ZynBuildOptionsBasic ${ZynBuildOptions_ExtendedWarnings})
 
-set (BuildOptionsDebug
+set (ZynBuildOptionsDebug
     -O0;-g3;-ggdb;-Wno-unused-parameter;-Wpointer-arith
     CACHE STRING "Debug build flags")
-list(APPEND BuildOptionsDebug ${BuildOptions_ExtendedWarnings})
+list(APPEND ZynBuildOptionsDebug ${ZynBuildOptions_ExtendedWarnings})
 
 if(IncludeWhatYouUse)
     find_program(IwyuPath NAMES include-what-you-use iwyu)
@@ -415,26 +415,26 @@ endif()
 
 if (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Debug")
-	add_compile_options("$<$<CONFIG:Debug>:${BuildOptionsDebug}>")
+	add_compile_options("$<$<CONFIG:Debug>:${ZynBuildOptionsDebug}>")
 else (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Release")
 	
-	add_compile_options("$<$<CONFIG:Release>:${BuildOptionsBasic}>")
+	add_compile_options("$<$<CONFIG:Release>:${ZynBuildOptionsBasic}>")
 
 	if (BuildForAMD_X86_64)
-		add_compile_options($<$<CONFIG:Release>:${BuildOptions_x86_64AMD}>)
+		add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_x86_64AMD}>)
 	endif (BuildForAMD_X86_64)
 	
 	if (BuildForCore2_X86_64)
-        add_compile_options($<$<CONFIG:Release>:${BuildOptions_X86_64Core2}>)
+        add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_X86_64Core2}>)
 	endif (BuildForCore2_X86_64)
 
 	if (SUPPORT_SSE)
-		add_compile_options("$<$<CONFIG:Release>:${BuildOptions_SSE}>")
+		add_compile_options("$<$<CONFIG:Release>:${ZynBuildOptions_SSE}>")
 	endif (SUPPORT_SSE)
 	
 	if (SUPPORT_NEON AND NOT NoNeonPlease)
-		add_compile_options($<$<CONFIG:Release>:${BuildOptions_NEON}>)
+		add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_NEON}>)
 	endif (SUPPORT_NEON AND NOT NoNeonPlease)
 
 endif (BuildForDebug)
