@@ -888,9 +888,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
     if(!max_threads)
         max_threads = std::numeric_limits<unsigned>::max();
 
-    const int           samplesize   = (((int) 1) << (Pquality.samplesize + 14));
-    const int           spectrumsize = samplesize / 2;
-    constexpr const int profilesize  = 512;
+    const int            samplesize   = (((int) 1) << (Pquality.samplesize + 14));
+    const int            spectrumsize = samplesize / 2;
+    inline constexpr int profilesize  = 512;
 
     float     profile[profilesize];
 
