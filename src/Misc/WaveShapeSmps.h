@@ -24,7 +24,6 @@ void waveShapeSmps(int buffersize,
                    unsigned char offset,
                    unsigned char funcpar,
                    unsigned char loudnessComp,
-                   unsigned int &windowPos,
                    float &sumIn, float &sumOut,
                    float &aWeightHistIn, float &aWeightHistOut,
                    float &compensationfactor);

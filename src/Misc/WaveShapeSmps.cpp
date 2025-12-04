@@ -74,13 +74,12 @@ void waveShapeSmps(int buffersize,
                    unsigned char offset,
                    unsigned char funcpar) {
 
-    unsigned int dummyWindowPos = 4;
     float dummySumIn = 0.123, dummySumOut = 0.321;
     float dummycompensationfactor = 0.234f;
     float dummyaWeightHistIn = 0.345, dummyaWeightHistOut=0.543;
 
     waveShapeSmps(buffersize, smps, type, drive, drive, offset, funcpar,
-                  false, dummyWindowPos, dummySumIn, dummySumOut,
+                  false, dummySumIn, dummySumOut,
                   dummyaWeightHistIn, dummyaWeightHistOut,
                   dummycompensationfactor);
 }
@@ -93,7 +92,6 @@ void waveShapeSmps(int buffersize,
                    unsigned char offset,
                    unsigned char funcpar,
                    unsigned char loudnessComp,
-                   unsigned int &windowPos,
                    float &sumIn, float &sumOut,
                    float &aWeightHistIn, float &aWeightHistOut,
                    float &compensationfactor)
