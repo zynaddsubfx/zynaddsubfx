@@ -888,9 +888,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
     if(!max_threads)
         max_threads = std::numeric_limits<unsigned>::max();
 
-    const int            samplesize   = (((int) 1) << (Pquality.samplesize + 14));
-    const int            spectrumsize = samplesize / 2;
-    inline constexpr int profilesize  = 512;
+    const int     samplesize   = (((int) 1) << (Pquality.samplesize + 14));
+    const int     spectrumsize = samplesize / 2;
+    constexpr int profilesize  = 512;
 
     float     profile[profilesize];
 
@@ -928,7 +928,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
 
     auto thread_cb = [basefreq, bwadjust, &cb, do_abort,
                       samplesize, samplemax, spectrumsize,
-                      adj_ptr, &profile, this_c](
+                      adj_ptr, &profile, profilesize, this_c](
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
