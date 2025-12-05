@@ -928,7 +928,11 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
 
     auto thread_cb = [basefreq, bwadjust, &cb, do_abort,
                       samplesize, samplemax, spectrumsize,
-                      adj_ptr, &profile, profilesize, this_c](
+                      adj_ptr, &profile, this_c
+#ifdef _MSC_VER
+                      , profilesize
+#endif
+                     ](
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
