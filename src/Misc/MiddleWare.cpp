@@ -941,7 +941,7 @@ public:
     // Add a message for handleMsg to a queue
     void queueMsg(const char* msg)
     {
-        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, std::numeric_limits<size_t>::max()));
+        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, (std::numeric_limits<size_t>::max)()));
     }
 
     void write(const char *path, const char *args, ...);
@@ -2202,7 +2202,7 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
-    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, std::numeric_limits<size_t>::max())) {
+    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, (std::numeric_limits<size_t>::max)())) {
         printf("[Warning] Invalid message in sendToRemote <%s, %s>...\n",
                rtmsg, dest.c_str());
         return;
