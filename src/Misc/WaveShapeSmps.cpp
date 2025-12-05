@@ -17,9 +17,6 @@
 
 namespace zyn {
 
-const int windowSize = 1024;
-bool silence = false;
-
 float polyblampres(float smp, float ws, float dMax)
 {
     // Formula from: Esqueda, Välimäki, Bilbao (2015): ALIASING REDUCTION IN SOFT-CLIPPING ALGORITHMS
