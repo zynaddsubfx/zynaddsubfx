@@ -324,8 +324,10 @@ namespace NSM
     {
 #ifdef NDEBUG
         (void)argc;
+        (void)types;
 #else
         assert(argc >= 3);
+        assert(!strncmp(types, "sss", 3));
 #endif
         char *out_msg = NULL;
 
@@ -350,7 +352,7 @@ namespace NSM
     }
 
     int
-    Client::osc_session_is_loaded(const char *path,
+    Client::osc_session_is_loaded(const char *,
                                   const char *,
                                   lo_arg **,
                                   int,
@@ -365,8 +367,8 @@ namespace NSM
     }
 
     int
-    Client::osc_error(const char *path,
-                      const char *,
+    Client::osc_error(const char *,
+                      const char *types,
                       lo_arg **argv,
                       int argc,
                       lo_message,
@@ -374,8 +376,10 @@ namespace NSM
     {
 #ifdef NDEBUG
         (void)argc;
+        (void)types;
 #else
         assert(argc);
+        assert(types[0]=='s');
 #endif
         if(strcmp(&argv[0]->s, "/nsm/server/announce"))
             return -1;
@@ -393,7 +397,7 @@ namespace NSM
 
     int
     Client::osc_announce_reply(const char *,
-                               const char *,
+                               const char *types,
                                lo_arg **argv,
                                int argc,
                                lo_message msg,
@@ -401,8 +405,11 @@ namespace NSM
     {
 #ifdef NDEBUG
         (void)argc;
+        (void)types;
 #else
         assert(argc >= 3);
+        assert(types[0]=='s');
+        assert(types[2]=='s');
 #endif
         if(strcmp(&argv[0]->s, "/nsm/server/announce"))
             return -1;

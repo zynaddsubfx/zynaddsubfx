@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <sys/stat.h>
 #include <mutex>
 #include <thread>
