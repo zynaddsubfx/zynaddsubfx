@@ -17,7 +17,7 @@
 
 namespace zyn {
 
-float polyblampres(float smp, float ws, float dMax)
+float polyblampres(const float smp, const float ws, const float dMax)
 {
     // Formula from: Esqueda, Välimäki, Bilbao (2015): ALIASING REDUCTION IN SOFT-CLIPPING ALGORITHMS
     // http://dafx16.vutbr.cz/dafxpapers/18-DAFx-16_paper_33-PN.pdf pg 123, table 1
@@ -66,14 +66,14 @@ float polyblampres(float smp, float ws, float dMax)
 
 void waveShapeSmps(int buffersize,
                    float *smps,
-                   unsigned char type,
-                   unsigned char drive,
-                   unsigned char offset,
-                   unsigned char funcpar) {
+                   const unsigned char type,
+                   const unsigned char drive,
+                   const unsigned char offset,
+                   const unsigned char funcpar) {
 
-    float dummySumIn = 0.123, dummySumOut = 0.321;
+    float dummySumIn = 0.123F, dummySumOut = 0.321F;
     float dummycompensationfactor = 0.234f;
-    float dummyaWeightHistIn = 0.345, dummyaWeightHistOut=0.543;
+    float dummyaWeightHistIn = 0.345F, dummyaWeightHistOut=0.543F;
 
     waveShapeSmps(buffersize, smps, type, drive, drive, offset, funcpar,
                   false, dummySumIn, dummySumOut,
@@ -83,12 +83,12 @@ void waveShapeSmps(int buffersize,
 
 void waveShapeSmps(int buffersize,
                    float *smps,
-                   unsigned char type,
-                   unsigned char drive,
-                   unsigned char driveHist,
-                   unsigned char offset,
-                   unsigned char funcpar,
-                   unsigned char loudnessComp,
+                   const unsigned char type,
+                   const unsigned char drive,
+                   const unsigned char driveHist,
+                   const unsigned char offset,
+                   const unsigned char funcpar,
+                   const unsigned char loudnessComp,
                    float &sumIn, float &sumOut,
                    float &aWeightHistIn, float &aWeightHistOut,
                    float &compensationfactor)
