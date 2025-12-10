@@ -13,9 +13,9 @@
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
 #include <sys/stat.h>
 
 #include "PresetsStore.h"
@@ -88,33 +88,31 @@ void PresetsStore::scanforpresets()
         //open directory
         string dirname = config.cfg.presetsDirList[i];
         expanddirname(dirname);
-        DIR   *dir     = opendir(dirname.c_str());
-        if(dir == NULL)
-            continue;
-        struct dirent *fn;
-
-        //check all files in directory
-        while((fn = readdir(dir))) {
-            string filename = fn->d_name;
-            if(filename.find(ftype) == string::npos)
+        
+        namespace fs = std::filesystem;
+        fs::path dir(dirname);
+        for(const auto& file : fs::directory_iterator(dir))
+        {
+            if(file.is_directory())
+                continue;
+            fs::path path = file.path();
+            string filename = path.filename();
+            auto ftype_pos = filename.find(ftype);
+            if(ftype_pos == string::npos)
                 continue;
 
-            string location = dirname + filename;
-
             //trim file type off of name
-            string name_type = filename.substr(0, filename.find(ftype));
-
+            string name_type = filename.substr(0, ftype_pos);
+            
             size_t tmp  = name_type.find_last_of(".");
             if(tmp == string::npos)
                 continue;
             string type = name_type.substr(tmp+1);
             string name = name_type.substr(0, tmp);
-
+            
             //put on list
-            presets.push_back(presetstruct{location, name, type});
+            presets.push_back(presetstruct{path.string(), name, type});
         }
-
-        closedir(dir);
     }
 
     //sort the presets
