@@ -1440,7 +1440,7 @@ void save_cb(const char *msg, RtData &d)
         std::size_t msgmax = (savefile.length()-1) / max_each;
         for(std::size_t pos = 0; pos < savefile.length(); pos += max_each)
         {
-            std::size_t len = std::min(max_each, savefile.length() - pos);
+            std::size_t len = (std::min)(max_each, savefile.length() - pos);
             d.reply(d.loc, "stiis",
                     file.c_str(), request_time, msgcount++, msgmax,
                     savefile.substr(pos, len).c_str());

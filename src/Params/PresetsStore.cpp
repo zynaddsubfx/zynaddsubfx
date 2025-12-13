@@ -96,7 +96,7 @@ void PresetsStore::scanforpresets()
             if(file.is_directory())
                 continue;
             fs::path path = file.path();
-            string filename = path.filename();
+            string filename = path.filename().string();
             auto ftype_pos = filename.find(ftype);
             if(ftype_pos == string::npos)
                 continue;
