@@ -61,6 +61,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #define errx(...) {}
 #define warnx(...) {}
@@ -73,25 +74,7 @@ namespace zyn {
 using std::string;
 int Pexitprogram = 0;
 
-#ifdef __APPLE__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
 
-/* work around missing clock_gettime on OSX */
-static void monotonic_clock_gettime(struct timespec *ts) {
-#ifdef __APPLE__
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts->tv_sec = mts.tv_sec;
-    ts->tv_nsec = mts.tv_nsec;
-#else
-    clock_gettime(CLOCK_MONOTONIC, ts);
-#endif
-}
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -550,8 +533,7 @@ public:
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
-    int64_t start_time_sec;
-    int64_t start_time_nsec;
+    std::chrono::steady_clock::time_point start_time;
     bool offline;
 
     //Apply function while parameters are write locked
@@ -1984,11 +1966,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             handleMsg(buf);
             });
 
-    //Setup starting time
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    start_time_sec  = time.tv_sec;
-    start_time_nsec = time.tv_nsec;
+    start_time = std::chrono::steady_clock::now();
 
     offline = false;
 }
@@ -2089,10 +2067,9 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Last acknowledged beat
     //Current offline status
 
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    uint32_t now = (time.tv_sec-start_time_sec)*100 +
-                   (time.tv_nsec-start_time_nsec)*1e-9*100;
+    auto duration = start_time - std::chrono::steady_clock::now();
+    using tick_t = std::chrono::duration<uint32_t, std::ratio<1, 100>>;  // 10 ms
+    uint32_t now = std::chrono::duration_cast<tick_t>(duration).count();
     int32_t last_ack   = master->last_ack;
     int32_t last_beat  = master->last_beat;
 
