@@ -101,7 +101,7 @@ class PADnoteParameters:public Presets
 
         //frequency parameters
         //If the base frequency is fixed to 440 Hz
-        SafeBool Pfixedfreq;
+        bool Pfixedfreq;
 
         /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
@@ -117,7 +117,7 @@ class PADnoteParameters:public Presets
         LFOParams      *FreqLfo; //Frequency LFO
 
         //Amplitude parameters
-        SafeBool PStereo;
+        bool PStereo;
         /* Panning -  0 - random
                   1 - left
                  64 - center

@@ -51,15 +51,15 @@ class EnvelopeParams:public Presets
         int loc; //!< consumer location
 
         /* MIDI Parameters */
-        SafeBool Pfreemode; //1 for free mode, 0 otherwise
+        bool          Pfreemode; //1 for free mode, 0 otherwise
         unsigned char Penvpoints;
         unsigned char Penvsustain; //127 for disabled
         float         envdt[MAX_ENVELOPE_POINTS];
         unsigned char Penvval[MAX_ENVELOPE_POINTS];
         unsigned char Penvstretch; //64=normal stretch (piano-like), 0=no stretch
-        SafeBool Pforcedrelease; //0 - OFF, 1 - ON
-        SafeBool Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
-        SafeBool Prepeating; //0 - OFF, 1 - ON
+        bool          Pforcedrelease; //0 - OFF, 1 - ON
+        bool          Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
+        bool          Prepeating; //0 - OFF, 1 - ON
 
         float A_dt, D_dt, R_dt;
         unsigned char PA_val, PD_val, PS_val, PR_val;
@@ -100,9 +100,9 @@ class EnvelopeParams:public Presets
 
         /* Default parameters */
         unsigned char Denvstretch;
-        SafeBool Dforcedrelease;
-        SafeBool Dlinearenvelope;
-        SafeBool Drepeating;
+        bool Dforcedrelease;
+        bool Dlinearenvelope;
+        bool Drepeating;
         float DA_dt, DD_dt, DR_dt;
         unsigned char DA_val, DD_val, DS_val, DR_val;
 };

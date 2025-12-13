@@ -83,7 +83,7 @@ class FilterParams:public PresetsArray
 
         unsigned char Psequencesize; //how many vowels are in the sequence
         unsigned char Psequencestretch; //how the sequence is stretched (how the input from filter envelopes/LFOs/etc. is "stretched")
-        SafeBool Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
+        bool Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
         struct {
             unsigned char nvowel; //the vowel from the position
         } Psequence[FF_MAX_SEQUENCE];

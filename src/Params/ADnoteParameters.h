@@ -39,7 +39,7 @@ struct ADnoteGlobalParam {
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
 
-    SafeBool PStereo;
+    bool PStereo;
 
 
     /******************************************
@@ -98,7 +98,7 @@ struct ADnoteGlobalParam {
     Resonance *Reson;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
-    SafeBool Hrandgrouping;
+    bool Hrandgrouping;
 
     const AbsTime *time;
     int64_t last_update_timestamp;
@@ -152,7 +152,7 @@ struct ADnoteVoiceParam {
     unsigned char PDelay;
 
     /** If the resonance is enabled for this voice */
-    SafeBool Presonance;
+    bool Presonance;
 
     // What external oscil should I use, -1 for internal OscilSmp&FMSmp
     short int Pextoscil, PextFMoscil;
@@ -162,8 +162,8 @@ struct ADnoteVoiceParam {
     unsigned char Poscilphase, PFMoscilphase;
 
     // filter bypass
-    SafeBool Pfilterbypass;
-    SafeBool PfilterFcCtlBypass;
+    bool Pfilterbypass;
+    bool PfilterFcCtlBypass;
 
     /** Voice oscillator */
     OscilGen *OscilGn;
@@ -173,7 +173,7 @@ struct ADnoteVoiceParam {
     **********************************/
 
     /** If the base frequency is fixed to 440 Hz*/
-    SafeBool Pfixedfreq;
+    bool Pfixedfreq;
 
     /* Equal temperate (this is used only if the Pfixedfreq is enabled)
        If this parameter is 0, the frequency is fixed (to 440 Hz);
@@ -196,12 +196,12 @@ struct ADnoteVoiceParam {
     unsigned char POffsetHz;
 
     /* Frequency Envelope */
-    SafeBool   PFreqEnvelopeEnabled;
+    bool PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;
 
     /* Frequency LFO */
-    SafeBool PFreqLfoEnabled;
-    LFOParams    *FreqLfo;
+    bool PFreqLfoEnabled;
+    LFOParams *FreqLfo;
 
 
     /***************************
@@ -219,7 +219,7 @@ struct ADnoteVoiceParam {
     float volume;
 
     /* If the Volume negative */
-    SafeBool PVolumeminus;
+    bool PVolumeminus;
 
     /* if AntiAliasing is enabled */
     bool PAAEnabled;
@@ -228,12 +228,12 @@ struct ADnoteVoiceParam {
     unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
-    SafeBool   PAmpEnvelopeEnabled;
+    bool PAmpEnvelopeEnabled;
     EnvelopeParams *AmpEnvelope;
 
     /* Amplitude LFO */
-    SafeBool PAmpLfoEnabled;
-    LFOParams    *AmpLfo;
+    bool PAmpLfoEnabled;
+    LFOParams *AmpLfo;
 
 
 
@@ -242,16 +242,16 @@ struct ADnoteVoiceParam {
     *************************/
 
     /* Voice Filter */
-    SafeBool PFilterEnabled;
+    bool PFilterEnabled;
     FilterParams *VoiceFilter;
 
     /* Filter Envelope */
-    SafeBool   PFilterEnvelopeEnabled;
+    bool PFilterEnvelopeEnabled;
     EnvelopeParams *FilterEnvelope;
 
     /* Filter LFO */
-    SafeBool PFilterLfoEnabled;
-    LFOParams    *FilterLfo;
+    bool PFilterLfoEnabled;
+    LFOParams *FilterLfo;
 
     // filter velocity sensing
     unsigned char PFilterVelocityScale;
@@ -293,20 +293,20 @@ struct ADnoteVoiceParam {
     unsigned char PFMDetuneType;
 
     /* FM base freq fixed at 440Hz */
-    SafeBool PFMFixedFreq;
+    bool PFMFixedFreq;
 
     /* Frequency Envelope of the Modulator */
-    SafeBool   PFMFreqEnvelopeEnabled;
+    bool PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
     /* Frequency Envelope of the Modulator */
-    SafeBool   PFMAmpEnvelopeEnabled;
+    bool PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
     /* Voice is being synced by modulator
        false = Hardsync disabled (default)
        true =  Hardsync enabled */
-    SafeBool PsyncEnabled;
+    bool PsyncEnabled;
 
     unsigned char *GlobalPDetuneType;
 
