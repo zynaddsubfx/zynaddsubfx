@@ -383,7 +383,7 @@ else()
     macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
         set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
         set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
-        
+       
         check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
             FAIL_REGEX ${_FAILREGEX}
         )

@@ -1003,7 +1003,7 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
         PPunchVelocitySensing = xml.getpar127("punch_velocity_sensing",
                                                PPunchVelocitySensing);
         Hrandgrouping = (bool) xml.getpar("harmonic_randomness_grouping",
-                                       Hrandgrouping, 0, 1);
+                                           Hrandgrouping, 0, 1);
 
         if(xml.enterbranch("AMPLITUDE_ENVELOPE")) {
             AmpEnvelope->getfromXML(xml);

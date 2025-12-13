@@ -88,7 +88,7 @@ void PresetsStore::scanforpresets()
         //open directory
         string dirname = config.cfg.presetsDirList[i];
         expanddirname(dirname);
-        
+
         namespace fs = std::filesystem;
         fs::path dir(dirname);
         for(const auto& file : fs::directory_iterator(dir))
@@ -103,13 +103,13 @@ void PresetsStore::scanforpresets()
 
             //trim file type off of name
             string name_type = filename.substr(0, ftype_pos);
-            
+
             size_t tmp  = name_type.find_last_of(".");
             if(tmp == string::npos)
                 continue;
             string type = name_type.substr(tmp+1);
             string name = name_type.substr(0, tmp);
-            
+
             //put on list
             presets.push_back(presetstruct{path.string(), name, type});
         }

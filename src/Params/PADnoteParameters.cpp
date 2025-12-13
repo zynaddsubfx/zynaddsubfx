@@ -930,6 +930,8 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
                       samplesize, samplemax, spectrumsize,
                       adj_ptr, &profile, this_c
 #ifdef _MSC_VER
+                      // MSVC requires the capture
+                      // Gcc warns unnecessary because it's constexpr
                       , profilesize
 #endif
                      ](
