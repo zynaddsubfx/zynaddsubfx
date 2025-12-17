@@ -202,6 +202,8 @@ void Chorus::out(const Stereo<float *> &input)
             // same for third ensemble member
             dl = (dlHist3 * (buffersize - i) + dlNew3 * i) / buffersize_f;
             output += getSample(delaySample.l, dl, dlk);
+            // reduce amplitude to match single phase modes
+            output *= 0.85f;
                 break;
             default:
                 // nothing to do for standard chorus
