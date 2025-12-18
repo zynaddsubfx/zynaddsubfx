@@ -22,10 +22,16 @@ endfunction()
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
+if(NOT MSVC)
+    set(PTHREAD_LIBRARIES pthread)
+else()
+    set(PTHREAD_LIBRARIES "")
+endif()
+
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread )
+    ${MXML_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 message(STATUS "Linking tests with: ${test_lib}")
 
