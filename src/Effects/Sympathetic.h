@@ -67,6 +67,8 @@ class Sympathetic final:public Effect
         unsigned char PmaxDrop;
         unsigned char PfadingTime;
         unsigned char PfreqOffset;
+        unsigned char PcontactDist;
+        unsigned char PcontactStrength;
 
         unsigned char Pinharmonicity = 0;
         unsigned char Pbeta=64;

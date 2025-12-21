@@ -43,6 +43,10 @@ class CombFilterBank
     /** Global pitch offset applied to all strings in semitones */
     float pitchOffset = 0.0f;
 
+    /** Distance of contact 0 = full conctact, 1= no contact */
+    float contactOffset = 1.0f;
+    float contactStrength = 0.0f;
+
     private:
     static float tanhX(const float x);
     float sampleLerp(const float *smp, const float pos) const;

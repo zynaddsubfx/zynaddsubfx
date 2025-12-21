@@ -233,13 +233,65 @@ namespace zyn {
                 {
                     if (delays[j] == 0.0f) continue;
                     // apply pitchoffset to comb delay
-                    const float delay = min(delays[j] * powf(2.0f, offsetbuf[i]), float(mem_size));
-                    // calculate reading position and care for ring buffer range
-                    const float pos_reader = fmodf(float(pos_writer + mem_size) - delay, float(mem_size));
-                    // sample at that position
-                    const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
-                    // add saturated feedback to comb
-                    comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
+                    if (contactOffset>0.0f) {
+                    //~ if (true) {
+
+                        const float baseDelay = min(delays[j], float(mem_size));
+                        const float contactPos = 0.25f * (offsetbuf[i]+1.0f); // 0 ... 2 should work never the less
+
+                        // calculate delay times for main and partial combs
+                        const float delayMain  = min(baseDelay, float(mem_size));
+                        const float delayLeft  = min(baseDelay * contactPos, float(mem_size));
+                        const float delayRight = min(baseDelay * (1.0f - contactPos), float(mem_size));
+
+                        // calculate reading position and care for ring buffer range
+                        const float posMain  = fmodf(float(pos_writer + mem_size) - delayMain,  float(mem_size));
+                        const float posLeft  = fmodf(float(pos_writer + mem_size) - delayLeft,  float(mem_size));
+                        const float posRight = fmodf(float(pos_writer + mem_size) - delayRight, float(mem_size));
+
+                        // sample at that positions
+                        float sMain  = sampleLerp(comb_smps[j], posMain);
+                        float sLeft  = sampleLerp(comb_smps[j], posLeft);
+                        float sRight = sampleLerp(comb_smps[j], posRight);
+
+                        // do some dampening of longer delays
+                        const float damp_range = 0.2f; // could be a parameter or removed at all
+                        float wr = sqrtf(1.0f - damp_range * contactPos);
+                        float wl = sqrtf((1.0f - damp_range) + damp_range * contactPos);
+                        float contactIn = wl * sLeft + wr * sRight;
+
+                        // inverse soft limiter - only high values are used
+                        float shaped = tanhX(contactIn );
+                        float contactResponse   = tanhX(contactIn  + contactOffset) - shaped;
+
+
+                        // mix partial and main feedbacks
+                        float w_main = (1.0f -  0.5f * contactStrength);
+                        float w_cont = contactStrength;
+                        const float feedback = w_main * sMain + w_cont * contactResponse;
+
+                          if(i==0 && j==0) {
+                            printf("\ncontactStrength: %f\n", contactStrength);
+                            printf("contactPos: %f\n", contactPos);
+                            printf("contactResponse: %f\n", contactResponse);
+                            printf("feedback: %f\n", feedback);
+
+                        }
+
+                        // add saturated feedback to comb
+                        comb_smps[j][pos_writer] = input_smp + tanhX(feedback * gainbuf[i/16]);
+
+                    }
+                    else {
+
+                        const float delay = min(delays[j] * powf(2.0f, offsetbuf[i]), float(mem_size));
+                        // calculate reading position and care for ring buffer range
+                        const float pos_reader = fmodf(float(pos_writer + mem_size) - delay, float(mem_size));
+                        // sample at that position
+                        const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
+                        // add saturated feedback to comb
+                        comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
+                    }
                 }
             }
             else

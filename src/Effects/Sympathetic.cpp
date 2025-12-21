@@ -81,6 +81,8 @@ rtosc::Ports Sympathetic::ports = {
     rEffPar(Pinharmonicity, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
     rEffPar(Pbeta, 17, rShort("beta"), rDefault(64), "beta"),
     rEffPar(Pgamma, 18, rShort("gamma"), rDefault(64), "gamma"),
+    rEffPar(PcontactDist, 19, rShort("contact"), rDefault(64), "contact disctance"),
+    rEffPar(PcontactStrength, 20, rShort("strength"), rDefault(0), "contact strength"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -542,6 +544,20 @@ void Sympathetic::changepar(int npar, unsigned char value)
             }
             break;
 
+        case 19: // Contact Distance
+            if (PcontactDist!=value) {
+                PcontactDist = value;
+                filterBank->contactOffset = (float)value / 32.0f;
+            }
+            break;
+
+        case 20: // Contact Strength
+            if (PcontactStrength!=value) {
+                PcontactStrength = value;
+                filterBank->contactStrength = (float)value / 128.0f;
+            }
+            break;
+
         default:
             break;
     }
@@ -569,6 +585,8 @@ unsigned char Sympathetic::getpar(int npar) const
         case 16: return Pinharmonicity;
         case 17: return Pbeta;
         case 18: return Pgamma;
+        case 19: return PcontactDist;
+        case 20: return PcontactStrength;
         default: return 0; //in case of bogus parameter number
     }
 }
