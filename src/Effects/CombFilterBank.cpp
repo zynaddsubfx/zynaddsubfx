@@ -267,48 +267,40 @@ namespace zyn {
                         float contactIn = (wl * sLeft + wr * sRight)/w_ges;
 
                         // remove DC
-                        //contactIn -= hp_state[j];  // Subtract DC estimate
-                        //hp_state[j] += 0.001f * contactIn;  // Very slow LP to estimate DC
+                        //~ contactIn -= hp_state[j];  // Subtract DC estimate
+                        //~ hp_state[j] += 0.001f * contactIn;  // Very slow LP to estimate DC
 
-                        // calculate velocity
-
-
-                        //~ float threshold = contactOffset * env[j];
-                        //~ float contactResponse = 0.0f;
-                        //~ if (fabsf(contactIn) > (threshold)) {
-                            //~ contactResponse = tanhX(contactIn - copysignf(threshold, contactIn));
-                        //~ }
-                        env[j] += 0.001f * (fabsf(contactIn) - env[j]);
+                        env[j] += 0.0001f * (fabsf(contactIn) - env[j]);
                         float thresh = 2.0f * contactOffset * env[j];
                         float excess = fabsf(contactIn) - thresh;
                         float contactResponse = 0.0f;
 
                         if (excess > 0.0f) {
-                            float x = excess / (env[j] + 1e-8f);
+                            float x = 2.0f * excess / (env[j] + 1e-8f);
                             contactResponse = tanhX(x);
                         }
                         contactResponse *= copysignf(1.0f, contactIn);
 
                         // mix partial and main feedbacks
+                        //~ const float w_cont = contactStrength;
                         const float w_cont = contactStrength * contactResponse;
                         const float delta = contactIn - sMain;
                         const float feedback = tanhX((sMain + w_cont * delta)* gainbuf[i/16]);
-
+                        // add saturated feedback to comb
+                        comb_smps[j][pos_writer] = input_smp + feedback;
 
                           if(i==0 && j==0) {
                             printf("\ncontactStrength: %f\n", contactStrength);
-                            printf("contactPos: %f\n", contactPos);
-                            printf("w_ges: %f\n", w_ges);
+                            //~ printf("contactPos: %f\n", contactPos);
+                            //~ printf("w_ges: %f\n", w_ges);
                             printf("contactIn: %f\n", fabsf(contactIn));
                              printf("contactOffset: %f\n", contactOffset);
-                             //~ printf("threshold: %f\n", threshold);
+                             printf("thresh: %f\n", thresh);
                             printf("contactResponse: %f\n", fabsf(contactResponse));
                             //~ printf("feedback: %f\n", feedback);
-
                         }
 
-                        // add saturated feedback to comb
-                        comb_smps[j][pos_writer] = input_smp + feedback;
+
 
                     }
                     else {

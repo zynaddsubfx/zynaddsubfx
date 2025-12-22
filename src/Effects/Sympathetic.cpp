@@ -336,14 +336,14 @@ void Sympathetic::calcFreqsGeneric()
 
         // Calculate delays for valid frequencies
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
-        printf("\ndelays[%d]: %f", i, filterBank->delays[i]);
+        //~ printf("\ndelays[%d]: %f", i, filterBank->delays[i]);
         if (Punison_size > 1) {
             filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
-            printf(" [%d]: %f", i+1, filterBank->delays[i+1]);
+            //~ printf(" [%d]: %f", i+1, filterBank->delays[i+1]);
         }
         if (Punison_size > 2) {
             filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
-            printf("[%d]: %f", i+2, filterBank->delays[i+2]);
+            //~ printf("[%d]: %f", i+2, filterBank->delays[i+2]);
         }
     }
     // factor for pitchdrop Maxdrop: 2^4 = 16, Pitchoffset: 2^1 = 2  -> 2^5 = 32.0f
