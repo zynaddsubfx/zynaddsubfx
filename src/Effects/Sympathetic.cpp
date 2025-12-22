@@ -547,14 +547,14 @@ void Sympathetic::changepar(int npar, unsigned char value)
         case 19: // Contact Distance
             if (PcontactDist!=value) {
                 PcontactDist = value;
-                filterBank->contactOffset = (float)value / 32.0f;
+                filterBank->contactOffset = (float)value / 127.0f;
             }
             break;
 
         case 20: // Contact Strength
             if (PcontactStrength!=value) {
                 PcontactStrength = value;
-                filterBank->contactStrength = (float)value / 128.0f;
+                filterBank->contactStrength = (float)value / 127.0f;
             }
             break;
 

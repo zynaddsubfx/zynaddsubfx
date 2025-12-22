@@ -78,6 +78,8 @@ class CombFilterBank
 
     /** Sample counter for timing-based delay modulation */
     float sampleCounter = 0.0f;
+    float hp_state[NUM_SYMPATHETIC_STRINGS] = {};
+    float env[NUM_SYMPATHETIC_STRINGS] = {};
 };
 
 }
