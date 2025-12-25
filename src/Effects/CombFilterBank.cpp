@@ -312,14 +312,15 @@ namespace zyn {
                         // It provides temporal smoothing of contact activity and a bounded memory,
                         // but does not accumulate unbounded energy.
                         // This effectively models penetration depth, but is envelope-dependent.
-                        contactResponse[j] *= 0.7f;
+                        float approximity = 1.0f - contactOffset;
+                        contactResponse[j] *= 0.5f;
                         if (excess > 0.0f) {
-                            float approximity = 1.0f - contactOffset;
 
-                            excess += (approximity*approximity)*2.0f;
+
+                            //~ excess += (approximity*approximity)*2.0f;
 
                             // drive rises nonlinearly, so low offsets stay very soft
-                            float drive = 1.0f + 4.0f * approximity * approximity;
+                            float drive = 4.0f + 8.0f * approximity;
                             // exponent controls knee hardness
                             float n = 4.0f;//2.5f + 2.0f * approximity;
                             // nonlinear shaper
@@ -327,14 +328,15 @@ namespace zyn {
                                     excess * drive /
                                     powf(1.0f + powf(fabsf(excess * drive), n), 1.0f / n);
 
-                            contactResponse[j] += 0.3f * shapedExcess;
+                            contactResponse[j] += 0.5f * shapedExcess;
+
                         }
 
 
                         // --- Feedback mixing ---
                         // Contact strength is modulated by contact response.
                         // This couples contact dynamics back into the main feedback loop.
-                        const float w_cont = contactStrength * contactResponse[j];
+                        const float w_cont = contactStrength * (contactResponse[j] + powf(approximity, 16) * (1.0f - contactResponse[j]));
                         //~ const float w_cont = contactStrength;
 
                         // Difference between contact-local motion and global string motion.
@@ -360,6 +362,7 @@ namespace zyn {
                              printf("contactOffset: %f\n", contactOffset);
                              printf("thresh: %f\n", thresh);
                             printf("contactResponse: %f\n", fabsf(contactResponse[j]));
+                            printf("w_cont: %f\n", w_cont);
                             //~ printf("feedback: %f\n", feedback);
                         }
 
