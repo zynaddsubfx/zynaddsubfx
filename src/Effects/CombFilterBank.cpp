@@ -33,6 +33,7 @@ namespace zyn {
         offset_smoothing.cutoff(0.2f);
         offset_smoothing.reset(0.0f);
         pos_writer = 0;
+        for (unsigned int j=0; j<NUM_SYMPATHETIC_STRINGS; j++) env[j] = 0.1f;
     }
 
     CombFilterBank::~CombFilterBank()
@@ -236,67 +237,129 @@ namespace zyn {
                 {
                     if (delays[j] == 0.0f) continue;
                     // apply pitchoffset to comb delay
-                    //~ if (contactOffset>0.0f) {
+                    //~ if (contactOffset<1.0f) {
                     if (true) {
 
+                        // Base delay length for this comb / string instance.
+                        // Clamped to ring buffer size for safety.
                         const float baseDelay = min(delays[j], float(mem_size));
-                        const float contactPos = 0.25f * (offsetbuf[i]+1.0f); // 0 ... 0.5 because of symetry
 
-                        // calculate delay times for main and partial combs
+                        // Contact position along the string, mapped from [-1,1] → [0,0.5]
+                        // Due to symmetry only half the string is modeled explicitly.
+                        const float contactPos = 0.25f * (offsetbuf[i] + 1.0f); // 0 … 0.5
+
+                        // --- Delay lengths for main string and the two partial segments ---
+                        // Main delay represents the full string loop.
                         const float delayMain  = min(baseDelay, float(mem_size));
+
+                        // Left/right partial delays represent the two string segments
+                        // split by the contact position.
                         const float delayLeft  = min(baseDelay * contactPos, float(mem_size));
                         const float delayRight = min(baseDelay * (1.0f - contactPos), float(mem_size));
 
-                        // calculate reading positions and care for ring buffer range
-                        const float posMain  = fmodf(float(pos_writer + mem_size) - delayMain,  float(mem_size));
-                        const float posLeft  = ((pos_writer + mem_size) - int(delayLeft)) %  (mem_size);
-                        const float posRight = ((pos_writer + mem_size) - int(delayRight)) % (mem_size);
+                        // --- Compute read positions in the circular buffer ---
+                        // Main read uses fractional delay (interpolated).
+                        const float posMain  = fmodf(float(pos_writer + mem_size) - delayMain,
+                                                     float(mem_size));
 
-                        // sample at that positions
+                        // Partial reads currently use integer delay indexing
+                        // (implicitly band-limited only by later processing).
+                        const float posLeft  = ((pos_writer + mem_size) - int(delayLeft)) % mem_size;
+                        const float posRight = ((pos_writer + mem_size) - int(delayRight)) % mem_size;
+
+                        // --- Sample delay line at the computed positions ---
                         float sMain  = sampleLerp(comb_smps[j], posMain);
                         float sLeft  = sampleLerp(comb_smps[j], posLeft);
                         float sRight = sampleLerp(comb_smps[j], posRight);
 
-                        // do some dampening of longer delays
-                        const float damp_range = 0.5f; // could be a parameter or removed at all
-                        float wr = (1.0f - damp_range) + damp_range* contactPos;
+                        // --- Frequency-dependent weighting of partial segments ---
+                        // Longer segments are slightly damped to reduce excessive low-frequency energy.
+                        // This effectively biases spectral contribution depending on contact position.
+                        const float damp_range = 0.5f; // heuristic, could be parameterized or removed
+
+                        float wr = (1.0f - damp_range) + damp_range * contactPos;
                         float wl = (1.0f - damp_range) + damp_range * (1.0f - contactPos);
-                        // calculate energy
-                        float w_ges = wr+wl;
-                        // normalize energy
-                        float contactIn = (wl * sLeft + wr * sRight)/w_ges;
 
-                        // remove DC
-                        //~ contactIn -= hp_state[j];  // Subtract DC estimate
-                        //~ hp_state[j] += 0.001f * contactIn;  // Very slow LP to estimate DC
+                        // Normalize combined energy of both partial taps
+                        float w_ges = wr + wl;
 
-                        env[j] += 0.0001f * (fabsf(contactIn) - env[j]);
-                        float thresh = 2.0f * contactOffset * env[j];
-                        float excess = fabsf(contactIn) - thresh;
-                        float contactResponse = 0.0f;
+                        // Contact excitation signal derived from partial segments.
+                        // This represents local string motion at the contact point.
+                        float contactIn = (wl * sLeft + wr * sRight) / w_ges;
 
+                        // --- DC removal on contact signal ---
+                        // Slow high-pass to avoid DC buildup from asymmetric nonlinear processing.
+                        contactIn -= hp_state[j];            // subtract DC estimate
+                        hp_state[j] += 0.001f * contactIn;   // very slow LP tracking DC
+
+                        // --- Envelope follower on main string signal ---
+                        // Acts as a global energy reference (implicitly part of a control loop).
+                        // Note: this envelope is influenced by the feedback decision below.
+                        env[j] += 0.0001f * (fabsf(sMain) - env[j]);
+
+                        // Contact threshold derived from envelope and user parameter.
+                        // contactOffset scales the geometric "distance" to contact.
+                        float thresh = 3.5f * contactOffset * env[j];
+
+                        // Amount by which local contact motion exceeds the threshold.
+                        // Half-wave rectification introduces a unilateral contact condition.
+                        float excess = contactIn - thresh;
+                        excess = fmaxf(0.0f, excess);
+                        //~ excess *= excess; // TBD: Try out
+
+                        // --- Contact response state ---
+                        // contactResponse[j] is a first-order leaky IIR state driven by contact excess.
+                        // It provides temporal smoothing of contact activity and a bounded memory,
+                        // but does not accumulate unbounded energy.
+                        // This effectively models penetration depth, but is envelope-dependent.
+                        contactResponse[j] *= 0.7f;
                         if (excess > 0.0f) {
-                            float x = 2.0f * excess / (env[j] + 1e-8f);
-                            contactResponse = tanhX(x);
-                        }
-                        contactResponse *= copysignf(1.0f, contactIn);
+                            float approximity = 1.0f - contactOffset;
 
-                        // mix partial and main feedbacks
+                            excess += (approximity*approximity)*2.0f;
+
+                            // drive rises nonlinearly, so low offsets stay very soft
+                            float drive = 1.0f + 4.0f * approximity * approximity;
+                            // exponent controls knee hardness
+                            float n = 4.0f;//2.5f + 2.0f * approximity;
+                            // nonlinear shaper
+                            float shapedExcess =
+                                    excess * drive /
+                                    powf(1.0f + powf(fabsf(excess * drive), n), 1.0f / n);
+
+                            contactResponse[j] += 0.3f * shapedExcess;
+                        }
+
+
+                        // --- Feedback mixing ---
+                        // Contact strength is modulated by contact response.
+                        // This couples contact dynamics back into the main feedback loop.
+                        const float w_cont = contactStrength * contactResponse[j];
                         //~ const float w_cont = contactStrength;
-                        const float w_cont = contactStrength * contactResponse;
+
+                        // Difference between contact-local motion and global string motion.
+                        // Injects localized disturbance rather than absolute signal.
                         const float delta = contactIn - sMain;
-                        const float feedback = tanhX((sMain + w_cont * delta)* gainbuf[i/16]);
-                        // add saturated feedback to comb
+
+                        // Final feedback signal:
+                        // - main string signal
+                        // - plus weighted contact-induced deviation
+                        // - passed through a saturator for energy stability
+                        const float feedback =
+                            tanhX((sMain + w_cont * delta) * gainbuf[i / 16]);
+
+                        // --- Write back into comb buffer ---
+                        // External excitation (input_smp) plus stabilized feedback.
                         comb_smps[j][pos_writer] = input_smp + feedback;
 
-                          if(i==0 && j==0) {
+                        if(i==0 && j==0) {
                             printf("\ncontactStrength: %f\n", contactStrength);
-                            //~ printf("contactPos: %f\n", contactPos);
+                            printf("contactPos: %f\n", contactPos);
                             //~ printf("w_ges: %f\n", w_ges);
-                            printf("contactIn: %f\n", fabsf(contactIn));
+                            //~ printf("contactIn: %f\n", fabsf(contactIn));
                              printf("contactOffset: %f\n", contactOffset);
                              printf("thresh: %f\n", thresh);
-                            printf("contactResponse: %f\n", fabsf(contactResponse));
+                            printf("contactResponse: %f\n", fabsf(contactResponse[j]));
                             //~ printf("feedback: %f\n", feedback);
                         }
 

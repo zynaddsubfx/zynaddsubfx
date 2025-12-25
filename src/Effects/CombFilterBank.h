@@ -80,6 +80,7 @@ class CombFilterBank
     float sampleCounter = 0.0f;
     float hp_state[NUM_SYMPATHETIC_STRINGS] = {};
     float env[NUM_SYMPATHETIC_STRINGS] = {};
+    float contactResponse[NUM_SYMPATHETIC_STRINGS] = {};
 };
 
 }

@@ -301,7 +301,7 @@ void Sympathetic::calcFreqsGeneric()
 
         float inharmonicOffset = 0.0f;
 
-        if (inharmonicity > 0.0f) {
+        if (inharmonicity > 0.0f && Pstrings > 1) {
             // Nonlinear weighting that emphasizes higher string indices
             // n_norm = 0 -> lowest string, n_norm = 1 -> highest string
             //
@@ -450,7 +450,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 4:
             Plevel = value;
-            filterBank->outgain = (float)Plevel/65.0f;
+            filterBank->outgain = (float)Plevel/96.0f;
             break;
         case 5:
             if(Punison_frequency_spread != value)
@@ -544,17 +544,17 @@ void Sympathetic::changepar(int npar, unsigned char value)
             }
             break;
 
-        case 19: // Contact Distance
-            if (PcontactDist!=value) {
-                PcontactDist = value;
-                filterBank->contactOffset = (float)value / 127.0f;
+        case 19: // Contact Approximity
+            if (PcontactDist!=127-value) {
+                PcontactDist = 127-value;
+                filterBank->contactOffset = (float)(PcontactDist*PcontactDist) / (127.0f * 127.0f);
             }
             break;
 
         case 20: // Contact Strength
             if (PcontactStrength!=value) {
                 PcontactStrength = value;
-                filterBank->contactStrength = (float)value / 127.0f;
+                filterBank->contactStrength = (float)(value*value) / (127.0f * 127.0f);
             }
             break;
 
@@ -585,7 +585,7 @@ unsigned char Sympathetic::getpar(int npar) const
         case 16: return Pinharmonicity;
         case 17: return Pbeta;
         case 18: return Pgamma;
-        case 19: return PcontactDist;
+        case 19: return 127-PcontactDist;
         case 20: return PcontactStrength;
         default: return 0; //in case of bogus parameter number
     }
