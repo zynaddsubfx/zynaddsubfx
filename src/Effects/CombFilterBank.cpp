@@ -211,234 +211,114 @@ namespace zyn {
         return gains;
     }
 
-    void CombFilterBank::filterout(float *smp)
+void CombFilterBank::filterout(float *smp)
+{
+    const unsigned int gain_bufsize = buffersize / 16;
+    float gainbuf[gain_bufsize];
+    if (!gain_smoothing.apply(gainbuf, gain_bufsize, gainbwd))
+        std::fill(gainbuf, gainbuf + gain_bufsize, gainbwd);
+
+    float offsetbuf[buffersize];
+    if (!offset_smoothing.apply(offsetbuf, buffersize, pitchOffset))
+        std::fill(offsetbuf, offsetbuf + buffersize, pitchOffset);
+
+    for (unsigned int i = 0; i < buffersize; ++i)
     {
+        const float input_smp = smp[i] * inputgain;
+        const float current_gain = gainbuf[i / 16];
 
-        // interpolate gainbuf values over buffer length using value smoothing filter (lp)
-        // this should prevent popping noise when controlled binary with 0 / 127
-        // new control rate = samplerate / 16
-        const unsigned int gain_bufsize = buffersize / 16;
-        //~ const unsigned int offset_bufsize = buffersize / 4;
-        float gainbuf[gain_bufsize]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, gain_bufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+gain_bufsize, gainbwd); // if nothing to interpolate (constant value)
-
-        float offsetbuf[buffersize]; // buffer for value smoothing filter
-        if (!offset_smoothing.apply( offsetbuf, buffersize, pitchOffset ) ) // interpolate the offset value
-            std::fill(offsetbuf, offsetbuf+buffersize, pitchOffset); // if nothing to interpolate (constant value)
-
-        for (unsigned int i = 0; i < buffersize; ++i)
-        {
-
-            const float input_smp = smp[i] * inputgain;
-            if (maxDrop <= maxDrop_min)
-            {   //Pitch drop deactivated
-                for (unsigned int j = 0; j < nrOfStrings; ++j)
-                {
-                    if (delays[j] == 0.0f) continue;
-                    // apply pitchoffset to comb delay
-                    //~ if (contactOffset<1.0f) {
-                    if (true) {
-
-                        // Base delay length for this comb / string instance.
-                        // Clamped to ring buffer size for safety.
-                        const float baseDelay = min(delays[j], float(mem_size));
-
-                        // Contact position along the string, mapped from [-1,1] → [0,0.5]
-                        // Due to symmetry only half the string is modeled explicitly.
-                        const float contactPos = 0.25f * (offsetbuf[i] + 1.0f); // 0 … 0.5
-
-                        // --- Delay lengths for main string and the two partial segments ---
-                        // Main delay represents the full string loop.
-                        const float delayMain  = min(baseDelay, float(mem_size));
-
-                        // Left/right partial delays represent the two string segments
-                        // split by the contact position.
-                        const float delayLeft  = min(baseDelay * contactPos, float(mem_size));
-                        const float delayRight = min(baseDelay * (1.0f - contactPos), float(mem_size));
-
-                        // --- Compute read positions in the circular buffer ---
-                        // Main read uses fractional delay (interpolated).
-                        const float posMain  = fmodf(float(pos_writer + mem_size) - delayMain,
-                                                     float(mem_size));
-
-                        // Partial reads currently use integer delay indexing
-                        // (implicitly band-limited only by later processing).
-                        const float posLeft  = ((pos_writer + mem_size) - int(delayLeft)) % mem_size;
-                        const float posRight = ((pos_writer + mem_size) - int(delayRight)) % mem_size;
-
-                        // --- Sample delay line at the computed positions ---
-                        float sMain  = sampleLerp(comb_smps[j], posMain);
-                        float sLeft  = sampleLerp(comb_smps[j], posLeft);
-                        float sRight = sampleLerp(comb_smps[j], posRight);
-
-                        // --- Frequency-dependent weighting of partial segments ---
-                        // Longer segments are slightly damped to reduce excessive low-frequency energy.
-                        // This effectively biases spectral contribution depending on contact position.
-                        const float damp_range = 0.5f; // heuristic, could be parameterized or removed
-
-                        float wr = (1.0f - damp_range) + damp_range * contactPos;
-                        float wl = (1.0f - damp_range) + damp_range * (1.0f - contactPos);
-
-                        // Normalize combined energy of both partial taps
-                        float w_ges = wr + wl;
-
-                        // Contact excitation signal derived from partial segments.
-                        // This represents local string motion at the contact point.
-                        float contactIn = (wl * sLeft + wr * sRight) / w_ges;
-
-                        // --- DC removal on contact signal ---
-                        // Slow high-pass to avoid DC buildup from asymmetric nonlinear processing.
-                        contactIn -= hp_state[j];            // subtract DC estimate
-                        hp_state[j] += 0.001f * contactIn;   // very slow LP tracking DC
-
-                        // --- Envelope follower on main string signal ---
-                        // Acts as a global energy reference (implicitly part of a control loop).
-                        // Note: this envelope is influenced by the feedback decision below.
-                        env[j] += 0.0001f * (fabsf(sMain) - env[j]);
-
-                        // Contact threshold derived from envelope and user parameter.
-                        // contactOffset scales the geometric "distance" to contact.
-                        float thresh = 3.5f * contactOffset * env[j];
-
-                        // Amount by which local contact motion exceeds the threshold.
-                        // Half-wave rectification introduces a unilateral contact condition.
-                        float excess = contactIn - thresh;
-                        excess = fmaxf(0.0f, excess);
-                        //~ excess *= excess; // TBD: Try out
-
-                        // --- Contact response state ---
-                        // contactResponse[j] is a first-order leaky IIR state driven by contact excess.
-                        // It provides temporal smoothing of contact activity and a bounded memory,
-                        // but does not accumulate unbounded energy.
-                        // This effectively models penetration depth, but is envelope-dependent.
-                        float approximity = 1.0f - contactOffset;
-                        contactResponse[j] *= 0.5f;
-                        if (excess > 0.0f) {
-
-
-                            //~ excess += (approximity*approximity)*2.0f;
-
-                            // drive rises nonlinearly, so low offsets stay very soft
-                            float drive = 4.0f + 8.0f * approximity;
-                            // exponent controls knee hardness
-                            float n = 4.0f;//2.5f + 2.0f * approximity;
-                            // nonlinear shaper
-                            float shapedExcess =
-                                    excess * drive /
-                                    powf(1.0f + powf(fabsf(excess * drive), n), 1.0f / n);
-
-                            contactResponse[j] += 0.5f * shapedExcess;
-
-                        }
-
-
-                        // --- Feedback mixing ---
-                        // Contact strength is modulated by contact response.
-                        // This couples contact dynamics back into the main feedback loop.
-                        const float w_cont = contactStrength * (contactResponse[j] + powf(approximity, 16) * (1.0f - contactResponse[j]));
-                        //~ const float w_cont = contactStrength;
-
-                        // Difference between contact-local motion and global string motion.
-                        // Injects localized disturbance rather than absolute signal.
-                        const float delta = contactIn - sMain;
-
-                        // Final feedback signal:
-                        // - main string signal
-                        // - plus weighted contact-induced deviation
-                        // - passed through a saturator for energy stability
-                        const float feedback =
-                            tanhX((sMain + w_cont * delta) * gainbuf[i / 16]);
-
-                        // --- Write back into comb buffer ---
-                        // External excitation (input_smp) plus stabilized feedback.
-                        comb_smps[j][pos_writer] = input_smp + feedback;
-
-                        if(i==0 && j==0) {
-                            printf("\ncontactStrength: %f\n", contactStrength);
-                            printf("contactPos: %f\n", contactPos);
-                            //~ printf("w_ges: %f\n", w_ges);
-                            //~ printf("contactIn: %f\n", fabsf(contactIn));
-                             printf("contactOffset: %f\n", contactOffset);
-                             printf("thresh: %f\n", thresh);
-                            printf("contactResponse: %f\n", fabsf(contactResponse[j]));
-                            printf("w_cont: %f\n", w_cont);
-                            //~ printf("feedback: %f\n", feedback);
-                        }
-
-
-
-                    }
-                    else {
-
-                        const float delay = min(delays[j] * powf(2.0f, offsetbuf[i]), float(mem_size));
-                        // calculate reading position and care for ring buffer range
-                        const float pos_reader = fmodf(float(pos_writer + mem_size) - delay, float(mem_size));
-                        // sample at that position
-                        const float feedbackSample = sampleLerp(comb_smps[j], pos_reader);
-                        // add saturated feedback to comb
-                        comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
-                    }
-                }
-            }
-            else
-            {   // Pitch drop Feature
-                // instead of reading with constant delay or with offset
-                // pitch drop keeps constantly changing the delay
-                // because the delay is limited, we use two alternating reading heads
-                // they jump back to 0 while their gain is 0
-
-                // calculate phases for both reading heads
-                const FloatTuple phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
-                const float normalizedPhase = fmodf(fabsf(sampleCounter) / maxDrop + 0.5f, 1.0f);
-                // calculate the gains with given cross fadeing time
-                const FloatTuple gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
-
-                for (unsigned int j = 0; j < nrOfStrings; ++j)
-                {
-                    if (delays[j] == 0.0f) continue;
-                    const float baseDelay = delays[j] * powf(2.0f, offsetbuf[i]);
-
-                    // Reading Head A
-                    float sampleA = 0.0f;
-                    if (gains.A > 0.0f)
-                    {
-                        const float delay1 = min(baseDelay * powf(2.0f, phases.A), float(mem_size));
-                        const float pos_reader1 = fmodf(float(pos_writer + mem_size - delay1), float(mem_size));
-                        sampleA = sampleLerp(comb_smps[j], pos_reader1) * gains.A;
-
-                    }
-
-                    // Reading Head B
-                    float sampleB = 0.0f;
-                    if (gains.B > 0.0f) {
-                        const float delay2 = min(baseDelay * powf(2.0f, phases.B), float(mem_size));
-                        const float pos_reader2 = fmodf(float(pos_writer + mem_size) - delay2, float(mem_size));
-                        sampleB = sampleLerp(comb_smps[j], pos_reader2)* gains.B;
-
-                    }
-
-                    float feedbackSample = (sampleA + sampleB);
-                    comb_smps[j][pos_writer] = input_smp + tanhX(feedbackSample * gainbuf[i/16]);
-                }
-            }
-            // mix output buffer samples to output sample
-            smp[i]=0.0f;
-            unsigned int nrOfNonZeroStrings = 0;
-            for (unsigned int j = 0; j < nrOfStrings; ++j)
-                if (delays[j] != 0.0f) {
-                    smp[i] += comb_smps[j][pos_writer];
-                    nrOfNonZeroStrings++;
-                }
-
-            // apply output gain to sum of strings and
-            // divide by nrOfStrings to get mean value
-            smp[i] *= outgain;
-            if(nrOfNonZeroStrings>0)
-                smp[i] /= (float)nrOfNonZeroStrings;
-
-        // proceed to next position in ringbuffer
-        ++pos_writer %= mem_size;
+        // Pitch drop pre-calculations
+        const bool isPitchDrop = maxDrop > maxDrop_min;
+        FloatTuple phases, gains;
+        if (isPitchDrop) {
+            phases = generatePhasedSawtooth(sampleCounter, dropRate, maxDrop);
+            float normalizedPhase = fmodf(fabsf(sampleCounter) / maxDrop + 0.5f, 1.0f);
+            gains = calculateSymmetricCrossfade(normalizedPhase, fadingTime);
         }
+
+        for (unsigned int j = 0; j < nrOfStrings; ++j)
+        {
+            if (delays[j] == 0.0f) continue;
+
+            // --- 1. Sample Acquisition (Unified for Normal and PitchDrop) ---
+            float sMain = 0.0f;
+            float sLeft = 0.0f;
+            float sRight = 0.0f;
+
+            const float baseDelay = delays[j] * powf(2.0f, offsetbuf[i]);
+            const float contactPos = 0.25f * (offsetbuf[i] + 1.0f);
+
+            // Helper to read all 3 taps (main, left, right) for a given delay
+            auto readTaps = [&](float d, float weight) {
+                if (weight <= 0.0f) return;
+
+                // Main loop delay
+                float dm = min(d, float(mem_size));
+                sMain += sampleLerp(comb_smps[j], fmodf(float(pos_writer + mem_size) - dm, float(mem_size))) * weight;
+
+                // Contact segments
+                float dl = min(dm * contactPos, float(mem_size));
+                float dr = min(dm * (1.0f - contactPos), float(mem_size));
+                sLeft  += sampleLerp(comb_smps[j], (pos_writer + mem_size - int(dl)) % mem_size) * weight;
+                sRight += sampleLerp(comb_smps[j], (pos_writer + mem_size - int(dr)) % mem_size) * weight;
+            };
+
+            if (isPitchDrop) {
+                readTaps(baseDelay * powf(2.0f, phases.A), gains.A);
+                readTaps(baseDelay * powf(2.0f, phases.B), gains.B);
+            } else {
+                readTaps(baseDelay, 1.0f);
+            }
+
+            // --- 2. Contact Logic (Unified) ---
+            const float damp_range = 0.5f;
+            float wr = (1.0f - damp_range) + damp_range * contactPos;
+            float wl = (1.0f - damp_range) + damp_range * (1.0f - contactPos);
+
+            float contactIn = (wl * sLeft + wr * sRight) / (wr + wl);
+
+            // DC removal
+            contactIn -= hp_state[j];
+            hp_state[j] += 0.001f * contactIn;
+
+            // Envelope and Threshold
+            env[j] += 0.0001f * (fabsf(sMain) - env[j]);
+            float thresh = 3.5f * contactOffset * env[j];
+            float excess = fmaxf(0.0f, contactIn - thresh);
+
+            // Response State
+            float approximity = 1.0f - contactOffset;
+            contactResponse[j] *= 0.5f;
+            if (excess > 0.0f) {
+                float drive = 4.0f + 16.0f * approximity;
+                float n = 4.0f;
+                float shapedExcess = excess * drive / powf(1.0f + powf(fabsf(excess * drive), n), 1.0f / n);
+                contactResponse[j] += 0.5f * shapedExcess;
+            }
+
+            // --- 3. Feedback and Write ---
+            const float hockeyFactor = powf(approximity, 16);
+            const float w_cont = contactStrength * (contactResponse[j] + hockeyFactor * (1.0f - contactResponse[j]));
+            const float delta = contactIn - sMain;
+
+            const float feedback = tanhX((sMain + w_cont * delta) * current_gain);
+            comb_smps[j][pos_writer] = input_smp + feedback;
+        }
+
+        // --- 4. Output Mixing ---
+        smp[i] = 0.0f;
+        unsigned int nrOfNonZeroStrings = 0;
+        for (unsigned int j = 0; j < nrOfStrings; ++j) {
+            if (delays[j] != 0.0f) {
+                smp[i] += comb_smps[j][pos_writer];
+                nrOfNonZeroStrings++;
+            }
+        }
+
+        smp[i] *= outgain;
+        if (nrOfNonZeroStrings > 0) smp[i] /= (float)nrOfNonZeroStrings;
+
+        ++pos_writer %= mem_size;
     }
+}
 }
