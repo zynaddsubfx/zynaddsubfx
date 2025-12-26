@@ -20,6 +20,8 @@
 #include <rtosc/port-sugar.h>
 #include "../globals.h"
 
+#define INH_MAX_OCTAVES 6.0f
+
 namespace zyn {
 
 #define rObject Sympathetic
@@ -32,7 +34,7 @@ namespace zyn {
 
 rtosc::Ports Sympathetic::ports = {
     {"preset::i", rProp(parameter)
-                  rOptions(Generic, Piano, Grand, Guitar, 12-String)
+                  rOptions(Generic, Piano, Grand, Guitar, 12-String, PitchDrop)
                   rProp(alias)
                   rDefault(0)
                   rDoc("Instrument Presets"), 0,
@@ -48,27 +50,39 @@ rtosc::Ports Sympathetic::ports = {
         rObject *o = (rObject*)d.obj;
         d.reply(d.loc, "i", o->Ppreset + (16 * o->insertion));
         rEnd},
-    rEffParVol(rDefaultDepends(presetOfVolume),
+    rEffParVol(rDefault(127) rDefaultDepends(presetOfVolume),
             rPresetsAt(0, 84, 66, 53, 66, 60),
             rPresetsAt(16, 127, 100, 80, 100, 90)),
-    rEffParPan(),
+    rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
-            rPresets(125, 125, 125, 110, 110), "Resonance"),
+            rPresets(125, 125, 125, 110, 110, 110), "Resonance"),
     rEffPar(Pdrive,   3, rShort("dr"), rDefault(65),
-            rPresets(5, 5, 5, 20, 20), "Input Amplification"),
+            rPresets(5, 5, 5, 20, 20, 20), "Input Amplification"),
     rEffPar(Plevel,   4, rShort("lev"), rDefault(65),
-            rPresets(80, 80, 90, 65, 77), "Output Amplification"),
+            rPresets(80, 80, 90, 65, 77, 77), "Output Amplification"),
     rEffPar(Punison_frequency_spread,  5, rShort("detune"), rDefault(30),
-            rPresets(10, 10, 5, 0, 10), "Unison String Detune"),
+            rPresets(10, 10, 5, 0, 10, 0), "Unison String Detune"),
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffParRange(Punison_size, 9, rShort("uni"), rLinear(1,3), rDefault(1),
-            rPresets(3, 3, 1, 1, 2), "Number of Unison Strings"),
+            rPresets(3, 3, 1, 1, 2, 1), "Number of Unison Strings"),
     rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(12),
-            rPresets(12, 12, 60, 6, 6), "Number of Strings"),
-    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
-            rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
+            rPresets(12, 12, 60, 6, 6, 8), "Number of Strings"),
+    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
+            rPresets(57, 57, 33, 52, 52, 52), "Midi Note of Lowest String"),
+    rEffPar(PdropRate, 12, rShort("dr"), rDefault(64),
+            rPresets(64, 64, 64, 64, 64, 32), "Pitch Drop Rate"),
+    rEffPar(PmaxDrop, 13, rShort("max"), rDefault(64),
+            rPresets(0, 0, 0, 0, 0, 32),  "Max Drop"),
+    rEffPar(PfadingTime, 14, rShort("fade"), rDefault(5),
+            rPresets(0, 0, 0, 0, 0, 32),  "Fading Time"),
+    rEffPar(PfreqOffset, 15, rShort("offset"), rDefault(64), "offset"),
+    rEffPar(Pinharmonicity, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
+    rEffPar(Pbeta, 17, rShort("beta"), rDefault(64), "beta"),
+    rEffPar(Pgamma, 18, rShort("gamma"), rDefault(64), "gamma"),
+    rEffPar(PcontactDist, 19, rShort("contact"), rDefault(64), "contact disctance"),
+    rEffPar(PcontactStrength, 20, rShort("strength"), rDefault(0), "contact strength"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -92,7 +106,12 @@ Sympathetic::Sympathetic(EffectParams pars)
       Punison_frequency_spread(30),
       Pstrings(12),
       Pbasenote(57),
-      baseFreq(220.0f)
+      PdropRate(64),
+      PmaxDrop(0),
+      PfadingTime(96),
+      PfreqOffset(64),
+      baseFreq(220.0f),
+      srate(pars.srate)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -223,24 +242,112 @@ void Sympathetic::calcFreqs()
         case 4:
             calcFreqsGuitar();
             break;
+        case 5:
+            calcFreqsPitchDrop();
+            break;
     }
+}
+
+
+void Sympathetic::calcFreqsPitchDrop()
+{
+    Pstrings = 8;
+    for(unsigned int i = 0; i < Pstrings; i++)
+    {
+        filterBank->delays[i] = ((float)samplerate) * freeverb_freqs[i] / 44100.0f;
+    }
+    //          factor for pitchdrop Maxdrop: 2^4 = 16, Pitchoffset: 2  -> 32.0f
+    const unsigned int mem_size_new = (int)ceilf(( filterBank->delays[0] * 32.0f * 1.03f + buffersize + 2)/16) * 16;
+
+    filterBank->setStrings(Pstrings,mem_size_new);
 }
 
 void Sympathetic::calcFreqsGeneric()
 {
     const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
-    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
-    const float unison_real_spread_down = 1.0f/unison_real_spread_up;
+    const float unison_real_spread_up   = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    const float unison_real_spread_down = 1.0f / unison_real_spread_up;
 
-    for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
+    const float min_freq = baseFreq * 0.125f; // Prevent overly long delays (3 octaves down)
+
+    for (unsigned int i = 0; i < Punison_size * Pstrings; i += Punison_size)
     {
-        const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
-        filterBank->delays[i] = ((float)samplerate)/centerFreq;
-        if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
-        if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
-    }
-    filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+        // normalized index along the string set (0..1)
+        const float n_norm = (float)(i / Punison_size) / (float)(Pstrings - 1);
+        const float n = (float)(i / Punison_size); // integer index for semitone spacing
 
+        // --- Base linear distribution: exact semitone spacing ---
+        // Each "string" corresponds to one semitone relative to baseFreq
+        float log2Base = n / 12.0f; // 12 semitones per octave
+
+        // --- Nonlinear deformation controlled by beta ---
+        // When beta = 1.0 → no deformation (pure semitone spacing)
+        // beta > 1.0  → high partials are stretched (metallic)
+        // beta < 1.0  → low partials are stretched (softer, string-like)
+        float nonlinearDeform = 0.0f;
+        if (beta != 1.0f && n_norm > 0.0f) {
+            // power curve relative to linear spacing
+            // result normalized so that the end of the range stays at INH_MAX_OCTAVES
+            float scaled = powf(n_norm, beta) - n_norm;
+            nonlinearDeform = scaled * (INH_MAX_OCTAVES / 12.0f); // scale to octave range
+        }
+
+        // --- Inharmonic Offset Calculation ---
+        // Goal:
+        //   Add inharmonicity *above* the regular harmonic (log2-based) distribution,
+        //   so that the parameter acts independently from the harmonic stretch (beta).
+        //   The idea is: 'beta' shapes the overall spacing of harmonics (macro scale),
+        //   while 'inharmonicity' adds local deviations (micro scale) mainly in upper regions.
+
+        float inharmonicOffset = 0.0f;
+
+        if (inharmonicity > 0.0f && Pstrings > 1) {
+            // Nonlinear weighting that emphasizes higher string indices
+            // n_norm = 0 -> lowest string, n_norm = 1 -> highest string
+            //
+            // Using powf(n_norm, gamma) ensures we can shape where the inharmonicity starts:
+            //   gamma < 1.0 → affects more of the range (softer curve)
+            //   gamma > 1.0 → concentrated toward the top (steeper curve)
+            //
+            // The (1 - powf(...)) term makes the offset start at 0 for n_norm=0
+            // and smoothly reach its maximum near n_norm=1.
+
+            float shaped = powf(n_norm, gamma);           // shape curve along strings
+            float rising = 1.0f - powf(1.0f - shaped, 2); // emphasize top-end effect
+
+            // Apply inharmonic scaling and clamp to maximum range
+            // INH_MAX_OCTAVES defines the maximum allowed offset range (e.g., 2 = 2 octaves)
+            inharmonicOffset = inharmonicity * rising * INH_MAX_OCTAVES;
+        }
+
+        // Combine base (halftone) + deformation + inharmonicity
+        float log2Offset = log2Base + nonlinearDeform + inharmonicOffset;
+
+        float centerFreq = baseFreq * powf(2.0f, log2Offset);
+
+        // Skip frequencies that are too low
+        if (centerFreq < min_freq) {
+            filterBank->delays[i] = 0.0f;
+            if (Punison_size > 1) filterBank->delays[i + 1] = 0.0f;
+            if (Punison_size > 2) filterBank->delays[i + 2] = 0.0f;
+            continue;
+        }
+
+
+        // Calculate delays for valid frequencies
+        filterBank->delays[i] = ((float)samplerate)/centerFreq;
+        //~ printf("\ndelays[%d]: %f", i, filterBank->delays[i]);
+        if (Punison_size > 1) {
+            filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
+            //~ printf(" [%d]: %f", i+1, filterBank->delays[i+1]);
+        }
+        if (Punison_size > 2) {
+            filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
+            //~ printf("[%d]: %f", i+2, filterBank->delays[i+2]);
+        }
+    }
+    // factor for pitchdrop Maxdrop: 2^4 = 16, Pitchoffset: 2^1 = 2  -> 2^5 = 32.0f
+    filterBank->setStrings(Pstrings*Punison_size, baseFreq/32.0f);
 }
 
 void Sympathetic::calcFreqsPiano()
@@ -281,20 +388,22 @@ void Sympathetic::calcFreqsGuitar()
 
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define PRESET_SIZE 13
-#define NUM_PRESETS 5
+#define PRESET_SIZE 15
+#define NUM_PRESETS 6
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note
         //Generic
-        {127, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
+        {127, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 64, 0, 0},
         //Piano 12-String
-        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
+        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 64, 0, 0},
         //Piano 60-String
-        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33},
+        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33, 64, 0, 0},
         //Guitar 6-String
-        {100, 64, 110, 20, 65, 0,  0, 127, 0, 1,    6,  52},
+        {100, 64, 110, 20, 65, 0,  0, 127, 0, 1,    6,  52, 64, 0, 0},
         //Guitar 12-String
-        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52},
+        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52, 64, 0, 0},
+        //Pitchdrop
+        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52, 32, 32, 32},
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
@@ -303,6 +412,9 @@ unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar
         }
         return presets[npreset][npar];
     }
+    else if (npreset < NUM_PRESETS && npar==15)
+        return 64;
+
     return 0;
 }
 
@@ -338,7 +450,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 4:
             Plevel = value;
-            filterBank->outgain = (float)Plevel/65.0f;
+            filterBank->outgain = (float)Plevel/96.0f;
             break;
         case 5:
             if(Punison_frequency_spread != value)
@@ -389,6 +501,63 @@ void Sympathetic::changepar(int npar, unsigned char value)
                 calcFreqs();
             }
             break;
+        case 12:
+            PdropRate = value;
+            filterBank->dropRate = (float)(PdropRate-64)/(-256.0f * float(srate));
+            break;
+        case 13:
+            PmaxDrop = value;
+            filterBank->maxDrop = (float)(PmaxDrop+1)/32.0f;
+            break;
+        case 14:
+            PfadingTime = value;
+            filterBank->fadingTime = (float)value/127.0f;
+            break;
+        case 15:
+            PfreqOffset = value;
+            filterBank->pitchOffset = (float)(PfreqOffset-64)/-64.0f;
+            break;
+        case 16: // Inharmonizität (I)
+            if (Pinharmonicity!=value) {
+                Pinharmonicity = value;
+                // Skaliert 0..127 → 0.0 .. 1.0
+                inharmonicity = (float)value / 127.0f;
+                calcFreqs();
+            }
+            break;
+
+        case 17: // Beta-Exponent
+            if (Pbeta!=value) {
+                Pbeta = value;
+                // Skaliert 0..127 → 1.5 .. 0.5 (Saiten bis Metall)
+                beta = 1.5f - ((float)value / 256.0f) * 2.0f;
+                calcFreqs();
+            }
+            break;
+
+        case 18: // Gamma-Exponent
+            if (Pgamma!=value) {
+                Pgamma = value;
+                // Skaliert 0..127 → 1.0 .. 3.0 (harmonisch bis stark inharmonisch)
+                gamma = 3.0f - ((float)value / 64.0f);
+                calcFreqs();
+            }
+            break;
+
+        case 19: // Contact Approximity
+            if (PcontactDist!=127-value) {
+                PcontactDist = 127-value;
+                filterBank->contactOffset = (float)(PcontactDist*PcontactDist) / (127.0f * 127.0f);
+            }
+            break;
+
+        case 20: // Contact Strength
+            if (PcontactStrength!=value) {
+                PcontactStrength = value;
+                filterBank->contactStrength = (float)(value*value) / (127.0f * 127.0f);
+            }
+            break;
+
         default:
             break;
     }
@@ -409,6 +578,15 @@ unsigned char Sympathetic::getpar(int npar) const
         case 9:  return Punison_size;
         case 10: return Pstrings;
         case 11: return Pbasenote;
+        case 12: return PdropRate;
+        case 13: return PmaxDrop;
+        case 14: return PfadingTime;
+        case 15: return PfreqOffset;
+        case 16: return Pinharmonicity;
+        case 17: return Pbeta;
+        case 18: return Pgamma;
+        case 19: return 127-PcontactDist;
+        case 20: return PcontactStrength;
         default: return 0; //in case of bogus parameter number
     }
 }

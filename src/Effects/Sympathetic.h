@@ -31,6 +31,7 @@ const unsigned int num_triple_strings = 48;
 
 // frequencies of a guitar in standard e tuning
 const float guitar_freqs[6] = {82.4f, 110.0f, 146.8f, 196.0f, 246.9f, 329.6f};
+const float freeverb_freqs[8] = {1116.0f, 1188.0f, 1277.0f, 1356.0f, 1422.0f, 1491.0f, 1557.0f, 1617.0f};
 
 class Sympathetic final:public Effect
 {
@@ -62,11 +63,26 @@ class Sympathetic final:public Effect
         unsigned char Punison_frequency_spread;
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
+        unsigned char PdropRate;     //
+        unsigned char PmaxDrop;
+        unsigned char PfadingTime;
+        unsigned char PfreqOffset;
+        unsigned char PcontactDist;
+        unsigned char PcontactStrength;
+
+        unsigned char Pinharmonicity = 0;
+        unsigned char Pbeta=64;
+        unsigned char Pgamma=64;
+
 
         unsigned char spread, spread_old;
-
         float freqs[NUM_SYMPATHETIC_STRINGS];
         float baseFreq;
+        float inharmonicity = 0.0f;
+        float beta = 1.0f;
+        float gamma = 2.0f;
+
+        unsigned int srate;
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
@@ -75,6 +91,7 @@ class Sympathetic final:public Effect
         void calcFreqsGeneric();
         void calcFreqsPiano();
         void calcFreqsGuitar();
+        void calcFreqsPitchDrop();
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
