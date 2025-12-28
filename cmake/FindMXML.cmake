@@ -6,7 +6,7 @@ find_path(MXML_INCLUDE_DIR
     )
 
 find_library(MXML_LIBRARIES
-    NAMES mxml libmxml mxml_static
+    NAMES mxml libmxml mxml_static mxml4 libmxml4 mxml4_static
     PATHS ${MXML_LIBRARY_DIRS}
     )
 
