@@ -587,12 +587,12 @@ add_library(zynaddsubfx_core STATIC
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if(NOT MSVC)
         set(PTHREAD_LIBRARY winpthread)
-    endif()
-    set(PLATFORM_LIBRARIES ws2_32
+        set(PLATFORM_LIBRARIES ws2_32
             winmm
             wsock32
             "-static" iphlpapi
             "-static" winpthread)
+    endif()
 elseif(APPLE)
     set(PTHREAD_LIBRARY pthread)
 else()
