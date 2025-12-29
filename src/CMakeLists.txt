@@ -23,7 +23,11 @@ find_package(OpenGL) #for FLTK
 find_package(ECM)
 list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
 if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
-    find_package(LibGit2)
+    if(EXISTS "/usr/include/git2/version.h")
+        find_package(LibGit2)
+    else()
+        message(STATUS "Could NOT find LibGit2 (missing file: /usr/include/git2/version.h)")
+    endif()
 endif()
 # lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
