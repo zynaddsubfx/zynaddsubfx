@@ -22,7 +22,7 @@ using namespace std;
 namespace zyn {
 
 WavEngine::WavEngine(const SYNTH_T &synth_)
-    :AudioOut(synth_), file(NULL), buffer(synth.samplerate * 4), pThread(NULL)
+    :AudioOut(synth_), file(NULL), buffer(synth.samplerate * 4)
 {
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -40,35 +40,27 @@ bool WavEngine::openAudio()
 
 bool WavEngine::Start()
 {
-    if(pThread)
-        return true;
-    pThread = new pthread_t;
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(pThread, &attr, _AudioThread, this);
+    if(!thread.joinable())
+        thread = std::thread(&WavEngine::AudioThread, this);
 
     return true;
 }
 
 void WavEngine::Stop()
 {
-    if(!pThread)
+    if(!thread.joinable())
         return;
 
-    pthread_t *tmp = pThread;
-    pThread = NULL;
+    std::thread tmp = std::move(thread);
 
     work.post();
-    pthread_join(*tmp, NULL);
-    delete pThread;
+    tmp.join();
     destroyFile();
 }
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if(!pThread)
+    if(!thread.joinable())
         return;
 
 
@@ -100,16 +92,11 @@ void WavEngine::destroyFile()
     file = NULL;
 }
 
-void *WavEngine::_AudioThread(void *arg)
-{
-    return (static_cast<WavEngine *>(arg))->AudioThread();
-}
-
 void *WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * synth.buffersize];
 
-    while(!work.wait() && pThread) {
+    while(!work.wait() && thread.joinable()) {
         for(int i = 0; i < synth.buffersize; ++i) {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);

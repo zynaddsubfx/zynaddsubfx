@@ -34,10 +34,8 @@ SndioEngine::SndioEngine(const SYNTH_T &synth)
     audio.buffer = new short[synth.buffersize * 2];
     audio.buffer_size = synth.buffersize * 2 * sizeof(short);
     audio.peaks[0] = 0;
-    audio.pThread = 0;
 
     midi.handle  = NULL;
-    midi.pThread = 0;
 }
 
 SndioEngine::~SndioEngine()
@@ -91,20 +89,10 @@ void *SndioEngine::AudioThread()
     return processAudio();
 }
 
-void *SndioEngine::_AudioThread(void *arg)
-{
-    return (static_cast<SndioEngine *>(arg))->AudioThread();
-}
-
-void *SndioEngine::MidiThread(void)
+void *SndioEngine::MidiThread()
 {
     set_realtime();
     return processMidi();
-}
-
-void *SndioEngine::_MidiThread(void *arg)
-{
-    return static_cast<SndioEngine *>(arg)->MidiThread();
 }
 
 bool SndioEngine::openAudio()
@@ -140,10 +128,7 @@ bool SndioEngine::openAudio()
         return false;
     }
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&audio.pThread, &attr, _AudioThread, this);
+    audio.thread = std::thread(&SndioEngine::AudioThread, this);
     return true;
 }
 
@@ -157,7 +142,8 @@ void SndioEngine::stopAudio()
 
     audio.handle = NULL;
 
-    pthread_join(audio.pThread, NULL);
+    if(audio.thread.joinable())
+        audio.thread.join();
 
     rc = sio_stop(handle);
     if(rc != 1)
@@ -179,11 +165,8 @@ bool SndioEngine::openMidi()
     }
 
     midi.exiting = false;
-    pthread_attr_t attr;
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&midi.pThread, &attr, _MidiThread, this);
+    midi.thread = std::thread(&SndioEngine::MidiThread, this);
     return true;
 }
 
@@ -194,9 +177,10 @@ void SndioEngine::stopMidi()
     if(!getMidiEn())
         return;
 
-    if((midi.handle != NULL) && midi.pThread) {
+    if(midi.handle) {
         midi.exiting = true;
-        pthread_join(midi.pThread, 0);
+        if(midi.thread.joinable())
+            midi.thread.join();
     }
 
     midi.handle = NULL;

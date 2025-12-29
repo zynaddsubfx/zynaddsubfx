@@ -10,6 +10,8 @@
   of the License, or (at your option) any later version.
 */
 
+#include <pthread.h>
+
 namespace zyn {
 
 template<class T>
