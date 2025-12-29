@@ -94,6 +94,8 @@ class MemoryStressTest
                 } catch (std::exception & e) {
 #if defined(DEBUG)
                     std::cerr << "couldn't push note #" << note_idx << ": " << e.what() << std::endl;
+#else
+                    (void)e;
 #endif
                 }
             }
