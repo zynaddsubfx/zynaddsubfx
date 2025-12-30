@@ -21,6 +21,7 @@
 #include "EnvelopeParams.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
+#include "../Misc/XMLwrapper.h"
 
 using namespace rtosc;
 

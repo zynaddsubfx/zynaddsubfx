@@ -15,11 +15,12 @@
 #define ENVELOPE_PARAMS_H
 
 #include "../globals.h"
-#include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 #include <cstdint>
 
 namespace zyn {
+
+class XMLwrapper;
 
    enum envmode_enum {
         ADSR_lin = 1,

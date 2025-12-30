@@ -14,11 +14,11 @@
 #ifndef PRESETSARRAY_H
 #define PRESETSARRAY_H
 
-#include "../Misc/XMLwrapper.h"
-
 #include "Presets.h"
 
 namespace zyn {
+
+class XMLwrapper;
 
 /**PresetsArray and Clipboard management*/
 class PresetsArray:public Presets
