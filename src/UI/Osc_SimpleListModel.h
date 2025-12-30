@@ -11,6 +11,7 @@
 */
 #pragma once
 #include "Fl_Osc_Widget.H"
+#include "../Misc/Util.h"
 #include <functional>
 #include <vector>
 #include <rtosc/rtosc.h>
