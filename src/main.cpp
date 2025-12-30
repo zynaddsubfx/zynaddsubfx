@@ -11,12 +11,16 @@
   of the License, or (at your option) any later version.
 */
 
-#ifdef WIN32
-#include <windows.h>
-#include <mmsystem.h>
+#ifdef _WIN32
+#  define WIN32_LEAN_AND_MEAN
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#  include <windows.h>
+#  include <mmsystem.h>
 #else
-#include <err.h>
+#  include <err.h>
 #endif
+
 
 #include <iostream>
 #include <fstream>
