@@ -54,12 +54,12 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 else()
     find_package(FFTW3F REQUIRED)
     find_package(MXML REQUIRED)
-    #    if(NOT MXML_FOUND)
-    #        find_package(MXML CONFIG)
-    #    endif()
     find_package(liblo REQUIRED)
-    find_package(PORTAUDIO)
     set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
+    find_package(PORTAUDIO)
+    if(MSVC)
+        find_package(getopt CONFIG REQUIRED)
+    endif()
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
@@ -665,8 +665,14 @@ target_link_libraries(zynaddsubfx
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
-    ${PLATFORM_LIBRARIES}
+	${PLATFORM_LIBRARIES}
+	)
+if(MSVC)
+    target_link_libraries(zynaddsubfx
+        PRIVATE
+        $<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>
     )
+endif()
 
 if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
