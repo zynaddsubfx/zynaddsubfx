@@ -33,7 +33,7 @@ jobs:
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config Debug",
-            test: "ctest --output-on-failure --test-dir build"
+            test: "ctest --output-on-failure --test-dir build -C Debug"
           }
           - {
             name: "Ubuntu gcc",
