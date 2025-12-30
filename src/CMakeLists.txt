@@ -585,7 +585,9 @@ add_library(zynaddsubfx_core STATIC
 	)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    if(NOT MSVC)
+    if(MSVC)
+        set(PTHREAD_LIBRARY winmm)
+    else()
         set(PTHREAD_LIBRARY winpthread)
         set(PLATFORM_LIBRARIES ws2_32
             winmm
