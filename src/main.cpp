@@ -14,6 +14,7 @@
 #ifdef WIN32
 #include <windows.h>
 #include <mmsystem.h>
+#else
 #include <err.h>
 #endif
 

@@ -22,10 +22,10 @@ endfunction()
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(NOT MSVC)
-    set(PTHREAD_LIBRARIES pthread)
+if(MSVC)
+    set(SYNC_LIBRARIES synchronization)
 else()
-    set(PTHREAD_LIBRARIES "")
+    set(PTHREAD_LIBRARIES pthread)
 endif()
 
 #Extra libraries added to make test and full compilation use the same library
@@ -61,11 +61,11 @@ quick_test(ReverseTest   ${test_lib})
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                          ${PLATFORM_LIBRARIES})
+                          ${PLATFORM_LIBRARIES} ${SYNC_LIBRARIES})
 quick_test(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                          ${PLATFORM_LIBRARIES})
+                          ${PLATFORM_LIBRARIES} ${SYNC_LIBRARIES})
 
 #Testbed app
 
