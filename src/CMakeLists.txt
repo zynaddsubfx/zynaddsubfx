@@ -29,7 +29,12 @@ if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERS
         message(STATUS "Could NOT find LibGit2 (missing file: /usr/include/git2/version.h)")
     endif()
 endif()
-# lash
+
+if(PKG_CONFIG_FOUND AND (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+    pkg_search_module(JACK jack)
+    mark_as_advanced(JACK_LIBRARIES)
+endif()
+
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
     pkg_check_modules(JACK jack)
@@ -60,7 +65,6 @@ else()
     endif()
     set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
     find_package(PORTAUDIO)
-    find_package(JACK)
     if(MSVC)
         find_package(getopt CONFIG REQUIRED)
     endif()
