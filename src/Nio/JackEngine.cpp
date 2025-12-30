@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <cassert>
 #include <cstring>
-#include <unistd.h> // access()
 #include <fstream> // std::istream
 
 #include "Nio.h"
