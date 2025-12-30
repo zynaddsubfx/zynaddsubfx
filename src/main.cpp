@@ -151,8 +151,11 @@ extern InMgr  *in;
 }
 HMIDIIN winmidiinhandle = 0;
 
-void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
-                            DWORD dwParam1,DWORD dwParam2)
+void CALLBACK WinMidiInProc([[maybe_unused]] HMIDIIN hMidiIn,
+                                             UINT wMsg,
+                            [[maybe_unused]] DWORD dwInstance,
+                                             DWORD dwParam1,
+                            [[maybe_unused]] DWORD dwParam2)
 {
     int midicommand=0;
     if (wMsg==MIM_DATA) {
@@ -164,7 +167,7 @@ void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
         int cmdchan=cmd&0x0f;
         int cmdtype=(cmd>>4)&0x0f;
 
-        int tmp=0;
+        //int tmp=0;
         MidiEvent ev;
         switch (cmdtype) {
             case(0x8)://noteon
@@ -635,7 +638,7 @@ int main(int argc, char *argv[])
     wait_t msg_waitlist;
     middleware->setUiCallback(0, [](void*v,const char*msg) {
             wait_t &wait = *(wait_t*)v;
-            size_t len = rtosc_message_length(msg, -1);
+            size_t len = rtosc_message_length(msg, (std::numeric_limits<size_t>::max)());
             char *copy = new char[len];
             memcpy(copy, msg, len);
             wait.push_back(copy);
