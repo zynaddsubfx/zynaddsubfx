@@ -30,6 +30,7 @@ jobs:
                     -DRTOSC_WERROR=1
                     -DCMAKE_BUILD_TYPE=Debug
                     -DPluginEnable=FALSE
+                    -DGuiModule=fltk
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config Debug",

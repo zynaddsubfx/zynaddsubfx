@@ -60,7 +60,6 @@ else()
     endif()
     set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
     find_package(PORTAUDIO)
-    find_package(JACK)
     if(MSVC)
         find_package(getopt CONFIG REQUIRED)
     endif()
