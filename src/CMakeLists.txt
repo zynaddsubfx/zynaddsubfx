@@ -668,9 +668,10 @@ target_link_libraries(zynaddsubfx
 	${AUDIO_LIBRARIES}
 	${PLATFORM_LIBRARIES}
 	$<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>
+	synchronization
 )
 else()
-    # same, just no getopt
+    # same, just no getopt and synchronization (TODO??? refactor?)
 target_link_libraries(zynaddsubfx
 	zynaddsubfx_core
 	zynaddsubfx_nio

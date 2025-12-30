@@ -11,6 +11,11 @@
   of the License, or (at your option) any later version.
 */
 
+#ifdef WIN32
+#include <windows.h>
+#include <mmsystem.h>
+#include <err.h>
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -20,10 +25,6 @@
 #include <ctime>
 #include <algorithm>
 #include <signal.h>
-
-#ifndef WIN32
-#include <err.h>
-#endif
 
 #include <getopt.h>
 
@@ -140,8 +141,6 @@ void exitprogram(const Config& config)
 
 //Windows MIDI OH WHAT A HACK...
 #ifdef WIN32
-#include <windows.h>
-#include <mmsystem.h>
 namespace zyn{
 extern InMgr  *in;
 }
