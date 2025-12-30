@@ -43,7 +43,9 @@ class JackEngine:public AudioOut, MidiIn
         int getBuffersize() { return audio.jackNframes; }
 
         std::string clientName();
+#ifndef _MSC_VER
         int clientId();
+#endif
 
     protected:
 
