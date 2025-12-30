@@ -658,20 +658,28 @@ endif()
 
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
+if(MSVC)
 target_link_libraries(zynaddsubfx
-    zynaddsubfx_core
+	zynaddsubfx_core
 	zynaddsubfx_nio
-    zynaddsubfx_gui_bridge
+	zynaddsubfx_gui_bridge
+	${GUI_LIBRARIES}
+	${NIO_LIBRARIES}
+	${AUDIO_LIBRARIES}
+	${PLATFORM_LIBRARIES}
+	$<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>
+)
+else()
+    # same, just no getopt
+target_link_libraries(zynaddsubfx
+	zynaddsubfx_core
+	zynaddsubfx_nio
+	zynaddsubfx_gui_bridge
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
 	${PLATFORM_LIBRARIES}
 	)
-if(MSVC)
-    target_link_libraries(zynaddsubfx
-        PRIVATE
-        $<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>
-    )
 endif()
 
 if (DssiEnable)
