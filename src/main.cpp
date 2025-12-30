@@ -157,7 +157,6 @@ void CALLBACK WinMidiInProc([[maybe_unused]] HMIDIIN hMidiIn,
                                              DWORD dwParam1,
                             [[maybe_unused]] DWORD dwParam2)
 {
-    int midicommand=0;
     if (wMsg==MIM_DATA) {
         int cmd,par1,par2;
         cmd=dwParam1&0xff;
@@ -170,14 +169,14 @@ void CALLBACK WinMidiInProc([[maybe_unused]] HMIDIIN hMidiIn,
         //int tmp=0;
         MidiEvent ev;
         switch (cmdtype) {
-            case(0x8)://noteon
+            case(0x8)://note OFF
                 ev.type = 1;
                 ev.num = par1;
                 ev.channel = cmdchan;
                 ev.value = 0;
                 in->putEvent(ev);
                 break;
-            case(0x9)://noteoff
+            case(0x9)://note ON
                 ev.type = 1;
                 ev.num = par1;
                 ev.channel = cmdchan;
