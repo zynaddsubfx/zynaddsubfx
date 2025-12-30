@@ -1,6 +1,6 @@
 {
   "dependencies": [
-    "pthreads", "ecm", "liblo", "mxml", "zlib", "fftw3", "getopt-win32", "portaudio", "jack2"
+    "pthreads", "ecm", "liblo", "mxml", "zlib", "fftw3", "getopt-win32", "portaudio", "jack2", "pkgconf", "fltk"
   ]
 }
 
