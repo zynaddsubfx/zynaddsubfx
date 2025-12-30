@@ -43,8 +43,8 @@ class Osc_SimpleListModel:public Fl_Osc_Widget
             if(list.size() == 0) {
                 oscWrite("", "I");
             }
-            char         types[list.size()+1];
-            rtosc_arg_t  args[list.size()];
+            STACKALLOC(char,        types, list.size()+1);
+            STACKALLOC(rtosc_arg_t, args,  list.size());
 
             //zero out data
             memset(types, 0, sizeof(types));
