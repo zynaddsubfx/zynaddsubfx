@@ -102,7 +102,7 @@ decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#endif} {private local
 }
 
-decl {\#if !defined(PLUGINVERSION) && HAS_X11 && !defined(NTK_GUI)
+decl {\#if !defined(PLUGINVERSION) && !defined(NTK_GUI)
 \#include <FL/platform.H>
 \#endif} {private local
 }
@@ -1622,12 +1622,12 @@ configui=new ConfigUI(osc);
 make_window();
 fl_open_display();
 
-\#if !defined(PLUGINVERSION) && defined(FLTK_GUI)
+\#if !defined(PLUGINVERSION) && defined(FLTK_GUI) && HAS_X11
 Fl_Pixmap *pixmap = new Fl_Pixmap(zynaddsubfx_xpm);
 Fl_RGB_Image *p = new Fl_RGB_Image(pixmap, FL_GRAY);
 masterwindow->icon(p);
 \#endif
-\#if !defined(PLUGINVERSION) && defined(NTK_GUI)
+\#if !defined(PLUGINVERSION) && defined(NTK_GUI) && HAS_X11
 Pixmap p, mask;
 XCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
                       (char**)zynaddsubfx_xpm, &p, &mask, NULL);

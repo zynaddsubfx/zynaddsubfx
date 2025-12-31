@@ -15,6 +15,7 @@
 #include <functional>
 #include <vector>
 #include <rtosc/rtosc.h>
+#include "../Misc/Util.h"
 
 class Osc_SimpleListModel:public Fl_Osc_Widget
 {
