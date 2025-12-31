@@ -14,8 +14,12 @@
 
 #if defined _MSC_VER
 
+// avoid double inclusion if win socket headers
+#define WIN32_LEAN_AND_MEAN
+#define _WINSOCKAPI_
+
 #include <windows.h>
-#include <synchapi.h>   // WaitOnAddress / WakeByAddress*
+#include <synchapi.h>  // WaitOnAddress / WakeByAddress*
 #include <atomic>
 
 namespace zyn {
