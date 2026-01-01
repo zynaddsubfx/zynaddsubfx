@@ -391,7 +391,7 @@ if (MSVC)
     # non-portable string warnings
     # declaration hides class member
     # shadowing
-    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996 /wd4456 /wd4458)
+    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996 /wd4456 /wd4458 /wd4459)
 else()
     add_compile_options(-Wall -Wextra)
 

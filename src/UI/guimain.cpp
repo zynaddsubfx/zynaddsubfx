@@ -12,6 +12,7 @@
 
 #include <rtosc/thread-link.h>
 #include <lo/lo.h>
+#include <limits>
 #include <string>
 #include <thread>
 
@@ -340,7 +341,7 @@ class UI_Interface:public Fl_Osc_Interface
             //Send to known url
             if(!sendtourl.empty()) {
                 lo_message msg  = lo_message_deserialise((void*)rtmsg,
-                        rtosc_message_length(rtmsg, rtosc_message_length(rtmsg,-1)), NULL);
+                        rtosc_message_length(rtmsg, rtosc_message_length(rtmsg,std::numeric_limits<size_t>::max())), NULL);
                 lo_address addr = lo_address_new_from_url(sendtourl.c_str());
                 lo_send_message(addr, rtmsg, msg);
             }
