@@ -1620,7 +1620,15 @@ bankui=new BankUI(&npart, osc);
 configui=new ConfigUI(osc);
 
 make_window();
+
+/*
+  Call fl_open_display. On Windows, it's not available before 1.4.
+  Note that the documentation says that this function is being called automatically,
+  and only required if the display is not open yet.
+*/
+\#if ! defined(WIN32) || (FL_MAJOR_VERSION == 1 && FL_MINOR_VERSION >= 4) || (FL_MAJOR_VERSION > 1)
 fl_open_display();
+\#endif
 
 \#if !defined(PLUGINVERSION) && defined(FLTK_GUI) && HAS_X11
 Fl_Pixmap *pixmap = new Fl_Pixmap(zynaddsubfx_xpm);
