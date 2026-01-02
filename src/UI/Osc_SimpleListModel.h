@@ -49,8 +49,8 @@ class Osc_SimpleListModel:public Fl_Osc_Widget
             STACKALLOC(rtosc_arg_t, args,  list.size());
 
             //zero out data
-            memset(types, 0, sizeof(types));
-            memset(args,  0, sizeof(args));
+            memset(types, 0, (list.size()+1) * sizeof(*types));
+            memset(args,  0, (list.size())   * sizeof(*args));
 
             for(int i=0; i<(int)list.size(); ++i) {
                 types[i]  = 's';

@@ -57,7 +57,7 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cmake -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest .."
+            config-fusion: "cmake -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
           }
           - {
             name: "Ubuntu clang+lld (fltk 1.4 + zest)",
@@ -79,13 +79,13 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=fltk ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build && \
-                cmake \
+            config-fusion: "cd build-fusion && \
+                cmake -B build-fusion \
                 -DCMAKE_C_COMPILER=clang \
                 -DCMAKE_CXX_COMPILER=clang++ \
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest .."
+                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
           }
           - {
             name: "macOS clang (fltk 1.4 + zest)",
@@ -100,7 +100,7 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest .."
+            config-fusion: "cmake -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
           }
     steps:
       - name: check out
@@ -128,7 +128,7 @@ jobs:
         run: ${{ matrix.config.info }}
       - name: create_builddirs
         if: ${{ matrix.config.enabled == 1 }}
-        run: mkdir build build-fusion
+        run: mkdir build; mkdir build-fusion
       - name: configure
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
