@@ -211,7 +211,11 @@ float SYNTH_T::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
+#ifdef NDEBUG
+    (void)len;
+#else
     assert(len > (size_t)pos + 1 && pos >= 0);
+#endif
     const unsigned int l_pos      = (int)pos;
     const unsigned int r_pos      = l_pos + 1;
     const float rightness = pos - (float)l_pos;
