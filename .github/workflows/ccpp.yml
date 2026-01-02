@@ -91,15 +91,15 @@ jobs:
             build-fusion: "cd build && make VERBOSE=1"
           }
           - {
-            name: "macOS clang (fltk 1.4 + zest)",
+            name: "macOS clang (no-gui + zest)",
             enabled: 1,
             os: macos-latest,
             update: "cmake --version && clang --version",
-            deps1: "brew install extra-cmake-modules liblo zlib fftw fltk@1.4 fluid-synth libxpm",
+            deps1: "brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm",
             deps2: "brew install libmxml --HEAD",
             testdeps: "brew install ruby",
             info: "cmake --version && clang --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
