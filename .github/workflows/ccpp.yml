@@ -42,7 +42,8 @@ jobs:
                     -DCMAKE_BUILD_TYPE=Release
                     -DPluginEnable=FALSE
                     -DGuiModule=zest
-                    "
+                    ",
+            build-fusion: "cmake --build build-fusion --config Release"
           }
           - {
             name: "Ubuntu gcc (fltk 1.3 + zest)",
@@ -57,7 +58,8 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cmake -S . -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
+            config-fusion: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
+            build-fusion: "cd build && make VERBOSE=1"
           }
           - {
             name: "Ubuntu clang+lld (fltk 1.3 + zest)",
@@ -85,7 +87,8 @@ jobs:
                 -DCMAKE_CXX_COMPILER=clang++ \
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
+                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            build-fusion: "cd build && make VERBOSE=1"
           }
           - {
             name: "macOS clang (fltk 1.4 + zest)",
@@ -100,7 +103,8 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cmake -S . -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
+            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            build: "cd build && make VERBOSE=1"
           }
     steps:
       - name: check out
@@ -146,8 +150,7 @@ jobs:
         run: ${{ matrix.config.config-fusion }}
       - name: make-fusion
         if: ${{ matrix.config.enabled == 1 }}
-        run: |
-          cmake --build build-fusion --config Release
+        run: ${{ matrix.config.build-fusion }}
 
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
