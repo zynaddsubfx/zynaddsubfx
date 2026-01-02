@@ -104,7 +104,7 @@ jobs:
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build: "cd build && make VERBOSE=1"
+            build-fusion: "cd build && make VERBOSE=1"
           }
     steps:
       - name: check out
