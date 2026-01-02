@@ -272,12 +272,12 @@ if (ExtendedWarnings)
 endif()
 
 set (ZynBuildOptions_x86_64AMD
-     -march=athlon64;-m64;-Wno-unused-parameter
+     -march=athlon64;-m64
   CACHE STRING "X86_64 compiler options"
 )
 
 set (ZynBuildOptions_X86_64Core2
-     -march=core2;-m64;-Wno-unused-parameter
+     -march=core2;-m64
   CACHE STRING "X86_64 compiler options"
 )
 
@@ -296,7 +296,7 @@ set (ZynBuildOptions_SSE
 check_cxx_compiler_flag("${ZynBuildOptions_SSE} -Werror" SUPPORT_SSE)
 
 set (ZynBuildOptionsBasic
-    -Wno-unused-parameter;-O3;-ffast-math;-fomit-frame-pointer
+    -O3;-ffast-math;-fomit-frame-pointer
     CACHE STRING "basic X86 compiler options"
 )
 list(APPEND ZynBuildOptionsBasic ${ZynBuildOptions_ExtendedWarnings})

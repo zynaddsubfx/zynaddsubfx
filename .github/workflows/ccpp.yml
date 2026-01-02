@@ -57,14 +57,14 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cmake -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
+            config-fusion: "cmake -S . -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
           }
           - {
-            name: "Ubuntu clang+lld (fltk 1.4 + zest)",
+            name: "Ubuntu clang+lld (fltk 1.3 + zest)",
             enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.4",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
             deps2: "sudo apt-get install liblo-dev",
             testdeps: "sudo apt-get install ruby",
             info: "cmake --version && clang --version",
@@ -80,7 +80,7 @@ jobs:
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && \
-                cmake -B build-fusion \
+                cmake -S . -B build-fusion \
                 -DCMAKE_C_COMPILER=clang \
                 -DCMAKE_CXX_COMPILER=clang++ \
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
@@ -100,7 +100,7 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cmake -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
+            config-fusion: "cmake -S . -B build-fusion -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest"
           }
     steps:
       - name: check out
