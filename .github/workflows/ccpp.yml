@@ -16,7 +16,7 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows MSVC",
+            name: "Windows MSVC (fltk + zest)",
             enabled: 1,
             os: windows-latest,
             deps1: "",
@@ -34,28 +34,37 @@ jobs:
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config Debug",
-            test: "ctest --output-on-failure --test-dir build -C Debug"
+            test: "ctest --output-on-failure --test-dir build -C Debug",
+            config-fusion: "cmake
+                    -B build-fusion
+                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+                    -DRTOSC_WERROR=1
+                    -DCMAKE_BUILD_TYPE=Release
+                    -DPluginEnable=FALSE
+                    -DGuiModule=zest
+                    ",
+            build-fusion: "cmake --build build --config Release"
           }
           - {
-            name: "Ubuntu gcc",
+            name: "Ubuntu gcc (fltk)",
             enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk",
             deps2: "sudo apt-get install liblo-dev",
             testdeps: "sudo apt-get install ruby",
             info: "cmake --version && gcc --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON ..",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure"
           }
           - {
-            name: "Ubuntu clang+lld",
+            name: "Ubuntu clang+lld (ntk)",
             enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev ntk",
             deps2: "sudo apt-get install liblo-dev",
             testdeps: "sudo apt-get install ruby",
             info: "cmake --version && clang --version",
@@ -67,7 +76,7 @@ jobs:
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DRTOSC_WERROR=ON -DWerror=ON ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=ntk ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure"
           }
