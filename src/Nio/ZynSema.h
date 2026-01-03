@@ -24,6 +24,8 @@
 
 namespace zyn {
 
+enum { PTHREAD_PROCESS_PRIVATE, PTHREAD_PROCESS_SHARED };
+
 // TODO: This is AI code
 class ZynSema
 {
@@ -171,6 +173,7 @@ private:
 
 #else // POSIX semaphore
 
+#include <pthread.h>  // for the "s" parameter to "init"
 #include <semaphore.h>
 
 namespace zyn {

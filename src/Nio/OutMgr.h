@@ -69,7 +69,6 @@ class OutMgr
         void applyOscEventRt(const char *msg);
 #if HAVE_BG_SYNTH_THREAD
         void setBackgroundSynth(bool);
-        static void *_refillThread(void *);
         void *refillThread();
 #endif
     private:
