@@ -32,12 +32,6 @@ OutMgr &OutMgr::getInstance(const SYNTH_T *synth)
 
 #if HAVE_BG_SYNTH_THREAD
 void *
-OutMgr::_refillThread(void *arg)
-{
-    return static_cast<OutMgr *>(arg)->refillThread();
-}
-
-void *
 OutMgr::refillThread()
 {
     refillLock();
@@ -53,8 +47,6 @@ OutMgr::refillThread()
 void
 OutMgr::setBackgroundSynth(bool enable)
 {
-    void *dummy;
-
     if (bgSynthEnabled == enable)
         return;
     if (bgSynthEnabled) {
@@ -63,13 +55,13 @@ OutMgr::setBackgroundSynth(bool enable)
         refillWakeup();
         refillUnlock();
 
-        pthread_join(bgSynthThread, &dummy);
+        bgSynthThread.join();
     } else {
         refillLock();
         bgSynthEnabled = true;
         refillUnlock();
 
-        pthread_create(&bgSynthThread, 0, &_refillThread, this);
+        bgSynthThread = std::thread(&OutMgr::refillThread, this);
     }
 }
 #endif
@@ -90,8 +82,6 @@ OutMgr::OutMgr(const SYNTH_T *synth_)
     memset(outr, 0, synth.bufferbytes);
 
 #if HAVE_BG_SYNTH_THREAD
-    pthread_mutex_init(&bgSynthMtx, 0);
-    pthread_cond_init(&bgSynthCond, 0);
     bgSynthEnabled = false;
 #endif
     midiFlushOffset = 0;
@@ -113,10 +103,6 @@ OutMgr::~OutMgr()
     delete [] priBuf.r;
     delete [] outr;
     delete [] outl;
-#if HAVE_BG_SYNTH_THREAD
-    pthread_cond_destroy(&bgSynthCond);
-    pthread_mutex_destroy(&bgSynthMtx);
-#endif
 }
 
 void OutMgr::refillSmps(unsigned int smpsLimit)

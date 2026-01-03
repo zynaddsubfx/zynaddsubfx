@@ -16,7 +16,9 @@
 #include "../globals.h"
 #include <list>
 #if HAVE_BG_SYNTH_THREAD
-#include <pthread.h>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #endif
 #include <string>
 #include <semaphore.h>
@@ -76,10 +78,10 @@ class OutMgr
         unsigned int curStoredSmps() const {return priBuffCurrent.l - priBuf.l; }
         void removeStaleSmps();
 #if HAVE_BG_SYNTH_THREAD
-        void refillLock() { pthread_mutex_lock(&bgSynthMtx); }
-        void refillUnlock() { pthread_mutex_unlock(&bgSynthMtx); }
-        void refillWait() { pthread_cond_wait(&bgSynthCond, &bgSynthMtx); }
-        void refillWakeup() { pthread_cond_broadcast(&bgSynthCond); }
+        void refillLock() { bgSynthMtx.lock(); }
+        void refillUnlock() { bgSynthMtx.unlock(); }
+        void refillWait() { std::unique_lock<std::mutex> lock(bgSynthMtx); bgSynthCond.wait(lock); }
+        void refillWakeup() { bgSynthCond.notify_one(); }
 #else
         void refillLock() { }
         void refillUnlock() { }
@@ -106,9 +108,9 @@ class OutMgr
 
 #if HAVE_BG_SYNTH_THREAD
         /**Background synth*/
-        pthread_mutex_t bgSynthMtx;
-        pthread_cond_t bgSynthCond;
-        pthread_t bgSynthThread;
+        std::mutex bgSynthMtx;
+        std::condition_variable bgSynthCond;
+        std::thread bgSynthThread;
         bool bgSynthEnabled;
 #endif
 };

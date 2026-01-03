@@ -35,15 +35,16 @@ jobs:
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config Debug",
             test: "ctest --output-on-failure --test-dir build -C Debug",
+            # re-use build dir, to avoid rebuilding deps with vcpkg
             config-fusion: "cmake
-                    -B build-fusion
+                    -B build
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
                     -DCMAKE_BUILD_TYPE=Release
                     -DPluginEnable=FALSE
                     -DGuiModule=zest
                     ",
-            build-fusion: "cmake --build build-fusion --config Release"
+            build-fusion: "cmake --build build --config Release"
           }
           - {
             name: "Ubuntu gcc (fltk 1.3 + zest)",
