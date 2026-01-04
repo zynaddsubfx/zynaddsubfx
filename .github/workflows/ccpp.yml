@@ -83,7 +83,7 @@ jobs:
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && \
-                cmake -S . -B build-fusion \
+                cmake \
                 -DCMAKE_C_COMPILER=clang \
                 -DCMAKE_CXX_COMPILER=clang++ \
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
@@ -100,10 +100,10 @@ jobs:
             deps2: "brew install libmxml --HEAD",
             testdeps: "brew install ruby",
             info: "cmake --version && clang --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
+            config: "cd buildx && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
+            configext: "cd buildx && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd buildx && make VERBOSE=1",
+            test: "cd buildx && ctest --output-on-failure",
             config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
