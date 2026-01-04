@@ -26,7 +26,6 @@ namespace zyn {
 
 enum { PTHREAD_PROCESS_PRIVATE, PTHREAD_PROCESS_SHARED };
 
-// TODO: This is AI code
 class ZynSema
 {
 public:

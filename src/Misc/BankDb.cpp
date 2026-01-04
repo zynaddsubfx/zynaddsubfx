@@ -190,7 +190,6 @@ static void saveCache(bvec vec)
     xml.saveXMLfile(getCacheName(), 0);
 }
 
-// TODO: Check AI code in git diff
 void BankDb::scanBanks()
 {
     namespace fs = std::filesystem;
