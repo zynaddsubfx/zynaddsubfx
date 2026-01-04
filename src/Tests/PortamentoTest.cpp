@@ -16,11 +16,13 @@
 #include <iostream>
 #include "../Misc/Time.h"
 #include "../Misc/Allocator.h"
+#include "../globals.h"
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
-#include "../globals.h"
+#undef protected
+#undef private
 
 using namespace std;
 using namespace zyn;

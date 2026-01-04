@@ -19,12 +19,14 @@
 #include "../Misc/Allocator.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
+#include "../globals.h"
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
 #include "../Misc/Part.h"
-#include "../globals.h"
+#undef protected
+#undef private
 
 using namespace std;
 using namespace zyn;
@@ -45,6 +47,11 @@ enum PrivateNoteStatus {
 class KitTest
 {
     private:
+        struct PartTestInterface
+        {
+            static void monomemClear(Part* p) { p->monomemClear(); }
+        };
+
         struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Alloc      alloc;
         FFTwrapper fft;
@@ -850,7 +857,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -875,7 +882,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    5);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -960,7 +967,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1008,7 +1015,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1061,7 +1068,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1126,7 +1133,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClear();
+            PartTestInterface::monomemClear(part);
             pool.killAllNotes();
 
             //Verify that notes are despawned

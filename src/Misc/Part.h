@@ -236,6 +236,8 @@ class Part
         const int &gzip_compression, &interpolation;
 
         std::vector<float> tmpOutL, tmpOutR;  // only used in ComputePartSmps
+
+        friend class PartTestInterface;
 };
 
 }
