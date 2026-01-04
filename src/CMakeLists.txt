@@ -9,9 +9,7 @@ include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
-#if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))  # TODO: remove comment
-    find_package(PkgConfig)
-#endif()
+find_package(PkgConfig)
 find_package(ZLIB REQUIRED)
 find_package(X11)
 find_package(Threads   REQUIRED)
@@ -595,6 +593,8 @@ add_library(zynaddsubfx_core STATIC
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if(MSVC)
         set(PTHREAD_LIBRARY winmm)
+        set(PLATFORM_LIBRARIES synchronization
+            $<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>)
     else()
         set(PTHREAD_LIBRARY winpthread)
         set(PLATFORM_LIBRARIES ws2_32
@@ -668,7 +668,6 @@ endif()
 
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
-if(MSVC)
 target_link_libraries(zynaddsubfx
 	zynaddsubfx_core
 	zynaddsubfx_nio
@@ -677,21 +676,7 @@ target_link_libraries(zynaddsubfx
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
 	${PLATFORM_LIBRARIES}
-	$<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>
-	synchronization
 )
-else()
-    # same, just no getopt and synchronization (TODO??? refactor?)
-target_link_libraries(zynaddsubfx
-	zynaddsubfx_core
-	zynaddsubfx_nio
-	zynaddsubfx_gui_bridge
-	${GUI_LIBRARIES}
-	${NIO_LIBRARIES}
-	${AUDIO_LIBRARIES}
-	${PLATFORM_LIBRARIES}
-	)
-endif()
 
 if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
