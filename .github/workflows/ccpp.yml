@@ -133,7 +133,7 @@ jobs:
         run: ${{ matrix.config.info }}
       - name: create_builddirs
         if: ${{ matrix.config.enabled == 1 }}
-        run: mkdir build; mkdir build-fusion
+        run: mkdir build; mkdir build-fusion; mkdir buildx
       - name: configure
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
