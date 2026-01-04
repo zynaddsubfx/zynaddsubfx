@@ -59,7 +59,8 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
+            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            #build-fusion: ""
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
           - {
@@ -89,6 +90,7 @@ jobs:
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            #build-fusion: ""
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
           - {
@@ -100,11 +102,12 @@ jobs:
             deps2: "brew install libmxml --HEAD",
             testdeps: "brew install ruby",
             info: "cmake --version && clang --version",
-            config: "cd buildx && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
-            configext: "cd buildx && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd buildx && make VERBOSE=1",
-            test: "cd buildx && ctest --output-on-failure",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            #build-fusion: ""
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
     steps:
@@ -127,13 +130,13 @@ jobs:
         run: ${{ matrix.config.testdeps }}
       - name: submodule
         if: ${{ matrix.config.enabled == 1 }}
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: info
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.info }}
       - name: create_builddirs
         if: ${{ matrix.config.enabled == 1 }}
-        run: mkdir build; mkdir build-fusion; mkdir buildx
+        run: mkdir build; mkdir build-fusion
       - name: configure
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
