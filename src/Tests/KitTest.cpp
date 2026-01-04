@@ -26,6 +26,8 @@
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
 #include "../Misc/Part.h"
+#undef protected
+#undef private
 
 using namespace std;
 using namespace zyn;
