@@ -208,8 +208,14 @@ class Part
         void monomemPop(note_t note);
         note_t monomemBack(void) const;
         bool monomemEmpty(void) const;
+#ifdef TESTING_PRIVATE_ACCESS
+    public:  // for some weir reasons, making this private fails MSVC builds
+#endif
         void monomemClear(void);
 
+#ifdef TESTING_PRIVATE_ACCESS
+    private:
+#endif
         short monomemnotes[256]; // A list to remember held notes.
         struct {
             unsigned char velocity;

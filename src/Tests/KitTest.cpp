@@ -20,6 +20,7 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
 #include "../globals.h"
+#define TESTING_PRIVATE_ACCESS
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
@@ -852,7 +853,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -877,7 +878,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    5);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -962,7 +963,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1010,7 +1011,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1063,7 +1064,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1128,7 +1129,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            part->monomemClearForTesting();
+            part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
