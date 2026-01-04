@@ -83,13 +83,13 @@ bool SndioEngine::getMidiEn() const
     return midi.handle;
 }
 
-void *SndioEngine::AudioThread()
+void SndioEngine::AudioThread()
 {
     set_realtime();
-    return processAudio();
+    processAudio();
 }
 
-void *SndioEngine::MidiThread()
+void SndioEngine::MidiThread()
 {
     set_realtime();
     return processMidi();
@@ -189,7 +189,7 @@ void SndioEngine::stopMidi()
         mio_close(handle);
 }
 
-void *SndioEngine::processAudio()
+void SndioEngine::processAudio()
 {
     size_t len;
     struct sio_hdl *handle;
@@ -201,10 +201,9 @@ void *SndioEngine::processAudio()
         if(len == 0) // write error according to sndio examples
             cerr << "sio_write error" << endl;
     }
-    return NULL;
 }
 
-void *SndioEngine::processMidi()
+void SndioEngine::processMidi()
 {
     int n;
     int nfds;
@@ -215,16 +214,12 @@ void *SndioEngine::processMidi()
     unsigned char buf[3];
 
     n = mio_nfds(midi.handle);
-    if(n <= 0) {
+    if(n <= 0)
         cerr << "mio_nfds error" << endl;
-        return NULL;
-    }
 
     pfd = (struct pollfd *) calloc(n, sizeof(struct pollfd));
-    if(pfd == NULL) {
+    if(pfd == NULL)
         cerr << "calloc error" << endl;
-        return NULL;
-    }
 
     while(1) {
         if(midi.exiting)
@@ -260,7 +255,6 @@ void *SndioEngine::processMidi()
         midiProcess(buf[0], buf[1], buf[2]);
     }
     free(pfd);
-    return NULL;
 }
 
 short *SndioEngine::interleave(const Stereo<float *> &smps)

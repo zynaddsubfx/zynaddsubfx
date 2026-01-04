@@ -92,7 +92,7 @@ void WavEngine::destroyFile()
     file = NULL;
 }
 
-void *WavEngine::AudioThread()
+void WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * synth.buffersize];
 
@@ -113,8 +113,6 @@ void *WavEngine::AudioThread()
     }
 
     delete[] recordbuf_16bit;
-
-    return NULL;
 }
 
 }

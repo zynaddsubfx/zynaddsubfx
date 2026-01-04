@@ -42,7 +42,7 @@ class WavEngine:public AudioOut
         void destroyFile();
 
     protected:
-        void *AudioThread();
+        void AudioThread();
 
     private:
         WavFile *file;

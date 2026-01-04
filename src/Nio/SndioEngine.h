@@ -40,8 +40,8 @@ class SndioEngine:public AudioOut, MidiIn
         bool getMidiEn() const;
 
     protected:
-        void *AudioThread();
-        void *MidiThread();
+        void AudioThread();
+        void MidiThread();
 
     private:
         bool openAudio();
@@ -49,8 +49,8 @@ class SndioEngine:public AudioOut, MidiIn
         bool openMidi();
         void stopMidi();
 
-        void *processAudio();
-        void *processMidi();
+        void processAudio();
+        void processMidi();
         short *interleave(const Stereo<float *> &smps);
         void showAudioInfo(struct sio_hdl *handle);
 
