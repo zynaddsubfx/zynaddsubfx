@@ -182,7 +182,7 @@ class Part
 
         const static rtosc::Ports &ports;
 
-    public:  // TODO! private
+    private:
         void MonoMemRenote(); // MonoMem stuff.
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
