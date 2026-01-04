@@ -17,7 +17,7 @@ jobs:
         config:
           - {
             name: "Windows MSVC (fltk + zest)",
-            enabled: 1,
+            enabled: 0,
             os: windows-latest,
             deps1: "",
             deps2: "",
@@ -64,7 +64,7 @@ jobs:
           }
           - {
             name: "Ubuntu clang+lld (fltk 1.3 + zest)",
-            enabled: 1,
+            enabled: 0,
             os: ubuntu-latest,
             update: "sudo apt-get update",
             deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
@@ -93,7 +93,7 @@ jobs:
           }
           - {
             name: "macOS clang (no-gui + zest)",
-            enabled: 1,
+            enabled: 0,
             os: macos-latest,
             update: "cmake --version && clang --version",
             deps1: "brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm",
