@@ -47,11 +47,6 @@ enum PrivateNoteStatus {
 class KitTest
 {
     private:
-        struct PartTestInterface
-        {
-            static void monomemClear(Part* p) { p->monomemClear(); }
-        };
-
         struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Alloc      alloc;
         FFTwrapper fft;
@@ -857,7 +852,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -882,7 +877,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    5);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -967,7 +962,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1015,7 +1010,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1068,7 +1063,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned
@@ -1133,7 +1128,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
 
             //Reset the part
-            PartTestInterface::monomemClear(part);
+            part->monomemClearForTesting();
             pool.killAllNotes();
 
             //Verify that notes are despawned

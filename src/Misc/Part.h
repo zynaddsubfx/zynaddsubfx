@@ -237,7 +237,8 @@ class Part
 
         std::vector<float> tmpOutL, tmpOutR;  // only used in ComputePartSmps
 
-        friend class PartTestInterface;
+    public:  // Testing only access
+        void monomemClearForTesting(void) { monomemClear(); }
 };
 
 }
