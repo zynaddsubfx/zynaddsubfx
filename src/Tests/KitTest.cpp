@@ -24,8 +24,8 @@
 #define protected public
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
-#include "../Misc/Part.h"
 #undef protected
+#include "../Misc/Part.h"
 #undef private
 
 using namespace std;
