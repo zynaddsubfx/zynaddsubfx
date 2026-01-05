@@ -1,0 +1,87 @@
+#!/bin/bash
+
+trap_func()
+{
+    trap - ERR  # don't run the trap again
+    echo "Error in line $1 (return code $2)" >&2
+    exit 1
+}
+
+main()
+{
+    set -eE
+    trap 'trap_func $LINENO $?' ERR
+
+    local tmp_dir
+    if [ "$1" ]
+    then
+        if ! [ -d "$1" ]
+        then
+            echo "Error: Directory \"$1\" does not exit" >&2
+            exit 1
+        fi
+        tmp_dir=$1
+    else
+        tmp_dir=$(mktemp -d "/tmp/build-mingw-deps.XXXXXXXXXX")
+    fi
+
+    local urls=(
+        https://www.fftw.org/fftw-3.3.10.tar.gz                                           # GPL-2.0-or-later
+        https://github.com/radarsat1/liblo/archive/refs/tags/0.34.tar.gz                  # GPL-2.1-only
+        https://github.com/michaelrsweet/mxml/releases/download/v4.0.4/mxml-4.0.4.tar.gz  # Apache-2.0 (but GPL2 exceptions)
+        https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz           # MIT
+        https://downloads.sourceforge.net/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz)          # libpng-2.0
+    local archives=(fftw-3.3.10 liblo-0.34 mxml-4.0.4 portaudio-19.7.0 zlib-1.2.11)
+
+    for i in 0 1 2 3 4
+    do
+        local tarball=$tmp_dir/${archives[$i]}.tar.gz
+        [ -f "$tarball" ] || wget "${urls[$i]}" -O "$tarball"
+        tar -C "$tmp_dir/" -xf "$tarball"
+        # rm "$tarball"
+    done
+
+    [ -d "$tmp_dir/prefix" ] || mkdir "$tmp_dir/prefix"
+
+    (cd "$tmp_dir/zlib-1.2.11"
+        CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar ./configure \
+            --prefix="$tmp_dir/prefix" \
+            --static
+        make
+        make install)
+
+    (cd "$tmp_dir/fftw-3.3.10"
+        ./configure --host=x86_64-w64-mingw32 \
+            --prefix="$tmp_dir/prefix" \
+            --with-our-malloc \
+            --disable-mpi
+        make
+        make install)
+
+    (cd "$tmp_dir/mxml-4.0.4"
+        ./configure --host=x86_64-w64-mingw32 \
+            --prefix="$tmp_dir/prefix" \
+            --disable-shared \
+            --enable-static
+        sed -i "s/^AR\t*=.*$/AR = x86_64-w64-mingw32-ar/" Makefile
+        sed -i '12 d; 14 d' mxml-file.c  # only valid for mxml-4.0.4
+        make libmxml.a
+        make -i install TARGETS="")
+
+    (cd "$tmp_dir/portaudio-19.7.0"
+        ./configure --host=x86_64-w64-mingw32 \
+            --prefix="$tmp_dir/prefix"
+        make
+        make install)
+
+    (cd "$tmp_dir/liblo-0.34"
+        ./autogen.sh --host=x86_64-w64-mingw32 \
+            --prefix="$tmp_dir/prefix" \
+            --disable-shared \
+            --enable-static \
+            --disable-doc
+        make
+        make install)
+}
+
+main "$@"

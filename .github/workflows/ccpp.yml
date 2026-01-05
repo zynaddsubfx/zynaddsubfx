@@ -52,12 +52,13 @@ jobs:
             os: ubuntu-latest,
             update: "sudo apt-get update",
             deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build",
+            deps2: "./build-mingw-deps $RUNNER_TEMP",
             testdeps: "",
             info: "",
-            config: "cmake -S . -B build -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DCMAKE_BUILD_TYPE=Release ..",
+            config: "PKG_CONFIG=x86_64-w64-mingw32-pkg-config PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig cmake -S . -B build -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DCMAKE_PREFIX_PATH=$RUNNER_TEMP/prefix -DCMAKE_BUILD_TYPE=Release ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cmake --build build",
-            test: "",  # TODO? Use wine?
+            test: "",
             config-fusion: "cmake -S . -B build-fusion -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DCMAKE_BUILD_TYPE=Release -DGuiModule=zest ..",
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
