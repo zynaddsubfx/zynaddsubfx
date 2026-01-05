@@ -60,7 +60,6 @@ jobs:
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            #build-fusion: ""
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
           - {
@@ -90,7 +89,6 @@ jobs:
                 -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
                 -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            #build-fusion: ""
             build-fusion: "cd build-fusion && make VERBOSE=1"
           }
           - {
@@ -107,8 +105,8 @@ jobs:
             build: "cd build && make VERBOSE=1",
             test: "cd build && ctest --output-on-failure",
             config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            #build-fusion: ""
-            build-fusion: "cd build-fusion && make VERBOSE=1"
+            build-fusion: ""  # Tries to compile as objective C. Possibly, DPF/pugl update required
+            #build-fusion: "cd build-fusion && make VERBOSE=1"
           }
     steps:
       - name: check out
