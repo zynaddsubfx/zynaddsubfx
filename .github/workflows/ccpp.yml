@@ -51,7 +51,7 @@ jobs:
             enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
-            deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build",
+            deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build wine",
             deps2: "./build-mingw-deps $RUNNER_TEMP",
             testdeps: "",
             info: "",
@@ -59,8 +59,8 @@ jobs:
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cmake --build build",
             test: 'set -e; for i in build/src/Tests/*.exe; do WINEPATH="/usr/x86_64-w64-mingw32/bin;$RUNNER_TEMP/prefix/lib;$RUNNER_TEMP/prefix/bin" wine "$i"; done',
-            config-fusion: "",  # TODO
-            build-fusion: ""
+            config-fusion: "PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig cmake -S . -B build-fusion -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DMINGW_PREFIX=$RUNNER_TEMP/prefix -DPluginEnable=FALSE -DCMAKE_BUILD_TYPE=Release -DGuiModule=zest ..",
+            build-fusion: "cmake --build build-fusion"
           }
           - {
             name: "Ubuntu gcc (fltk 1.3 + zest)",
