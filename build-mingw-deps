@@ -54,7 +54,8 @@ main()
         ./configure --host=x86_64-w64-mingw32 \
             --prefix="$tmp_dir/prefix" \
             --with-our-malloc \
-            --disable-mpi
+            --disable-mpi \
+            --enable-single
         make
         make install)
 

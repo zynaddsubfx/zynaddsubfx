@@ -2,6 +2,7 @@
 
 find_path(MXML_INCLUDE_DIR
     NAMES mxml.h
+    PATH_SUFFIXES libmxml4
     PATHS ${MXML_INCLUDE_DIRS}
     )
 

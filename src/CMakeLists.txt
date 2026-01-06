@@ -28,7 +28,7 @@ if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERS
     endif()
 endif()
 
-if(PKG_CONFIG_FOUND AND (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+if(PKG_CONFIG_FOUND AND MSVC)
     pkg_search_module(JACK jack)
     mark_as_advanced(JACK_LIBRARIES)
 endif()
@@ -368,7 +368,7 @@ list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 message(STATUS "Compiling with liblo")
 
 # other include directories
-include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${FFTW3F_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIR} ${FFTW3F_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
 if(NOT ${X11_X11_LIB} STREQUAL "")

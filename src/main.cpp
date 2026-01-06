@@ -208,7 +208,7 @@ void InitWinMidi(int midi)
         long int res=midiInOpen(&winmidiinhandle,i,(DWORD_PTR)(void*)WinMidiInProc,0,CALLBACK_FUNCTION);
         if(res == MMSYSERR_NOERROR) {
             res=midiInStart(winmidiinhandle);
-            printf("[INFO] Starting Windows MIDI At %d with code %d(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
+            printf("[INFO] Starting Windows MIDI At %d with code %ld(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
             if(res == 0)
                 return;
         } else

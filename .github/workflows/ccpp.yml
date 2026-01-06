@@ -55,12 +55,12 @@ jobs:
             deps2: "./build-mingw-deps $RUNNER_TEMP",
             testdeps: "",
             info: "",
-            config: "PKG_CONFIG=x86_64-w64-mingw32-pkg-config PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig cmake -S . -B build -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DCMAKE_PREFIX_PATH=$RUNNER_TEMP/prefix -DCMAKE_BUILD_TYPE=Release ..",
+            config: "PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig cmake -S . -B build -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DMINGW_PATH=$RUNNER_TEMP/prefix -DPluginEnable=FALSE -DCMAKE_BUILD_TYPE=Release ..",
             configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
             build: "cmake --build build",
-            test: "",
-            config-fusion: "cmake -S . -B build-fusion -G Ninja -DRTOSC_WERROR=ON -DWerror=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake -DCMAKE_BUILD_TYPE=Release -DGuiModule=zest ..",
-            build-fusion: "cd build-fusion && make VERBOSE=1"
+            test: 'set -e; for i in build/src/Tests/*.exe; do WINEPATH="/usr/x86_64-w64-mingw32/bin;$RUNNER_TEMP/prefix/lib;$RUNNER_TEMP/prefix/bin" wine "$i"; done',
+            config-fusion: "",  # TODO
+            build-fusion: ""
           }
           - {
             name: "Ubuntu gcc (fltk 1.3 + zest)",

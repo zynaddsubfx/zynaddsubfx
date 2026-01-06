@@ -32,7 +32,7 @@
 #include "Part.h"
 #include "BankDb.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
