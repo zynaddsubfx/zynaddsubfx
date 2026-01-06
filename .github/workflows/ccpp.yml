@@ -51,7 +51,7 @@ jobs:
             enabled: 1,
             os: ubuntu-latest,
             update: "sudo apt-get update",
-            deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build wine",
+            deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build wine64",
             deps2: "./build-mingw-deps $RUNNER_TEMP",
             testdeps: "",
             info: "",
