@@ -43,7 +43,7 @@ class Envelope
         int   envsustain;    // "-1" means disabled
         float envdt[MAX_ENVELOPE_POINTS];  //seconds
         float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
-        float envcpy[MAX_ENVELOPE_CPOINTS];// [-1.0f .. 1.0f]
+        float envcpy[MAX_ENVELOPE_CPOINTS] = {};// [-1.0f .. 1.0f]
         float envstretch;    // how much lower notes are slower
         int   linearenvelope;
         int   mode;
