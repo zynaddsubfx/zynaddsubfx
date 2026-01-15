@@ -1061,8 +1061,8 @@ void Part::ComputePartSmps()
     for(auto &d:notePool.activeDesc()) {
         d.age++;
         for(auto &s:notePool.activeNotes(d)) {
-            float tmpoutr[synth.buffersize];
-            float tmpoutl[synth.buffersize];
+            STACKALLOC(float, tmpoutr, synth.buffersize);
+            STACKALLOC(float, tmpoutl, synth.buffersize);
             auto &note = *s.note;
             note.noteout(&tmpoutl[0], &tmpoutr[0]);
 

@@ -424,7 +424,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
 
 void AnalogFilter::filterout(float *smp)
 {
-    float freqbuf[freqbufsize];
+    STACKALLOC(float, freqbuf, freqbufsize);
 
     if ( freq_smoothing.apply( freqbuf, freqbufsize, freq ) )
     {
