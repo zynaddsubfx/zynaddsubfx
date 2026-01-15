@@ -102,7 +102,8 @@ Reverb::Reverb(EffectParams pars)
       bandwidth(NULL),
       idelay(NULL),
       lpf(NULL),
-      hpf(NULL) // no filter
+      hpf(NULL), // no filter
+      outInputbuf(buffersize)
 {
     for(int i = 0; i < REV_COMBS * 2; ++i) {
         comblen[i] = 800 + (int)(RND * 1400.0f);
@@ -159,7 +160,7 @@ void Reverb::cleanup(void)
 }
 
 //Process one channel; 0=left, 1=right
-void Reverb::processmono(int ch, float *output, float *inputbuf)
+void Reverb::processmono(int ch, float *output, const std::vector<float> &inputbuf)
 {
     //todo: implement the high part from lohidamp
 
@@ -200,15 +201,14 @@ void Reverb::out(const Stereo<float *> &smp)
     if(!Pvolume && insertion)
         return;
 
-    float inputbuf[buffersize];
     for(int i = 0; i < buffersize; ++i)
-        inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
+        outInputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
 
     if(idelay)
         for(int i = 0; i < buffersize; ++i) {
             //Initial delay r
-            float tmp = inputbuf[i] + idelay[idelayk] * idelayfb;
-            inputbuf[i]     = idelay[idelayk];
+            float tmp = outInputbuf[i] + idelay[idelayk] * idelayfb;
+            outInputbuf[i]  = idelay[idelayk];
             idelay[idelayk] = tmp;
             idelayk++;
             if(idelayk >= idelaylen)
@@ -216,15 +216,15 @@ void Reverb::out(const Stereo<float *> &smp)
         }
 
     if(bandwidth)
-        bandwidth->process(buffersize, inputbuf);
+        bandwidth->process(buffersize, outInputbuf.data());
 
     if(lpf)
-        lpf->filterout(inputbuf);
+        lpf->filterout(outInputbuf.data());
     if(hpf)
-        hpf->filterout(inputbuf);
+        hpf->filterout(outInputbuf.data());
 
-    processmono(0, efxoutl, inputbuf); //left
-    processmono(1, efxoutr, inputbuf); //right
+    processmono(0, efxoutl, outInputbuf); //left
+    processmono(1, efxoutr, outInputbuf); //right
 
     float lvol = rs / REV_COMBS * pangainL;
     float rvol = rs / REV_COMBS * pangainR;
