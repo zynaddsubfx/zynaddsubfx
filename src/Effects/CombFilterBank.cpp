@@ -13,7 +13,8 @@ namespace zyn {
     nrOfStrings(0),
     memory(*alloc),
     samplerate(samplerate_),
-    buffersize(buffersize_)
+    buffersize(buffersize_),
+    filteroutGainbuf(buffersize/16)
     {
         // setup the smoother for gain parameter
         gain_smoothing.sample_rate(samplerate/16);
@@ -95,10 +96,9 @@ namespace zyn {
         // interpolate gainbuf values over buffer length using value smoothing filter (lp)
         // this should prevent popping noise when controlled binary with 0 / 127
         // new control rate = samplerate / 16
-        const unsigned int gainbufsize = buffersize / 16;
-        float gainbuf[gainbufsize]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
+        assert(filteroutGainbuf.size() == buffersize / 16);
+        if (!gain_smoothing.apply( filteroutGainbuf.data(), filteroutGainbuf.size(), gainbwd ) ) // interpolate the gain value
+            std::fill(filteroutGainbuf.begin(), filteroutGainbuf.end(), gainbwd); // if nothing to interpolate (constant value)
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
@@ -114,7 +114,7 @@ namespace zyn {
 
                 // sample at that position
                 const float sample = sampleLerp(string_smps[j], pos_reader);
-                string_smps[j][pos_writer] = input_smp + tanhX(sample*gainbuf[i/16]);
+                string_smps[j][pos_writer] = input_smp + tanhX(sample*filteroutGainbuf[i/16]);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;

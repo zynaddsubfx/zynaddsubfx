@@ -38,7 +38,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
       newq(Fq),
      gain(1.0),
      recompute(true),
-     freqbufsize(bufsize/8)
+     filteroutTmpbuf(bufsize/8)
 {
     for(int i = 0; i < 3; ++i)
         coeff.c[i] = coeff.d[i] = oldCoeff.c[i] = oldCoeff.d[i] = 0.0f;
@@ -424,16 +424,14 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
 
 void AnalogFilter::filterout(float *smp)
 {
-    float freqbuf[freqbufsize];
-
-    if ( freq_smoothing.apply( freqbuf, freqbufsize, freq ) )
+    if ( freq_smoothing.apply( filteroutTmpbuf.data(), filteroutTmpbuf.size(), freq ) )
     {
         /* in transition, need to do fine grained interpolation */
         for(int i = 0; i < stages + 1; ++i)
-            for(int j = 0; j < freqbufsize; ++j)
+            for(std::size_t j = 0; j < filteroutTmpbuf.size(); ++j)
             {
                 recompute = true;
-                singlefilterout(&smp[j*8], history[i], freqbuf[j], 8);
+                singlefilterout(&smp[j*8], history[i], filteroutTmpbuf[j], 8);
             }
     }
     else

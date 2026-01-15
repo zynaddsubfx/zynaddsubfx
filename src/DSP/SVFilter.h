@@ -67,6 +67,8 @@ class SVFilter:public Filter
         float q;    // Q factor (resonance or Q factor)
         float gain; // the gain of the filter (if are shelf/peak) filters
 
+    // temporary buffer of size "buffersize" for use only in "filterout"
+    std::vector<float> filteroutFreqbuf;
     Value_Smoothing_Filter freq_smoothing;
 };
 
