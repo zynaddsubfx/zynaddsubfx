@@ -1312,7 +1312,7 @@ bool Master::AudioOut(float *outl, float *outr)
                                   part[efxpart]->partoutr);
         }
 
-    float gainbuf[synth.buffersize];
+    STACKALLOC(float, gainbuf, synth.buffersize);
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1363,8 +1363,8 @@ bool Master::AudioOut(float *outl, float *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue;  //the effect is disabled
 
-        float tmpmixl[synth.buffersize];
-        float tmpmixr[synth.buffersize];
+        STACKALLOC(float, tmpmixl, synth.buffersize);
+        STACKALLOC(float, tmpmixr, synth.buffersize);
         //Clean up the samples used by the system effects
         memset(tmpmixl, 0, synth.bufferbytes);
         memset(tmpmixr, 0, synth.bufferbytes);

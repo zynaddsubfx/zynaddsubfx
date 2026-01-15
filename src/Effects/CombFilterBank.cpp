@@ -96,7 +96,7 @@ namespace zyn {
         // this should prevent popping noise when controlled binary with 0 / 127
         // new control rate = samplerate / 16
         const unsigned int gainbufsize = buffersize / 16;
-        float gainbuf[gainbufsize]; // buffer for value smoothing filter
+        STACKALLOC(float, gainbuf, gainbufsize); // buffer for value smoothing filter
         if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
             std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
 
