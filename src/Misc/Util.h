@@ -25,6 +25,14 @@
 
 namespace zyn {
 
+#ifdef _MSC_VER
+#define STACKALLOC(type, name, size) type *name = (type*)(_alloca((size)*sizeof(type)))
+#elif defined (__clang__)
+#define STACKALLOC(type, name, size) type *name = (type*)(alloca((size)*sizeof(type)))
+#else
+#define STACKALLOC(type, name, size) type name[size]
+#endif
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 

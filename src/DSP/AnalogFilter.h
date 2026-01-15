@@ -16,6 +16,8 @@
 #ifndef ANALOG_FILTER_H
 #define ANALOG_FILTER_H
 
+#include <vector>
+
 #include "../globals.h"
 #include "Filter.h"
 #include "Value_Smoothing_Filter.h"
@@ -75,7 +77,8 @@ class AnalogFilter:public Filter
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
 
-        int freqbufsize;
+        // temporary buffer of size "buffersize" for use only in "filterout"
+        std::vector<float> filteroutTmpbuf;
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
         bool beforeFirstTick; // reset the smoothing at first Tick
 };

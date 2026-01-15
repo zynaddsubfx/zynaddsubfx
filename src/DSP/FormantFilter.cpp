@@ -23,6 +23,7 @@ namespace zyn {
 
 FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize)
     :Filter(srate, bufsize), memory(*alloc)
+    ,filteroutInbuffer(bufsize), filteroutFormantbuf(bufsize), filteroutTmpbuf (bufsize)
 {
     numformants = pars->Pnumformants;
     for(int i = 0; i < numformants; ++i)
@@ -196,31 +197,25 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float inbuffer[buffersize];
-
-    memcpy(inbuffer, smp, bufferbytes);
+    memcpy(filteroutInbuffer.data(), smp, bufferbytes);
     memset(smp, 0, bufferbytes);
-
-    float formantbuf[buffersize];
 
     for(int j = 0; j < numformants; ++j) {
 
-        float tmpbuf[buffersize];
-
         for(int i = 0; i < buffersize; ++i)
-            tmpbuf[i] = inbuffer[i] * outgain;
+            filteroutTmpbuf[i] = filteroutInbuffer[i] * outgain;
 
-        formant[j]->filterout(tmpbuf);
+        formant[j]->filterout(filteroutTmpbuf.data());
 
-        if ( formant_amp_smoothing[j].apply( formantbuf, buffersize, currentformants[j].amp ) )
+        if ( formant_amp_smoothing[j].apply( filteroutFormantbuf.data(), buffersize, currentformants[j].amp ) )
         {
             for(int i = 0; i < buffersize; ++i)
-                smp[i] += tmpbuf[i] * formantbuf[i];
+                smp[i] += filteroutTmpbuf[i] * filteroutFormantbuf[i];
         }
         else
         {
             for(int i = 0; i < buffersize; ++i)
-                smp[i] += tmpbuf[i] * currentformants[j].amp;
+                smp[i] += filteroutTmpbuf[i] * currentformants[j].amp;
         }
     }
 }

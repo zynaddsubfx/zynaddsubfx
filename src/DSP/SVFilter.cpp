@@ -33,7 +33,8 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
-      gain(1.0f)
+      gain(1.0f),
+      filteroutFreqbuf(bufsize/8)
 {
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
@@ -209,21 +210,19 @@ void SVFilter::filterout(float *smp)
 {
     assert((buffersize % 8) == 0);
 
-    float freqbuf[buffersize];
-
-    if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
+    if ( freq_smoothing.apply( filteroutFreqbuf.data(), buffersize, freq ) )
     {
         /* 8 sample chunks seems to work OK for AnalogFilter, so do that here too. */
         for ( int i = 0; i < buffersize; i += 8 )
         {
-            freq = freqbuf[i];
+            freq = filteroutFreqbuf[i];
             computefiltercoefs();
 
             for(int j = 0; j < stages + 1; ++j)
                 singlefilterout(smp + i, st[j], par, 8 );
         }
 
-        freq = freqbuf[buffersize - 1];
+        freq = filteroutFreqbuf[buffersize - 1];
         computefiltercoefs();
     }
     else

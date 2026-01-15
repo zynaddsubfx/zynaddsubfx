@@ -239,8 +239,8 @@ float cinterpolate(const float *data, size_t len, float pos)
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
 {
-    char argT[v.size()+1];
-    rtosc_arg_t arg[v.size()];
+    STACKALLOC(char, argT, v.size()+1);
+    STACKALLOC(rtosc_arg_t, arg, v.size());
     unsigned i=0;
     for(auto &vv : v) {
         argT[i]  = 's';
