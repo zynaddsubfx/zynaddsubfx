@@ -21,6 +21,7 @@
 #include "../Containers/NotePool.h"
 
 #include <functional>
+#include <vector>
 
 namespace zyn {
 
@@ -234,6 +235,7 @@ class Part
         Sync* sync;
         const int &gzip_compression, &interpolation;
         bool constPowerMixing = true;
+        std::vector<float> tmpOutL, tmpOutR;  // only used in ComputePartSmps
 };
 
 }

@@ -728,7 +728,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum, 0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -803,7 +803,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum,  0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -917,7 +917,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         samplemax = PAD_MAX_SAMPLES;
 
     //this is used to compute frequency relation to the base frequency
-    float adj[samplemax];
+    STACKALLOC(float, adj, samplemax);
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
     // QtCreator can't capture VLAs (QTCREATORBUG-23722), so this is

@@ -519,8 +519,8 @@ void SUBnote::computeallfiltercoefs(bpfilter *filters, float envfreq,
 
 void SUBnote::chanOutput(float *out, bpfilter *bp, int buffer_size)
 {
-    float tmprnd[buffer_size];
-    float tmpsmp[buffer_size];
+    STACKALLOC(float, tmprnd, buffer_size);
+    STACKALLOC(float, tmpsmp, buffer_size);
 
     //Initialize Random Input
     for(int i = 0; i < buffer_size; ++i)
