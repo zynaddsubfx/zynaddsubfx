@@ -284,6 +284,8 @@ class Master
         Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
 
         bool constPowerMixing = true;
+        // temporary buffers of size "synth.buffersize" for use only in "audioOut"
+        std::vector<float> audioOutGainBuf, audioOutTmpMixL, audioOutTmpMixR;
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

@@ -60,7 +60,7 @@ class Reverb final:public Effect
         void settype(unsigned char _Ptype);
         void setroomsize(unsigned char _Proomsize);
         void setbandwidth(unsigned char _Pbandwidth);
-        void processmono(int ch, float *output, float *inputbuf);
+        void processmono(int ch, float *output, const std::vector<float>& inputbuf);
 
 
         //Parameters
@@ -84,6 +84,9 @@ class Reverb final:public Effect
         int    apk[REV_APS * 2];
         float *idelay;
         class AnalogFilter * lpf, *hpf; //filters
+
+        // temporary buffer of size "buffersize" for use only in "out"
+        std::vector<float> outInputbuf;
 };
 
 }

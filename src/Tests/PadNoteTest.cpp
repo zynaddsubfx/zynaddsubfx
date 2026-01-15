@@ -239,7 +239,7 @@ class PadNoteTest
 
 
             //Verify Harmonic Input
-            float harmonics[synth->oscilsize];
+            STACKALLOC(float, harmonics, synth->oscilsize);
             memset(harmonics, 0, sizeof(float) * synth->oscilsize);
 
             pars->oscilgen->get(harmonics, 440.0f, false);

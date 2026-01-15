@@ -2,6 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+  #include <malloc.h>
+#endif
 
 int tap_quiet    = 0;
 int global_err   = 0;
@@ -214,7 +217,12 @@ int assert_hex_eq(const char *a, const char *b, size_t size_a, size_t size_b,
         //create difference mask
         const int longer  = size_a > size_b ? size_a : size_b;
         const int shorter = size_a < size_b ? size_a : size_b;
+
+#ifdef _MSC_VER
+        char* mask = (char*)(_alloca(longer*sizeof(char)));
+#else
         char mask[longer];
+#endif
         memset(mask, 0, longer);
         for(int i=0; i<shorter; ++i)
             if(a[i] != b[i])

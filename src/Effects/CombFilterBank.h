@@ -40,7 +40,8 @@ class CombFilterBank
     int samplerate=0;
     unsigned int buffersize=0;
 
-
+    // temporary buffer of size "buffersize / 16" for use only in "filterout"
+    std::vector<float> filteroutGainbuf;
 };
 
 }
