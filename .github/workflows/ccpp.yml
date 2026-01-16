@@ -16,22 +16,76 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows MSVC (fltk, disabled)",
-            enabled: 0,
+            name: "Windows MSVC (fltk + zest)",
+            enabled: 1,
             os: windows-latest,
             deps1: "",
             deps2: "",
             testdeps: "",
             info: "",
+            # Note: Plugin does not work on MSVC yet - DPF must be updated
             config: "cmake
                     -B build
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
                     -DCMAKE_BUILD_TYPE=Debug
+                    -DPluginEnable=FALSE
+                    -DGuiModule=fltk
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config Debug",
-            test: "ctest --output-on-failure --test-dir build"
+            test: "ctest --output-on-failure --test-dir build -C Debug",
+            # re-use build dir, to avoid rebuilding deps with vcpkg
+            config-fusion: "cmake
+                    -B build
+                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+                    -DRTOSC_WERROR=1
+                    -DCMAKE_BUILD_TYPE=Release
+                    -DPluginEnable=FALSE
+                    -DGuiModule=zest
+                    ",
+            build-fusion: "cmake --build build --config Release"
+          }
+          - {
+            name: "MinGW (no-gui + zest)",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install -y mingw-w64 cmake ninja-build wine64",
+            deps2: "./build-mingw-deps $RUNNER_TEMP",
+            testdeps: "",
+            info: "",
+            config: "PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig
+                     cmake
+                     -S .
+                     -B build
+                     -G Ninja
+                     -DRTOSC_WERROR=ON
+                     -DWerror=ON
+                     -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake
+                     -DMINGW_PREFIX=$RUNNER_TEMP/prefix
+                     -DPluginEnable=FALSE
+                     -DCMAKE_BUILD_TYPE=Debug
+                     -DCompileTests=ON
+                     ",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cmake --build build",
+            # Run tests. There will be warnings "it looks like wine32 is missing, you should install it." and that it could not create a GUI - these can be ignored
+            test: "cd build && ctest --output-on-failure",
+            config-fusion: "PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig
+                            cmake
+                            -S .
+                            -B build-fusion
+                            -G Ninja
+                            -DRTOSC_WERROR=ON
+                            -DWerror=ON
+                            -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake
+                            -DMINGW_PREFIX=$RUNNER_TEMP/prefix
+                            -DPluginEnable=FALSE
+                            -DCMAKE_BUILD_TYPE=Release
+                            -DGuiModule=zest
+                            ",
+            build-fusion: "cmake --build build-fusion"
           }
           - {
             name: "Ubuntu gcc (fltk 1.3 + zest)",
