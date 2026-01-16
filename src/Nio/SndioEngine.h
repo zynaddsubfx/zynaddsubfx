@@ -13,7 +13,7 @@
 #ifndef SNDIO_ENGINE_H
 #define SNDIO_ENGINE_H
 
-#include <pthread.h>
+#include <thread>
 #include <queue>
 #include <sndio.h>
 #include <string>
@@ -40,10 +40,8 @@ class SndioEngine:public AudioOut, MidiIn
         bool getMidiEn() const;
 
     protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
-        void *MidiThread();
-        static void *_MidiThread(void *arg);
+        void AudioThread();
+        void MidiThread();
 
     private:
         bool openAudio();
@@ -51,17 +49,17 @@ class SndioEngine:public AudioOut, MidiIn
         bool openMidi();
         void stopMidi();
 
-        void *processAudio();
-        void *processMidi();
+        void processAudio();
+        void processMidi();
         short *interleave(const Stereo<float *> &smps);
-	void showAudioInfo(struct sio_hdl *handle);
+        void showAudioInfo(struct sio_hdl *handle);
 
         struct {
             struct sio_hdl *handle;
             struct sio_par params;
             short *buffer;
-	    size_t buffer_size;
-            pthread_t pThread;
+            size_t buffer_size;
+            std::thread thread;
             float peaks[1];
         } audio;
 
@@ -69,7 +67,7 @@ class SndioEngine:public AudioOut, MidiIn
             std::string device;
             struct mio_hdl *handle;
             bool exiting;
-            pthread_t pThread;
+            std::thread thread;
         } midi;
 };
 

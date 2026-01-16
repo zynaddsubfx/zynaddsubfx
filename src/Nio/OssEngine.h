@@ -14,6 +14,7 @@
 #ifndef OSS_ENGINE_H
 #define OSS_ENGINE_H
 
+#include <thread>
 #include <sys/time.h>
 #include "../globals.h"
 #include "AudioOut.h"
@@ -51,15 +52,12 @@ class OssEngine:public AudioOut, MidiIn
         bool getMidiEn() const;
 
     protected:
-        void *audioThreadCb();
-        static void *_audioThreadCb(void *arg);
-
-        void *midiThreadCb();
-        static void *_midiThreadCb(void *arg);
+        void audioThreadCb();
+        void midiThreadCb();
 
     private:
-        pthread_t *audioThread;
-        pthread_t *midiThread;
+        std::thread audioThread;
+        std::thread midiThread;
 
         //Audio
         bool openAudio();
