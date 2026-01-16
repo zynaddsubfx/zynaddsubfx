@@ -16,7 +16,7 @@
 #define WAVENGINE_H
 #include "AudioOut.h"
 #include <string>
-#include <pthread.h>
+#include <thread>
 #include "ZynSema.h"
 #include "SafeQueue.h"
 
@@ -42,15 +42,14 @@ class WavEngine:public AudioOut
         void destroyFile();
 
     protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
+        void AudioThread();
 
     private:
         WavFile *file;
         ZynSema  work;
         SafeQueue<float> buffer;
 
-        pthread_t *pThread;
+        std::thread thread;
 };
 
 }
