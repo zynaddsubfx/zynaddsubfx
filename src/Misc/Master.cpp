@@ -1102,13 +1102,13 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outl2 = part[npart]->partoutl,
+                  *outr2 = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                if (fabsf(outl[i]) > vuoutpeakpartl[npart])
-                    vuoutpeakpartl[npart] = fabsf(outl[i]);
-                if (fabsf(outr[i]) > vuoutpeakpartr[npart])
-                    vuoutpeakpartr[npart] = fabsf(outr[i]);
+                if (fabsf(outl2[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabsf(outl2[i]);
+                if (fabsf(outr2[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabsf(outr2[i]);
             }
         }
         else
