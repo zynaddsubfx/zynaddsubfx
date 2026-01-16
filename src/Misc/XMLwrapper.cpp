@@ -129,14 +129,15 @@ XMLwrapper::XMLwrapper()
         mxmlElementSetAttr(tree,"encoding","UTF-8");
     */
 
-    mxml_node_t *doctype =
+    [[maybe_unused]] mxml_node_t *doctype =
 #if MXML_MAJOR_VERSION <= 3
         mxmlNewElement(tree, "!DOCTYPE");
+        assert(doctype);
         mxmlElementSetAttr(doctype, "ZynAddSubFX-data", NULL);
 #else
         mxmlNewDeclaration(tree, "DOCTYPE ZynAddSubFX-data");
+        assert(doctype);
 #endif
-    assert(doctype);
 
     node = root = addparams("ZynAddSubFX-data", 4,
                             "version-major", stringFrom<int>(

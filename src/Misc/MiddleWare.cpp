@@ -2307,7 +2307,8 @@ void MiddleWareImpl::kitEnable(const char *msg)
     int part, kit;
     bool res = idsFromMsg(msg, &part, &kit, nullptr);
     assert(res);
-    kitEnable(part, kit, type);
+    if(res)
+        kitEnable(part, kit, type);
 }
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)

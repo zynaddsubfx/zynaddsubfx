@@ -58,9 +58,12 @@ static const Ports sysefxPort =
             //be ...Psysefxvol#N/part#M
             //and the number "N" is one or two digits at most
 
-            // go backto the '/'
+            // go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -90,9 +93,12 @@ static const Ports sysefsendto =
         rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same workaround as before
-            //go backto the '/'
+            //go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
