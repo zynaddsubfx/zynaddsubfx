@@ -48,7 +48,7 @@ class PortamentoTest
             //Initialize portamento
             ctl->setportamento(127);
             ctl->portamento.time = 127;
-            ctl->portamento.automode = 0;
+            ctl->portamento.automode = false;
             Portamento portamento(*ctl, *synth, false, log2f(40.0f), log2f(40.0f), log2f(400.0f));
             TS_ASSERT(portamento.active);
             //Bounds Check
@@ -72,7 +72,7 @@ class PortamentoTest
         void testPortamentoValue() {
             ctl->setportamento(127);
             ctl->portamento.time = 127;
-            ctl->portamento.automode = 0;
+            ctl->portamento.automode = false;
             Portamento portamento(*ctl, *synth, false, log2f(40.0f), log2f(40.0f), log2f(400.0f));
             TS_ASSERT(portamento.active);
             int i;

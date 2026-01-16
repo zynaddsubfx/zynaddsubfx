@@ -147,8 +147,8 @@ class OscilGen:public Presets, NoCopyNoMove
         bool          Pfilterbeforews;
         unsigned char Psatype, Psapar; //spectrum adjust
 
-        int Pharmonicshift; //how the harmonics are shifted
-        int Pharmonicshiftfirst; //if the harmonic shift is done before waveshaping and filter
+        int  Pharmonicshift; //how the harmonics are shifted
+        bool Pharmonicshiftfirst; //if the harmonic shift is done before waveshaping and filter
 
         unsigned char Pmodulation; //what modulation is applied to the oscil
         unsigned char Pmodulationpar1, Pmodulationpar2, Pmodulationpar3; //the parameter of the parameters
