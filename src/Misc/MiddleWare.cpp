@@ -781,10 +781,10 @@ public:
                         std::cerr << savefile << std::endl;
                         std::cerr << "first entry that could not be parsed:" << std::endl;
 
-                        for(int i = -res + 1; savefile[i]; ++i)
-                        if(savefile[i] == '\n')
+                        for(int j = -res + 1; savefile[j]; ++j)
+                        if(savefile[j] == '\n')
                         {
-                            savefile.resize(i);
+                            savefile.resize(j);
                             break;
                         }
                         std::cerr << (savefile.c_str() - res) << std::endl;
@@ -1216,15 +1216,15 @@ const rtosc::Ports bankPorts = {
             impl.loadbank(impl.banks[0].dir);
 
             //Reload bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
+            for(int j=0; j<BANK_SIZE; ++j) {
                 d.reply("/bankview", "iss",
-                    i, impl.ins[i].name.c_str(),
-                    impl.ins[i].filename.c_str());
+                    j, impl.ins[j].name.c_str(),
+                    impl.ins[j].filename.c_str());
             }
         } else {
             //Clear all bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
-                d.reply("/bankview", "iss", i, "", "");
+            for(int j=0; j<BANK_SIZE; ++j) {
+                d.reply("/bankview", "iss", j, "", "");
             }
         }
         d.broadcast("/damage", "s", "/bank/");
