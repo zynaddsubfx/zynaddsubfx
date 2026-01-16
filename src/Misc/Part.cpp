@@ -494,12 +494,16 @@ Part::~Part()
 
 static void assert_kit_sanity(const Part::Kit *kits)
 {
+#ifdef NDEBUG
+    (void)kits;
+#else
     for(int i=0; i<NUM_KIT_ITEMS; ++i) {
         //an enabled kit must have a corresponding parameter object
         assert(!kits[i].Padenabled  || kits[i].adpars);
         assert(!kits[i].Ppadenabled || kits[i].padpars);
         assert(!kits[i].Psubenabled || kits[i].subpars);
     }
+#endif
 }
 
 static int kit_usage(const Part::Kit *kits, int note, int mode)
