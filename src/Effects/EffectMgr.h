@@ -14,8 +14,6 @@
 #ifndef EFFECTMGR_H
 #define EFFECTMGR_H
 
-#include <pthread.h>
-
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
 #include "../globals.h"
