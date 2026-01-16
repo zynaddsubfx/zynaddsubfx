@@ -1207,7 +1207,7 @@ class KitTest
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
 
             // Play four notes
             // This implicitly tests that note deltas larger than the
@@ -1343,7 +1343,7 @@ class KitTest
         void testPortamentoOnPlayingStaccatoAuto(void)
         {
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
 
             verifyNoPortamento();
         }
@@ -1385,7 +1385,7 @@ class KitTest
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
-            part->ctl.portamento.pitchthreshtype = 0;
+            part->ctl.portamento.pitchthreshtype = false;
 
             // Test that we don't get any portamento when playing notes
             // that are further away than the default threshold of 3, when the
@@ -1414,7 +1414,7 @@ class KitTest
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
-            part->ctl.portamento.pitchthreshtype = 0;
+            part->ctl.portamento.pitchthreshtype = false;
 
             // Test that we get portamento when playing notes
             // that are closer than the default threshold of 3, when the
@@ -1452,8 +1452,8 @@ class KitTest
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
-            part->ctl.portamento.pitchthreshtype = 0;
-            part->ctl.portamento.automode = 0;
+            part->ctl.portamento.pitchthreshtype = false;
+            part->ctl.portamento.automode = false;
 
             // Test that we get portamento when playing staccato notes
             // that are closer than the default threshold of 3, when the
@@ -1549,7 +1549,7 @@ class KitTest
         void testPortamentoOnLegatoOnPlayingLegatoAuto(void)
         {
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
             part->Ppolymode   = false;
             part->Plegatomode = true;
 
@@ -1595,7 +1595,7 @@ class KitTest
         void testPortamentoOnLegatoOnPlayingStaccatoAuto(void)
         {
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
             part->Ppolymode   = false;
             part->Plegatomode = true;
 
@@ -1635,7 +1635,7 @@ class KitTest
         void testPortamentoOnMonoPlayingLegatoAuto(void)
         {
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
             part->Ppolymode   = false;
 
             verifyPortamento();
@@ -1644,7 +1644,7 @@ class KitTest
         void testPortamentoOnMonoPlayingStaccatoAuto(void)
         {
             part->ctl.setportamento(127);
-            part->ctl.portamento.automode = 1;
+            part->ctl.portamento.automode = true;
             part->Ppolymode   = false;
 
             verifyNoPortamento();

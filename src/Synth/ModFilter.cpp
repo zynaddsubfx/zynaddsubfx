@@ -118,21 +118,20 @@ void ModFilter::filter(float *l, float *r)
         right->filterout(r);
 }
 
-static int current_category(Filter *f)
+static unsigned current_category(Filter *f)
 {
     if(dynamic_cast<AnalogFilter*>(f))
-        return 0;
+        return 0u;
     else if(dynamic_cast<FormantFilter*>(f))
-        return 1;
+        return 1u;
     else if(dynamic_cast<SVFilter*>(f))
-        return 2;
+        return 2u;
     else if(dynamic_cast<MoogFilter*>(f))
-        return 3;
+        return 3u;
     else if(dynamic_cast<CombFilter*>(f))
-        return 4;
+        return 4u;
 
-    assert(false);
-    return -1;
+    throw std::logic_error("Invalid filter category");
 }
 
 void ModFilter::paramUpdate(Filter *&f)
