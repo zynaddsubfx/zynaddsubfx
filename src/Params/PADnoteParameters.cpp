@@ -239,7 +239,7 @@ static const rtosc::Ports non_realtime_ports =
             "Size of each wavetable element"),
     rOption(Pquality.basenote, rShort("basenote"),
             rOptions(C-2, G-2, C-3, G-3, C-4,
-                G-4, C-5, G-5, G-6,),
+                G-4, C-5, G-5, C-6, G-6),
             rDefaultId(C-4),
             "Base note for wavetable"),
     rOption(Pquality.smpoct, rShort("smp/oct"),
