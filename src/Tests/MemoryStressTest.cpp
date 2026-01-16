@@ -93,7 +93,9 @@ class MemoryStressTest
                     notes.push_back(new ADnote(defaultPreset, pars));
                 } catch (std::exception & e) {
 #if defined(DEBUG)
-                    std::cerr << "couldn't push note #" << note_idx << std::endl;
+                    std::cerr << "couldn't push note #" << note_idx << ": " << e.what() << std::endl;
+#else
+                    (void)e;
 #endif
                 }
             }
