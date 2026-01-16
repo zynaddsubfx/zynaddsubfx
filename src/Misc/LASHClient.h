@@ -14,7 +14,6 @@
 #define LASHClient_h
 
 #include <string>
-#include <pthread.h>
 #include <lash/lash.h>
 
 namespace zyn {

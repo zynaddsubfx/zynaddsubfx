@@ -70,25 +70,7 @@ namespace zyn {
 using std::string;
 int Pexitprogram = 0;
 
-#ifdef __APPLE__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
 
-/* work around missing clock_gettime on OSX */
-static void monotonic_clock_gettime(struct timespec *ts) {
-#ifdef __APPLE__
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts->tv_sec = mts.tv_sec;
-    ts->tv_nsec = mts.tv_nsec;
-#else
-    clock_gettime(CLOCK_MONOTONIC, ts);
-#endif
-}
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -547,8 +529,7 @@ public:
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
-    int64_t start_time_sec;
-    int64_t start_time_nsec;
+    std::chrono::steady_clock::time_point start_time;
     bool offline;
 
     //Apply function while parameters are write locked
@@ -746,6 +727,7 @@ public:
 
                 doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
                 {
+                    using namespace std::literals::chrono_literals;
                     savefile = master->saveOSC(savefile, alreadyWritten);
 #if 1
                     // load the savefile string into another master to compare the results
@@ -753,7 +735,7 @@ public:
                     // this requires a temporary master switch
                     Master* old_master = master;
                     dispatcher.updateMaster(&master2);
-                    while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(old_master->isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 
                     res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
                     // TODO: compare MiddleWare, too?
@@ -763,7 +745,7 @@ public:
                     // We need to wait until savefile has been loaded into master2
                     int i;
                     for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
-                        os_usleep(50000);
+                        std::this_thread::sleep_for(50ms);
                     if(i >= 20) // >= 1 second?
                     {
                         // Master failed to fetch its messages
@@ -772,7 +754,7 @@ public:
                     printf("Saved in less than %d ms.\n", 50*i);
 
                     dispatcher.updateMaster(old_master);
-                    while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(master2.isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 #endif
                     if(res < 0)
                     {
@@ -1995,11 +1977,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             handleMsg(buf);
             });
 
-    //Setup starting time
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    start_time_sec  = time.tv_sec;
-    start_time_nsec = time.tv_nsec;
+    start_time = std::chrono::steady_clock::now();
 
     offline = false;
 }
@@ -2065,7 +2043,8 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     int tries = 0;
     while(tries++ < 10000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();
@@ -2099,10 +2078,9 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Last acknowledged beat
     //Current offline status
 
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    uint32_t now = (time.tv_sec-start_time_sec)*100 +
-                   (time.tv_nsec-start_time_nsec)*1e-9*100;
+    auto duration = start_time - std::chrono::steady_clock::now();
+    using tick_t = std::chrono::duration<uint32_t, std::ratio<1, 100>>;  // 10 ms
+    uint32_t now = std::chrono::duration_cast<tick_t>(duration).count();
     int32_t last_ack   = master->last_ack;
     int32_t last_beat  = master->last_beat;
 
@@ -2169,7 +2147,8 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     int tries = 0;
     while(tries++ < 2000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();
