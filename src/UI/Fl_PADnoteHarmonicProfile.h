@@ -45,15 +45,23 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
 
         void OSC_value(unsigned N, void *data, const char *name) override
         {
+#ifdef NDEBUG
+            (void)name;
+#else
             assert(!strcmp(name, "profile"));
             assert(N==w()*sizeof(float));
+#endif
             memcpy(smps, data, N);
             redraw();
         }
 
         void OSC_value(float x, const char *name) override
         {
+#ifdef NDEBUG
+            (void)name;
+#else
             assert(!strcmp(name, "profile"));
+#endif
             realbw = x;
             redraw();
         }
