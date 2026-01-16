@@ -1519,7 +1519,7 @@ void Part::getfromXML(XMLwrapper& xml)
         // portamento.automode will default to off, so no need to do anything
         // here).
         if (upgrade_3_0_7 && !Ppolymode)
-            ctl.portamento.automode = 1;
+            ctl.portamento.automode = true;
         xml.exitbranch();
     }
 }
