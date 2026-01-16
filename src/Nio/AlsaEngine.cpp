@@ -39,18 +39,12 @@ AlsaEngine::AlsaEngine(const SYNTH_T &synth)
 
     midi.handle  = NULL;
     midi.alsaId  = -1;
-    midi.pThread = 0;
 }
 
 AlsaEngine::~AlsaEngine()
 {
     Stop();
     delete[] audio.buffer;
-}
-
-void *AlsaEngine::_AudioThread(void *arg)
-{
-    return (static_cast<AlsaEngine *>(arg))->AudioThread();
 }
 
 void *AlsaEngine::AudioThread()
@@ -97,11 +91,6 @@ void AlsaEngine::setAudioEn(bool nval)
 bool AlsaEngine::getAudioEn() const
 {
     return audio.handle;
-}
-
-void *AlsaEngine::_MidiThread(void *arg)
-{
-    return static_cast<AlsaEngine *>(arg)->MidiThread();
 }
 
 
@@ -271,11 +260,9 @@ bool AlsaEngine::openMidi()
         return false;
 
     midi.exiting = false;
-    pthread_attr_t attr;
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&midi.pThread, &attr, _MidiThread, this);
+    midi.thread = std::thread(&AlsaEngine::MidiThread, this);
+
     return true;
 }
 
@@ -285,9 +272,9 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if((NULL != midi.handle) && midi.pThread) {
+    if(midi.handle && midi.thread.joinable()) {
         midi.exiting = true;
-        pthread_join(midi.pThread, 0);
+        midi.thread.join();
     }
     midi.handle = NULL;
     if(handle)
@@ -396,10 +383,7 @@ bool AlsaEngine::openAudio()
     //snd_pcm_hw_params_get_period_time(audio.params, &val, NULL);
 
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&audio.pThread, &attr, _AudioThread, this);
+    audio.thread = std::thread(&AlsaEngine::AudioThread, this);
     return true;
 }
 
@@ -410,7 +394,7 @@ void AlsaEngine::stopAudio()
 
     snd_pcm_t *handle = audio.handle;
     audio.handle = NULL;
-    pthread_join(audio.pThread, NULL);
+    audio.thread.join();
     snd_pcm_drain(handle);
     if(snd_pcm_close(handle))
         cout << "Error: in snd_pcm_close " << __LINE__ << ' ' << __FILE__

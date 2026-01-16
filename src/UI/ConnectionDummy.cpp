@@ -10,7 +10,10 @@
   of the License, or (at your option) any later version.
 */
 #include "Connection.h"
-#include <unistd.h>
+
+#include <thread>
+#include <chrono>
+
 namespace GUI {
 ui_handle_t createUi(Fl_Osc_Interface*, void *)
 {
@@ -27,7 +30,7 @@ void raiseUi(ui_handle_t, const char *, const char *, ...)
 }
 void tickUi(ui_handle_t)
 {
-    usleep(1000);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 Fl_Osc_Interface *genOscInterface(zyn::MiddleWare*)
 {
