@@ -61,7 +61,7 @@ retry:
             //Effectively there's mutual exclusion over other readers here
 
             //Set the next element
-            int sane_read = next_r.compare_exchange_strong(next_tag, next_next_tag);
+            [[maybe_unused]] int sane_read = next_r.compare_exchange_strong(next_tag, next_next_tag);
             assert(sane_read && "No double read on a single tag");
 
             //Decrement available elements
@@ -89,7 +89,7 @@ retry:
     uint32_t invalid_tag = INVALID;
 
     //Update tag
-    int sane_write = tag[Q-data].compare_exchange_strong(invalid_tag, write_tag);
+    [[maybe_unused]] int sane_write = tag[Q-data].compare_exchange_strong(invalid_tag, write_tag);
     assert(sane_write);
 
     //Increment available elements

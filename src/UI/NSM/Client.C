@@ -18,12 +18,11 @@
 /*******************************************************************************/
 
 #include "Client.H"
+#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 namespace NSM
 {
@@ -277,9 +276,9 @@ namespace NSM
 
     int
     Client::osc_broadcast(const char *path,
-                          const char *types,
-                          lo_arg **argv,
-                          int argc,
+                          const char *,
+                          lo_arg **,
+                          int,
                           lo_message msg,
                           void *user_data)
     {
@@ -288,10 +287,10 @@ namespace NSM
 
     int
     Client::osc_save(const char *path,
-                     const char *types,
-                     lo_arg **argv,
-                     int argc,
-                     lo_message msg,
+                     const char *,
+                     lo_arg **,
+                     int,
+                     lo_message,
                      void *user_data)
     {
         char *out_msg = NULL;
@@ -314,9 +313,16 @@ namespace NSM
                      const char *types,
                      lo_arg **argv,
                      int argc,
-                     lo_message msg,
+                     lo_message,
                      void *user_data)
     {
+#ifdef NDEBUG
+        (void)argc;
+        (void)types;
+#else
+        assert(argc >= 3);
+        assert(!strncmp(types, "sss", 3));
+#endif
         char *out_msg = NULL;
 
         NSM::Client *nsm = (NSM::Client *)user_data;
@@ -340,11 +346,11 @@ namespace NSM
     }
 
     int
-    Client::osc_session_is_loaded(const char *path,
-                                  const char *types,
-                                  lo_arg **argv,
-                                  int argc,
-                                  lo_message msg,
+    Client::osc_session_is_loaded(const char *,
+                                  const char *,
+                                  lo_arg **,
+                                  int,
+                                  lo_message,
                                   void *user_data)
     {
         NSM::Client *nsm = (NSM::Client *)user_data;
@@ -355,13 +361,20 @@ namespace NSM
     }
 
     int
-    Client::osc_error(const char *path,
+    Client::osc_error(const char *,
                       const char *types,
                       lo_arg **argv,
                       int argc,
-                      lo_message msg,
+                      lo_message,
                       void *user_data)
     {
+#ifdef NDEBUG
+        (void)argc;
+        (void)types;
+#else
+        assert(argc);
+        assert(types[0]=='s');
+#endif
         if(strcmp(&argv[0]->s, "/nsm/server/announce"))
             return -1;
 
@@ -377,13 +390,21 @@ namespace NSM
     }
 
     int
-    Client::osc_announce_reply(const char *path,
+    Client::osc_announce_reply(const char *,
                                const char *types,
                                lo_arg **argv,
                                int argc,
                                lo_message msg,
                                void *user_data)
     {
+#ifdef NDEBUG
+        (void)argc;
+        (void)types;
+#else
+        assert(argc >= 3);
+        assert(types[0]=='s');
+        assert(types[2]=='s');
+#endif
         if(strcmp(&argv[0]->s, "/nsm/server/announce"))
             return -1;
 

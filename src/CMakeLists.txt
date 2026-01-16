@@ -253,12 +253,12 @@ if (ExtendedWarnings)
 endif()
 
 set (BuildOptions_x86_64AMD
-    "-march=athlon64 -m64 -Wall -Wno-unused-parameter"
+    "-march=athlon64 -m64 -Wall"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptions_X86_64Core2
-    "-march=core2 -m64 -Wall -Wno-unused-parameter"
+    "-march=core2 -m64 -Wall"
   CACHE STRING "X86_64 compiler options"
 )
 
@@ -277,13 +277,13 @@ set (BuildOptions_SSE
 check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
 
 set (BuildOptionsBasic
-    "-Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
+    "-O3 -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 compiler options"
 )
 STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
 
 set (BuildOptionsDebug
-    "-O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+    "-O0 -g3 -ggdb -Wall -Wpointer-arith"
     CACHE STRING "Debug build flags")
 STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
