@@ -19,6 +19,7 @@
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#include "../Misc/XMLwrapper.h"
 #include "../Synth/ADnote.h"
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
@@ -62,7 +63,7 @@ class AdNoteTest
             lfop->PLFOtype    = randval(0,6);
             lfop->Prandomness = randval(0,127);
             lfop->Pfreqrand   = randval(0,127);
-            lfop->Pcontinous  = randval(0,1);
+            lfop->Pcontinous  = (bool)randval(0,1);
             lfop->Pstretch    = randval(0,127);
             lfop->fel         = (consumer_location_type_t) randval(1,2);
 

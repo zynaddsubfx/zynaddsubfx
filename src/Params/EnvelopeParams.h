@@ -15,11 +15,12 @@
 #define ENVELOPE_PARAMS_H
 
 #include "../globals.h"
-#include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 #include <cstdint>
 
 namespace zyn {
+
+class XMLwrapper;
 
    enum envmode_enum {
         ADSR_lin = 1,
@@ -32,8 +33,8 @@ namespace zyn {
 class EnvelopeParams:public Presets
 {
     public:
-        EnvelopeParams(unsigned char Penvstretch_=64,
-                       unsigned char Pforcedrelease_=0,
+        EnvelopeParams(unsigned char Penvstretch_ = 64,
+                       bool Pforcedrelease_ = false,
                        const AbsTime *time_ = nullptr);
         ~EnvelopeParams() override;
         void paste(const EnvelopeParams &ep);
@@ -51,15 +52,15 @@ class EnvelopeParams:public Presets
         int loc; //!< consumer location
 
         /* MIDI Parameters */
-        unsigned char Pfreemode; //1 for free mode, 0 otherwise
+        bool          Pfreemode; //1 for free mode, 0 otherwise
         unsigned char Penvpoints;
         unsigned char Penvsustain; //127 for disabled
         float         envdt[MAX_ENVELOPE_POINTS];
         unsigned char Penvval[MAX_ENVELOPE_POINTS];
         unsigned char Penvstretch; //64=normal stretch (piano-like), 0=no stretch
-        unsigned char Pforcedrelease; //0 - OFF, 1 - ON
-        unsigned char Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
-        unsigned char Prepeating; //0 - OFF, 1 - ON
+        bool          Pforcedrelease; //0 - OFF, 1 - ON
+        bool          Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
+        bool          Prepeating; //0 - OFF, 1 - ON
 
         float A_dt, D_dt, R_dt;
         unsigned char PA_val, PD_val, PS_val, PR_val;
@@ -100,9 +101,9 @@ class EnvelopeParams:public Presets
 
         /* Default parameters */
         unsigned char Denvstretch;
-        unsigned char Dforcedrelease;
-        unsigned char Dlinearenvelope;
-        unsigned char Drepeating;
+        bool Dforcedrelease;
+        bool Dlinearenvelope;
+        bool Drepeating;
         float DA_dt, DD_dt, DR_dt;
         unsigned char DA_val, DD_val, DS_val, DR_val;
 };

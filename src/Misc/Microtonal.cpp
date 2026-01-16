@@ -204,10 +204,10 @@ Microtonal::Microtonal(const int &gzip_compression)
 
 void Microtonal::defaults()
 {
-    Pinvertupdown = 0;
+    Pinvertupdown = false;
     Pinvertupdowncenter = 60;
     octavesize  = 12;
-    Penabled    = 0;
+    Penabled    = false;
     PAnote      = 69;
     PAfreq      = 440.0f;
     Pscaleshift = 64;
@@ -216,7 +216,7 @@ void Microtonal::defaults()
     Plastkey        = 127;
     Pmiddlenote     = 60;
     Pmapsize        = 12;
-    Pmappingenabled = 0;
+    Pmappingenabled = false;
 
     for(int i = 0; i < 128; ++i)
         Pmapping[i] = i;
@@ -249,10 +249,7 @@ Microtonal::~Microtonal()
  */
 unsigned char Microtonal::getoctavesize() const
 {
-    if(Penabled != 0)
-        return octavesize;
-    else
-        return 12;
+    return Penabled ? octavesize : 12;
 }
 
 /*
@@ -268,7 +265,7 @@ bool Microtonal::updatenotefreq_log2(float &note_log2_freq, int keyshift) const
     // I had written this way because if I use var=a%b gives unwanted results when a<0
     // This is the same with divisions.
 
-    if((Pinvertupdown != 0) && ((Pmappingenabled == 0) || (Penabled == 0))) {
+    if(Pinvertupdown && ((!Pmappingenabled) || (!Penabled))) {
         note = (int) Pinvertupdowncenter * 2 - note;
         freq_log2 = Pinvertupdowncenter * (2.0f / 12.0f) - freq_log2;
     }
@@ -276,7 +273,7 @@ bool Microtonal::updatenotefreq_log2(float &note_log2_freq, int keyshift) const
     /* compute global fine detune, -64.0f .. 63.0f cents */
     const float globalfinedetunerap_log2 = (Pglobalfinedetune - 64.0f) / 1200.0f;
 
-    if(Penabled == 0) { /* 12tET */
+    if(!Penabled) { /* 12tET */
         freq_log2 += (keyshift - PAnote) / 12.0f;
     }
     else { /* Microtonal */
@@ -343,7 +340,7 @@ bool Microtonal::updatenotefreq_log2(float &note_log2_freq, int keyshift) const
              * Invert the keyboard upside-down if it is asked for
              * TODO: do the right way by using Pinvertupdowncenter
              */
-            if(Pinvertupdown != 0) {
+            if(Pinvertupdown) {
                 degkey = octavesize - degkey - 1;
                 degoct = -degoct;
             }
@@ -757,7 +754,7 @@ void Microtonal::add2XML(XMLwrapper& xml) const
     xml.addpar("a_note", PAnote);
     xml.addparreal("a_freq", PAfreq);
 
-    if((Penabled == 0) && (xml.minimal))
+    if((!Penabled) && xml.minimal)
         return;
 
     xml.beginbranch("SCALE");
@@ -783,7 +780,7 @@ void Microtonal::add2XML(XMLwrapper& xml) const
 
     xml.beginbranch("KEYBOARD_MAPPING");
     xml.addpar("map_size", Pmapsize);
-    xml.addpar("mapping_enabled", Pmappingenabled);
+    xml.addpar("mapping_enabled", (int)Pmappingenabled);
     for(int i = 0; i < Pmapsize; ++i) {
         xml.beginbranch("KEYMAP", i);
         xml.addpar("degree", Pmapping[i]);
@@ -844,7 +841,7 @@ void Microtonal::getfromXML(XMLwrapper& xml)
 
         if(xml.enterbranch("KEYBOARD_MAPPING")) {
             Pmapsize = xml.getpar127("map_size", Pmapsize);
-            Pmappingenabled = xml.getpar127("mapping_enabled", Pmappingenabled);
+            Pmappingenabled = (bool)xml.getpar127("mapping_enabled", Pmappingenabled);
             for(int i = 0; i < Pmapsize; ++i) {
                 if(xml.enterbranch("KEYMAP", i) == 0)
                     continue;

@@ -520,7 +520,7 @@ void OscilGen::defaults()
     Pamprandtype  = 0;
 
     Pharmonicshift      = 0;
-    Pharmonicshiftfirst = 0;
+    Pharmonicshiftfirst = false;
 
     Padaptiveharmonics         = 0;
     Padaptiveharmonicspower    = 100;

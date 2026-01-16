@@ -646,7 +646,7 @@ class DataObj:public rtosc::RtData
         }
         virtual void reply(const char *msg) override
         {
-            if(rtosc_message_length(msg, -1) == 0)
+            if(rtosc_message_length(msg, std::numeric_limits<size_t>::max()) == 0)
                 fprintf(stderr, "Warning: Invalid Rtosc message '%s'\n", msg);
             bToU->raw_write(msg);
         }

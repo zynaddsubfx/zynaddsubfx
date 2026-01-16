@@ -13,6 +13,7 @@
 
 #include "PresetsStore.h"
 #include "PresetsArray.h"
+#include "../Misc/XMLwrapper.h"
 #include <string.h>
 
 namespace zyn {

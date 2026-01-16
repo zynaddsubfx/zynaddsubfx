@@ -338,16 +338,16 @@ PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
     oscilgen  = new OscilGen(synth, fft_, resonance);
     oscilgen->ADvsPAD = true;
 
-    FreqEnvelope = new EnvelopeParams(0, 0, time_);
+    FreqEnvelope = new EnvelopeParams(0, false, time_);
     FreqEnvelope->init(ad_global_freq);
     FreqLfo = new LFOParams(ad_global_freq, time_);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
     AmpLfo = new LFOParams(ad_global_amp, time_);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
-    FilterEnvelope = new EnvelopeParams(0, 1, time_);
+    FilterEnvelope = new EnvelopeParams(0, true, time_);
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
 
@@ -404,9 +404,9 @@ void PADnoteParameters::defaults()
     Pquality.oct    = 3;
     Pquality.smpoct = 2;
 
-    PStereo = 1; //stereo
+    PStereo = true; //stereo
     /* Frequency Global Parameters */
-    Pfixedfreq    = 0;
+    Pfixedfreq    = false;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -1220,7 +1220,7 @@ void PADnoteParameters::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("FREQUENCY_PARAMETERS")) {
-        Pfixedfreq    = xml.getpar127("fixed_freq", Pfixedfreq);
+        Pfixedfreq    = (bool)xml.getpar("fixed_freq", Pfixedfreq, 0, 1);
         PfixedfreqET  = xml.getpar127("fixed_freq_et", PfixedfreqET);
         PBendAdjust  = xml.getpar127("bend_adjust", PBendAdjust);
         POffsetHz  = xml.getpar127("offset_hz", POffsetHz);

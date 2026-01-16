@@ -78,7 +78,7 @@ class Controller
         struct { //Expression
             int   data;
             float relvolume;
-            unsigned char receive;
+            bool  receive;
         } expression;
 
         struct { //Panning
@@ -104,41 +104,41 @@ class Controller
             int   data;
             float relbw;
             unsigned char depth;
-            unsigned char exponential;
+            bool  exponential;
         } bandwidth;
 
         struct { //Modulation Wheel
             int   data;
             float relmod;
             unsigned char depth;
-            unsigned char exponential;
+            bool  exponential;
         } modwheel;
 
         struct { //FM amplitude
             int   data;
             float relamp;
-            unsigned char receive;
+            bool  receive;
         } fmamp;
 
         struct { //Volume
             int   data;
             float volume;
-            unsigned char receive;
+            bool  receive;
         } volume;
 
         struct { //Sustain
-            int data, sustain;
-            unsigned char receive;
+            int  data, sustain;
+            bool receive;
         } sustain;
 
         struct { /**<Portamento*/
             //parameters
-            int data;
-            unsigned char portamento;
+            int  data;
+            bool portamento;
             /**Whether the portamento midi events are received or not*/
-            unsigned char receive;
+            bool receive;
             /**Whether legato playing is needed to get portamento*/
-            unsigned char automode;
+            bool automode;
             /** The time that it takes for the portamento to complete
              *
              * Translates in an expontal fashion to 0 Seconds to 1.93f Seconds
@@ -148,7 +148,7 @@ class Controller
              *
              * 0 - constant time(default)
              * 1 - proportional*/
-            unsigned char proportional;
+            bool proportional;
             /**Rate of proportinal portamento*/
             unsigned char propRate;
             /**Depth of proportinal portamento*/
@@ -156,7 +156,7 @@ class Controller
             /**pitchthresh is the threshold of enabling protamento*/
             unsigned char pitchthresh;
             /**enable the portamento only below(0)/above(1) the threshold*/
-            unsigned char pitchthreshtype;
+            bool pitchthreshtype;
 
             /**this value represent how the portamento time is reduced
              * 0      - for down portamento
@@ -187,9 +187,9 @@ class Controller
 
         /** RPN and NPRPN */
         struct { //nrpn
-            int parhi, parlo;
-            int valhi, vallo;
-            unsigned char receive; //this is saved to disk by Master
+            int  parhi, parlo;
+            int  valhi, vallo;
+            bool receive; //this is saved to disk by Master
         } NRPN;
 
 

@@ -2211,7 +2211,7 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
-    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, -1)) {
+    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, (std::numeric_limits<size_t>::max)())) {
         printf("[Warning] Invalid message in sendToRemote <%s, %s>...\n",
                rtmsg, dest.c_str());
         return;
