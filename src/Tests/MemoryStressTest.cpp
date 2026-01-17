@@ -21,6 +21,7 @@
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#include "../Misc/XMLwrapper.h"
 #include "../Synth/ADnote.h"
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
