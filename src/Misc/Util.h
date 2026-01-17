@@ -14,6 +14,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <stdint.h>

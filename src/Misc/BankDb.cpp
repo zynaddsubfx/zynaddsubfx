@@ -3,8 +3,11 @@
 #include "Util.h"
 #include "../globals.h"
 #include <cstring>
-#include <dirent.h>
 #include <sys/stat.h>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <filesystem>
 
 namespace zyn {
 
@@ -187,40 +190,43 @@ static void saveCache(bvec vec)
     xml.saveXMLfile(getCacheName(), 0);
 }
 
-void BankDb::scanBanks(void)
+void BankDb::scanBanks()
 {
+    namespace fs = std::filesystem;
+
     fields.clear();
     bvec cache = loadCache();
+
+    // Build lookup map from cached items
     bmap cc;
-    for(auto c:cache)
+    for (const auto& c : cache)
         cc[c.bank + c.file] = c;
 
     bvec ncache;
-    for(auto bank:banks)
-    {
-        DIR *dir = opendir(bank.c_str());
 
-        if(!dir)
+    // Iterate over known bank directories
+    for (const auto& bank : banks)
+    {
+        if (!fs::exists(bank) || !fs::is_directory(bank))
             continue;
 
+        for (const auto& entry : fs::directory_iterator(bank))
+        {
+            if (!entry.is_regular_file())
+                continue;
 
-        struct dirent *fn;
+            std::string filename = entry.path().filename().string();
 
-        while((fn = readdir(dir))) {
-            const char *filename = fn->d_name;
-
-            //check for extension
-            if(!strstr(filename, INSTRUMENT_EXTENSION))
+            // Skip non-instrument files
+            if (filename.find(INSTRUMENT_EXTENSION) == std::string::npos)
                 continue;
 
             auto xiz = processXiz(filename, bank, cc);
             fields.push_back(xiz);
             ncache.push_back(xiz);
         }
-
-        closedir(dir);
-
     }
+
     saveCache(ncache);
 }
 

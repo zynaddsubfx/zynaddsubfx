@@ -13,20 +13,23 @@
 
 #include "globals.h"
 #include "Util.h"
-#include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
 
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
+#endif
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #define errx(...) {}
