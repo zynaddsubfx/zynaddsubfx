@@ -208,7 +208,9 @@ class Part
         void monomemPop(note_t note);
         note_t monomemBack(void) const;
         bool monomemEmpty(void) const;
-        void monomemClear(void);
+    protected:
+        void monomemClear(void);  // to be accessible in tests
+    private:
 
         short monomemnotes[256]; // A list to remember held notes.
         struct {
