@@ -19,12 +19,14 @@
 #include "../Misc/Allocator.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
+#include "../globals.h"
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
+#undef protected
 #include "../Misc/Part.h"
-#include "../globals.h"
+#undef private
 
 using namespace std;
 using namespace zyn;
