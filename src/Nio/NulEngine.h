@@ -14,36 +14,37 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
-#include <sys/time.h>
-#include <pthread.h>
+#include <thread>
+#include <atomic>
+#include <chrono>
 #include "../globals.h"
 #include "AudioOut.h"
 #include "MidiIn.h"
 
 namespace zyn {
 
-class NulEngine:public AudioOut, MidiIn
+class NulEngine : public AudioOut, public MidiIn
 {
-    public:
-        NulEngine(const SYNTH_T &synth_);
-        ~NulEngine();
+public:
+    explicit NulEngine(const SYNTH_T &synth_);
+    ~NulEngine();
 
-        bool Start();
-        void Stop();
+    bool Start();
+    void Stop();
 
-        void setAudioEn(bool nval);
-        bool getAudioEn() const;
+    void setAudioEn(bool nval);
+    bool getAudioEn() const;
 
-        void setMidiEn(bool) {}
-        bool getMidiEn() const {return true; }
+    void setMidiEn(bool) {}
+    bool getMidiEn() const { return true; }
 
-    protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
+protected:
+    void AudioThread();
 
-    private:
-        struct timeval playing_until;
-        pthread_t     *pThread;
+private:
+    std::chrono::steady_clock::time_point playing_until;
+    std::atomic<bool> running {false};
+    std::thread audio_thread;
 };
 
 }
