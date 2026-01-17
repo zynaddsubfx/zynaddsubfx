@@ -525,10 +525,10 @@ unsigned char Phaser::getpar(int npar) const
         case 7:  return Pfb;
         case 8:  return Pstages;
         case 9:  return Plrcross;
-            return Poffset;      //same
+            // return Poffset;      //same
         case 10: return Poutsub;
         case 11: return Pphase;
-            return Pwidth;      //same
+            // return Pwidth;      //same
         case 12: return Phyper;
         case 13: return Pdistortion;
         case 14: return Panalog;
