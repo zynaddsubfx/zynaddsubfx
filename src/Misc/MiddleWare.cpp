@@ -26,8 +26,6 @@
 #include <rtosc/port-sugar.h>
 #include <lo/lo.h>
 
-#include <unistd.h>
-
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
 
@@ -187,7 +185,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     assert(!path.empty());
     path += "sample";
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_MSC_VER)
     unsigned num = p->sampleGenerator([&path,&d]
                        (unsigned N, PADnoteParameters::Sample &&s)
                        {
@@ -566,7 +564,7 @@ public:
         assert(filename);
 
         //load part in async fashion when possible
-#ifndef WIN32
+#if !defined(WIN32) || defined(_MSC_VER)
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -596,11 +594,12 @@ public:
         }
 
         Part *p = alloc.get();
-#else
-        Part *p = new Part(*master->memory, synth, master->time,
+#else  // Windows without MSVC
+        Part *p = new Part(*master->memory, synth, master->time, master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
-                &master->microtonal, master->fft);
+                &master->microtonal, master->fft, &master->watcher,
+		("/part"+to_s(npart)+"/").c_str());
         p->partno  = npart % NUM_MIDI_CHANNELS;
         p->Prcvchn = npart % NUM_MIDI_CHANNELS;
 
@@ -918,7 +917,7 @@ public:
     // Add a message for handleMsg to a queue
     void queueMsg(const char* msg)
     {
-        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, -1));
+        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, (std::numeric_limits<size_t>::max)()));
     }
 
     void write(const char *path, const char *args, ...);
@@ -1451,7 +1450,7 @@ void save_cb(const char *msg, RtData &d)
         std::size_t msgmax = (savefile.length()-1) / max_each;
         for(std::size_t pos = 0; pos < savefile.length(); pos += max_each)
         {
-            std::size_t len = std::min(max_each, savefile.length() - pos);
+            std::size_t len = (std::min)(max_each, savefile.length() - pos);
             d.reply(d.loc, "stiis",
                     file.c_str(), request_time, msgcount++, msgmax,
                     savefile.substr(pos, len).c_str());
@@ -1926,7 +1925,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             auto master = this->master;
             this->doReadOnlyOp([master](){
                 std::string home = getenv("HOME");
-                std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
+                std::string save_file = home+"/.local/zynaddsubfx-"+to_s(os_getpid())+"-autosave.xmz";
                 printf("doing an autosave <%s>...\n", save_file.c_str());
                 int res = master->saveXML(save_file.c_str());
                 (void)res;});})
@@ -2507,7 +2506,7 @@ int MiddleWare::checkAutoSave(void) const
 void MiddleWare::removeAutoSave(void)
 {
     std::string home = getenv("HOME");
-    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
+    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(os_getpid())+"-autosave.xmz";
     remove(save_file.c_str());
 }
 

@@ -1,3 +1,62 @@
+function(zyn_add_test testname testbinary)
+    # Remaining arguments are test args
+    set(test_args ${ARGN})
+
+    # Default: native execution
+    set(cmd ${testbinary})
+    set(env)
+
+    # Condition 1: -DMINGW_PREFIX was passed
+    # Condition 2: environment variable forces wine
+    if(DEFINED MINGW_PREFIX OR DEFINED ENV{ZYN_USE_WINE})
+
+        # Allow override via environment (useful in CI)
+        if(DEFINED ENV{RUNNER_TEMP})
+            set(_runner_temp "$ENV{RUNNER_TEMP}")
+        else()
+            set(_runner_temp "")
+        endif()
+
+        # Compose WINEPATH
+        set(_winepath
+            "/usr/x86_64-w64-mingw32/bin/;"
+            "/usr/x86_64-w64-mingw32/lib/;"
+            "/usr/lib/gcc/x86_64-w64-mingw32/13-win32"
+        )
+
+        if(_runner_temp)
+            list(APPEND _winepath
+                "${_runner_temp}/prefix/lib"
+                "${_runner_temp}/prefix/bin"
+            )
+        endif()
+
+        # Join with semicolons (WINEPATH wants ;, but ENVIRONMENT PROPERTY also wants it)
+        list(JOIN _winepath "\\\\;" WINEPATH_VALUE)
+
+        # Wine command
+        set(cmd wine ${testbinary})
+
+        # Environment for CTest
+        set(env "WINEPATH=${WINEPATH_VALUE}")
+
+    endif()
+
+    # Register test
+    add_test(
+        NAME ${testname}
+        COMMAND ${cmd} ${test_args}
+    )
+
+    # Apply environment only if needed
+    if(env)
+        set_tests_properties(${testname}
+            PROPERTIES ENVIRONMENT "${env}"
+        )
+        message(STATUS "${env}")
+    endif()
+endfunction()
+
 function(cp_script script_name)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
         ${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
@@ -5,8 +64,7 @@ endfunction()
 
 function(quick_test test_name link)
     add_executable(${test_name} "${test_name}.cpp")
-    add_test(NAME ${test_name}
-             COMMAND ${test_name})
+    zyn_add_test(${test_name} ${test_name})
     target_link_libraries(${test_name} ${link} ${ARGN})
     if(Werror)
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
@@ -22,10 +80,16 @@ endfunction()
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
+if(MSVC)
+    set(SYNC_LIBRARIES synchronization)
+else()
+    set(PTHREAD_LIBRARIES pthread)
+endif()
+
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
 set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
-    ${MXML_LIBRARIES} pthread )
+    ${MXML_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 message(STATUS "Linking tests with: ${test_lib}")
 
@@ -35,6 +99,9 @@ quick_test(ControllerTest   ${test_lib})
 quick_test(EchoTest         ${test_lib})
 quick_test(EffectTest       ${test_lib})
 quick_test(KitTest          ${test_lib})
+if(MSVC)
+    target_compile_features(KitTest PRIVATE cxx_std_20)
+endif()
 quick_test(MemoryStressTest ${test_lib})
 quick_test(MicrotonalTest   ${test_lib})
 quick_test(MsgParseTest     ${test_lib})
@@ -52,11 +119,11 @@ quick_test(ReverseTest   ${test_lib})
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                          ${PLATFORM_LIBRARIES})
+                          ${PLATFORM_LIBRARIES} ${SYNC_LIBRARIES})
 quick_test(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                          ${PLATFORM_LIBRARIES})
+                          ${PLATFORM_LIBRARIES} ${SYNC_LIBRARIES})
 
 #Testbed app
 
@@ -103,12 +170,12 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
             ${PLATFORM_LIBRARIES})
     endif()
     # test all presets
-    add_test(SaveOscPresets save-osc)
+    zyn_add_test(SaveOscPresets save-osc)
     # test the most insane XIZ file
-    add_test(SaveOscBigFile save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/banks/olivers-100/0032-Drum\ Kit.xiz)
+    zyn_add_test(SaveOscBigFile save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/banks/olivers-100/0032-Drum\ Kit.xiz)
     # not realized, because it takes 15 minutes each time:
     if (CompileExtensiveTests)
-        add_test(SaveOscAllFiles save-osc test-all)
+        zyn_add_test(SaveOscAllFiles save-osc test-all)
     endif()
 
 endif()
@@ -122,7 +189,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     if(IS_GIT_REPO STREQUAL "true")
-        add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+        zyn_add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
     endif()
 endif()
 
