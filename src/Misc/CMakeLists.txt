@@ -1,5 +1,3 @@
-include_directories(${MXML_INCLUDE_DIR})
-
 set(zynaddsubfx_misc_SRCS
 	Misc/Bank.cpp
     Misc/BankDb.cpp

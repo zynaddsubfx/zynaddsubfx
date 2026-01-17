@@ -33,7 +33,7 @@ Value_Smoothing_Filter::sample_rate ( nframes_t n )
 }
 
 bool
-Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, float gt )
+Value_Smoothing_Filter::apply( sample_t * ZYN_RESTRICT dst, nframes_t nframes, float gt )
 {
     if ( _reset_on_next_apply )
     {

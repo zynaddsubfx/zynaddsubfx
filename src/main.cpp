@@ -11,6 +11,16 @@
   of the License, or (at your option) any later version.
 */
 
+#ifdef _WIN32
+#  define WIN32_LEAN_AND_MEAN
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#  include <windows.h>
+#  include <mmsystem.h>
+#else
+#  include <err.h>
+#endif
+
 
 #include <iostream>
 #include <fstream>
@@ -20,11 +30,6 @@
 #include <ctime>
 #include <algorithm>
 #include <signal.h>
-
-#ifndef WIN32
-#include <err.h>
-#endif
-#include <unistd.h>
 
 #include <getopt.h>
 
@@ -141,17 +146,17 @@ void exitprogram(const Config& config)
 
 //Windows MIDI OH WHAT A HACK...
 #ifdef WIN32
-#include <windows.h>
-#include <mmsystem.h>
 namespace zyn{
 extern InMgr  *in;
 }
 HMIDIIN winmidiinhandle = 0;
 
-void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
-                            DWORD dwParam1,DWORD dwParam2)
+void CALLBACK WinMidiInProc([[maybe_unused]] HMIDIIN hMidiIn,
+                                             UINT wMsg,
+                            [[maybe_unused]] DWORD dwInstance,
+                                             DWORD dwParam1,
+                            [[maybe_unused]] DWORD dwParam2)
 {
-    int midicommand=0;
     if (wMsg==MIM_DATA) {
         int cmd,par1,par2;
         cmd=dwParam1&0xff;
@@ -161,17 +166,17 @@ void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
         int cmdchan=cmd&0x0f;
         int cmdtype=(cmd>>4)&0x0f;
 
-        int tmp=0;
+        //int tmp=0;
         MidiEvent ev;
         switch (cmdtype) {
-            case(0x8)://noteon
+            case(0x8)://note OFF
                 ev.type = 1;
                 ev.num = par1;
                 ev.channel = cmdchan;
                 ev.value = 0;
                 in->putEvent(ev);
                 break;
-            case(0x9)://noteoff
+            case(0x9)://note ON
                 ev.type = 1;
                 ev.num = par1;
                 ev.channel = cmdchan;
