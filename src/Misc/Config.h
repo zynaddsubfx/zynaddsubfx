@@ -14,6 +14,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "../globals.h"
 #include <string>
 #define MAX_STRING_SIZE 4000
 #define MAX_BANK_ROOT_DIRS 100
