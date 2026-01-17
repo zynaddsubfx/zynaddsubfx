@@ -9,9 +9,7 @@ include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
-if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
-    find_package(PkgConfig)
-endif()
+find_package(PkgConfig)
 find_package(ZLIB REQUIRED)
 find_package(X11)
 find_package(Threads   REQUIRED)
@@ -31,6 +29,12 @@ if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERS
         message(STATUS "Could NOT find LibGit2 (missing file: /usr/include/git2/version.h)")
     endif()
 endif()
+
+if(PKG_CONFIG_FOUND AND MSVC)
+    pkg_search_module(JACK jack)
+    mark_as_advanced(JACK_LIBRARIES)
+endif()
+
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
     pkg_check_modules(JACK jack)
@@ -51,11 +55,19 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     mark_as_advanced(DSSI_LIBRARIES)
     pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
     mark_as_advanced(LIBLO_LIBRARIES)
+    set(ZYN_LIBLO_LIBRARIES "${LIBLO_LIBRARIES}")
 else()
     find_package(FFTW3F REQUIRED)
     find_package(MXML REQUIRED)
-    find_package(LIBLO REQUIRED)
+    find_package(liblo REQUIRED)
+    if(liblo_FOUND)
+        set(LIBLO_FOUND TRUE)
+    endif()
+    set(ZYN_LIBLO_LIBRARIES "liblo::liblo")  # Notation currently solely supported on Windows
     find_package(PORTAUDIO)
+    if(MSVC)
+        find_package(getopt CONFIG REQUIRED)
+    endif()
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
@@ -119,7 +131,7 @@ mark_as_advanced(FORCE ZynFusionDir)
 
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND NOT MSVC)
   add_definitions(-static)
 endif()
 
@@ -353,7 +365,7 @@ endif()
 
 include_directories(${LIBLO_INCLUDE_DIRS})
 add_definitions(-DUSE_NSM=1)
-list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+list(APPEND AUDIO_LIBRARIES ${ZYN_LIBLO_LIBRARIES})
 list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 message(STATUS "Compiling with liblo")
 
@@ -373,39 +385,48 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
     add_definitions(-D_GNU_SOURCE=1 -D_POSIX_THREAD_PRIO_INHERIT=1)
 endif()
 
-add_compile_options(-Wall -Wextra)
+if (MSVC)
+    # like gcc's "-Wextra", but disable some
+    # type narrowing
+    # non-portable string warnings
+    # declaration hides class member
+    # shadowing
+    add_compile_options(/W4 /wd4244 /wd4267 /wd4305 /wd4996 /wd4456 /wd4458 /wd4459)
+else()
+    add_compile_options(-Wall -Wextra)
 
-# macro similar to "check_cxx_compiler_flag", however,
-# it also checks for warnings that are only output if other warnings are active
-macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
-    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+    # macro similar to "check_cxx_compiler_flag", however,
+    # it also checks for warnings that are only output if other warnings are active
+    macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
+        set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+        set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+       
+        check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
+            FAIL_REGEX ${_FAILREGEX}
+        )
 
-check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
-        FAIL_REGEX ${_FAILREGEX}
-    )
+        set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
+    endmacro ()
 
-    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-endmacro ()
-
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-stringop-truncation" "unrecognized|option" HAVE_NO_STRINGOP_TRUNCATION)
-if (HAVE_NO_STRINGOP_TRUNCATION)
-    add_compile_options(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
-endif()
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-vla-cxx-extension" "unrecognized|option" HAVE_NO_VLA_CXX_EXTENSION)
-if (HAVE_NO_VLA_CXX_EXTENSION)
-    add_compile_options(-Wno-vla-cxx-extension)
-endif()
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-nan-infinity-disabled" "unrecognized|option" HAVE_NO_NAN_INFINITY_DISABLED)
-if (HAVE_NO_NAN_INFINITY_DISABLED)
-    add_compile_options(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
-endif()
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
-    "unrecognized|option"
-    HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
-    )
-if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
-    add_compile_options(-Wno-inconsistent-missing-override)
+    check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-stringop-truncation" "unrecognized|option" HAVE_NO_STRINGOP_TRUNCATION)
+    if (HAVE_NO_STRINGOP_TRUNCATION)
+        add_compile_options(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
+    endif()
+    check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-vla-cxx-extension" "unrecognized|option" HAVE_NO_VLA_CXX_EXTENSION)
+    if (HAVE_NO_VLA_CXX_EXTENSION)
+        add_compile_options(-Wno-vla-cxx-extension)
+    endif()
+    check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-nan-infinity-disabled" "unrecognized|option" HAVE_NO_NAN_INFINITY_DISABLED)
+    if (HAVE_NO_NAN_INFINITY_DISABLED)
+        add_compile_options(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
+    endif()
+    check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
+        "unrecognized|option"
+        HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
+        )
+    if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
+        add_compile_options(-Wno-inconsistent-missing-override)
+    endif()
 endif()
 
 if(HAVE_X86_FISTPL)
@@ -572,19 +593,25 @@ add_library(zynaddsubfx_core STATIC
 	)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(PTHREAD_LIBRARY winpthread)
-    set(PLATFORM_LIBRARIES ws2_32
+    if(MSVC)
+        set(THREAD_LIBRARY winmm)
+        set(PLATFORM_LIBRARIES synchronization
+            $<IF:$<TARGET_EXISTS:getopt::getopt_shared>,getopt::getopt_shared,getopt::getopt_static>)
+    else()
+        set(THREAD_LIBRARY winpthread)
+        set(PLATFORM_LIBRARIES ws2_32
             winmm
             wsock32
             "-static" iphlpapi
             "-static" winpthread)
+    endif()
 elseif(APPLE)
-    set(PTHREAD_LIBRARY pthread)
+    set(THREAD_LIBRARY pthread)
 else()
     if(HAVE_LIBRT)
         set(PLATFORM_LIBRARIES rt)
     endif()
-    set(PTHREAD_LIBRARY pthread)
+    set(THREAD_LIBRARY pthread)
 endif()
 
 if(ZYN_SYSTEM_RTOSC)
@@ -593,7 +620,7 @@ if(ZYN_SYSTEM_RTOSC)
         ${FFTW3F_LIBRARIES}
         ${MXML_LIBRARIES}
         ${OS_LIBRARIES}
-        ${PTHREAD_LIBRARY}
+        ${THREAD_LIBRARY}
         ${RTOSC_LIBRARIES}
         ${RTOSC_CPP_LIBRARIES}
     )
@@ -603,7 +630,7 @@ else()
         ${FFTW3F_LIBRARIES}
         ${MXML_LIBRARIES}
         ${OS_LIBRARIES}
-        ${PTHREAD_LIBRARY}
+        ${THREAD_LIBRARY}
         rtosc
         rtosc-cpp
     )
@@ -666,7 +693,7 @@ if (DssiEnable)
 	target_link_libraries(zynaddsubfx_dssi
 		zynaddsubfx_core
 		${OS_LIBRARIES}
-		${LIBLO_LIBRARIES}
+		${ZYN_LIBLO_LIBRARIES}
 		${PLATFORM_LIBRARIES}
 		-Wl,--no-undefined
 		)

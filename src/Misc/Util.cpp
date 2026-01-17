@@ -136,31 +136,16 @@ void set_realtime()
 }
 
 
-
-#ifdef WIN32
-#include <windows.h>
-
-//https://stackoverflow.com/questions/5801813/c-usleep-is-obsolete-workarounds-for-windows-mingw
-void os_usleep(long usec)
+std::uint32_t os_getpid()
 {
-    HANDLE timer;
-    LARGE_INTEGER ft;
-
-    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
-
-    timer = CreateWaitableTimer(NULL, TRUE, NULL);
-    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
-    WaitForSingleObject(timer, INFINITE);
-    CloseHandle(timer);
-}
+#ifdef _MSC_VER
+    return static_cast<std::uint32_t>(GetCurrentProcessId());
 #else
-
-void os_usleep(long length)
-{
-    usleep(length);
-}
+    return static_cast<std::uint32_t>(getpid());
 #endif
+}
 
+#ifndef _MSC_VER
 //!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
@@ -193,10 +178,12 @@ std::string os_pid_as_padded_string()
     char result_str[max_pid_len << 1];
     std::fill_n(result_str, max_pid_len, '0');
     std::size_t written = snprintf(result_str + max_pid_len, max_pid_len,
-        "%d", (int)getpid());
+        "%" PRIu32, os_getpid());
     // the below pointer should never cause segfaults:
     return result_str + max_pid_len + written - os_guess_pid_length();
 }
+
+#endif
 
 std::string legalizeFilename(std::string filename)
 {

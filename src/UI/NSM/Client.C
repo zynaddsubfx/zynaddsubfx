@@ -18,12 +18,17 @@
 /*******************************************************************************/
 
 #include "Client.H"
+#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdlib.h>
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#if defined(_WIN32)
+  #include <process.h>   // for _getpid()
+  #define getpid _getpid
+#else
+  #include <unistd.h>    // for getpid()
+#endif
 
 namespace NSM
 {

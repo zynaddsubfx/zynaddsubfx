@@ -20,6 +20,14 @@
 #ifndef VALUE_SMOOTHING_FILTER_H
 #define VALUE_SMOOTHING_FILTER_H
 
+#if defined(_MSC_VER)
+  #define ZYN_RESTRICT __restrict
+#elif defined(__GNUC__) || defined(__clang__)
+  #define ZYN_RESTRICT __restrict__
+#else
+  #define ZYN_RESTRICT
+#endif
+
 typedef unsigned long nframes_t;
 typedef float sample_t;
 
@@ -52,7 +60,7 @@ public:
 
     void sample_rate ( nframes_t n );
 
-    bool apply( sample_t * __restrict__ dst, nframes_t nframes, float gt );
+    bool apply( sample_t * ZYN_RESTRICT dst, nframes_t nframes, float gt );
 };
 
 #endif
