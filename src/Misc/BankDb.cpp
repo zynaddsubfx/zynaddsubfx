@@ -3,11 +3,10 @@
 #include "Util.h"
 #include "../globals.h"
 #include <cstring>
-#include <sys/stat.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <filesystem>
+#ifndef WIN32
+#include <sys/stat.h>
+#endif
 
 namespace zyn {
 
@@ -190,43 +189,31 @@ static void saveCache(bvec vec)
     xml.saveXMLfile(getCacheName(), 0);
 }
 
-void BankDb::scanBanks()
+void BankDb::scanBanks(void)
 {
-    namespace fs = std::filesystem;
-
     fields.clear();
     bvec cache = loadCache();
-
-    // Build lookup map from cached items
     bmap cc;
-    for (const auto& c : cache)
+    for(auto c:cache)
         cc[c.bank + c.file] = c;
 
+    namespace fs = std::filesystem;
     bvec ncache;
-
-    // Iterate over known bank directories
-    for (const auto& bank : banks)
+    for(const auto& bank:banks)
     {
-        if (!fs::exists(bank) || !fs::is_directory(bank))
-            continue;
-
-        for (const auto& entry : fs::directory_iterator(bank))
+        if(fs::is_directory(bank))
+        for(const auto& entry : fs::directory_iterator(bank))
         {
-            if (!entry.is_regular_file())
-                continue;
-
-            std::string filename = entry.path().filename().string();
-
-            // Skip non-instrument files
-            if (filename.find(INSTRUMENT_EXTENSION) == std::string::npos)
-                continue;
-
-            auto xiz = processXiz(filename, bank, cc);
-            fields.push_back(xiz);
-            ncache.push_back(xiz);
+            const std::string filename = entry.path().filename().string();
+            if(!entry.is_directory() &&
+                filename.find(INSTRUMENT_EXTENSION) != std::string::npos)
+            {
+                auto xiz = processXiz(filename, bank, cc);
+                fields.push_back(xiz);
+                ncache.push_back(xiz);
+            }
         }
     }
-
     saveCache(ncache);
 }
 

@@ -19,13 +19,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
-#include <iostream>
 #include <sys/stat.h>
 #include <algorithm>
 
 #include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #include "Config.h"
 #include "Util.h"
@@ -226,56 +223,61 @@ int Bank::loadfromslot(unsigned int ninstrument, Part *part)
 /*
  * Makes current a bank directory
  */
-int Bank::loadbank(std::string bankdirname)
+int Bank::loadbank(string bankdirname)
 {
     namespace fs = std::filesystem;
-
     normalizedirsuffix(bankdirname);
+
+    const fs::path bankdirnamepath = bankdirname;
     clearbank();
 
+    if(!fs::is_directory(bankdirnamepath))
+        return -1;
+
+    //set msb when possible
     bank_msb = 0;
-    for (unsigned i = 0; i < banks.size(); i++)
-        if (banks[i].dir == bankdirname)
+    for(unsigned i=0; i<banks.size(); i++)
+        if(banks[i].dir == bankdirname)
             bank_msb = i;
 
     dirname = bankdirname;
+
     bankfiletitle = dirname;
 
-    if (!fs::exists(bankdirname) || !fs::is_directory(bankdirname))
-        return -1;
+    for(const auto& fn : fs::directory_iterator{bankdirnamepath})
+    {
+        const std::string filename{fn.path().filename().string()};
 
-    for (const auto& entry : fs::directory_iterator(bankdirname)) {
-        if (!entry.is_regular_file())
+        //check for extension
+        if(filename.find("INSTRUMENT_EXTENSION") == std::string::npos)
             continue;
 
-        std::string filename = entry.path().filename().string();
-
-        // Skip files without the instrument extension
-        if (filename.find(INSTRUMENT_EXTENSION) == std::string::npos)
-            continue;
-
-        // Parse number prefix (first up to 4 digits)
+        //verify if the name is like this NNNN-name (where N is a digit)
         int no = 0;
         unsigned int startname = 0;
-        for (unsigned int i = 0; i < 4 && i < filename.size(); ++i) {
-            if (std::isdigit(static_cast<unsigned char>(filename[i]))) {
+
+        for(unsigned int i = 0; i < 4 && i < filename.size(); ++i) {
+            if(filename.length() <= i)
+                break;
+
+            if((filename[i] >= '0') && (filename[i] <= '9')) {
                 no = no * 10 + (filename[i] - '0');
                 startname++;
             }
         }
-        if ((startname + 1) < filename.size())
-            startname++;
 
-        // Remove file extension
-        std::string name = entry.path().stem().string();
+        if((startname + 1) < filename.length())
+            startname++;  //to take out the "-"
 
-        if (no != 0)
+        string name = fn.path().stem().string();  // file extension removed
+
+        if(no != 0) //the instrument position in the bank is found
             addtobank(no - 1, filename, name.substr(startname));
         else
             addtobank(-1, filename, name);
     }
 
-    if (!dirname.empty())
+    if(!dirname.empty())
         config->cfg.currentBankDir = dirname;
 
     return 0;
@@ -293,9 +295,10 @@ int Bank::newbank(string newbankdirname)
 
     bankdir += newbankdirname;
 
+    namespace fs = std::filesystem;
     try {
-        if (!std::filesystem::exists(bankdir))
-            std::filesystem::create_directory(bankdir);
+        if (!fs::exists(bankdir))
+            fs::create_directory(bankdir);
     } catch (...) {
         return -1;
     }
@@ -435,47 +438,46 @@ void Bank::setLsb(uint8_t lsb)
     bank_lsb = limit<uint8_t>(lsb,0,1);
 }
 
-
 // private stuff
 
-void Bank::scanrootdir(std::string rootdir)
+void Bank::scanrootdir(string rootdir)
 {
     namespace fs = std::filesystem;
     expanddirname(rootdir);
 
-    if (!fs::exists(rootdir) || !fs::is_directory(rootdir))
+    fs::path rootdirpath {rootdir};
+    if(!fs::is_directory(rootdirpath))
         return;
 
-    for (const auto& entry : fs::directory_iterator(rootdir)) {
-        if (!entry.is_directory())
-            continue;
-
-        std::string dirname = entry.path().filename().string();
-
-        if (dirname.empty() || dirname[0] == '.')
+    for(const auto& entry : fs::directory_iterator{rootdirpath})
+    {
+        fs::path p = entry.path();
+        const std::string dirname = p.filename().string();
+        if(dirname.empty() || dirname[0] == '.')
             continue;
 
         bankstruct bank;
-        bank.dir  = (entry.path().string() + std::string(1, fs::path::preferred_separator));
+        bank.dir  = rootdir + dirname + '/';
         bank.name = dirname;
 
+        //find out if the directory contains at least 1 instrument
         bool isbank = false;
-
-        // Iterate through contents of this subdirectory
-        for (const auto& subentry : fs::directory_iterator(entry.path())) {
-            if (!subentry.is_regular_file())
+        if(!fs::is_directory(bank.dir))
+            continue;
+        for(const auto& subentry : fs::directory_iterator{rootdirpath})
+        {
+            if(subentry.is_directory())
                 continue;
-
-            std::string fname = subentry.path().filename().string();
-
-            if (fname.find(INSTRUMENT_EXTENSION) != std::string::npos ||
-                fname.find(FORCE_BANK_DIR_FILE) != std::string::npos) {
+            const std::string fname = subentry.path().filename().string();
+            if(     fname.find(INSTRUMENT_EXTENSION) != std::string::npos
+                ||  fname.find(FORCE_BANK_DIR_FILE)  != std::string::npos)
+            {
                 isbank = true;
-                break;
+                break; //could put a #instrument counter here instead
             }
         }
 
-        if (isbank)
+        if(isbank)
             banks.push_back(bank);
     }
 }

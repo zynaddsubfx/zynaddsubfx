@@ -13,54 +13,48 @@
 
 #include "NulEngine.h"
 #include "../globals.h"
-#include "../Misc/Util.h"
 
-#include <iostream>
-#include <thread>
 #include <chrono>
-
+#include <iostream>
 using namespace std;
-using namespace std::chrono;
 
 namespace zyn {
 
 NulEngine::NulEngine(const SYNTH_T &synth_)
-    : AudioOut(synth_)
+    :AudioOut(synth_)
 {
     name = "NULL";
-    playing_until = steady_clock::now();
 }
 
 void NulEngine::AudioThread()
 {
-    auto us_per_buffer = static_cast<long long>(synth.buffersize) * 1'000'000 / synth.samplerate;
+    using duration = chrono::microseconds;
+    const duration increase(synth.buffersize * 1'000'000 / synth.samplerate);
 
-    while (running.load()) {
+    while(thread.joinable()) {
         getNext();
 
-        auto now = steady_clock::now();
-
-        // Initialize if first run
-        if (playing_until == time_point<steady_clock>{})
+        time_point now = chrono::steady_clock::now();
+        if(playing_until == time_point()) {
             playing_until = now;
-
-        auto remaining = duration_cast<microseconds>(playing_until - now).count();
-
-        if (remaining > 10'000) {
-            // Sleep slightly less than the buffer duration
-            this_thread::sleep_for(microseconds(remaining - 10'000));
-        } else if (remaining < 0) {
-            cerr << "WARNING - too late" << endl;
         }
-
-        playing_until += microseconds(us_per_buffer);
+        else {
+            using namespace std::chrono_literals;
+            duration remaining = std::chrono::duration_cast<duration>(playing_until - now);
+            if(remaining > 10ms) //Don't x() less than 10ms.
+                //This will add latency...
+                this_thread::sleep_for(remaining  - 10ms);
+            else if(remaining < 0us) {
+                playing_until -= remaining;
+                cerr << "WARNING - too late" << endl;
+            }
+        }
+        playing_until += increase;
     }
 }
 
 NulEngine::~NulEngine()
-{
-    Stop();
-}
+{}
 
 bool NulEngine::Start()
 {
@@ -75,23 +69,21 @@ void NulEngine::Stop()
 
 void NulEngine::setAudioEn(bool nval)
 {
-    if (nval) {
-        if (!running.load()) {
-            running.store(true);
-            audio_thread = std::thread(&NulEngine::AudioThread, this);
+    if(nval) {
+        if(!getAudioEn()) {
+            thread = std::thread(&NulEngine::AudioThread, this);
         }
-    } else {
-        if (running.load()) {
-            running.store(false);
-            if (audio_thread.joinable())
-                audio_thread.join();
-        }
+    }
+    else
+    if(getAudioEn()) {
+        std::thread tmpthread = std::move(thread);
+        tmpthread.join();
     }
 }
 
 bool NulEngine::getAudioEn() const
 {
-    return running.load();
+    return thread.joinable();
 }
 
 }
