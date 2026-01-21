@@ -137,8 +137,6 @@ void Phaser::analog_setup()
     offset[10] = 0.2762545f;
     offset[11] = 0.5215785f;
 
-    barber = 0;  //Deactivate barber pole phasing by default
-
     mis       = 1.0f;
     Rmin      = 625.0f; // 2N5457 typical on resistance at Vgs = 0
     Rmax      = 22000.0f; // Resistor parallel to FET
@@ -205,13 +203,6 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
         g.r += diff.r;
 
         Stereo<float> xn(input.l[i] * pangainL, input.r[i] * pangainR);
-
-        if(barber) {
-            g.l += 0.25;
-            g.l -= floorf(g.l);
-            g.r += 0.25;
-            g.r -= floorf(g.r);
-        }
 
         xn.l = applyPhase(xn.l, g.l, fb.l, hpf.l, yn1.l, xn1.l);
         xn.r = applyPhase(xn.r, g.r, fb.r, hpf.r, yn1.r, xn1.r);
@@ -474,7 +465,6 @@ void Phaser::changepar(int npar, unsigned char value)
         case 4:
             lfo.PLFOtype = value;
             lfo.updateparams();
-            barber = (2 == value);
             break;
         case 5:
             lfo.Pstereo = value;
