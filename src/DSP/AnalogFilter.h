@@ -53,6 +53,8 @@ class AnalogFilter:public Filter
                 float gain, float fs, int &order);
         void filterSample(float& smp);
 
+        float compensationfactor = 0;
+
     private:
         struct fstage {
             float x1, x2; //Input History
@@ -72,12 +74,19 @@ class AnalogFilter:public Filter
         float q;      //Q factor (resonance or Q factor)
         float newq;   //New target Q
         float gain;   //the gain of the filter (if are shelf/peak) filters
+        float loudnessComp;
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
 
         int freqbufsize;
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
         bool beforeFirstTick; // reset the smoothing at first Tick
+        float one_div_n;
+        float aWeightHistIn;
+        float aWeightHistOut;
+        float sumIn;
+
+
 };
 
 }

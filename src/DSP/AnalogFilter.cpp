@@ -38,7 +38,8 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
       newq(Fq),
      gain(1.0),
      recompute(true),
-     freqbufsize(bufsize/8)
+     freqbufsize(bufsize/8),
+     one_div_n (1.0f/(bufsize-1))
 {
     for(int i = 0; i < 3; ++i)
         coeff.c[i] = coeff.d[i] = oldCoeff.c[i] = oldCoeff.d[i] = 0.0f;
@@ -394,6 +395,29 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
         recompute = false;
     }
 
+    float rmsIn[buffersize];
+    const float compensationAmount = loudnessComp / 110.0f;
+
+    // EWMA RMS parameters (fast)
+    const float rmsAlpha = 0.02f;  // ≈ Attack ~2–4 ms, Release ~50–70 ms
+
+    // Attack/Release for compensation factor
+    const float attack  = 0.20f;   // fast reaction
+    const float release = 0.02f;   // slow decay
+
+    if (loudnessComp>0)
+        for(unsigned int i = 0; i < bufsize; ++i) {
+
+            // ------ A-weighting (simplified) ------
+            float aIn = smp[i] - 0.95f * aWeightHistIn;
+            aWeightHistIn = smp[i];
+            aIn *= 1.5f;
+
+            // ------ EWMA RMS ------
+            sumIn  = (1.0f - rmsAlpha) * sumIn  + rmsAlpha * (aIn  * aIn);
+            rmsIn[i]  = sqrtf(sumIn);
+        }
+
     if(order == 1) {  //First order filter
         for(unsigned int i = 0; i < bufsize; ++i) {
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
@@ -420,6 +444,44 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
         hist.y1 = work[2];
         hist.y2 = work[3];
     }
+
+    if (loudnessComp>0) {
+
+        // precalculate out of hot zone
+        const float one_minus_compAmount = (1.0f - compensationAmount);
+        for(int i = 0; i < buffersize; ++i) {
+
+            float aOut = smp[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
+            aWeightHistOut = smp[i];
+            aOut *= 1.5f;  // +3.5dB Boost
+            float sumOut = (1.0f - rmsAlpha) * sumOut + rmsAlpha * (aOut * aOut);
+
+            float rmsOut = sqrtf(sumOut);
+
+            if (rmsOut < 1e-6f) rmsOut = 1e-6f;
+            float rawFactor = rmsIn[i] / rmsOut;
+
+
+            if (rawFactor > compensationfactor)
+            {
+                // schneller Attack
+                compensationfactor =
+                    attack * rawFactor + (1.0f - attack) * compensationfactor;
+            }
+            else
+            {
+                // langsamer Release
+                compensationfactor =
+                    release * rawFactor + (1.0f - release) * compensationfactor;
+            }
+
+            // lerp between zero and full compensation
+            smp[i] *=  compensationAmount * compensationfactor + one_minus_compAmount;
+        }
+    }
+
+
+
 }
 
 void AnalogFilter::filterout(float *smp)
