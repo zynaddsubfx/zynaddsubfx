@@ -1,57 +1,57 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
-header_name {.h} 
+version 1.0302
+header_name {.h}
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
-} 
+}
 
 decl {//License: GNU GPL version 2 or later} {private local
-} 
+}
 
 decl {\#include <stdlib.h>} {public local
-} 
+}
 
 decl {\#include <stdio.h>} {public local
-} 
+}
 
 decl {\#include <string.h>} {public local
-} 
+}
 
 decl {\#include <string>} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Dial.H"} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Input.H"} {public local
-} 
+}
 
 decl {\#include "PartNameButton.h"} {public local
-} 
+}
 
 decl {\#include "EffUI.h"} {public local
-} 
+}
 
 decl {\#include "BankUI.h"} {public local
-} 
+}
 
 decl {\#include "ADnoteUI.h"} {public local
-} 
+}
 
 decl {\#include "SUBnoteUI.h"} {public local
-} 
+}
 
 decl {\#include "PADnoteUI.h"} {public local
-} 
+}
 
 decl {\#include "../Misc/Config.h"} {public local
-} 
+}
 
 decl {\#include "../Misc/Master.h"} {public local
-} 
+}
 
 decl {\#include "../Misc/Part.h"} {public local
-} 
+}
 
 class PartSysEffSend {open : {public Fl_Group}
 } {
@@ -103,7 +103,7 @@ end();} {}
   }
   decl {int npart;} {private local
   }
-} 
+}
 
 class PartKitItem {open : {public Fl_Osc_Group}
 } {
@@ -262,7 +262,7 @@ end();} {}
   }
   decl {class PartUI *partui;} {private local
   }
-} 
+}
 
 class PartUI {open : {public Fl_Osc_Group}
 } {
@@ -629,7 +629,7 @@ else {propta->deactivate();proptb->deactivate();}}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {569 775 390 145} type Double box NO_BOX
+      private xywh {569 775 420 145} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -860,7 +860,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit} open
-      xywh {262 621 395 360} type Double box NO_BOX
+      xywh {262 621 425 360} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -868,7 +868,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         code0 {instrumenteditwindow->init(osc, "/part"+to_s(npart)+"/");}
       }
       Fl_Group editgroup {
-        xywh {0 220 395 110} box UP_FRAME
+        xywh {0 220 425 110} box UP_FRAME
         class Fl_Osc_Group
       } {
         Fl_Box {} {
@@ -948,7 +948,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         }
       }
       Fl_Group {} {
-        xywh {0 5 395 215} box UP_FRAME
+        xywh {0 5 425 215} box UP_FRAME
       } {
         Fl_Input {} {
           label {Author and Copyright}
@@ -1107,7 +1107,7 @@ if (engine==-1){//this is used if I want to clear the engine from the part
     //if (kititem==lastkititem) kititem=-1;
     //else kititem=lastkititem;
     delete adnoteui;
-    delete subnoteui;   
+    delete subnoteui;
     delete padnoteui;
     adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     return;
@@ -1119,10 +1119,10 @@ if (engine==-1){//this is used if I want to clear the engine from the part
 if(!adnoteui  && engine==0)//adsynenabledcheck->value())
     adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
-if(!subnoteui && engine==1)//subsynenabledcheck->value()) 
+if(!subnoteui && engine==1)//subsynenabledcheck->value())
     subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
-if(!padnoteui && engine==2)//padsynenabledcheck->value()) 
+if(!padnoteui && engine==2)//padsynenabledcheck->value())
     padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars/", osc);
 
 if (engine==0&&adnoteui) adnoteui->ADnoteGlobalParameters->show();
@@ -1209,4 +1209,4 @@ for (int i=0;i<NUM_SYS_EFX;i++)
 } {selected
     }
   }
-} 
+}
