@@ -211,14 +211,17 @@ void ADnote::setupVoice(int nvoice)
     }
 
     voice.FreqLfo      = NULL;
+    voice.FreqSeq      = NULL;
     voice.FreqEnvelope = NULL;
 
     voice.AmpLfo      = NULL;
+    voice.AmpSeq      = NULL;
     voice.AmpEnvelope = NULL;
 
     voice.Filter         = NULL;
     voice.FilterEnvelope = NULL;
     voice.FilterLfo      = NULL;
+    voice.FilterSeq      = NULL;
 
     voice.filterbypass = param.Pfilterbypass;
     voice.filterFcCtlBypass = param.PfilterFcCtlBypass;
@@ -696,6 +699,9 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         if(pars.VoicePar[nvoice].PAmpLfoEnabled && NoteVoicePar[nvoice].AmpLfo)
             vce.newamplitude *= NoteVoicePar[nvoice].AmpLfo->amplfoout();
+            
+        if(pars.VoicePar[nvoice].PAmpSeqEnabled && NoteVoicePar[nvoice].AmpSeq)
+            vce.newamplitude *= NoteVoicePar[nvoice].AmpSeq->ampseqout();
 
         auto *voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
@@ -818,7 +824,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
     NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
-                         * NoteGlobalPar.AmpLfo->amplfoout();
+                         * NoteGlobalPar.AmpLfo->amplfoout()
+                         * NoteGlobalPar.AmpSeq->ampseqout();
 
     // Forbids the Modulation Voice to be greater or equal than voice
     for(int i = 0; i < NUM_VOICES; ++i)
@@ -863,6 +870,12 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             vce.newamplitude *= vce.AmpLfo->amplfoout();
         }
 
+        if(param.PAmpSeqEnabled) {
+            vce.AmpSeq = memory.alloc<SEQ>(*param.AmpSeq, time, wm,
+                    (pre+"VoicePar"+nvoice+"/AmpSeq/").c_str);
+            vce.newamplitude *= vce.AmpSeq->ampseqout();
+        }
+
         /* Voice Frequency Parameters Init */
         if(param.PFreqEnvelopeEnabled)
             vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope,
@@ -872,6 +885,10 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
                     (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str);
+
+        if(param.PFreqSeqEnabled)
+            vce.FreqSeq = memory.alloc<SEQ>(*param.FreqSeq, time, wm,
+                    (pre+"VoicePar"+nvoice+"/FreqSeq/").c_str);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
@@ -895,6 +912,12 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
                         (pre+"VoicePar"+nvoice+"/FilterLfo/").c_str);
                 vce.Filter->addMod(*vce.FilterLfo);
+            }
+
+            if(param.PFilterSeqEnabled) {
+                vce.FilterSeq = memory.alloc<SEQ>(*param.FilterSeq, time, wm,
+                        (pre+"VoicePar"+nvoice+"/FilterSeq/").c_str);
+                vce.Filter->addMod(*vce.FilterSeq);
             }
         }
 
@@ -1087,12 +1110,15 @@ void ADnote::computecurrentparameters()
           FMrelativepitch, globalpitch;
 
     globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
-                           + NoteGlobalPar.FreqLfo->lfoout()
-                           * ctl.modwheel.relmod);
+                           + NoteGlobalPar.FreqLfo->lfoout() * ctl.modwheel.relmod
+                           + NoteGlobalPar.FreqSeq->seqout() );
+    //~ printf("global lfoout = %f\n",NoteGlobalPar.FreqLfo->lfoout());
+    //~ printf("global seqout = %f\n\n",NoteGlobalPar.FreqSeq->seqout());
     globaloldamplitude = globalnewamplitude;
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
-                         * NoteGlobalPar.AmpLfo->amplfoout();
+                         * NoteGlobalPar.AmpLfo->amplfoout()
+                         * NoteGlobalPar.AmpSeq->ampseqout();
 
     NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
@@ -1127,6 +1153,9 @@ void ADnote::computecurrentparameters()
         if(NoteVoicePar[nvoice].AmpLfo)
             vce.newamplitude *= NoteVoicePar[nvoice].AmpLfo->amplfoout();
 
+        if(NoteVoicePar[nvoice].AmpSeq)
+            vce.newamplitude *= NoteVoicePar[nvoice].AmpSeq->ampseqout();
+
         /****************/
         /* Voice Filter */
         /****************/
@@ -1148,6 +1177,11 @@ void ADnote::computecurrentparameters()
             if(NoteVoicePar[nvoice].FreqEnvelope)
                 voicepitch += NoteVoicePar[nvoice].FreqEnvelope->envout()
                               / 100.0f;
+
+            if(NoteVoicePar[nvoice].FreqSeq)
+                voicepitch += NoteVoicePar[nvoice].FreqSeq->seqout()
+                              / 100.0f;
+
             voicefreq = getvoicebasefreq(nvoice, portamentofreqdelta_log2 +
                 (voicepitch + globalpitch) / 12.0f); //Hz frequency
             voicefreq *=
@@ -2127,11 +2161,14 @@ void ADnote::Global::kill(Allocator &memory)
 {
     memory.dealloc(FreqEnvelope);
     memory.dealloc(FreqLfo);
+    memory.dealloc(FreqSeq);
     memory.dealloc(AmpEnvelope);
     memory.dealloc(AmpLfo);
+    memory.dealloc(AmpSeq);
     memory.dealloc(Filter);
     memory.dealloc(FilterEnvelope);
     memory.dealloc(FilterLfo);
+    memory.dealloc(FilterSeq);
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
@@ -2148,11 +2185,15 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
             synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str);
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FreqLfo/").c_str);
+    FreqSeq      = memory.alloc<SEQ>(*param.FreqSeq, time, wm,
+                   (pre+"GlobalPar/FreqSeq/").c_str);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
             synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
+    AmpSeq      = memory.alloc<SEQ>(*param.AmpSeq, time, wm,
+                   (pre+"GlobalPar/AmpSeq/").c_str);
 
     Volume = dB2rap(param.Volume)
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -2164,9 +2205,12 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
             synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str);
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FilterLfo/").c_str);
+    FilterSeq      = memory.alloc<SEQ>(*param.FilterSeq, time, wm,
+                   (pre+"GlobalPar/FilterSeq/").c_str);
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);
+    Filter->addMod(*FilterSeq);
 
     {
         Filter->updateSense(velocity, param.PFilterVelocityScale,

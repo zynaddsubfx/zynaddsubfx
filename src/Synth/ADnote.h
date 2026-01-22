@@ -18,6 +18,7 @@
 #include "Envelope.h"
 #include "LFO.h"
 #include "Portamento.h"
+#include "SEQ.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
 #include "WatchPoint.h"
@@ -143,6 +144,7 @@ class ADnote:public SynthNote
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
+            SEQ      *FreqSeq;
 
             /********************************************
             *     AMPLITUDE GLOBAL PARAMETERS          *
@@ -153,6 +155,7 @@ class ADnote:public SynthNote
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
+            SEQ      *AmpSeq;
 
             float Fadein_adjustment;
             struct {
@@ -166,6 +169,7 @@ class ADnote:public SynthNote
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
+            SEQ       *FilterSeq;
         } NoteGlobalPar;
 
 
@@ -218,6 +222,7 @@ class ADnote:public SynthNote
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
+            SEQ      *FreqSeq;
 
 
             /***************************
@@ -230,6 +235,7 @@ class ADnote:public SynthNote
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
+            SEQ      *AmpSeq;
 
             /*************************
             *   FILTER PARAMETERS    *
@@ -237,6 +243,7 @@ class ADnote:public SynthNote
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
+            SEQ       *FilterSeq;
 
 
             /****************************

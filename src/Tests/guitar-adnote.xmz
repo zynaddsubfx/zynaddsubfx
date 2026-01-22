@@ -108,6 +108,16 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </AMPLITUDE_LFO>
+<AMPLITUDE_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="40" exact_value="0x42200000" />
+<par name="steps" value="8" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE />
+</AMPLITUDE_SEQ>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par name="detune" value="8192" />
@@ -146,6 +156,16 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<FREQUENCY_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="40" exact_value="0x42200000" />
+<par name="steps" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE />
+</FREQUENCY_SEQ>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
 <par name="velocity_sensing_amplitude" value="34" />
@@ -191,6 +211,16 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FILTER_LFO>
+<FILTER_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="40" exact_value="0x42200000" />
+<par name="steps" value="98" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE />
+</FILTER_SEQ>
 </FILTER_PARAMETERS>
 <RESONANCE>
 <par_bool name="enabled" value="no" />
@@ -295,6 +325,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </AMPLITUDE_LFO>
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -338,6 +369,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
 <par name="velocity_sensing_amplitude" value="0" />
@@ -385,6 +417,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FILTER_LFO>
+<par_bool name="filter_seq_enabled" value="no" />
 </FILTER_PARAMETERS>
 <FM_PARAMETERS>
 <par name="input_voice" value="-1" />
@@ -533,6 +566,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -560,6 +594,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="2">
@@ -626,6 +661,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -653,6 +689,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="3">
@@ -743,6 +780,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </AMPLITUDE_ENVELOPE>
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -754,6 +792,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="detune_type" value="0" />
 <par_bool name="freq_envelope_enabled" value="no" />
 <par_bool name="freq_lfo_enabled" value="no" />
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="4">
