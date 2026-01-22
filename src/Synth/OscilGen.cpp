@@ -317,7 +317,7 @@ const rtosc::MergePorts OscilGen::ports{
 };
 
 #ifndef M_PI_2
-# define M_PI_2		1.57079632679489661923	/* pi/2 */
+# define M_PI_2     1.57079632679489661923  /* pi/2 */
 #endif
 
 
@@ -1131,6 +1131,17 @@ bool OscilGen::needPrepare(OscilGenBuffers& bfrs) const
     return outdated == true || bfrs.oscilprepared == false;
 }
 
+short int OscilGen::getMaxFreq(OscilGenBuffers& bfrs) const
+{
+    int nyquist = synth.oscilsize / 2;
+    for (int i = nyquist - 1; i > 0; --i)
+        {
+            if (fabsf(bfrs.outoscilFFTfreqs[i].real()) > 1e-6f || fabsf(bfrs.outoscilFFTfreqs[i].imag()) > 1e-6f)
+                return i;
+        }
+        return 0;
+
+}
 /*
  * Get the oscillator function
  */
