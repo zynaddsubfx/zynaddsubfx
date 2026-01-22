@@ -1,3 +1,5 @@
+set (CMAKE_CXX_STANDARD 17)
+
 #checking include/library paths
 message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_PATH})
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
@@ -5,7 +7,6 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 #Dependency check
 include(CheckFunctionExists)
 include(CheckIncludeFile)
-include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     find_package(PkgConfig)
@@ -52,7 +53,6 @@ else()
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
-set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 CHECK_CXX_SOURCE_COMPILES(
     "#include <future>
     #if ATOMIC_INT_LOCK_FREE<2
@@ -277,13 +277,13 @@ set (BuildOptions_SSE
 check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
 
 set (BuildOptionsBasic
-    "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
+    "-Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 compiler options"
 )
 STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
 
 set (BuildOptionsDebug
-    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+    "-O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
     CACHE STRING "Debug build flags")
 STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
@@ -370,39 +370,21 @@ add_definitions(
 	 -Wall
 	 -Wextra)
 
-check_cxx_compiler_flag("-Wno-stringop-truncation" HAVE_NO_STRINGOP_TRUNCATION)
-if (HAVE_NO_STRINGOP_TRUNCATION)
-    add_definitions(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
-endif()
-check_cxx_compiler_flag("-Wno-vla-cxx-extension" HAVE_NO_VLA_CXX_EXTENSION)
-if (HAVE_NO_VLA_CXX_EXTENSION)
-    add_definitions(-Wno-vla-cxx-extension)
-endif()
-check_cxx_compiler_flag("-Wno-nan-infinity-disabled" HAVE_NO_NAN_INFINITY_DISABLED)
-if (HAVE_NO_NAN_INFINITY_DISABLED)
-    add_definitions(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
-endif()
+# Check for -W... and if available, add compile option -Wno-...
+function (zyn_disable_warning W_FLAG)
+    string(TOUPPER "${W_FLAG}" CACHE_VAR)
+    string(REPLACE "-" "_" CACHE_VAR "${CACHE_VAR}")
+    set(_CACHE_VAR "HAVE_WARNING_${CACHE_VAR}")
+    check_cxx_compiler_flag("-W${W_FLAG}" "${CACHE_VAR}")
+    if (${${CACHE_VAR}})
+        add_compile_options("-Wno-${W_FLAG}")
+    endif()
+endfunction ()
 
-# macro similar to "check_cxx_compiler_flag", however,
-# it also checks for warnings that are only output if other warnings are active
-macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
-    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
-    
-    check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
-        FAIL_REGEX "unrecognized|option"
-    )
-
-    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-endmacro ()
-
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
-    "unrecognized|option"
-    HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
-    )
-if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
-    add_definitions(-Wno-inconsistent-missing-override)
-endif()
+zyn_disable_warning("stringop-truncation")
+zyn_disable_warning("vla-cxx-extension")
+zyn_disable_warning("nan-infinity-disabled")
+zyn_disable_warning("inconsistent-missing-override")
 
 if(HAVE_X86_FISTPL)
     message(STATUS "Compiling with x86 opcode support")
