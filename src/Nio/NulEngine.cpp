@@ -33,13 +33,12 @@ void NulEngine::AudioThread()
     while(thread.joinable()) {
         getNext();
 
-        duration remaining = 0us;
         time_point now = chrono::steady_clock::now();
         if(playing_until == time_point()) {
             playing_until = now;
         }
         else {
-            remaining = std::chrono::duration_cast<duration>(playing_until - now);
+            duration remaining = std::chrono::duration_cast<duration>(playing_until - now);
             if(remaining > 10ms) //Don't x() less than 10ms.
                 //This will add latency...
                 this_thread::sleep_for(remaining  - 10ms);
