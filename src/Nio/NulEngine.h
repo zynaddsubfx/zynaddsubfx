@@ -14,7 +14,6 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
-#include <sys/time.h>
 #include <thread>
 #include "../globals.h"
 #include "AudioOut.h"
