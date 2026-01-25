@@ -183,7 +183,8 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
              ninstrument + 1,
              (char *)part->Pname);
 
-    string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
+    auto sep = std::filesystem::path::preferred_separator;
+    string filename = dirname + sep + legalizeFilename(tmpfilename) + ".xiz";
 
     FILE *f = fopen(filename.c_str(), "r");
     if(f) {
@@ -225,12 +226,13 @@ int Bank::loadfromslot(unsigned int ninstrument, Part *part)
  */
 int Bank::loadbank(string bankdirname)
 {
+    namespace fs = std::filesystem;
     normalizedirsuffix(bankdirname);
 
-    const std::filesystem::path bankdirnamepath = bankdirname;
+    const fs::path bankdirnamepath = bankdirname;
     clearbank();
 
-    if(!std::filesystem::is_directory(bankdirnamepath))
+    if(!fs::is_directory(bankdirnamepath))
         return -1;
 
     //set msb when possible
@@ -243,7 +245,7 @@ int Bank::loadbank(string bankdirname)
 
     bankfiletitle = dirname;
 
-    for(const auto& fn : std::filesystem::directory_iterator{bankdirnamepath})
+    for(const auto& fn : fs::directory_iterator{bankdirnamepath})
     {
         const std::string filename{fn.path().filename().string()};
 
@@ -255,7 +257,7 @@ int Bank::loadbank(string bankdirname)
         int no = 0;
         unsigned int startname = 0;
 
-        for(unsigned int i = 0; i < 4; ++i) {
+        for(unsigned int i = 0; i < 4 && i < filename.size(); ++i) {
             if(filename.length() <= i)
                 break;
 
@@ -268,14 +270,7 @@ int Bank::loadbank(string bankdirname)
         if((startname + 1) < filename.length())
             startname++;  //to take out the "-"
 
-        string name = filename;
-
-        //remove the file extension
-        for(int i = name.size() - 1; i >= 2; i--)
-            if(name[i] == '.') {
-                name = name.substr(0, i);
-                break;
-            }
+        string name = fn.path().stem().string();  // file extension removed
 
         if(no != 0) //the instrument position in the bank is found
             addtobank(no - 1, filename, name.substr(startname));
@@ -301,14 +296,16 @@ int Bank::newbank(string newbankdirname)
 
     bankdir += newbankdirname;
 
+    namespace fs = std::filesystem;
     try {
-        if (!std::filesystem::exists(bankdir))
-            std::filesystem::create_directory(bankdir);
+        if (!fs::exists(bankdir))
+            fs::create_directory(bankdir);
     } catch (...) {
         return -1;
     }
 
-    const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
+    auto sep = fs::path::preferred_separator;
+    const string tmpfilename = bankdir + sep + FORCE_BANK_DIR_FILE;
 
     FILE *tmpfile = fopen(tmpfilename.c_str(), "w+");
     fclose(tmpfile);
@@ -447,32 +444,35 @@ void Bank::setLsb(uint8_t lsb)
 
 void Bank::scanrootdir(string rootdir)
 {
+    namespace fs = std::filesystem;
     expanddirname(rootdir);
 
-    std::filesystem::path rootdirpath {rootdir};
-    if(!std::filesystem::is_directory(rootdirpath))
+    fs::path rootdirpath {rootdir};
+    if(!fs::is_directory(rootdirpath))
         return;
 
-    bankstruct bank;
-    for(const auto& fn : std::filesystem::directory_iterator{rootdirpath})
+    for(const auto& entry : fs::directory_iterator{rootdirpath})
     {
-        std::filesystem::path p = fn.path();
+        fs::path p = entry.path();
         const std::string dirname = p.filename().string();
-        if(dirname[0] == '.')
+        if(dirname.empty() || dirname[0] == '.')
             continue;
 
-        bank.dir  = rootdir + dirname + '/';
+        bankstruct bank;
+        bank.dir  = rootdir + dirname + fs::path::preferred_separator;
         bank.name = dirname;
 
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
-        if(!std::filesystem::is_directory(bank.dir))
+        if(!fs::is_directory(bank.dir))
             continue;
-        for(auto fname : std::filesystem::directory_iterator{rootdirpath})
+        for(const auto& subentry : fs::directory_iterator{rootdirpath})
         {
-            const std::string fname_str = fname.path().string();
-            if(     fname_str.find(INSTRUMENT_EXTENSION) != std::string::npos
-                ||  fname_str.find(FORCE_BANK_DIR_FILE)  != std::string::npos)
+            if(subentry.is_directory())
+                continue;
+            const std::string fname = subentry.path().filename().string();
+            if(     fname.find(INSTRUMENT_EXTENSION) != std::string::npos
+                ||  fname.find(FORCE_BANK_DIR_FILE)  != std::string::npos)
             {
                 isbank = true;
                 break; //could put a #instrument counter here instead
