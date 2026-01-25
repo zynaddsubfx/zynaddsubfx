@@ -19,13 +19,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
-#include <iostream>
 #include <sys/stat.h>
 #include <algorithm>
 
 #include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #include "Config.h"
 #include "Util.h"
@@ -229,10 +226,11 @@ int Bank::loadfromslot(unsigned int ninstrument, Part *part)
 int Bank::loadbank(string bankdirname)
 {
     normalizedirsuffix(bankdirname);
-    DIR *dir = opendir(bankdirname.c_str());
+
+    const std::filesystem::path bankdirnamepath = bankdirname;
     clearbank();
 
-    if(dir == NULL)
+    if(!std::filesystem::is_directory(bankdirnamepath))
         return -1;
 
     //set msb when possible
@@ -245,13 +243,12 @@ int Bank::loadbank(string bankdirname)
 
     bankfiletitle = dirname;
 
-    struct dirent *fn;
-
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
+    for(const auto& fn : std::filesystem::directory_iterator{bankdirnamepath})
+    {
+        const std::string filename{fn.path().filename().string()};
 
         //check for extension
-        if(strstr(filename, INSTRUMENT_EXTENSION) == NULL)
+        if(filename.find("INSTRUMENT_EXTENSION") == std::string::npos)
             continue;
 
         //verify if the name is like this NNNN-name (where N is a digit)
@@ -259,7 +256,7 @@ int Bank::loadbank(string bankdirname)
         unsigned int startname = 0;
 
         for(unsigned int i = 0; i < 4; ++i) {
-            if(strlen(filename) <= i)
+            if(filename.length() <= i)
                 break;
 
             if((filename[i] >= '0') && (filename[i] <= '9')) {
@@ -268,7 +265,7 @@ int Bank::loadbank(string bankdirname)
             }
         }
 
-        if((startname + 1) < strlen(filename))
+        if((startname + 1) < filename.length())
             startname++;  //to take out the "-"
 
         string name = filename;
@@ -285,8 +282,6 @@ int Bank::loadbank(string bankdirname)
         else
             addtobank(-1, filename, name);
     }
-
-    closedir(dir);
 
     if(!dirname.empty())
         config->cfg.currentBankDir = dirname;
@@ -448,38 +443,37 @@ void Bank::setLsb(uint8_t lsb)
     bank_lsb = limit<uint8_t>(lsb,0,1);
 }
 
-
 // private stuff
 
 void Bank::scanrootdir(string rootdir)
 {
     expanddirname(rootdir);
 
-    DIR *dir = opendir(rootdir.c_str());
-    if(dir == NULL)
+    std::filesystem::path rootdirpath {rootdir};
+    if(!std::filesystem::is_directory(rootdirpath))
         return;
 
     bankstruct bank;
-    struct dirent *fn;
-    while((fn = readdir(dir))) {
-        const char *dirname = fn->d_name;
+    for(const auto& fn : std::filesystem::directory_iterator{rootdirpath})
+    {
+        std::filesystem::path p = fn.path();
+        const std::string dirname = p.filename().string();
         if(dirname[0] == '.')
             continue;
 
         bank.dir  = rootdir + dirname + '/';
         bank.name = dirname;
+
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
-
-        DIR *d = opendir(bank.dir.c_str());
-        if(d == NULL)
+        if(!std::filesystem::is_directory(bank.dir))
             continue;
-
-        struct dirent *fname;
-
-        while((fname = readdir(d))) {
-            if((strstr(fname->d_name, INSTRUMENT_EXTENSION) != NULL)
-               || (strstr(fname->d_name, FORCE_BANK_DIR_FILE) != NULL)) {
+        for(auto fname : std::filesystem::directory_iterator{rootdirpath})
+        {
+            const std::string fname_str = fname.path().string();
+            if(     fname_str.find(INSTRUMENT_EXTENSION) != std::string::npos
+                ||  fname_str.find(FORCE_BANK_DIR_FILE)  != std::string::npos)
+            {
                 isbank = true;
                 break; //could put a #instrument counter here instead
             }
@@ -487,11 +481,7 @@ void Bank::scanrootdir(string rootdir)
 
         if(isbank)
             banks.push_back(bank);
-
-        closedir(d);
     }
-
-    closedir(dir);
 }
 
 void Bank::clearbank()
