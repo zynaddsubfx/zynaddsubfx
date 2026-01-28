@@ -183,8 +183,8 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
              ninstrument + 1,
              (char *)part->Pname);
 
-    auto sep = std::filesystem::path::preferred_separator;
-    string filename = dirname + sep + legalizeFilename(tmpfilename) + ".xiz";
+    using path = std::filesystem::path;
+    const path filename = path{dirname} / path{legalizeFilename(tmpfilename)}.concat(".xiz");
 
     FILE *f = fopen(filename.c_str(), "r");
     if(f) {
