@@ -185,9 +185,10 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
 
     using path = std::filesystem::path;
     const path filename = path{dirname} / path{legalizeFilename(tmpfilename)}.concat(".xiz");
-    const char* filename_c = to_s(filename).c_str();
+    const std::string filename_str = to_s(filename);
+    const char* filename_c = filename_str.c_str();
 
-    FILE *f = fopen(filename.c_str(), "r");
+    FILE *f = fopen(filename_c, "r");
     if(f) {
         fclose(f);
 
