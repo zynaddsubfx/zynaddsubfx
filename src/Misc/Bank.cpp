@@ -185,17 +185,18 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
 
     using path = std::filesystem::path;
     const path filename = path{dirname} / path{legalizeFilename(tmpfilename)}.concat(".xiz");
+    const char* filename_c = to_s(filename).c_str();
 
     FILE *f = fopen(filename.c_str(), "r");
     if(f) {
         fclose(f);
 
-        err = remove(filename.c_str());
+        err = remove(filename_c);
         if(err)
             return err;
     }
 
-    err = part->saveXML(filename.c_str());
+    err = part->saveXML(filename_c);
     if(err)
         return err;
     addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz",
