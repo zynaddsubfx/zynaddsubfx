@@ -2485,7 +2485,7 @@ int MiddleWare::checkAutoSave(void) const
 void MiddleWare::removeAutoSave(void)
 {
     std::string home = getenv("HOME");
-    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
+    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(os_getpid())+"-autosave.xmz";
     remove(save_file.c_str());
 }
 
