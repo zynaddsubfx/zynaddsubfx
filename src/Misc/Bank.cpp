@@ -457,7 +457,7 @@ void Bank::scanrootdir(string rootdir)
             continue;
 
         bankstruct bank;
-        bank.dir  = rootdir + dirname + fs::path::preferred_separator;
+        bank.dir  = rootdir + dirname + '/';
         bank.name = dirname;
 
         //find out if the directory contains at least 1 instrument
