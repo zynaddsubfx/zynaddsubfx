@@ -1108,49 +1108,23 @@ class MwDataObj:public rtosc::RtData
 
 static std::vector<std::string> getFiles(const char *folder, bool finddir)
 {
-    DIR *dir = opendir(folder);
+    namespace fs = std::filesystem;
 
-    if(dir == NULL) {
-        return {};
-    }
-
-    struct dirent *fn;
     std::vector<string> files;
-    bool has_updir = false;
+    std::error_code ec;
 
-    while((fn = readdir(dir))) {
-#ifndef WIN32
-        bool is_dir = fn->d_type == DT_DIR;
-        //it could still be a symbolic link
-        if(!is_dir) {
-            string path = string(folder) + "/" + fn->d_name;
-            struct stat buf;
-            memset((void*)&buf, 0, sizeof(buf));
-            int err = stat(path.c_str(), &buf);
-            if(err)
-                printf("[Zyn:Error] stat cannot handle <%s>:%d\n", path.c_str(), err);
-            if(S_ISDIR(buf.st_mode)) {
-                is_dir = true;
-            }
-        }
-#else
-        std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
-        //printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
-        //printf("desired mask =  %x\n", mask);
-        //printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
-        bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
-#endif
-        if(finddir == is_dir && strcmp(".", fn->d_name))
-            files.push_back(fn->d_name);
+    for(const auto& entry : fs::directory_iterator(folder, ec))
+    {
+        if(ec) { return{}; }
 
-        if(!strcmp("..", fn->d_name))
-            has_updir = true;
+        // note: is_directory is also true for symlinks to dirs
+        if(finddir == entry.is_directory())
+            files.push_back(entry.path().filename().string());
     }
 
-    if(finddir == true && has_updir == false)
+    if(finddir == true) // std::directory_iterator does not return ".."
         files.push_back("..");
 
-    closedir(dir);
     std::sort(begin(files), end(files));
     return files;
 }
@@ -2466,27 +2440,28 @@ void MiddleWare::enableAutoSave(int interval_sec)
 
 int MiddleWare::checkAutoSave(void) const
 {
+    namespace fs = std::filesystem;
+
     //save spec zynaddsubfx-PID-autosave.xmz
     const std::string home     = getenv("HOME");
     const std::string save_dir = home+"/.local/";
 
-    DIR *dir = opendir(save_dir.c_str());
-
-    if(dir == NULL)
-        return -1;
-
-    struct dirent *fn;
     int    reload_save = -1;
 
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
+    std::error_code ec;
+
+    for(const auto& entry : fs::directory_iterator(save_dir, ec))
+    {
+        if(ec) { return{}; }
+
+        const std::string filename = entry.path().filename().string();
         const char *prefix = "zynaddsubfx-";
 
-        //check for manditory prefix
-        if(strstr(filename, prefix) != filename)
+        //check for mandatory prefix
+        if(filename.rfind(prefix, 0) == 0)
             continue;
 
-        int id = atoi(filename+strlen(prefix));
+        int id = atoi(filename.c_str()+strlen(prefix));
 
         bool in_use = false;
 
@@ -2503,8 +2478,6 @@ int MiddleWare::checkAutoSave(void) const
             break;
         }
     }
-
-    closedir(dir);
 
     return reload_save;
 }
