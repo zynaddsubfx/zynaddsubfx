@@ -183,21 +183,18 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
              ninstrument + 1,
              (char *)part->Pname);
 
-    using path = std::filesystem::path;
-    const path filename = path{dirname} / path{legalizeFilename(tmpfilename)}.concat(".xiz");
-    const std::string filename_str = to_s(filename);
-    const char* filename_c = filename_str.c_str();
+    string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
-    FILE *f = fopen(filename_c, "r");
+    FILE *f = fopen(filename.c_str(), "r");
     if(f) {
         fclose(f);
 
-        err = remove(filename_c);
+        err = remove(filename.c_str());
         if(err)
             return err;
     }
 
-    err = part->saveXML(filename_c);
+    err = part->saveXML(filename.c_str());
     if(err)
         return err;
     addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz",
@@ -306,8 +303,7 @@ int Bank::newbank(string newbankdirname)
         return -1;
     }
 
-    auto sep = fs::path::preferred_separator;
-    const string tmpfilename = bankdir + sep + FORCE_BANK_DIR_FILE;
+    const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 
     FILE *tmpfile = fopen(tmpfilename.c_str(), "w+");
     fclose(tmpfile);
