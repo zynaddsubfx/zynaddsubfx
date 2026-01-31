@@ -168,7 +168,7 @@ float LFO::biquad(float input)
         const float output = limit(input * a0 + z1, -1.0f, 1.0f);
         z1 = input * a1 + z2 - b1 * output;
         z2 = input * a2 - b2 * output;
-	return output;
+        return output;
     }
 }
 

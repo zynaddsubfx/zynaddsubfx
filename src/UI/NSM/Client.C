@@ -18,12 +18,11 @@
 /*******************************************************************************/
 
 #include "Client.H"
+#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 namespace NSM
 {
