@@ -232,7 +232,7 @@ void Sympathetic::calcFreqsGeneric()
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
     const float unison_real_spread_down = 1.0f/unison_real_spread_up;
 
-    for(unsigned int i = 0; i < ((unsigned int)Punison_size)*Pstrings; i+=Punison_size)
+    for(unsigned int i = 0; i < (unsigned int)Punison_size*Pstrings; i+=Punison_size)
     {
         const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
