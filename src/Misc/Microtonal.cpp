@@ -754,7 +754,7 @@ void Microtonal::add2XML(XMLwrapper& xml) const
     xml.addpar("a_note", PAnote);
     xml.addparreal("a_freq", PAfreq);
 
-    if((!Penabled) && xml.minimal)
+    if(!Penabled && xml.minimal)
         return;
 
     xml.beginbranch("SCALE");
