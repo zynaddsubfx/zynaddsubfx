@@ -34,10 +34,8 @@ SndioEngine::SndioEngine(const SYNTH_T &synth)
     audio.buffer = new short[synth.buffersize * 2];
     audio.buffer_size = synth.buffersize * 2 * sizeof(short);
     audio.peaks[0] = 0;
-    audio.pThread = 0;
 
     midi.handle  = NULL;
-    midi.pThread = 0;
 }
 
 SndioEngine::~SndioEngine()
@@ -85,26 +83,16 @@ bool SndioEngine::getMidiEn() const
     return midi.handle;
 }
 
-void *SndioEngine::AudioThread()
+void SndioEngine::AudioThread()
 {
     set_realtime();
-    return processAudio();
+    processAudio();
 }
 
-void *SndioEngine::_AudioThread(void *arg)
-{
-    return (static_cast<SndioEngine *>(arg))->AudioThread();
-}
-
-void *SndioEngine::MidiThread(void)
+void SndioEngine::MidiThread()
 {
     set_realtime();
     return processMidi();
-}
-
-void *SndioEngine::_MidiThread(void *arg)
-{
-    return static_cast<SndioEngine *>(arg)->MidiThread();
 }
 
 bool SndioEngine::openAudio()
@@ -140,10 +128,7 @@ bool SndioEngine::openAudio()
         return false;
     }
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&audio.pThread, &attr, _AudioThread, this);
+    audio.thread = std::thread(&SndioEngine::AudioThread, this);
     return true;
 }
 
@@ -157,7 +142,8 @@ void SndioEngine::stopAudio()
 
     audio.handle = NULL;
 
-    pthread_join(audio.pThread, NULL);
+    if(audio.thread.joinable())
+        audio.thread.join();
 
     rc = sio_stop(handle);
     if(rc != 1)
@@ -179,11 +165,8 @@ bool SndioEngine::openMidi()
     }
 
     midi.exiting = false;
-    pthread_attr_t attr;
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&midi.pThread, &attr, _MidiThread, this);
+    midi.thread = std::thread(&SndioEngine::MidiThread, this);
     return true;
 }
 
@@ -194,9 +177,10 @@ void SndioEngine::stopMidi()
     if(!getMidiEn())
         return;
 
-    if((midi.handle != NULL) && midi.pThread) {
+    if(midi.handle) {
         midi.exiting = true;
-        pthread_join(midi.pThread, 0);
+        if(midi.thread.joinable())
+            midi.thread.join();
     }
 
     midi.handle = NULL;
@@ -205,7 +189,7 @@ void SndioEngine::stopMidi()
         mio_close(handle);
 }
 
-void *SndioEngine::processAudio()
+void SndioEngine::processAudio()
 {
     size_t len;
     struct sio_hdl *handle;
@@ -217,10 +201,9 @@ void *SndioEngine::processAudio()
         if(len == 0) // write error according to sndio examples
             cerr << "sio_write error" << endl;
     }
-    return NULL;
 }
 
-void *SndioEngine::processMidi()
+void SndioEngine::processMidi()
 {
     int n;
     int nfds;
@@ -233,13 +216,13 @@ void *SndioEngine::processMidi()
     n = mio_nfds(midi.handle);
     if(n <= 0) {
         cerr << "mio_nfds error" << endl;
-        return NULL;
+        return;
     }
 
     pfd = (struct pollfd *) calloc(n, sizeof(struct pollfd));
     if(pfd == NULL) {
         cerr << "calloc error" << endl;
-        return NULL;
+        return;
     }
 
     while(1) {
@@ -276,7 +259,6 @@ void *SndioEngine::processMidi()
         midiProcess(buf[0], buf[1], buf[2]);
     }
     free(pfd);
-    return NULL;
 }
 
 short *SndioEngine::interleave(const Stereo<float *> &smps)
