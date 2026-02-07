@@ -14,17 +14,15 @@
 */
 
 #include "Bank.h"
+#include <string>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <dirent.h>
+#include <filesystem>
 #include <sys/stat.h>
 #include <algorithm>
 
 #include <sys/types.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "Config.h"
 #include "Util.h"
@@ -226,11 +224,13 @@ int Bank::loadfromslot(unsigned int ninstrument, Part *part)
  */
 int Bank::loadbank(string bankdirname)
 {
+    namespace fs = std::filesystem;
     normalizedirsuffix(bankdirname);
-    DIR *dir = opendir(bankdirname.c_str());
+
+    const fs::path bankdirnamepath = bankdirname;
     clearbank();
 
-    if(dir == NULL)
+    if(!fs::is_directory(bankdirnamepath))
         return -1;
 
     //set msb when possible
@@ -243,21 +243,20 @@ int Bank::loadbank(string bankdirname)
 
     bankfiletitle = dirname;
 
-    struct dirent *fn;
-
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
+    for(const auto& fn : fs::directory_iterator{bankdirnamepath})
+    {
+        const std::string filename{fn.path().filename().string()};
 
         //check for extension
-        if(strstr(filename, INSTRUMENT_EXTENSION) == NULL)
+        if(filename.find("INSTRUMENT_EXTENSION") == std::string::npos)
             continue;
 
         //verify if the name is like this NNNN-name (where N is a digit)
         int no = 0;
         unsigned int startname = 0;
 
-        for(unsigned int i = 0; i < 4; ++i) {
-            if(strlen(filename) <= i)
+        for(unsigned int i = 0; i < 4 && i < filename.size(); ++i) {
+            if(filename.length() <= i)
                 break;
 
             if((filename[i] >= '0') && (filename[i] <= '9')) {
@@ -266,25 +265,16 @@ int Bank::loadbank(string bankdirname)
             }
         }
 
-        if((startname + 1) < strlen(filename))
+        if((startname + 1) < filename.length())
             startname++;  //to take out the "-"
 
-        string name = filename;
-
-        //remove the file extension
-        for(int i = name.size() - 1; i >= 2; i--)
-            if(name[i] == '.') {
-                name = name.substr(0, i);
-                break;
-            }
+        string name = fn.path().stem().string();  // file extension removed
 
         if(no != 0) //the instrument position in the bank is found
             addtobank(no - 1, filename, name.substr(startname));
         else
             addtobank(-1, filename, name);
     }
-
-    closedir(dir);
 
     if(!dirname.empty())
         config->cfg.currentBankDir = dirname;
@@ -303,12 +293,14 @@ int Bank::newbank(string newbankdirname)
     expanddirname(bankdir);
 
     bankdir += newbankdirname;
-#ifdef _WIN32
-    if(mkdir(bankdir.c_str()) < 0)
-#else
-    if(mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
-#endif
+
+    namespace fs = std::filesystem;
+    try {
+        if (!fs::exists(bankdir))
+            fs::create_directory(bankdir);
+    } catch (...) {
         return -1;
+    }
 
     const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 
@@ -445,38 +437,40 @@ void Bank::setLsb(uint8_t lsb)
     bank_lsb = limit<uint8_t>(lsb,0,1);
 }
 
-
 // private stuff
 
 void Bank::scanrootdir(string rootdir)
 {
+    namespace fs = std::filesystem;
     expanddirname(rootdir);
 
-    DIR *dir = opendir(rootdir.c_str());
-    if(dir == NULL)
+    fs::path rootdirpath {rootdir};
+    if(!fs::is_directory(rootdirpath))
         return;
 
-    bankstruct bank;
-    struct dirent *fn;
-    while((fn = readdir(dir))) {
-        const char *dirname = fn->d_name;
-        if(dirname[0] == '.')
+    for(const auto& entry : fs::directory_iterator{rootdirpath})
+    {
+        fs::path p = entry.path();
+        const std::string dirname = p.filename().string();
+        if(dirname.empty() || dirname[0] == '.')
             continue;
 
+        bankstruct bank;
         bank.dir  = rootdir + dirname + '/';
         bank.name = dirname;
+
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
-
-        DIR *d = opendir(bank.dir.c_str());
-        if(d == NULL)
+        if(!fs::is_directory(bank.dir))
             continue;
-
-        struct dirent *fname;
-
-        while((fname = readdir(d))) {
-            if((strstr(fname->d_name, INSTRUMENT_EXTENSION) != NULL)
-               || (strstr(fname->d_name, FORCE_BANK_DIR_FILE) != NULL)) {
+        for(const auto& subentry : fs::directory_iterator{rootdirpath})
+        {
+            if(subentry.is_directory())
+                continue;
+            const std::string fname = subentry.path().filename().string();
+            if(     fname.find(INSTRUMENT_EXTENSION) != std::string::npos
+                ||  fname.find(FORCE_BANK_DIR_FILE)  != std::string::npos)
+            {
                 isbank = true;
                 break; //could put a #instrument counter here instead
             }
@@ -484,11 +478,7 @@ void Bank::scanrootdir(string rootdir)
 
         if(isbank)
             banks.push_back(bank);
-
-        closedir(d);
     }
-
-    closedir(dir);
 }
 
 void Bank::clearbank()

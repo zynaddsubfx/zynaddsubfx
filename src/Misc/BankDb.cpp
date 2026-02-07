@@ -3,7 +3,7 @@
 #include "Util.h"
 #include "../globals.h"
 #include <cstring>
-#include <dirent.h>
+#include <filesystem>
 #include <sys/stat.h>
 
 namespace zyn {
@@ -195,31 +195,22 @@ void BankDb::scanBanks(void)
     for(auto c:cache)
         cc[c.bank + c.file] = c;
 
+    namespace fs = std::filesystem;
     bvec ncache;
-    for(auto bank:banks)
+    for(const auto& bank:banks)
     {
-        DIR *dir = opendir(bank.c_str());
-
-        if(!dir)
-            continue;
-
-
-        struct dirent *fn;
-
-        while((fn = readdir(dir))) {
-            const char *filename = fn->d_name;
-
-            //check for extension
-            if(!strstr(filename, INSTRUMENT_EXTENSION))
-                continue;
-
-            auto xiz = processXiz(filename, bank, cc);
-            fields.push_back(xiz);
-            ncache.push_back(xiz);
+        if(fs::is_directory(bank))
+        for(const auto& entry : fs::directory_iterator(bank))
+        {
+            const std::string filename = entry.path().filename().string();
+            if(!entry.is_directory() &&
+                filename.find(INSTRUMENT_EXTENSION) != std::string::npos)
+            {
+                auto xiz = processXiz(filename, bank, cc);
+                fields.push_back(xiz);
+                ncache.push_back(xiz);
+            }
         }
-
-        closedir(dir);
-
     }
     saveCache(ncache);
 }

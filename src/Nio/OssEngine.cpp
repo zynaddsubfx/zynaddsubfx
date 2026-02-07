@@ -179,7 +179,7 @@ OssMidiParse(struct OssMidiParse &midi_parse,
 
 OssEngine::OssEngine(const SYNTH_T &synth,
     const oss_devs_t& oss_devs)
-    :AudioOut(synth), audioThread(NULL), midiThread(NULL),
+    :AudioOut(synth),
     linux_oss_wave_out_dev(oss_devs.linux_wave_out),
     linux_oss_seq_in_dev(oss_devs.linux_seq_in)
 {
@@ -268,11 +268,7 @@ bool OssEngine::openAudio()
 
     ioctl(audio.handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    audioThread = new pthread_t;
-    pthread_create(audioThread, &attr, _audioThreadCb, this);
+    audioThread = std::thread(&OssEngine::audioThreadCb, this);
 
     return true;
 
@@ -292,9 +288,7 @@ void OssEngine::stopAudio()
     /* close handle first, so that write() exits */
     close(handle);
 
-    pthread_join(*audioThread, NULL);
-    delete audioThread;
-    audioThread = NULL;
+    audioThread.join();
 }
 
 bool OssEngine::Start()
@@ -365,11 +359,7 @@ bool OssEngine::openMidi()
 
     ioctl(midi.handle, FIONBIO, &OssNonBlocking);
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    midiThread = new pthread_t;
-    pthread_create(midiThread, &attr, _midiThreadCb, this);
+    midiThread = std::thread(&OssEngine::midiThreadCb, this);
 
     return true;
 }
@@ -385,22 +375,10 @@ void OssEngine::stopMidi()
     /* close handle first, so that read() exits */
     close(handle);
 
-    pthread_join(*midiThread, NULL);
-    delete midiThread;
-    midiThread = NULL;
+    midiThread.join();
 }
 
-void *OssEngine::_audioThreadCb(void *arg)
-{
-    return (static_cast<OssEngine *>(arg))->audioThreadCb();
-}
-
-void *OssEngine::_midiThreadCb(void *arg)
-{
-    return (static_cast<OssEngine *>(arg))->midiThreadCb();
-}
-
-void *OssEngine::audioThreadCb()
+void OssEngine::audioThreadCb()
 {
     /*
      * In case the audio device is a PIPE/FIFO,
@@ -432,19 +410,16 @@ void *OssEngine::audioThreadCb()
             /* make a copy of handle, in case of OSS audio disable */
             int handle = audio.handle;
             if(handle == -1)
-                goto done;
+                return;
             error = write(handle, audio.smps.ps32, audio.buffersize);
         } while (error == -1 && errno == EINTR);
 
         if(error == -1)
-            goto done;
+            return;
     }
-done:
-    pthread_exit(NULL);
-    return NULL;
 }
 
-void *OssEngine::midiThreadCb()
+void OssEngine::midiThreadCb()
 {
     /*
      * In case the MIDI device is a PIPE/FIFO,
@@ -459,13 +434,13 @@ void *OssEngine::midiThreadCb()
             /* make a copy of handle, in case of OSS MIDI disable */
             int handle = midi.handle;
             if(handle == -1)
-                goto done;
+                return;
             error = read(handle, &tmp, 1);
         } while (error == -1 && errno == EINTR);
 
         /* check that we got one byte */
         if(error != 1)
-                goto done;
+                return;
 
         /* feed MIDI byte into statemachine */
         if(OssMidiParse(midi.state, 0, tmp)) {
@@ -475,9 +450,6 @@ void *OssEngine::midiThreadCb()
                 midi.state.temp_cmd[3]);
         }
     }
-done:
-    pthread_exit(NULL);
-    return NULL;
 }
 
 }
