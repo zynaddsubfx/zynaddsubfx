@@ -14,41 +14,39 @@
 #include <cmath>
 #include <cassert>
 #include <cstring>
-#include <pthread.h>
+#include <mutex>
 #include "FFTwrapper.h"
 
 namespace zyn {
 
-static pthread_mutex_t *mutex = NULL;
+static std::mutex mutex;
+
 
 FFTwrapper::FFTwrapper(int fftsize_) : m_fftsize(fftsize_)
 {
-    //first one will spawn the mutex (yeah this may be a race itself)
-    if(!mutex) {
-        mutex = new pthread_mutex_t;
-        pthread_mutex_init(mutex, NULL);
-    }
-
     time      = new fftwf_real[m_fftsize];
     fft       = new fftwf_complex[m_fftsize + 1];
-    pthread_mutex_lock(mutex);
-    planfftw = fftwf_plan_dft_r2c_1d(m_fftsize,
-                                    time,
-                                    fft,
-                                    FFTW_ESTIMATE);
-    planfftw_inv = fftwf_plan_dft_c2r_1d(m_fftsize,
-                                        fft,
+
+    {
+        std::lock_guard<std::mutex> guard(mutex);
+        planfftw = fftwf_plan_dft_r2c_1d(m_fftsize,
                                         time,
+                                        fft,
                                         FFTW_ESTIMATE);
-    pthread_mutex_unlock(mutex);
+        planfftw_inv = fftwf_plan_dft_c2r_1d(m_fftsize,
+                                            fft,
+                                            time,
+                                            FFTW_ESTIMATE);
+    }
 }
 
 FFTwrapper::~FFTwrapper()
 {
-    pthread_mutex_lock(mutex);
-    fftwf_destroy_plan(planfftw);
-    fftwf_destroy_plan(planfftw_inv);
-    pthread_mutex_unlock(mutex);
+    {
+        std::lock_guard<std::mutex> guard(mutex);
+        fftwf_destroy_plan(planfftw);
+        fftwf_destroy_plan(planfftw_inv);
+    }
 
     delete [] time;
     delete [] fft;
@@ -102,9 +100,6 @@ void FFTwrapper::freqs2smps_noconst_input(FFTfreqBuffer freqs, FFTsampleBuffer s
 void FFT_cleanup()
 {
     fftwf_cleanup();
-    pthread_mutex_destroy(mutex);
-    delete mutex;
-    mutex = NULL;
 }
 
 }

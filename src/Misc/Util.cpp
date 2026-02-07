@@ -22,11 +22,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
+#endif
+#ifndef _MSC_VER
+#include <unistd.h>
 #endif
 
 #define errx(...) {}

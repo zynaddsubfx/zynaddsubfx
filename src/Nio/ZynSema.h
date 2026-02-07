@@ -83,6 +83,7 @@ private:
 
 #else // POSIX semaphore
 
+#include <pthread.h>  // for the "s" parameter to "init"
 #include <semaphore.h>
 
 namespace zyn {
