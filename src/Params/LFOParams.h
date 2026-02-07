@@ -47,7 +47,7 @@ class LFOParams:public Presets
                   float delay_,
                   float fadein_,
                   float fadeout_,
-                  char Pcontinous,
+                  bool Pcontinous,
                   consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
         ~LFOParams() override;
@@ -69,7 +69,7 @@ class LFOParams:public Presets
         float         delay; /**<delay (0=off)*/
         float         fadein; /**<fadein, relative to delay*/
         float         fadeout; /**<fadeout on key release (10.0=off)*/
-        unsigned char Pcontinous; /**<1 if LFO is continous*/
+        bool          Pcontinous; /**<1 if LFO is continous*/
         int           numerator;  /**<numerator for integer ratio between system tempo and LFO freq (0=off)*/
         int           denominator;/**<denominator for integer ratio between system tempo and LFO freq (0=off)*/
         unsigned char Pstretch; /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
@@ -96,7 +96,7 @@ class LFOParams:public Presets
         float         Ddelay;
         float         Dfadein;
         float         Dfadeout;
-        unsigned char Dcontinous;
+        bool          Dcontinous;
 };
 
 }

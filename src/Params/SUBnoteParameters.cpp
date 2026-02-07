@@ -233,15 +233,15 @@ SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
         : Presets(), time(time_), last_update_timestamp(0)
 {
     setpresettype("Psubsynth");
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
-    FreqEnvelope = new EnvelopeParams(64, 0, time_);
+    FreqEnvelope = new EnvelopeParams(64, false, time_);
     FreqEnvelope->init(sub_freq);
-    BandWidthEnvelope = new EnvelopeParams(64, 0, time_);
+    BandWidthEnvelope = new EnvelopeParams(64, false, time_);
     BandWidthEnvelope->init(sub_bandwidth);
 
     GlobalFilter = new FilterParams(sub_filter, time_);
-    GlobalFilterEnvelope = new EnvelopeParams(0, 1, time_);
+    GlobalFilterEnvelope = new EnvelopeParams(0, true, time_);
     GlobalFilterEnvelope->init(sub_filter);
 
     defaults();
@@ -304,7 +304,7 @@ void SUBnoteParameters::defaults()
     PPanning = 64;
     AmpVelocityScaleFunction = 70.86;
 
-    Pfixedfreq   = 0;
+    Pfixedfreq   = false;
     PfixedfreqET = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -312,14 +312,14 @@ void SUBnoteParameters::defaults()
     Pbandwidth   = 40;
     Phmagtype    = 0;
     Pbwscale     = 64;
-    Pstereo      = 1;
+    Pstereo      = true;
     Pstart = 1;
 
     PDetune = 8192;
     PCoarseDetune = 0;
     PDetuneType   = 1;
-    PFreqEnvelopeEnabled      = 0;
-    PBandWidthEnvelopeEnabled = 0;
+    PFreqEnvelopeEnabled      = false;
+    PBandWidthEnvelopeEnabled = false;
 
     POvertoneSpread.type = 0;
     POvertoneSpread.par1 = 0;
@@ -333,7 +333,7 @@ void SUBnoteParameters::defaults()
     }
     Phmag[0] = 127;
 
-    PGlobalFilterEnabled = 0;
+    PGlobalFilterEnabled = false;
     PGlobalFilterVelocityScale = 0;
     PGlobalFilterVelocityScaleFunction = 64;
 

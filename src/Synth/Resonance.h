@@ -50,11 +50,11 @@ class Resonance:public Presets
         void sendcontroller(MidiControllers ctl, float par);
 
         //parameters
-        unsigned char Penabled;     //if the ressonance is enabled
+        bool Penabled;     //if the resonance is enabled
         unsigned char Prespoints[N_RES_POINTS]; //how many points define the resonance function
         unsigned char PmaxdB;       //how many dB the signal may be amplified
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
-        unsigned char Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even it resonance function is low
+        bool Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even if resonance function is low
 
         //controllers
         float ctlcenter; //center frequency(relative)

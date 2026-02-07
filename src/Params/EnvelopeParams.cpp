@@ -303,7 +303,7 @@ const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
-                               unsigned char Pforcedrelease_,
+                               bool Pforcedrelease_,
                                const AbsTime *time_):
         time(time_), last_update_timestamp(0)
 {
@@ -325,9 +325,9 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     Envmode         = ADSR_lin;
     Penvstretch     = Penvstretch_;
     Pforcedrelease  = Pforcedrelease_;
-    Pfreemode       = 1;
-    Plinearenvelope = 0;
-    Prepeating      = 0;
+    Pfreemode       = true;
+    Plinearenvelope = false;
+    Prepeating      = false;
 
     store2defaults();
 }
@@ -399,7 +399,7 @@ void EnvelopeParams::ADSRinit(float a_dt, float d_dt, char s_val, float r_dt)
     D_dt      = d_dt;
     PS_val    = s_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -413,7 +413,7 @@ void EnvelopeParams::ADSRinit_dB(float a_dt, float d_dt, char s_val, float r_dt)
     D_dt      = d_dt;
     PS_val    = s_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -427,7 +427,7 @@ void EnvelopeParams::ASRinit(char a_val, float a_dt, char r_val, float r_dt)
     A_dt      = a_dt;
     PR_val    = r_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -448,7 +448,7 @@ void EnvelopeParams::ADSRinit_filter(char a_val,
     D_dt      = d_dt;
     R_dt      = r_dt;
     PR_val    = r_val;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
     store2defaults();
 }
@@ -461,7 +461,7 @@ void EnvelopeParams::ASRinit_bw(char a_val, float a_dt, char r_val, float r_dt)
     A_dt      = a_dt;
     PR_val    = r_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
     store2defaults();
 }
@@ -636,7 +636,7 @@ void EnvelopeParams::defaults()
     PD_val    = DD_val;
     PS_val    = DS_val;
     PR_val    = DR_val;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 }
 
