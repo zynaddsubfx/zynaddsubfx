@@ -265,7 +265,7 @@ bool Microtonal::updatenotefreq_log2(float &note_log2_freq, int keyshift) const
     // I had written this way because if I use var=a%b gives unwanted results when a<0
     // This is the same with divisions.
 
-    if(Pinvertupdown && ((!Pmappingenabled) || (!Penabled))) {
+    if(Pinvertupdown && (!Pmappingenabled || !Penabled)) {
         note = (int) Pinvertupdowncenter * 2 - note;
         freq_log2 = Pinvertupdowncenter * (2.0f / 12.0f) - freq_log2;
     }
