@@ -54,7 +54,7 @@ class Resonance:public Presets
         unsigned char Prespoints[N_RES_POINTS]; //how many points define the resonance function
         unsigned char PmaxdB;       //how many dB the signal may be amplified
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
-        bool Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even it resonance function is low
+        bool Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even if resonance function is low
 
         //controllers
         float ctlcenter; //center frequency(relative)
