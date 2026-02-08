@@ -48,32 +48,32 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         else
             envdt[i] = 2.0f;  //any value larger than 1
 
+        envcpy[i] = pars.envcpy[i];
         switch(mode) {
             case ADSR_dB:
                 envval[i] = (1.0f - pars.Penvval[i] / 127.0f) * -40;
-                envcpy[i] = 10.0f * pars.envcpy[i];
+
                 break;
             case ASR_freqlfo:
                 envval[i] =
                     (powf(2, 6.0f
                           * fabsf(pars.Penvval[i]
                                  - 64.0f) / 64.0f) - 1.0f) * 100.0f;
-                if(pars.Penvval[i] < 64)
+                if(pars.Penvval[i] < 64){
                     envval[i] = -envval[i];
-                envcpy[i] = 1000.0f * pars.envcpy[i];
+                    envcpy[i] = -envcpy[i];
+                }
+
                 break;
             case ADSR_filter:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
-                envcpy[i] = 3.0f * pars.envcpy[i];
                 break;
             case ASR_bw:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 10;
-                envcpy[i] = 100.0f * pars.envcpy[i];
                 break;
             case ADSR_lin:
             default:
                 envval[i] = pars.Penvval[i] / 127.0f;
-                envcpy[i] = 0.25f * pars.envcpy[i];
                 break;
         }
     }
@@ -138,27 +138,64 @@ void Envelope::watch(float time, float value)
     }
 }
 
-inline float bezier3(float a, float bRel, float cRel, float d, float t)
+/**
+ * @brief Cubic Bezier interpolation with backward compatibility to linear interpolation
+ *
+ * This function implements a cubic Bezier curve interpolation that automatically
+ * defaults to linear interpolation when offset parameters are zero. The control
+ * points are calculated relative to the linear path between start and end points.
+ *
+ * @param a     Start value (point P0)
+ * @param bOffs Relative offset factor for the first control point (P1)
+ *             - Value of 0.0 places P1 at 1/3 of the linear path
+ *             - Positive values move P1 beyond the linear path toward end point
+ *             - Negative values move P1 before the linear path toward start point
+ *             - Typical range: [-0.3, 0.3] for reasonable curves
+ *
+ * @param cOffs Relative offset factor for the second control point (P2)
+ *             - Value of 0.0 places P2 at 2/3 of the linear path
+ *             - Positive values move P2 beyond the linear path toward end point
+ *             - Negative values move P2 before the linear path toward start point
+ *             - Typical range: [-0.3, 0.3] for reasonable curves
+ *
+ * @param d     End value (point P3)
+ * @param t     Interpolation parameter in range [0, 1]
+ *             - 0.0 returns start value (a)
+ *             - 1.0 returns end value (d)
+ *             - Values outside [0, 1] are automatically clamped
+ *
+ * @return float Interpolated value at parameter t
+ *
+ * @note The function is backward compatible: when bOffs = 0 and cOffs = 0,
+ *       the interpolation is perfectly linear between a and d.
+ *
+ * @note For a = d (zero difference), the function returns a constant value
+ *       regardless of offset parameters, which is mathematically correct.
+ */
+inline float bezier3(float a, float bOffs, float cOffs, float d, float t)
 {
-    const float mt = 1.0f-t;
+    // Clamp parameter t to valid range [0, 1] for numerical stability
+    t = t < 0.0f ? 0.0f : (t > 1.0f ? 1.0f : t);
 
-    const float t2 = t*t;
-    const float mt2 = mt*mt;
+    // Calculate total difference between end and start points
+    const float diff = d - a;
 
-    const float t3 = t2*t;
-    const float mt3 = mt2*mt;
+    // Calculate Bezier control points relative to linear path
+    // Base positions for linear interpolation (1/3 and 2/3 along the line)
+    const float b = a + diff * (0.3333333333f + bOffs);
+    const float c = a + diff * (0.6666666666f + cOffs);
 
-    // Calculate the first control point (P1) for linear slope
-    const float b0 = a + (d - a) / 3.0f;
+    // Precompute powers of t and (1-t) for Bernstein polynomials
+    const float mt = 1.0f - t;
+    const float t2 = t * t;
+    const float mt2 = mt * mt;
 
-    // Calculate the second control point (P2) for linear slope
-    const float c0 = a + 2.0f * (d - a) / 3.0f;
-
-    // add offset
-    const float b = b0 + bRel;
-    const float c = c0 + cRel;
-
-    return mt3*a + 3.0f*mt2*t*b + 3.0f*mt*t2*c + t3*d;
+    // Cubic Bezier formula using Bernstein basis:
+    // B(t) = (1-t)³·P0 + 3·(1-t)²·t·P1 + 3·(1-t)·t²·P2 + t³·P3
+    return mt * mt2 * a +          // (1-t)³ term for start point P0
+           3.0f * mt2 * t * b +    // 3·(1-t)²·t term for control point P1
+           3.0f * mt * t2 * c +    // 3·(1-t)·t² term for control point P2
+           t * t2 * d;             // t³ term for end point P3
 }
 
 /*
@@ -216,24 +253,60 @@ float Envelope::envout(bool doWatch)
         return out;
     }
 
-    if(t >= 1.0f) // if we reached the next point
-        out = envval[currentpoint];
-    else // if we have to interpolate between points
-        out = bezier3(envval[currentpoint - 1], envcpy[currentpoint*2-1], envcpy[currentpoint*2], envval[currentpoint], t);
 
-    t += inct;
+    // --- NEW LOGIC: Pre-calculation of envelope position ---
 
-    if(t >= 1.0f) {
-        if(currentpoint >= envpoints - 1) // if last point reached
+    // 1. Advance time and handle segment transitions
+    float new_t = t + inct;
+    int new_currentpoint = currentpoint;
+
+    bool segment_changed = false;
+
+    // Handle cases where we cross one or more segment boundaries
+    while(new_t >= 1.0f && !envfinish) {
+        new_t -= 1.0f;  // Carry remainder to next segment
+        segment_changed = true;
+
+        // Check if we've reached the last point
+        if(new_currentpoint >= envpoints - 1) {
             envfinish = true;
-        // otherwise proceed only if not reached sustain point, repeating activated and key still pressed or sustained
-        else if (not (repeating && currentpoint == envsustain && !keyreleased))
-            currentpoint++;
+            break;
+        }
+        // Check if we should stop at sustain point (with repeat mode)
+        else if (repeating && new_currentpoint == envsustain && !keyreleased) {
+            // Stay at sustain point in repeat mode
+            new_t = 0.0f;  // Reset to beginning of sustain
+            break;
+        }
+        else {
+            // Move to next segment
+            new_currentpoint++;
+        }
 
-        t    = 0.0f;
-        inct = envdt[currentpoint];
+        // Update increment for new segment
+        inct = envdt[new_currentpoint];
     }
 
+    // 2. Calculate output based on current (not new!) position
+    if(t >= 1.0f) {
+        // We're exactly at a control point
+        out = envval[currentpoint];
+    } else {
+        // Interpolate between current and next point
+        out = bezier3(envval[currentpoint - 1],
+                     envcpy[currentpoint*2-1],
+                     envcpy[currentpoint*2],
+                     envval[currentpoint],
+                     t);
+    }
+
+    // 3. Update envelope state for next call
+    if(segment_changed && !envfinish) {
+        currentpoint = new_currentpoint;
+        t = new_t;
+    } else {
+        t = new_t;
+    }
     envoutval = out;
 
     if(doWatch) {
