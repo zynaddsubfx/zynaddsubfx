@@ -28,7 +28,9 @@
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
 #endif
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <unistd.h>
 #endif
 

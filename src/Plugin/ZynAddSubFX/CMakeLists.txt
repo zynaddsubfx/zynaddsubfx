@@ -178,14 +178,14 @@ else()
 endif()
 
 if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
+    target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${ZYN_LIBLO_LIBRARIES}
         ${PLATFORM_LIBRARIES})
 endif()
 if(APPLE)
-    target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
+    target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${ZYN_LIBLO_LIBRARIES}
         ${PLATFORM_LIBRARIES} "-framework Cocoa" "-framework openGL" "-Wl,-exported_symbol,_VSTPluginMain")
 else()
-    target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
+    target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${ZYN_LIBLO_LIBRARIES}
         ${PLATFORM_LIBRARIES})
 endif()
 if(ZestGui AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

@@ -28,7 +28,8 @@
 #include "Util.h"
 #include "Part.h"
 #include "BankDb.h"
-#ifdef WIN32
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -375,7 +376,7 @@ void Bank::rescanforbanks()
     {
         //Search the VST Directory for banks/preset/etc
         char path[1024];
-        GetModuleFileName(GetModuleHandle("ZynAddSubFX.dll"), path, sizeof(path));
+        GetModuleFileNameA(GetModuleHandleA("ZynAddSubFX.dll"), path, sizeof(path));
         if(strstr(path, "ZynAddSubFX.dll")) {
             strstr(path, "ZynAddSubFX.dll")[0] = 0;
             strcat(path, "banks");
