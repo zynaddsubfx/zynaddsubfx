@@ -4,7 +4,9 @@
 #include "../globals.h"
 #include <cstring>
 #include <filesystem>
+#ifndef WIN32
 #include <sys/stat.h>
+#endif
 
 namespace zyn {
 
@@ -221,7 +223,9 @@ BankEntry BankDb::processXiz(std::string filename,
     string fname = bank+filename;
 
     //Grab a timestamp
+#ifndef WIN32
     struct stat st;
+#endif
     int time = 0;
 
     //gah windows, just implement the darn standard APIs

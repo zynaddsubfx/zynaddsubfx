@@ -19,12 +19,14 @@
 #include "../Misc/Allocator.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
+#include "../globals.h"
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
 #include "../Synth/Portamento.h"
+#undef protected
 #include "../Misc/Part.h"
-#include "../globals.h"
+#undef private
 
 using namespace std;
 using namespace zyn;
@@ -44,12 +46,18 @@ enum PrivateNoteStatus {
 
 class KitTest
 {
+    class TestPart : public Part {
+    public:
+        using Part::Part;
+        void monomemClear() { Part::monomemClear(); }
+    };
+
     private:
         struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Alloc      alloc;
         FFTwrapper fft;
         Microtonal microtonal;
-        Part *part;
+        TestPart *part;
         AbsTime *time;
         Sync *sync;
         float *outL, *outR;
@@ -72,7 +80,7 @@ class KitTest
             memset(outL, 0, synth->bufferbytes);
             memset(outR, 0, synth->bufferbytes);
 
-            part = new Part(alloc, *synth, *time, sync, dummy, dummy, &microtonal, &fft);
+            part = new TestPart(alloc, *synth, *time, sync, dummy, dummy, &microtonal, &fft);
         }
 
         //Standard poly mode with sustain

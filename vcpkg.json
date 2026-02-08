@@ -1,6 +1,6 @@
 {
   "dependencies": [
-    "liblo"
+    "ecm", "liblo", "mxml", "zlib", "fftw3", "getopt-win32", "portaudio", "jack2", "pkgconf", "fltk"
   ]
 }
 
