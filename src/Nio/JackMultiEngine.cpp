@@ -14,8 +14,16 @@
 #include <jack/jack.h>
 #include <string>
 #include <cstring>
-#include <err.h>
 #include <cstdio>
+#ifdef _MSC_VER
+#include <cstdlib>
+static void errx(int rval, const char* errstr) {
+    std::fprintf(stderr, "zynaddsubfx: %s\n", errstr);
+    std::exit(rval);
+}
+#else
+#include <err.h>
+#endif
 #include <cassert>
 
 #include "Nio.h"
