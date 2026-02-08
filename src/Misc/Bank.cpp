@@ -248,7 +248,7 @@ int Bank::loadbank(string bankdirname)
         const std::string filename{fn.path().filename().string()};
 
         //check for extension
-        if(filename.find("INSTRUMENT_EXTENSION") == std::string::npos)
+        if(filename.find(INSTRUMENT_EXTENSION) == std::string::npos)
             continue;
 
         //verify if the name is like this NNNN-name (where N is a digit)
@@ -463,7 +463,7 @@ void Bank::scanrootdir(string rootdir)
         bool isbank = false;
         if(!fs::is_directory(bank.dir))
             continue;
-        for(const auto& subentry : fs::directory_iterator{rootdirpath})
+        for(const auto& subentry : fs::directory_iterator{bank.dir})
         {
             if(subentry.is_directory())
                 continue;
