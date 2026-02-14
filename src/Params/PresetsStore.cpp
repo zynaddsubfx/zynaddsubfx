@@ -91,7 +91,8 @@ void PresetsStore::scanforpresets()
 
         namespace fs = std::filesystem;
         fs::path dir(dirname);
-        for(const auto& file : fs::directory_iterator(dir))
+        std::error_code ec;
+        for(const auto& file : fs::directory_iterator(dir, ec))
         {
             if(file.is_directory())
                 continue;
