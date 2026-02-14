@@ -2450,7 +2450,7 @@ int MiddleWare::checkAutoSave(void) const
         const char *prefix = "zynaddsubfx-";
 
         //check for mandatory prefix
-        if(filename.rfind(prefix, 0) == 0)
+        if(entry.is_directory() || filename.rfind(prefix, 0) != 0)
             continue;
 
         int id = atoi(filename.c_str()+strlen(prefix));
