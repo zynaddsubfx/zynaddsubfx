@@ -42,7 +42,7 @@ void NulEngine::AudioThread()
         else {
             using namespace std::chrono_literals;
             duration remaining = std::chrono::duration_cast<duration>(playing_until - now);
-            if(remaining > 10ms) //Don't x() less than 10ms.
+            if(remaining > 10ms) //Don't sleep_for() less than 10ms.
                 //This will add latency...
                 this_thread::sleep_for(remaining  - 10ms);
             else if(remaining < 0us) {
