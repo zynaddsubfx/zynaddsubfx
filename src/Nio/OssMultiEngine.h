@@ -13,6 +13,7 @@
 #ifndef OSS_MULTI_ENGINE_H
 #define OSS_MULTI_ENGINE_H
 
+#include <thread>
 #include <sys/time.h>
 #include "../globals.h"
 #include "AudioOut.h"
@@ -33,11 +34,10 @@ class OssMultiEngine : public AudioOut
         bool getAudioEn() const;
 
     protected:
-        void *audioThreadCb();
-        static void *_audioThreadCb(void *arg);
+        void audioThreadCb();
 
     private:
-        pthread_t audioThread;
+        std::thread audioThread;
 
         /* Audio */
         bool openAudio();

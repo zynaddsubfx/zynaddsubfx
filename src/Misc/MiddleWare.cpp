@@ -16,9 +16,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <mutex>
+#include <thread>
 
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
@@ -30,9 +30,6 @@
 
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
-
-#include <map>
-#include <queue>
 
 #include "Util.h"
 #include "CallbackRepeater.h"
@@ -54,10 +51,13 @@
 #include "../Synth/OscilGen.h"
 #include "../Nio/Nio.h"
 
-#include <string>
-#include <future>
 #include <atomic>
+#include <filesystem>
+#include <future>
 #include <list>
+#include <map>
+#include <queue>
+#include <chrono>
 
 #define errx(...) {}
 #define warnx(...) {}
@@ -70,25 +70,7 @@ namespace zyn {
 using std::string;
 int Pexitprogram = 0;
 
-#ifdef __APPLE__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
 
-/* work around missing clock_gettime on OSX */
-static void monotonic_clock_gettime(struct timespec *ts) {
-#ifdef __APPLE__
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts->tv_sec = mts.tv_sec;
-    ts->tv_nsec = mts.tv_nsec;
-#else
-    clock_gettime(CLOCK_MONOTONIC, ts);
-#endif
-}
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -547,8 +529,7 @@ public:
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
-    int64_t start_time_sec;
-    int64_t start_time_nsec;
+    std::chrono::steady_clock::time_point start_time;
     bool offline;
 
     //Apply function while parameters are write locked
@@ -746,6 +727,7 @@ public:
 
                 doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
                 {
+                    using namespace std::literals::chrono_literals;
                     savefile = master->saveOSC(savefile, alreadyWritten);
 #if 1
                     // load the savefile string into another master to compare the results
@@ -753,7 +735,7 @@ public:
                     // this requires a temporary master switch
                     Master* old_master = master;
                     dispatcher.updateMaster(&master2);
-                    while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(old_master->isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 
                     res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
                     // TODO: compare MiddleWare, too?
@@ -763,7 +745,7 @@ public:
                     // We need to wait until savefile has been loaded into master2
                     int i;
                     for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
-                        os_usleep(50000);
+                        std::this_thread::sleep_for(50ms);
                     if(i >= 20) // >= 1 second?
                     {
                         // Master failed to fetch its messages
@@ -772,7 +754,7 @@ public:
                     printf("Saved in less than %d ms.\n", 50*i);
 
                     dispatcher.updateMaster(old_master);
-                    while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
+                    while(master2.isMasterSwitchUpcoming()) { std::this_thread::sleep_for(50ms); }
 #endif
                     if(res < 0)
                     {
@@ -1121,49 +1103,23 @@ class MwDataObj:public rtosc::RtData
 
 static std::vector<std::string> getFiles(const char *folder, bool finddir)
 {
-    DIR *dir = opendir(folder);
+    namespace fs = std::filesystem;
 
-    if(dir == NULL) {
-        return {};
-    }
-
-    struct dirent *fn;
     std::vector<string> files;
-    bool has_updir = false;
+    std::error_code ec;
 
-    while((fn = readdir(dir))) {
-#ifndef WIN32
-        bool is_dir = fn->d_type == DT_DIR;
-        //it could still be a symbolic link
-        if(!is_dir) {
-            string path = string(folder) + "/" + fn->d_name;
-            struct stat buf;
-            memset((void*)&buf, 0, sizeof(buf));
-            int err = stat(path.c_str(), &buf);
-            if(err)
-                printf("[Zyn:Error] stat cannot handle <%s>:%d\n", path.c_str(), err);
-            if(S_ISDIR(buf.st_mode)) {
-                is_dir = true;
-            }
-        }
-#else
-        std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
-        //printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
-        //printf("desired mask =  %x\n", mask);
-        //printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
-        bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
-#endif
-        if(finddir == is_dir && strcmp(".", fn->d_name))
-            files.push_back(fn->d_name);
+    for(const auto& entry : fs::directory_iterator(folder, ec))
+    {
+        if(ec) { return{}; }
 
-        if(!strcmp("..", fn->d_name))
-            has_updir = true;
+        // note: is_directory is also true for symlinks to dirs
+        if(finddir == entry.is_directory())
+            files.push_back(entry.path().filename().string());
     }
 
-    if(finddir == true && has_updir == false)
+    if(finddir == true) // std::directory_iterator does not return ".."
         files.push_back("..");
 
-    closedir(dir);
     std::sort(begin(files), end(files));
     return files;
 }
@@ -1995,11 +1951,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             handleMsg(buf);
             });
 
-    //Setup starting time
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    start_time_sec  = time.tv_sec;
-    start_time_nsec = time.tv_nsec;
+    start_time = std::chrono::steady_clock::now();
 
     offline = false;
 }
@@ -2065,7 +2017,8 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     int tries = 0;
     while(tries++ < 10000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();
@@ -2099,10 +2052,9 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Last acknowledged beat
     //Current offline status
 
-    struct timespec time;
-    monotonic_clock_gettime(&time);
-    uint32_t now = (time.tv_sec-start_time_sec)*100 +
-                   (time.tv_nsec-start_time_nsec)*1e-9*100;
+    auto duration = start_time - std::chrono::steady_clock::now();
+    using tick_t = std::chrono::duration<uint32_t, std::ratio<1, 100>>;  // 10 ms
+    uint32_t now = std::chrono::duration_cast<tick_t>(duration).count();
     int32_t last_ack   = master->last_ack;
     int32_t last_beat  = master->last_beat;
 
@@ -2169,7 +2121,8 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     int tries = 0;
     while(tries++ < 2000) {
         if(!bToU->hasNextLookahead()) {
-            os_usleep(500);
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(500us);
             continue;
         }
         const char *msg = bToU->read_lookahead();
@@ -2479,27 +2432,28 @@ void MiddleWare::enableAutoSave(int interval_sec)
 
 int MiddleWare::checkAutoSave(void) const
 {
+    namespace fs = std::filesystem;
+
     //save spec zynaddsubfx-PID-autosave.xmz
     const std::string home     = getenv("HOME");
     const std::string save_dir = home+"/.local/";
 
-    DIR *dir = opendir(save_dir.c_str());
-
-    if(dir == NULL)
-        return -1;
-
-    struct dirent *fn;
     int    reload_save = -1;
 
-    while((fn = readdir(dir))) {
-        const char *filename = fn->d_name;
+    std::error_code ec;
+
+    for(const auto& entry : fs::directory_iterator(save_dir, ec))
+    {
+        if(ec) { return{}; }
+
+        const std::string filename = entry.path().filename().string();
         const char *prefix = "zynaddsubfx-";
 
-        //check for manditory prefix
-        if(strstr(filename, prefix) != filename)
+        //check for mandatory prefix
+        if(entry.is_directory() || filename.rfind(prefix, 0) != 0)
             continue;
 
-        int id = atoi(filename+strlen(prefix));
+        int id = atoi(filename.c_str()+strlen(prefix));
 
         bool in_use = false;
 
@@ -2516,8 +2470,6 @@ int MiddleWare::checkAutoSave(void) const
             break;
         }
     }
-
-    closedir(dir);
 
     return reload_save;
 }

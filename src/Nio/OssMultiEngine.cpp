@@ -46,7 +46,6 @@ OssMultiEngine :: OssMultiEngine(const SYNTH_T &synth,
 {
     /* setup variables */
     name = "OSS-MULTI";
-    audioThread = 0;
     handle = -1;
     channels = 0;
     en = false;
@@ -149,10 +148,7 @@ OssMultiEngine :: openAudio()
 
     ioctl(handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&audioThread, &attr, _audioThreadCb, this);
+    audioThread = std::thread(&OssMultiEngine::audioThreadCb, this);
 
     return (true);
 
@@ -175,8 +171,7 @@ OssMultiEngine :: stopAudio()
     /* close handle first, so that write() exits */
     close(fd);
 
-    pthread_join(audioThread, 0);
-    audioThread = 0;
+    audioThread.join();
 }
 
     bool
@@ -206,14 +201,7 @@ OssMultiEngine :: getAudioEn() const
     return (handle != -1);
 }
 
-    void *
-OssMultiEngine :: _audioThreadCb(void *arg)
-{
-    return (static_cast<OssMultiEngine *>(arg))->audioThreadCb();
-}
-
-    void *
-OssMultiEngine :: audioThreadCb()
+void OssMultiEngine :: audioThreadCb()
 {
     /*
      * In case the audio device is a PIPE/FIFO, we need to ignore
@@ -261,16 +249,13 @@ OssMultiEngine :: audioThreadCb()
             /* make a copy of handle, in case of OSS audio disable */
             int fd = handle;
             if (fd == -1)
-                goto done;
+                return;
             error = write(fd, smps.ps32, buffersize);
         } while (error == -1 && errno == EINTR);
 
         if(error == -1)
-            goto done;
+            return;
     }
-done:
-    pthread_exit(0);
-    return (0);
 }
 
 }

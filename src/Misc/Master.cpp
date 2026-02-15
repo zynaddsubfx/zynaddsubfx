@@ -39,7 +39,6 @@
 #include <algorithm>
 #include <cmath>
 #include <atomic>
-#include <unistd.h>
 
 using namespace std;
 using namespace rtosc;
