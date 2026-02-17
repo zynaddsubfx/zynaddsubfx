@@ -16,9 +16,9 @@ namespace zyn {
     buffersize(buffersize_)
     {
         // setup the smoother for gain parameter
+        gain_smoothing.cutoff(1.0f);
         gain_smoothing.sample_rate(samplerate/16);
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
-        gain_smoothing.cutoff(1.0f);
         gain_smoothing.reset(gainbwd);
         pos_writer = 0;
     }
