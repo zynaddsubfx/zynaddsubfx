@@ -1231,19 +1231,20 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
     float* smps = vce.OscilSmp;
 
     for (int k = 0; k < vce.unison_size; ++k) {
-        int poshi  = vce.oscposhi[k];
-        int poslo  = static_cast<int>(vce.oscposlo[k] * 16777216.0f);  // 2^24
-        int freqhi = vce.oscfreqhi[k];
-        int freqlo = static_cast<int>(vce.oscfreqlo[k] * 16777216.0f);
+    int poshi  = vce.oscposhi[k];
+    int poslo  = (int)(vce.oscposlo[k] * (1<<24));  // REVERT-PHASE-CHANGE: use explicit 24-bit fixed point
+    int freqhi = vce.oscfreqhi[k];
+    int freqlo = (int)(vce.oscfreqlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
         float* tw  = tmpwave_unison[k];
         //~ printf("freqhi: %d\n", freqhi);
         assert(vce.oscfreqlo[k] < 1.0f);  // sanity check
         for (int i = 0; i < synth.buffersize; ++i) {
             // advance phase (fixed-point)
-            poslo += freqlo;
-            poshi += freqhi + (poslo >> 24);  // propagate carry
-            poslo &= 0xFFFFFF;                // keep lower 24 bits
-            poshi &= synth.oscilsize - 1;     // wrap around table size
+            // REVERT-PHASE-CHANGE: use original carry/overflow ordering
+            poslo += freqlo;                 // increment fractional part
+            poshi += freqhi + (poslo >> 24); // add overflow over 24 bits in poslo to poshi
+            poslo &= 0xFFFFFF;               // remove overflow from poslo (keep 24 bits)
+            poshi &= synth.oscilsize - 1;    // wrap around wavetable size
 
             float out = 0.0f;
 
@@ -1268,7 +1269,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 
                 // Use the fractional part of the phase (poslo) to align the start of the kernel
                 // This helps preserve phase continuity and prevents audible stepping or artifacts.
-                const int startpos = ((16777216 - poslo) * stpsize);  // 2^24 = fixed-point phase resolution
+                const int startpos = (((1<<24) - poslo) * stpsize);  // REVERT-PHASE-CHANGE: use (1<<24)
                 const int startposhi = startpos >> 24;  // Normalize to 0..WSKERNELSIZE range
 
                 // Apply the kernel convolution:
@@ -1287,13 +1288,14 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
             } else {
                 // linear interpolation with wrapping
                 int poship1 = (poshi + 1) & (synth.oscilsize - 1);
-                tw[i] = (smps[poshi] * (16777216 - poslo) + smps[poship1] * poslo) * (1.0f / 16777216.0f);
+                // REVERT-PHASE-CHANGE: perform interpolation using 24-bit fixed point math
+                tw[i] = (smps[poshi] * ((1<<24) - poslo) + smps[poship1] * poslo) / (1.0f * (1<<24));
             }
         }
 
         // save updated phase (convert back from fixed-point)
         vce.oscposhi[k] = poshi;
-        vce.oscposlo[k] = static_cast<float>(poslo) / 16777216.0f;
+    vce.oscposlo[k] = static_cast<float>(poslo) / (1<<24); // REVERT-PHASE-CHANGE
     }
 }
 
@@ -1439,9 +1441,9 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
 
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
-        int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
-        int    freqhi = vce.oscfreqhi[k];
-        int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
+    int    poslo  = (int)(vce.oscposlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
+    int    freqhi = vce.oscfreqhi[k];
+    int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
@@ -1458,7 +1460,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
                 && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) || vce.FMEnabled != FMTYPE::NONE)
                 ) {
                 fmold = tw[i];
-                tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f) + smps[0])/2.0f;
+                tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(1.0f * (1<<24)) + smps[0])/2.0f; // REVERT-PHASE-CHANGE
                 poslo = 0;
                 poshi = 0;
                 continue;
@@ -1466,14 +1468,14 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             }
             fmold = tw[i];
 
-            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
+            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(1.0f * (1<<24)); // REVERT-PHASE-CHANGE
             poslo += freqlo;                // increment fractional part (sample interval phase)
             poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
             poslo &= 0xffffff;              // remove overflow from poslo
             poshi &= synth.oscilsize - 1;   // remove overflow
         }
         vce.oscposhi[k] = poshi;
-        vce.oscposlo[k] = poslo/(16777216.0f);
+    vce.oscposlo[k] = poslo/((1<<24) * 1.0f); // REVERT-PHASE-CHANGE
         vce.FMoldsmp[k] = fmold; // store value for next tick
     }
 }
@@ -1553,7 +1555,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
+                fmold = fmold + tw[i] * normalize, synth.oscilsize);
                 tw[i] = fmold;
             }
             vce.FMoldsmp[k] = fmold;
@@ -1588,15 +1590,16 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             fmold = tw[i];
 
-            int FMmodfreqhi = 0;
-            F2I(tw[i], FMmodfreqhi);
-            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
-            if(FMmodfreqlo < 0)
-                FMmodfreqlo++;
+            // REVERT-FM-CHANGE: use explicit 24-bit fixed point for FM fractional part
+            int FMmodposhi = 0;
+            F2I(tw[i], FMmodposhi);
+            int FMmodposlo = (int)((tw[i] - FMmodposhi) * (1<<24));
+            if(FMmodposlo < 0)
+                FMmodposlo++;
 
-            //carrier
-            int carposhi = poshi + FMmodfreqhi;
-            int carposlo = (int)(poslo + FMmodfreqlo);
+            // carrier positions (integer+fixed-point fractional)
+            int carposhi = poshi + FMmodposhi;
+            int carposlo = poslo + FMmodposlo;
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 carposhi += NoteVoicePar[nvoice].phase_offset;
 
