@@ -13,6 +13,7 @@
 
 #include "WaveShapeSmps.h"
 #include <cmath>
+#include <cstdio>
 
 namespace zyn {
 
@@ -63,26 +64,86 @@ float polyblampres(float smp, float ws, float dMax)
     return res*dMax/2.0f;
 }
 
-void waveShapeSmps(int n,
+void waveShapeSmps(int buffersize,
                    float *smps,
                    unsigned char type,
                    unsigned char drive,
                    unsigned char offset,
-                   unsigned char funcpar)
+                   unsigned char funcpar) {
+
+    float dummySumIn = 0.123, dummySumOut = 0.321;
+    float dummycompensationfactor = 0.234f;
+    float dummyaWeightHistIn = 0.345, dummyaWeightHistOut=0.543;
+
+    waveShapeSmps(buffersize, smps, type, drive, drive, offset, funcpar,
+                  false, dummySumIn, dummySumOut,
+                  dummyaWeightHistIn, dummyaWeightHistOut,
+                  dummycompensationfactor);
+}
+
+void waveShapeSmps(int buffersize,
+                   float *smps,
+                   unsigned char type,
+                   unsigned char drive,
+                   unsigned char driveHist,
+                   unsigned char offset,
+                   unsigned char funcpar,
+                   unsigned char loudnessComp,
+                   float &sumIn, float &sumOut,
+                   float &aWeightHistIn, float &aWeightHistOut,
+                   float &compensationfactor)
 {
+    const int n = buffersize;
     int   i;
     float ws = drive / 127.0f;
+    float wsHist = driveHist / 127.0f;
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
+    float rmsIn[buffersize];
+    const float compensationAmount = loudnessComp / 110.0f;
 
+    // EWMA RMS parameters (fast)
+    const float rmsAlpha = 0.02f;  // ≈ Attack ~2–4 ms, Release ~50–70 ms
+
+    // Attack/Release for compensation factor
+    const float attack  = 0.20f;   // fast reaction
+    const float release = 0.02f;   // slow decay
+
+    if (loudnessComp>0)
+        for(i = 0; i < n; ++i) {
+
+            // ------ A-weighting (vereinfacht) ------
+            float aIn = smps[i] - 0.95f * aWeightHistIn;
+            aWeightHistIn = smps[i];
+            aIn *= 1.5f;
+
+            // ------ EWMA RMS ------
+            sumIn  = (1.0f - rmsAlpha) * sumIn  + rmsAlpha * (aIn  * aIn);
+            rmsIn[i]  = sqrtf(sumIn);
+        }
+
+    const float one_div_n = 1.0f/(n-1);
     switch(type) {
         case 1:
-            ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
+            {
+            // Pre-Calcuations
+            ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; // Arctangent
+
+            wsHist = powf(10, wsHist * wsHist * 3.0f) - 1.0f + 0.001f;
+            const float ws_start = wsHist;
+            const float ws_diff = ws - wsHist;
+            const float ws_inc = one_div_n * ws_diff;
+
             for(i = 0; i < n; ++i) {
+                // Interpolation with only one multiplication
+                // ws_lerp = ws_start + i * ws_inc;
+                const float ws_lerp = ws_start + (float)i * ws_inc;
+
                 smps[i] += offs;
-                smps[i] = atanf(smps[i] * ws) / atanf(ws);
+                smps[i] = atanf(smps[i] * ws_lerp) / atanf(ws_lerp);
                 smps[i] -= offs;
+            }
             }
             break;
         case 2:
@@ -93,7 +154,6 @@ void waveShapeSmps(int n,
                 tmpv = 1.1f;
             for(i = 0; i < n; ++i)
                 smps[i] = sinf(smps[i] * (0.1f + ws - ws * smps[i])) / tmpv;
-            ;
             break;
         case 3:
             ws = ws * ws * ws * 20.0f + 0.0001f; //Pow
@@ -254,31 +314,49 @@ void waveShapeSmps(int n,
             }
             break;
         case 15: // tanh soft limiter
-            // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
-            // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
-            par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
-            ws = ws * ws * 35.0f + 1.0f;
-            for(i = 0; i < n; ++i) {
-                smps[i] *= ws;// multiply signal to drive it in the saturation of the function
-                smps[i] += offs; // add dc offset
-                smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par);
-                smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
+           {
+                // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+                // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+                par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
+                ws = ws * ws * 35.0f + 1.0f;
+                wsHist = wsHist * wsHist * 35.0f + 1.0f;
+                const float ws_start = wsHist;
+                const float ws_diff = ws - wsHist;
+                const float ws_inc = one_div_n * ws_diff;
+
+                for(i = 0; i < n; ++i) {
+                    // Interpolation with only one multiplication
+                    const float ws_lerp = ws_start + (float)i * ws_inc;
+                    smps[i] *= ws_lerp; // multiply signal to drive it in the saturation of the function
+                    smps[i] += offs; // add dc offset
+                    smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par);
+                    smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
+                }
             }
             break;
         case 16: //cubic distortion
-            // f(x) = 1.5 * (x-(x^3/3))
-            // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
-            // modified with factor 1.5 to go through [1,1] and [-1,-1]
-            ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
-            for(i = 0; i < n; ++i) {
-                smps[i] *= ws; // multiply signal to drive it in the saturation of the function
-                smps[i] += offs; // add dc offset
-                if(fabsf(smps[i]) < 1.0f)
-                    smps[i] = 1.5 * (smps[i] - (smps[i]*smps[i]*smps[i] / 3.0) );
-                else
-                    smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-                //subtract offset with distortion function applied
-                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
+            {
+                // f(x) = 1.5 * (x-(x^3/3))
+                // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
+                // modified with factor 1.5 to go through [1,1] and [-1,-1]
+                ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+                wsHist = wsHist * wsHist * wsHist * 20.0f + 0.168f;
+                const float ws_start = wsHist;
+                const float ws_diff = ws - wsHist;
+                const float ws_inc = one_div_n * ws_diff;
+
+                for(i = 0; i < n; ++i) {
+                    // Interpolation with only one multiplication
+                    const float ws_lerp = ws_start + (float)i * ws_inc;
+                    smps[i] *= ws_lerp; // multiply signal to drive it in the saturation of the function
+                    smps[i] += offs; // add dc offset
+                    if(fabsf(smps[i]) < 1.0f)
+                        smps[i] = 1.5 * (smps[i] - (smps[i]*smps[i]*smps[i] / 3.0) );
+                    else
+                        smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
+                    //subtract offset with distortion function applied
+                    smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
+                }
             }
             break;
         case 17: //square distortion
@@ -296,6 +374,41 @@ void waveShapeSmps(int n,
                 smps[i] -= offs*(2-fabsf(offs));
             }
             break;
+    }
+
+    if (loudnessComp>0) {
+
+        // precalculate out of hot zone
+        const float one_minus_compAmount = (1.0f - compensationAmount);
+        for(i = 0; i < n; ++i) {
+
+            float aOut = smps[i] - 0.95f * aWeightHistOut;  // HP ~500Hz
+            aWeightHistOut = smps[i];
+            aOut *= 1.5f;  // +3.5dB Boost
+            sumOut = (1.0f - rmsAlpha) * sumOut + rmsAlpha * (aOut * aOut);
+
+            float rmsOut = sqrtf(sumOut);
+
+            if (rmsOut < 1e-6f) rmsOut = 1e-6f;
+            float rawFactor = rmsIn[i] / rmsOut;
+
+
+            if (rawFactor > compensationfactor)
+            {
+                // schneller Attack
+                compensationfactor =
+                    attack * rawFactor + (1.0f - attack) * compensationfactor;
+            }
+            else
+            {
+                // langsamer Release
+                compensationfactor =
+                    release * rawFactor + (1.0f - release) * compensationfactor;
+            }
+
+            // lerp between zero and full compensation
+            smps[i] *=  compensationAmount * compensationfactor + one_minus_compAmount;
+        }
     }
 }
 
