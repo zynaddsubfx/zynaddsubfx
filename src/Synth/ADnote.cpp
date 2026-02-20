@@ -148,6 +148,7 @@ void ADnote::setupVoice(int nvoice)
     voice.oscposlo    = memory.valloc<float>(unison);
     voice.oscposhiFM  = memory.valloc<unsigned int>(unison);
     voice.oscposloFM  = memory.valloc<float>(unison);
+    voice.twold       = memory.valloc<float>(unison);
 
     voice.Enabled     = ON;
     voice.fixedfreq   = pars.VoicePar[nvoice].Pfixedfreq;
@@ -160,6 +161,7 @@ void ADnote::setupVoice(int nvoice)
         voice.oscposlo[k]   = 0.0f;
         voice.oscposhiFM[k] = 0;
         voice.oscposloFM[k] = 0.0f;
+        voice.twold[k] = 0.0f;
     }
 
     //the extra points contains the first point
@@ -486,6 +488,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 * fmvoldamp * 4.0f;
             break;
         case FMTYPE::FREQ_MOD:
+        case FMTYPE::SELFPM_MOD:
             FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
                 * fmvoldamp * 4.0f;
             break;
@@ -619,6 +622,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             case FMTYPE::FREQ_MOD:
+            case FMTYPE::SELFPM_MOD:
                 FMVolume =
                     (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
@@ -1601,6 +1605,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             vce.oscposloFM[k] = posloFM/((1<<24)*1.0f);
         }
     }
+
+
     // Amplitude interpolation
     if(ABOVE_AMPLITUDE_THRESHOLD(vce.FMoldamplitude,
                                  vce.FMnewamplitude)) {
@@ -1611,6 +1617,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                vce.FMnewamplitude,
                                                i,
                                                synth.buffersize);
+            vce.FMoldamplitude = vce.FMnewamplitude;
         }
     } else {
         for(int k = 0; k < vce.unison_size; ++k) {
@@ -1635,7 +1642,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             vce.FMoldsmp[k] = fmold;
         }
     }
-    else {  //Phase or PWM modulation
+    else if(FMmode == FMTYPE::PHASE_MOD || FMmode == FMTYPE::PW_MOD) {  //Phase or PWM modulation
         const float normalize = synth.oscilsize_f / 262144.0f;
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
@@ -1664,9 +1671,26 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             fmold = tw[i];
 
+
+            float phoffs;
+            if(FMmode == FMTYPE::SELFPM_MOD) {
+            /* phoffs is computed from the previous carrier sample (twold).
+             * Multiply by a fixed factor to scale the range of
+             * self pm amount (FM Volume) to sane values
+             */
+                phoffs = vce.twold[k] * 0.00008f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                                               vce.FMnewamplitude,
+                                               i,
+                                               synth.buffersize);
+
+            }
+            else {
+                phoffs = tw[i];
+            }
+
             int FMmodfreqhi = 0;
-            F2I(tw[i], FMmodfreqhi);
-            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            F2I(phoffs, FMmodfreqhi);
+            float FMmodfreqlo = phoffs-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             if(FMmodfreqlo < 0)
                 FMmodfreqlo++;
 
@@ -1684,6 +1708,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
             tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
                     + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
+            vce.twold[k] = tw[i];
 
             poslo += freqlo;
             if(poslo >= (1<<24)) {
@@ -1785,6 +1810,7 @@ int ADnote::noteout(float *outl, float *outr)
                     case FMTYPE::FREQ_MOD:
                     case FMTYPE::PHASE_MOD:
                     case FMTYPE::PW_MOD:
+                    case FMTYPE::SELFPM_MOD:
                         ComputeVoiceOscillatorFrequencyModulation(nvoice,
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
