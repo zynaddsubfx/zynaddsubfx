@@ -64,7 +64,6 @@ class Phaser final:public Effect
         void setphase(unsigned char Pphase);
 
         //Internal Variables
-        bool  barber; //Barber pole phasing flag
         float distortion, width, offsetpct;
         float feedback, depth, phase;
         Stereo<float *> old, xn1, yn1;
