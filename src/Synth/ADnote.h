@@ -120,6 +120,8 @@ class ADnote:public SynthNote
         float note_log2_freq;
         float velocity;
 
+        float twold;
+
         ONOFFTYPE   NoteEnabled;
 
         /*****************************************************************/

@@ -1601,6 +1601,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             vce.oscposloFM[k] = posloFM/((1<<24)*1.0f);
         }
     }
+
+
     // Amplitude interpolation
     if(ABOVE_AMPLITUDE_THRESHOLD(vce.FMoldamplitude,
                                  vce.FMnewamplitude)) {
@@ -1611,6 +1613,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                vce.FMnewamplitude,
                                                i,
                                                synth.buffersize);
+            vce.FMoldamplitude = vce.FMnewamplitude;
         }
     } else {
         for(int k = 0; k < vce.unison_size; ++k) {
@@ -1665,8 +1668,20 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             fmold = tw[i];
 
             int FMmodfreqhi = 0;
-            F2I(tw[i], FMmodfreqhi);
-            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            float phoffs = 0.0f;
+            if(true) { //FMmode == FMTYPE::SELFPM_MOD) {
+                phoffs = twold * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                                               vce.FMnewamplitude,
+                                               i,
+                                               synth.buffersize);
+            }
+            else {
+                phoffs = tw[i];
+            }
+
+
+            F2I(phoffs, FMmodfreqhi);
+            float FMmodfreqlo = phoffs-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             if(FMmodfreqlo < 0)
                 FMmodfreqlo++;
 
@@ -1684,6 +1699,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
             tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
                     + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
+            twold = tw[i];
 
             poslo += freqlo;
             if(poslo >= (1<<24)) {
