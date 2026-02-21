@@ -9,6 +9,7 @@ set(zynaddsubfx_synth_SRCS
 	Synth/OscilGen.cpp
 	wavenormals.cpp
 	Synth/PADnote.cpp
+	Synth/Portamento.cpp
 	Synth/Resonance.cpp
 	Synth/SUBnote.cpp
 	Synth/WatchPoint.cpp

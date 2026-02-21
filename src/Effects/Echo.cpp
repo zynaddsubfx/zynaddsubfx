@@ -29,7 +29,9 @@ namespace zyn {
 
 rtosc::Ports Echo::ports = {
     {"preset::i", rOptions(Echo 1, Echo 2, Echo 3, Simple Echo, Canyon, Panning Echo 1,
-            Panning Echo 2, Panning Echo 3, Feedback Echo)
+                           Panning Echo 2, Panning Echo 3, Feedback Echo)
+                  rDefault(0)
+                  rProp(alias)
                   rProp(parameter)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
@@ -39,8 +41,11 @@ rtosc::Ports Echo::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(67), rPresetsAt(6, 81, 81, 62)),
-    rEffParPan(rPresetsAt(2, 75, 60, 60, 64, 60, 60, 64)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume), rDefault(67),
+        rPresetsAt(6, 81, 81, 62),
+        rPresetsAt(16, 33, 33, 33, 33, 33, 33, 40, 40, 31)),
+    rEffParPan(rDefaultDepends(preset), rPresetsAt(2, 75, 60, 60, 64, 60, 60)),
     rEffPar(Pdelay,   2, rShort("delay"), rLinear(0, 127),
             rPresets(35, 21, 60, 44, 102, 44, 46, 26, 28),
             "Length of Echo"),
@@ -202,11 +207,11 @@ void Echo::sethidamp(unsigned char _Phidamp)
     hidamp  = 1.0f - Phidamp / 127.0f;
 }
 
-void Echo::setpreset(unsigned char npreset)
+unsigned char Echo::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 7;
-    const int     NUM_PRESETS = 9;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 7
+#define	NUM_PRESETS 9
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         {67, 64, 35,  64,  30,  59, 0 }, //Echo 1
         {67, 64, 21,  64,  30,  59, 0 }, //Echo 2
         {67, 75, 60,  64,  30,  59, 10}, //Echo 3
@@ -217,16 +222,24 @@ void Echo::setpreset(unsigned char npreset)
         {81, 60, 26,  100, 127, 67, 36}, //Panning Echo 3
         {62, 64, 28,  64,  100, 90, 55}  //Feedback Echo
     };
-
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    if(insertion)
-        setvolume(presets[npreset][0] / 2);  //lower the volume if this is insertion effect
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if(npar == 0 && insertion != 0) {
+            /* lower the volume if this is insertion effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
 }
 
+void Echo::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Echo::changepar(int npar, unsigned char value)
 {

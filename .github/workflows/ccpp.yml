@@ -1,0 +1,167 @@
+---
+name: Build CI
+
+on:  # yamllint disable-line rule:truthy
+  push:
+  pull_request:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows MSVC (fltk, disabled)",
+            enabled: 0,
+            os: windows-latest,
+            deps1: "",
+            deps2: "",
+            testdeps: "",
+            info: "",
+            config: "cmake
+                    -B build
+                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+                    -DRTOSC_WERROR=1
+                    -DCMAKE_BUILD_TYPE=Debug
+                    ",
+            configext: "cmake -B build -DCompileExtensiveTests=ON ..",
+            build: "cmake --build build --config Debug",
+            test: "ctest --output-on-failure --test-dir build"
+          }
+          - {
+            name: "Ubuntu gcc (fltk 1.3 + zest)",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            info: "cmake --version && gcc --version",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure",
+            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            build-fusion: "cd build-fusion && make VERBOSE=1"
+          }
+          - {
+            name: "Ubuntu clang+lld (fltk 1.3 + zest)",
+            enabled: 1,
+            os: ubuntu-latest,
+            update: "sudo apt-get update",
+            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
+            deps2: "sudo apt-get install liblo-dev",
+            testdeps: "sudo apt-get install ruby",
+            info: "cmake --version && clang --version",
+            # the only really different line to gcc:
+            config: "cd build && \
+                cmake \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++ \
+                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
+                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
+                -DRTOSC_WERROR=ON -DWerror=ON ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=fltk ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure",
+            config-fusion: "cd build-fusion && \
+                cmake \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++ \
+                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
+                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
+                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            build-fusion: "cd build-fusion && make VERBOSE=1"
+          }
+          - {
+            name: "macOS clang (no-gui)",
+            enabled: 1,
+            os: macos-latest,
+            update: "cmake --version && clang --version",
+            deps1: "brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm",
+            deps2: "brew install libmxml --HEAD",
+            testdeps: "brew install ruby",
+            info: "cmake --version && clang --version",
+            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
+            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
+            build: "cd build && make VERBOSE=1",
+            test: "cd build && ctest --output-on-failure",
+            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
+            build-fusion: ""  # Tries to compile as objective C. Possibly, DPF/pugl update required
+            #build-fusion: "cd build-fusion && make VERBOSE=1"
+          }
+    steps:
+      - name: check out
+        if: ${{ matrix.config.enabled == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: update_apt
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.update }}
+      - name: install_deps1
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.deps1 }}
+      - name: install_deps2
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.deps2 }}
+      - name: install_test_deps1
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.testdeps }}
+      - name: submodule
+        if: ${{ matrix.config.enabled == 1 }}
+        run: git submodule update --init --recursive
+      - name: info
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.info }}
+      - name: create_builddirs
+        if: ${{ matrix.config.enabled == 1 }}
+        run: mkdir build; mkdir build-fusion
+      - name: configure
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.config }}
+      - name: configure-extensive
+        if: ${{ matrix.config.enabled == 1 && ( (github.event_name == 'pull_request_review' && github.event.action == 'submitted') || ( github.ref == 'refs/heads/master' ) ) }}
+        run: ${{ matrix.config.configext }}
+      - name: make
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.build }}
+      - name: make test
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.test }}
+      - name: configure-fusion
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.config-fusion }}
+      - name: make-fusion
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.build-fusion }}
+
+#  build_arch_linux_system_rtosc:
+#    runs-on: ubuntu-latest
+#    container:
+#      image: archlinux:latest
+#    steps:
+#      - name: Install dependencies
+#        run: pacman --noconfirm -Syu alsa-lib base-devel cmake cxxtest dssi fftw fltk git jack ladspa liblo libxpm mxml portaudio rtosc zlib
+#      - uses: actions/checkout@v2
+#        with:
+#          submodules: recursive
+#      # test does not seem to work in a container and reports:
+#      # Process not started
+#      #  /__w/zynaddsubfx/zynaddsubfx/build/src/Tests/check-ports.rb
+#      # [no such file or directory]
+#      - name: Disable PortChecker test
+#        run: sed -e '/add_test(PortChecker/d' -i src/Tests/CMakeLists.txt
+#      - name: Build zynaddsubfx
+#        run: |
+#          cmake -DCMAKE_INSTALL_PREFIX=/usr -DZYN_SYSTEM_RTOSC=ON -B build -S .
+#          make VERBOSE=1 -C build
+#      - name: Test zynaddsubfx
+#        run: make VERBOSE=1 -k test ARGS='-VVd' -C build
+#      - name: Install zynaddsubfx
+#        run: make VERBOSE=1 install -C build

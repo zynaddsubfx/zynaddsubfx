@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "../globals.h"
 #include "Presets.h"
+#include <cstdint>
 
 namespace zyn {
 
@@ -24,7 +25,7 @@ class SUBnoteParameters:public Presets
 {
     public:
         SUBnoteParameters(const AbsTime *time_ = nullptr);
-        ~SUBnoteParameters();
+        ~SUBnoteParameters() override;
 
         //Identify active harmonic positions
         // - pos       : int[MAX_SUB_HARMONICS] offsets of active harmonics
@@ -35,7 +36,7 @@ class SUBnoteParameters:public Presets
                 int scale, int relbw);
         static float convertHarmonicMag(int mag, int type);
 
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
         void updateFrequencyMultipliers(void);
@@ -43,7 +44,7 @@ class SUBnoteParameters:public Presets
 
         //Parameters
         //AMPLITUDE PARAMETERS
-        unsigned char   Pstereo; //0 for mono,1 for stereo
+        bool    Pstereo; //0 for mono,1 for stereo
         float   Volume;
         unsigned char   PPanning;
         float   AmpVelocityScaleFunction;
@@ -53,15 +54,15 @@ class SUBnoteParameters:public Presets
         unsigned short int PDetune;
         unsigned short int PCoarseDetune;
         unsigned char      PDetuneType;
-        unsigned char      PFreqEnvelopeEnabled;
+        bool               PFreqEnvelopeEnabled;
         EnvelopeParams    *FreqEnvelope;
-        unsigned char      PBandWidthEnvelopeEnabled;
+        bool               PBandWidthEnvelopeEnabled;
         EnvelopeParams    *BandWidthEnvelope;
-        unsigned char     PBendAdjust;
-        unsigned char     POffsetHz;
+        unsigned char      PBendAdjust;
+        unsigned char      POffsetHz;
 
         //Filter Parameters (Global)
-        unsigned char   PGlobalFilterEnabled;
+        bool            PGlobalFilterEnabled;
         FilterParams   *GlobalFilter;
         unsigned char   PGlobalFilterVelocityScale;
         unsigned char   PGlobalFilterVelocityScaleFunction;
@@ -71,7 +72,7 @@ class SUBnoteParameters:public Presets
         //Other Parameters
 
         //If the base frequency is fixed to 440 Hz
-        unsigned char Pfixedfreq;
+        bool           Pfixedfreq;
 
         /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);

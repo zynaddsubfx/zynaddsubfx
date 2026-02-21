@@ -1,89 +1,128 @@
 function(cp_script script_name)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
-		${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
+endfunction()
+
+function(quick_test test_name link)
+    add_executable(${test_name} "${test_name}.cpp")
+    add_test(NAME ${test_name}
+             COMMAND ${test_name})
+    target_link_libraries(${test_name} ${link} ${ARGN})
+    if(Werror)
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+            set_target_properties(${test_name} PROPERTIES COMPILE_WARNINGS_AS_ERRORS ON)
+	 else()
+            if(NOT WIN32)  # For Windows, just allow warnings for now
+                target_compile_options(${test_name} PUBLIC -Werror)
+            endif()
+        endif()
+    endif()
 endfunction()
 
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
-CXXTEST_ADD_TEST(ControllerTest ControllerTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ControllerTest.h)
-CXXTEST_ADD_TEST(EchoTest EchoTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/EchoTest.h)
-#CXXTEST_ADD_TEST(SampleTest SampleTest.h)
-CXXTEST_ADD_TEST(MicrotonalTest MicrotonalTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MicrotonalTest.h)
-CXXTEST_ADD_TEST(XMLwrapperTest XMLwrapper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/XMLwrapperTest.h)
-CXXTEST_ADD_TEST(ADnoteTest AdNoteTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/AdNoteTest.h)
-CXXTEST_ADD_TEST(SUBnoteTest SubNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SubNoteTest.h)
-CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/OscilGenTest.h)
-CXXTEST_ADD_TEST(RandTest RandTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RandTest.h)
-CXXTEST_ADD_TEST(PADnoteTest PadNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PadNoteTest.h)
-CXXTEST_ADD_TEST(PluginTest PluginTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PluginTest.h)
-CXXTEST_ADD_TEST(MiddlewareTest MiddlewareTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareTest.h)
-CXXTEST_ADD_TEST(MessageTest MessageTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MessageTest.h)
-CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTest.h)
-CXXTEST_ADD_TEST(MqTest MqTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MqTest.h)
-CXXTEST_ADD_TEST(WatchTest WatchTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/WatchTest.h)
-#CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
-CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
-CXXTEST_ADD_TEST(EffectTest EffectTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/EffectTest.h)
-CXXTEST_ADD_TEST(KitTest KitTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/KitTest.h)
-CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/MemoryStressTest.h)
-CXXTEST_ADD_TEST(TriggerTest TriggerTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/TriggerTest.h)
-
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES}
-    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
+set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW3F_LIBRARIES}
+    ${MXML_LIBRARIES} pthread )
 
 message(STATUS "Linking tests with: ${test_lib}")
-target_link_libraries(ADnoteTest     ${test_lib})
-target_link_libraries(SUBnoteTest    ${test_lib})
-target_link_libraries(ControllerTest ${test_lib})
-target_link_libraries(EchoTest       ${test_lib})
-target_link_libraries(MicrotonalTest ${test_lib})
-target_link_libraries(OscilGenTest   ${test_lib})
-target_link_libraries(XMLwrapperTest ${test_lib})
-target_link_libraries(RandTest       ${test_lib})
-target_link_libraries(PADnoteTest    ${test_lib})
-target_link_libraries(MqTest         ${test_lib})
-target_link_libraries(WatchTest      ${test_lib})
-target_link_libraries(TriggerTest      ${test_lib})
-target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
-    zynaddsubfx_gui_bridge
-    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
-target_link_libraries(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
-    zynaddsubfx_gui_bridge
-    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
-target_link_libraries(MessageTest zynaddsubfx_core zynaddsubfx_nio
-    zynaddsubfx_gui_bridge
-    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
-target_link_libraries(UnisonTest    ${test_lib})
-#target_link_libraries(RtAllocTest    ${test_lib})
-target_link_libraries(AllocatorTest    ${test_lib})
-target_link_libraries(KitTest    ${test_lib})
-target_link_libraries(MemoryStressTest ${test_lib})
-target_link_libraries(EffectTest ${test_lib})
+
+quick_test(AdNoteTest       ${test_lib})
+quick_test(AllocatorTest    ${test_lib})
+quick_test(ControllerTest   ${test_lib})
+quick_test(EchoTest         ${test_lib})
+quick_test(EffectTest       ${test_lib})
+quick_test(KitTest          ${test_lib})
+quick_test(MemoryStressTest ${test_lib})
+quick_test(MicrotonalTest   ${test_lib})
+quick_test(MsgParseTest     ${test_lib})
+quick_test(OscilGenTest     ${test_lib})
+quick_test(PadNoteTest      ${test_lib})
+quick_test(PortamentoTest   ${test_lib})
+quick_test(RandTest         ${test_lib})
+quick_test(SubNoteTest      ${test_lib})
+quick_test(TriggerTest      ${test_lib})
+quick_test(UnisonTest       ${test_lib})
+quick_test(WatchTest        ${test_lib})
+quick_test(XMLwrapperTest   ${test_lib})
+quick_test(ReverseTest   ${test_lib})
+
+quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
+                          zynaddsubfx_gui_bridge
+                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                          ${PLATFORM_LIBRARIES})
+quick_test(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
+                          zynaddsubfx_gui_bridge
+                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                          ${PLATFORM_LIBRARIES})
 
 #Testbed app
-add_executable(ins-test InstrumentStats.cpp)
-target_link_libraries(ins-test ${test_lib} rt)
 
-if(LIBLO_FOUND)
-    cp_script(check-ports.rb)
-    add_test(PortChecker check-ports.rb)
+if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+
+    #std::thread issues with mingw vvvvv
+    quick_test(MqTest           ${test_lib})
+    #same std::thread mingw issue
+    quick_test(MessageTest zynaddsubfx_core zynaddsubfx_nio
+                           zynaddsubfx_gui_bridge
+                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                           ${PLATFORM_LIBRARIES})
+
+    add_executable(ins-test InstrumentStats.cpp)
+    target_link_libraries(ins-test ${test_lib})
+    if(HAVE_LIBRT)
+        target_link_libraries(ins-test rt)
+    endif()
+
+    if(LIBLO_FOUND)
+        quick_test(PortChecker lo-server zynaddsubfx_core zynaddsubfx_nio
+                   zynaddsubfx_gui_bridge
+                   ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                   ${PLATFORM_LIBRARIES})
+        target_include_directories(PortChecker PRIVATE ${RTOSC_TEST_INCLUDE_DIR})
+        target_link_directories(PortChecker PRIVATE ${RTOSC_TEST_LIB_DIR})
+    endif()
+
+    add_executable(save-osc SaveOSC.cpp)
+    if(LIBGIT2_FOUND)
+        target_include_directories(save-osc PRIVATE ${LIBGIT2_INCLUDE_DIRS})
+        target_link_libraries(save-osc
+            zynaddsubfx_core zynaddsubfx_nio
+            zynaddsubfx_gui_bridge
+            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            ${LIBGIT2_LIBRARIES}
+            ${PLATFORM_LIBRARIES})
+    else()
+        target_compile_definitions(save-osc PRIVATE -DZYN_GIT_WORKTREE="${CMAKE_SOURCE_DIR}")
+        target_link_libraries(save-osc
+            zynaddsubfx_core zynaddsubfx_nio
+            zynaddsubfx_gui_bridge
+            ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+            ${PLATFORM_LIBRARIES})
+    endif()
+    # test all presets
+    add_test(SaveOscPresets save-osc)
+    # test the most insane XIZ file
+    add_test(SaveOscBigFile save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/banks/olivers-100/0032-Drum\ Kit.xiz)
+    # not realized, because it takes 15 minutes each time:
+    if (CompileExtensiveTests)
+        add_test(SaveOscAllFiles save-osc test-all)
+    endif()
+
 endif()
 
-add_executable(save-osc SaveOSC.cpp)
-target_link_libraries(save-osc
-                      zynaddsubfx_core zynaddsubfx_nio
-                      zynaddsubfx_gui_bridge
-                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
-#this will be replaced with a for loop when the code will get more stable:
-add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
-
-#message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    execute_process(
+        COMMAND git rev-parse --is-inside-work-tree
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE IS_GIT_REPO
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(IS_GIT_REPO STREQUAL "true")
+        add_test(TrailingWhitespace ${CMAKE_SOURCE_DIR}/src/Tests/trailing-whitespace)
+    endif()
+endif()
 

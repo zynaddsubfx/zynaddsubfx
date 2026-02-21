@@ -27,7 +27,8 @@ namespace zyn {
 #define rEnd }
 
 rtosc::Ports DynamicFilter::ports = {
-    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph1)
+    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph2)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -36,7 +37,10 @@ rtosc::Ports DynamicFilter::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(110), rPreset(2, 110), rPreset(4, 127)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+               rDefault(55), rPreset(2, 50), rPreset(4, 63),
+               rPresetsAt(16, 110, 110, 100, 110, 127)),
     rEffParPan(),
     rEffPar(Pfreq,      2, rShort("freq"),   rPresets(80, 70, 30, 80, 50),
             "Effect Frequency"),
@@ -59,7 +63,7 @@ rtosc::Ports DynamicFilter::ports = {
 #undef rEnd
 #undef rObject
 
-DynamicFilter::DynamicFilter(EffectParams pars, const AbsTime *time)
+DynamicFilter::DynamicFilter(EffectParams pars)
     :Effect(pars),
       lfo(pars.srate, pars.bufsize),
       Pvolume(110),
@@ -183,39 +187,46 @@ void DynamicFilter::reinitfilter(void)
 void DynamicFilter::setfilterpreset(unsigned char npreset)
 {
     filterpars->defaults();
+    filterpars->updateLoc(dynfilter_0 + npreset);
 
     switch(npreset) {
         case 0:
             filterpars->Pcategory = 0;
             filterpars->Ptype     = 2;
-            filterpars->Pfreq     = 45;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(45);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 1:
             filterpars->Pcategory = 2;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 72;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 0;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(72);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 0;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 2:
             filterpars->Pcategory = 0;
             filterpars->Ptype     = 4;
-            filterpars->Pfreq     = 64;
-            filterpars->Pq      = 64;
-            filterpars->Pstages = 2;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(64);
+            filterpars->baseq     = FilterParams::baseqFromOldPq(64);
+            filterpars->Pstages   = 2;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
             break;
         case 3:
             filterpars->Pcategory = 1;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 50;
-            filterpars->Pq      = 70;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(50);
+            filterpars->baseq     =
+#ifdef __clang__
+                                    // rounding issues with clang, so we cannot use the function
+                                    0x1.d04b16p+2;
+#else
+                                    FilterParams::baseqFromOldPq(70);
+#endif
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
 
             filterpars->Psequencesize = 2;
             // "I"
@@ -242,10 +253,16 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
         case 4:
             filterpars->Pcategory = 1;
             filterpars->Ptype     = 0;
-            filterpars->Pfreq     = 64;
-            filterpars->Pq      = 70;
-            filterpars->Pstages = 1;
-            filterpars->Pgain   = 64;
+            filterpars->basefreq  = FilterParams::basefreqFromOldPreq(64);
+            filterpars->baseq     =
+#ifdef __clang__
+                                    // rounding issues with clang, so we cannot use the function
+                                    0x1.d04b16p+2;
+#else
+                                    FilterParams::baseqFromOldPq(70);
+#endif
+            filterpars->Pstages   = 1;
+            filterpars->gain      = FilterParams::gainFromOldPgain(64);
 
             filterpars->Psequencesize   = 2;
             filterpars->Pnumformants    = 2;
@@ -273,11 +290,11 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
     reinitfilter();
 }
 
-void DynamicFilter::setpreset(unsigned char npreset, bool protect)
+unsigned char DynamicFilter::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 10;
-    const int     NUM_PRESETS = 5;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 10
+#define	NUM_PRESETS 5
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //WahWah
         {110, 64, 80, 0, 0, 64, 0,  90, 0, 60},
         //AutoWah
@@ -286,22 +303,29 @@ void DynamicFilter::setpreset(unsigned char npreset, bool protect)
         {100, 64, 30, 0, 0, 50, 80, 0,  0, 60},
         //VocalMorph1
         {110, 64, 80, 0, 0, 64, 0,  64, 0, 60},
-        //VocalMorph1
+        //VocalMorph2
         {127, 64, 50, 0, 0, 96, 64, 0,  0, 60}
     };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if(npar == 0 && insertion == 0) {
+            /* lower the volume if this is system effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
+}
 
+void DynamicFilter::setpreset(unsigned char npreset, bool protect)
+{
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-
-    if(insertion == 0) //lower the volume if this is system effect
-        changepar(0, presets[npreset][0] * 0.5f);
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
     if(!protect)
         setfilterpreset(npreset);
 }
-
 
 void DynamicFilter::changepar(int npar, unsigned char value)
 {

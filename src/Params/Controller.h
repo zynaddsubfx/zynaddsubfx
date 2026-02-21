@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include "../globals.h"
+#include <cstdint>
 
 namespace zyn {
 
@@ -25,8 +26,7 @@ class Controller
 {
     public:
         Controller(const SYNTH_T &synth, const AbsTime *time = nullptr);
-        Controller&operator=(const Controller &c);
-        ~Controller();
+
         void resetall();
 
         void add2XML(XMLwrapper& xml);
@@ -35,35 +35,36 @@ class Controller
 
         //Controllers functions
         void setpitchwheel(int value);
+        void setpitchwheel(void);
         void setexpression(int value);
+        void setexpression(void);
         void setpanning(int value);
+        void setpanning(void);
         void setfiltercutoff(int value);
+        void setfiltercutoff(void);
         void setfilterq(int value);
+        void setfilterq(void);
         void setbandwidth(int value);
+        void setbandwidth(void);
         void setmodwheel(int value);
+        void setmodwheel(void);
         void setfmamp(int value);
+        void setfmamp(void);
         void setvolume(int value);
+        void setvolume(void);
         void setsustain(int value);
+        void setsustain(void);
         /**Enable or disable portamento
          * @param value 0-127 MIDI value (greater than 64 enables)*/
         void setportamento(int value);
         void setresonancecenter(int value);
+        void setresonancecenter(void);
         void setresonancebw(int value);
+        void setresonancebw(void);
 
 
         void setparameternumber(unsigned int type, int value); //used for RPN and NRPN's
         int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
-
-        /**
-         * Initialize a portamento
-         *
-         * @param oldfreq Starting frequency of the portamento (Hz)
-         * @param newfreq Ending frequency of the portamento (Hz)
-         * @param legatoflag true when legato is in progress, false otherwise
-         * @returns 1 if properly initialized, 0 otherwise*/
-        int initportamento(float oldfreq, float newfreq, bool legatoflag);
-        /**Update portamento's freqrap to next value based upon dx*/
-        void updateportamento();
 
         // Controllers values
         struct { //Pitch Wheel
@@ -77,7 +78,7 @@ class Controller
         struct { //Expression
             int   data;
             float relvolume;
-            unsigned char receive;
+            bool  receive;
         } expression;
 
         struct { //Panning
@@ -103,39 +104,41 @@ class Controller
             int   data;
             float relbw;
             unsigned char depth;
-            unsigned char exponential;
+            bool  exponential;
         } bandwidth;
 
         struct { //Modulation Wheel
             int   data;
             float relmod;
             unsigned char depth;
-            unsigned char exponential;
+            bool  exponential;
         } modwheel;
 
         struct { //FM amplitude
             int   data;
             float relamp;
-            unsigned char receive;
+            bool  receive;
         } fmamp;
 
         struct { //Volume
             int   data;
             float volume;
-            unsigned char receive;
+            bool  receive;
         } volume;
 
         struct { //Sustain
-            int data, sustain;
-            unsigned char receive;
+            int  data, sustain;
+            bool receive;
         } sustain;
 
         struct { /**<Portamento*/
             //parameters
-            int data;
-            unsigned char portamento;
+            int  data;
+            bool portamento;
             /**Whether the portamento midi events are received or not*/
-            unsigned char receive;
+            bool receive;
+            /**Whether legato playing is needed to get portamento*/
+            bool automode;
             /** The time that it takes for the portamento to complete
              *
              * Translates in an expontal fashion to 0 Seconds to 1.93f Seconds
@@ -145,7 +148,7 @@ class Controller
              *
              * 0 - constant time(default)
              * 1 - proportional*/
-            unsigned char proportional;
+            bool proportional;
             /**Rate of proportinal portamento*/
             unsigned char propRate;
             /**Depth of proportinal portamento*/
@@ -153,7 +156,7 @@ class Controller
             /**pitchthresh is the threshold of enabling protamento*/
             unsigned char pitchthresh;
             /**enable the portamento only below(0)/above(1) the threshold*/
-            unsigned char pitchthreshtype;
+            bool pitchthreshtype;
 
             /**this value represent how the portamento time is reduced
              * 0      - for down portamento
@@ -167,26 +170,6 @@ class Controller
              * (eg: the portamento is from 300Hz to 200 Hz)
              */
             unsigned char updowntimestretch;
-            /**this value is used to compute the actual portamento
-             *
-             * This is a multiplyer to change the frequency of the newer
-             * frequency to fit the profile of the portamento.
-             * This will be linear with respect to x.*/
-            float freqrap;
-            /**this is used by the Part for knowing which note uses the portamento*/
-            int noteusing;
-            /**if a the portamento is used by a note
-             * \todo see if this can be a bool*/
-            int used;
-
-            //Internal data
-
-            /**x is from 0.0f (start portamento) to 1.0f (finished portamento)*/
-            float x;
-            /**dx is the increment to x when updateportamento is called*/
-            float dx;
-            /** this is used for computing oldfreq value from x*/
-            float origfreqrap;
         } portamento;
 
         struct { //Resonance Center Frequency
@@ -204,9 +187,9 @@ class Controller
 
         /** RPN and NPRPN */
         struct { //nrpn
-            int parhi, parlo;
-            int valhi, vallo;
-            unsigned char receive; //this is saved to disk by Master
+            int  parhi, parlo;
+            int  valhi, vallo;
+            bool receive; //this is saved to disk by Master
         } NRPN;
 
 

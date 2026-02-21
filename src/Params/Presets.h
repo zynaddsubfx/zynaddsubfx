@@ -70,6 +70,12 @@ class Presets
 #define in_effect 11
 #define loc_unspecified 12
 
+#define dynfilter_0 13
+#define dynfilter_1 14
+#define dynfilter_2 15
+#define dynfilter_3 16
+#define dynfilter_4 17
+
 //};
 using consumer_location_t = int;
 

@@ -81,7 +81,15 @@ class OGSlider {: {public Fl_Osc_TSlider}
   } { code {phase=false; } {} }
 
   Function {OSC_value(char c)} {open return_type void
-  } { code {value(phase ? c : 127-c);
+  } { code {
+  value(phase ? c : 127-c);
+  selection_color(value() == reset_value ? 0 : 222);
+  redraw();
+  } {} }
+  
+  Function {OSC_value(int c)} {open return_type void
+  } { code {
+  value(phase ? c : 127-c);
   selection_color(value() == reset_value ? 0 : 222);
   redraw();
   } {} }
@@ -141,7 +149,6 @@ class Oscilharmonic {: {public Fl_Group}
     phase->value(64);
     phase->selection_color(0);
  }
- o->osc->requestValue(o->loc+"prepare");
  o->osc->requestValue(o->loc+"spectrum");
  o->osc->requestValue(o->loc+"waveform");
 
@@ -154,7 +161,6 @@ display->redraw();}
       Fl_Slider phase {
         callback {
 o->osc->writeValue(o->loc+"phase"+to_s(n), (char) o->value());
-o->osc->requestValue(o->loc+"prepare");
 o->osc->requestValue(o->loc+"spectrum");
 o->osc->requestValue(o->loc+"waveform");
 
@@ -172,12 +178,12 @@ display->redraw();}
       Fl_Box {} {
         label 01
         xywh {0 210 20 15} labelfont 1 labelsize 9 align 20
-        code0 {char tmp[10];snprintf(tmp,10,"%d",n+1);o->label(strdup(tmp));}
+        code0 {char tmp[12];snprintf(tmp,sizeof(tmp),"%d",n+1);o->label(strdup(tmp));}
       }
       Fl_Box {} {
         label 01
         xywh {0 0 20 15} labelfont 1 labelsize 9 align 20
-        code0 {char tmp[10];snprintf(tmp,10,"%d",n+1);o->label(strdup(tmp));}
+        code0 {char tmp[12];snprintf(tmp,sizeof(tmp),"%d",n+1);o->label(strdup(tmp));}
       }
     }
   }
@@ -251,6 +257,8 @@ class OscilEditor {open : {public PresetsUI_}
         Fl_Button applybutton {
           label Apply
           callback {
+          //call PADnoteParameters' "prepare" port, which computes the whole
+          //PAD synth wave table
           dummy->osc->requestValue(loc+"../prepare");}
           xywh {305 285 60 20} box THIN_UP_BOX labelfont 1
           code0 {if(adnotep) o->hide();}
@@ -272,7 +280,7 @@ class OscilEditor {open : {public PresetsUI_}
           Fl_Value_Slider rndslider {
             label rnd
             callback {}
-            tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {145 290 100 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
+            tooltip {Oscillator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {145 290 100 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
             code0 {(void)o->init("Prand"); if (!adnotep) o->hide();}
 	    class Fl_Osc_VSlider
           }
@@ -430,6 +438,10 @@ setbfmodstatus(o->value());
             }
             MenuItem {} {
               label Circle
+              xywh {127 127 100 20} labelfont 1 labelsize 11
+            }
+            MenuItem {} {
+              label PowerSinus
               xywh {127 127 100 20} labelfont 1 labelsize 11
             }
 	    MenuItem {} {
@@ -634,6 +646,18 @@ redrawoscil();}
             MenuItem {} {
               label Sgm
               xywh {95 95 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Tanh
+              xywh {105 105 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Cubic
+              xywh {115 115 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Square
+              xywh {205 125 100 20} labelfont 1 labelsize 10
             }
           }
           Fl_Dial wshpar {
@@ -970,6 +994,8 @@ basefuncdisplaygroup = NULL;
 bfpar = NULL;
 bftype = NULL;
 make_window();
+if(!adnotep)
+    osceditUI->label("PADsynth Harmonic Content Editor");
 bftype->init("Pcurrentbasefunc");
 initialized = true;
 

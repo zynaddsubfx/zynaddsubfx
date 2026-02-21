@@ -18,12 +18,13 @@
 #include "../globals.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
+#include "../Misc/Sync.h"
 
 // effect parameters differing between single effects
 #ifndef rEffPar
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
-   DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
+      rLinear(0,127) DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
 #define rEffParOpt(name, idx, ...) \
   {STRINGIFY(name) "::i:c:S",  rProp(parameter) rDefaultDepends(preset) \
    rProp(enumerated) DOC(__VA_ARGS__), NULL, \
@@ -64,15 +65,20 @@
         if(!rtosc_narguments(msg)) \
             d.reply(d.loc, "i", eff.getpar(idx)); \
         else { \
-            eff.changepar(0, rtosc_argument(msg, 0).i); \
+            eff.changepar(idx, rtosc_argument(msg, 0).i); \
             d.broadcast(d.loc, "i", eff.getpar(idx)); \
         } \
     }}
 #define rEffParVol(...) rEffParCommon(Pvolume, "amt", "amount of effect", 0, \
     __VA_ARGS__)
 #define rEffParPan(...) rEffParCommon(Ppanning, "pan", "panning", 1, \
-    __VA_ARGS__)
-
+    rDefault(64), __VA_ARGS__)
+#define rPresetForVolume \
+    {"presetOfVolume:", rProp(internal), 0, \
+     rBegin; (void)msg; \
+     rObject *o = (rObject*)d.obj; \
+     d.reply(d.loc, "i", o->Ppreset + (16 * o->insertion)); \
+     rEnd}
 
 namespace zyn {
 
@@ -92,7 +98,7 @@ struct EffectParams
      * @return Initialized Effect Parameter object*/
     EffectParams(Allocator &alloc_, bool insertion_, float *efxoutl_, float *efxoutr_,
             unsigned char Ppreset_, unsigned int srate, int bufsize, FilterParams *filterpars_,
-            bool filterprotect=false);
+            bool filterprotect=false, const AbsTime *time_ = nullptr);
 
 
     Allocator &alloc;
@@ -104,14 +110,25 @@ struct EffectParams
     int bufsize;
     FilterParams *filterpars;
     bool filterprotect;
+    const AbsTime *time;
 };
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
-class Effect
+class Effect: public Observer
 {
     public:
         Effect(EffectParams pars);
         virtual ~Effect() {}
+
+        void update() override {}
+
+        /**
+         * Get default preset parameter value
+         * @param npreset chosen preset
+         * @param npar chosen parameter
+         * @return the default parameter value
+         **/
+        virtual unsigned char getpresetpar(unsigned char npreset, unsigned int npar) = 0;
         /**
          * Choose a preset
          * @param npreset number of chosen preset*/
@@ -129,7 +146,7 @@ class Effect
          *
          * This method should result in the effect generating its results
          * and placing them into the efxoutl and efxoutr buffers.
-         * Every Effect should overide this method.
+         * Every Effect should override this method.
          *
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel
@@ -150,6 +167,7 @@ class Effect
                           * Master Output only.*/
 
         float volume;
+        float speedfactor;    /**relative factor for using the global tempo (BPM)*/
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
 
@@ -170,6 +188,8 @@ class Effect
 
         //Allocator
         Allocator &memory;
+
+        const AbsTime *time;
 
         // current setup
         unsigned int samplerate;

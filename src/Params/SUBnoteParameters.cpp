@@ -36,12 +36,25 @@ namespace zyn {
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
 static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
-    rPaste,
+    rPasteRt,
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
-    rParamF(Volume,  rShort("volume"), rDefault(0), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
+    rParamF(Volume,  rShort("volume"), rDefault(0.f), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
     rParamF(AmpVelocityScaleFunction, rShort("sense"), rDefault(70.86),
         rLinear(0.0, 100.0), "Amplitude Velocity Sensing function"),
+    {"PAmpVelocityScaleFunction::i", rShort("sense") rProp(parameter) rLinear(0,127)
+        rDefault(90) rDoc("Amplitude Velocity Sensing function"), 0,
+        [](const char *m, rtosc::RtData &d) {
+            SUBnoteParameters *obj = (SUBnoteParameters*)d.obj;
+            if (rtosc_narguments(m)==0) {
+                d.reply(d.loc, "i", (int) roundf(obj->AmpVelocityScaleFunction * 127.0f / 100.0f));
+            } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+                const uint8_t value = limit<char>(rtosc_argument(m, 0).i, 0, 127);
+                obj->AmpVelocityScaleFunction = value * 100.0f / 127.0f;
+                d.broadcast(d.loc, "i", value);
+                rChangeCb
+            }
+    }},
     rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), rDefault(8192),
         "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), rDefault(0), "Coarse Detune"),
@@ -72,9 +85,9 @@ static const rtosc::Ports SUBnotePorts = {
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
-    rParamI(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
+    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type"),
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Spread of harmonic frequencies"),
     rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255), rShort("p1"),
             rDefault(0), "Overtone Parameter"),
@@ -88,7 +101,7 @@ static const rtosc::Ports SUBnotePorts = {
             rDefault(2), "Number of filter stages"),
     rParamZyn(Pbandwidth, rShort("bandwidth"), rDefault(40),
               "Bandwidth of filters"),
-    rParamZyn(Phmagtype,  rShort("mag. type"),
+    rOption(Phmagtype,  rShort("mag. type"),
               rOptions(linear, -40dB, -60dB, -80dB, -100dB),
               rDefault(linear), "Magnitude scale"),
     rArray(Phmag, MAX_SUB_HARMONICS, rDefault([127 0 0 ...]),
@@ -133,28 +146,36 @@ static const rtosc::Ports SUBnotePorts = {
     {"octave::c:i", rProp(parameter) rShort("octave") rLinear(-8,7)
         rDoc("Note octave shift"), NULL,
         rBegin;
-        if(!rtosc_narguments(msg)) {
-            int k=obj->PCoarseDetune/1024;
-            if (k>=8) k-=16;
-            d.reply(d.loc, "i", k);
-        } else {
-            int k=(int) rtosc_argument(msg, 0).i;
-            if (k<0) k+=16;
-            obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
-        }
+            auto get_octave = [&obj](){
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
+            }
         rEnd},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
         rDoc("Note coarse detune"), NULL,
         rBegin;
-        if(!rtosc_narguments(msg)) {
-            int k=obj->PCoarseDetune%1024;
-            if (k>=512) k-=1024;
-            d.reply(d.loc, "i", k);
-        } else {
-            int k=(int) rtosc_argument(msg, 0).i;
-            if (k<0) k+=1024;
-            obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
-        }
+            auto get_coarse = [&obj](){
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
+            }
         rEnd},
     {"response:", rDoc("Filter response at 440Hz. with 48kHz sample rate\n\n"
             "Format: stages, filter*active_filters\n"
@@ -212,15 +233,15 @@ SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
         : Presets(), time(time_), last_update_timestamp(0)
 {
     setpresettype("Psubsynth");
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
-    FreqEnvelope = new EnvelopeParams(64, 0, time_);
+    FreqEnvelope = new EnvelopeParams(64, false, time_);
     FreqEnvelope->init(sub_freq);
-    BandWidthEnvelope = new EnvelopeParams(64, 0, time_);
+    BandWidthEnvelope = new EnvelopeParams(64, false, time_);
     BandWidthEnvelope->init(sub_bandwidth);
 
     GlobalFilter = new FilterParams(sub_filter, time_);
-    GlobalFilterEnvelope = new EnvelopeParams(0, 1, time_);
+    GlobalFilterEnvelope = new EnvelopeParams(0, true, time_);
     GlobalFilterEnvelope->init(sub_filter);
 
     defaults();
@@ -283,7 +304,7 @@ void SUBnoteParameters::defaults()
     PPanning = 64;
     AmpVelocityScaleFunction = 70.86;
 
-    Pfixedfreq   = 0;
+    Pfixedfreq   = false;
     PfixedfreqET = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -291,14 +312,14 @@ void SUBnoteParameters::defaults()
     Pbandwidth   = 40;
     Phmagtype    = 0;
     Pbwscale     = 64;
-    Pstereo      = 1;
+    Pstereo      = true;
     Pstart = 1;
 
     PDetune = 8192;
     PCoarseDetune = 0;
     PDetuneType   = 1;
-    PFreqEnvelopeEnabled      = 0;
-    PBandWidthEnvelopeEnabled = 0;
+    PFreqEnvelopeEnabled      = false;
+    PBandWidthEnvelopeEnabled = false;
 
     POvertoneSpread.type = 0;
     POvertoneSpread.par1 = 0;
@@ -312,7 +333,7 @@ void SUBnoteParameters::defaults()
     }
     Phmag[0] = 127;
 
-    PGlobalFilterEnabled = 0;
+    PGlobalFilterEnabled = false;
     PGlobalFilterVelocityScale = 0;
     PGlobalFilterVelocityScaleFunction = 64;
 
@@ -556,7 +577,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
             (!xml.hasparreal("volume"));
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume    = -60.0f * ( 1.0f - vol / 96.0f);
+            Volume    = 60.0f * (vol / 96.0f - 1.0f);
         } else {
             Volume    = xml.getparreal("volume", Volume);
         }

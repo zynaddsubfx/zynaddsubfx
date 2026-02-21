@@ -23,12 +23,12 @@ namespace zyn {
 class SUBnote:public SynthNote
 {
     public:
-        SUBnote(const SUBnoteParameters *parameters, SynthParams &pars,
-                WatchManager *wm = 0, const char *prefix = 0);
+        SUBnote(const SUBnoteParameters *parameters, const SynthParams &pars,
+                WatchManager *wm = 0, const char *prefix = 0, bool constPowerMixing = true);
         ~SUBnote();
 
         SynthNote *cloneLegato(void);
-        void legatonote(LegatoParams pars);
+        void legatonote(const LegatoParams &pars);
         VecWatchPoint watch_filter,watch_amp_int, watch_legato;
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void releasekey();
@@ -36,12 +36,11 @@ class SUBnote:public SynthNote
         void entomb(void);
     private:
 
-        void setup(float freq,
-                   float velocity,
-                   int portamento_,
+        void setup(float velocity,
+                   Portamento *portamento_,
                    float note_log2_freq,
                    bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
-        float setupFilters(int *pos, bool automation);
+        float setupFilters(float basefreq, int *pos, bool automation);
         void computecurrentparameters();
         /*
          * Initialize envelopes and global filter
@@ -51,14 +50,14 @@ class SUBnote:public SynthNote
         void KillNote();
 
         const SUBnoteParameters &pars;
-        
+
         //parameters
         bool       stereo;
         int       numstages; //number of stages of filters
         int       numharmonics; //number of harmonics (after the too higher hamonics are removed)
         int       firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
         int       start; //how the harmonics start
-        float     basefreq;
+        float     note_log2_freq;
         float     BendAdjust;
         float     OffsetHz;
         float     panning;
@@ -71,7 +70,8 @@ class SUBnote:public SynthNote
 
         //internal values
         bool   NoteEnabled;
-        bool   firsttick, portamento;
+        bool   firsttick;
+        Portamento *portamento;
         float  volume, oldamplitude, newamplitude;
         float  oldreduceamp;
 
@@ -103,9 +103,8 @@ class SUBnote:public SynthNote
         float overtone_freq[MAX_SUB_HARMONICS];
 
         int   oldpitchwheel, oldbandwidth;
-        float globalfiltercenterq;
         float velocity;
-        WatchManager *wm;
+        bool filterupdate;
 };
 
 }

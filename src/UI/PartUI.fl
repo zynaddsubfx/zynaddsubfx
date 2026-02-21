@@ -67,7 +67,7 @@ class PartSysEffSend {open : {public Fl_Group}
         code0 {o->size(25,25);}
         code1 {o->alt_init("/","Psysefxvol"+to_s(neff)+"/part"+to_s(npart));}
         code2 {o->mark_dead();}
-        code3 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
+        code3 {char tmp[12];snprintf(tmp,sizeof(tmp),"%d",neff+1);o->copy_label(tmp);}
         class Fl_Osc_Dial
       }
     }
@@ -149,13 +149,13 @@ maxkcounter->do_callback();}
         Fl_Button adeditbutton {
           label edit
           callback {
-	  if (Fl::event_shift())
-	      partui->showvoiceparams(n, true);
-	  else if (Fl::event_ctrl())
-	      partui->showvoiceparams(n, false);
-	  else
-	      partui->showparameters(n,0);
-	  }
+          if (Fl::event_shift())
+              partui->showvoiceparams(n, true);
+          else if (Fl::event_ctrl())
+              partui->showvoiceparams(n, false);
+          else
+              partui->showparameters(n,0);
+          }
           xywh {420 0 40 15} box THIN_UP_BOX labelsize 11
         }
         Fl_Button subeditbutton {
@@ -177,7 +177,7 @@ maxkcounter->do_callback();}
           label {Bass Drum}
           xywh {90 0 130 15} box THIN_DOWN_BOX labelfont 1 labelsize 10 align 20
           code0 {o->init("Pname");}
-	  callback { o->oscWrite(o->ext, "s", o->value()); }
+          callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Check_Button adcheck {
@@ -227,7 +227,7 @@ else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
-        code0 {snprintf(label,10,"%d",n+1);o->label(label);}
+        code0 {snprintf(label,sizeof(label),"%d",n+1);o->label(label);}
         code1 {o->init("Penabled");}
         code2 {if (n==0) o->deactivate();}
         class Fl_Osc_Check
@@ -258,7 +258,7 @@ end();} {}
   }
   decl {int n;} {private local
   }
-  decl {char label[10];} {private local
+  decl {char label[12];} {private local
   }
   decl {class PartUI *partui;} {private local
   }
@@ -286,7 +286,7 @@ class PartUI {open : {public Fl_Osc_Group}
           label KeyShift
           xywh {195 45 90 20} labelsize 11 align 1 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
-          code1 {o->init("Pkeyshift", 'i', -64);}
+          code1 {o->init("Pkeyshift", 'i', 0);}
           class Fl_Osc_Counter
         }
         Fl_Scroll {} {open
@@ -415,7 +415,6 @@ if (event==FL_RIGHT_MOUSE){
           tooltip {Key Limit} xywh {215 155 50 20} labelsize 10 align 8 textfont 1 textsize 10
           code0 {o->init("Pkeylimit",'i');}
           code1 {o->step(1.0,10.0);}
-          code2 {o->range(0,127);}
           class Fl_Osc_Counter
         }
         Fl_Choice {} {
@@ -532,8 +531,8 @@ else {bendrng->oscMove("pitchwheel.bendrange");}}
       Fl_Button {} {
         label {Reset all controllers}
         callback {o->oscWrite("defaults");//part->SetController(C_resetallcontrollers,0);
-	ctlwindow->update();
-	}
+        ctlwindow->update();
+        }
         xywh {5 110 210 20} box THIN_UP_BOX
         class Fl_Osc_Button
       }
@@ -724,7 +723,7 @@ inseffectui->refresh();}
         callback {(void)o;/*int x=(int) o->value();
 part->Pefxroute[ninseff]=x;
 if (x==2) part->partefx[ninseff]->setdryonly(true);
-	else part->partefx[ninseff]->setdryonly(false);*/}
+        else part->partefx[ninseff]->setdryonly(false);*/}
         xywh {235 110 80 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {/*int x=part->Pefxroute[ninseff]; if (x==127) x=1;*/}
         code1 {o->init(("Pefxroute"+to_s(ninseff)).c_str());}
@@ -809,13 +808,13 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       Fl_Choice {} {
         label Mode
         callback {if (o->value()==0) {
-		 for (int i=1;i<NUM_KIT_ITEMS;i++)
-		   partkititem[i]->deactivate();
-		 partkititem[0]->mutedcheck->deactivate();
+                 for (int i=1;i<NUM_KIT_ITEMS;i++)
+                   partkititem[i]->deactivate();
+                 partkititem[0]->mutedcheck->deactivate();
         } else {
-		 for (int i=1;i<NUM_KIT_ITEMS;i++)
-		   partkititem[i]->activate();
-                   partkititem[0]->mutedcheck->activate(); };}
+                 for (int i=1;i<NUM_KIT_ITEMS;i++)
+                   partkititem[i]->activate();
+                 partkititem[0]->mutedcheck->activate(); };}
         xywh {35 350 70 15} down_box BORDER_BOX labelsize 11 textfont 1 textsize 11
         code0 {o->init("Pkitmode");}
         class Fl_Osc_Choice
@@ -909,13 +908,13 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           Fl_Button adeditbutton {
             label Edit
             callback {
-	    if (Fl::event_shift()) {
-	        showvoiceparams(0, true);
-	    } else if (Fl::event_ctrl()) {
-	        showvoiceparams(0, false);
-	    } else
-	        showparameters(0,0);
-	    }
+            if (Fl::event_shift()) {
+                showvoiceparams(0, true);
+            } else if (Fl::event_ctrl()) {
+                showvoiceparams(0, false);
+            } else
+                showparameters(0,0);
+            }
             xywh {15 281 80 34} color 51 selection_color 51 labelfont 1 labelsize 13 align 128
           }
         }
@@ -956,7 +955,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           xywh {5 60 385 50} type Multiline color 124 labelsize 10 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->init("info.Pauthor");}
-	  callback { o->oscWrite(o->ext, "s", o->value()); }
+          callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Input {} {
@@ -964,7 +963,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           xywh {5 125 385 90} type Multiline color 124 labelsize 11 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->init("info.Pcomments");}
-	  callback { o->oscWrite(o->ext, "s", o->value()); }
+          callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Choice {} {
@@ -1141,10 +1140,10 @@ if(adnoteui ||
         adnoteui->ADnoteVoiceList->show();
     else {
         if (adnoteui->advoice->mod_type->value() == 0)
-	    adnoteui->advoice->voiceFMparametersgroup->deactivate();
-	else
-	    adnoteui->advoice->voiceFMparametersgroup->activate();
-	adnoteui->ADnoteVoice->show();
+            adnoteui->advoice->voiceFMparametersgroup->deactivate();
+        else
+            adnoteui->advoice->voiceFMparametersgroup->activate();
+        adnoteui->ADnoteVoice->show();
     }}} {}}
 
   Function {~PartUI()} {} {

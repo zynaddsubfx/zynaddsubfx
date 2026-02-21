@@ -24,7 +24,7 @@ class DynamicFilterPlugin : public AbstractPluginFX<zyn::DynamicFilter>
 {
 public:
     DynamicFilterPlugin()
-        : AbstractPluginFX(10, 5) {}
+        : AbstractPluginFX(10, 5) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------

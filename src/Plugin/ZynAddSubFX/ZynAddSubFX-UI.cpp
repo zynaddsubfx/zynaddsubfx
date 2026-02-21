@@ -72,6 +72,7 @@ protected:
     */
     void programLoaded(uint32_t index) override
     {
+        (void)index; // ZynAddSubFX::loadProgram already informs the UI
     }
 
    /**
@@ -80,6 +81,7 @@ protected:
     */
     void stateChanged(const char* key, const char* value) override
     {
+        (void)key; (void)value;
     }
 
 private:

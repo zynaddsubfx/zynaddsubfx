@@ -35,8 +35,15 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 #define rObject FilterParams::Pvowels_t::formants_t
 
 static const rtosc::Ports subsubports = {
-    rParamZyn(freq, rShort("f.freq"), "Formant frequency"),
-    rParamZyn(amp,  rShort("f.str"),  rDefault(127), "Strength of formant"),
+    rParamZyn(loc, rProp(internal), "location of the filter"),
+    rParamZyn(freq, rShort("f.freq"), rDefault(128),
+              rDefaultDepends(loc),
+              rPresets(34, 99, 108, 61, 71, 99, 70, 80, 20, 100),
+              "Formant frequency"),
+    rParamZyn(amp,  rShort("f.str"),  rDefault(127),
+              rDefaultDepends(loc),
+              rPresets(127, 122, 112, 127, 121, 117, 127, 122, 127, 121),
+              "Strength of formant"),
     rParamZyn(q,    rShort("f.q"),    rDefault(64),
               "The formant's quality factor, also known as "
               "resonance bandwidth or Q for short"),
@@ -57,39 +64,63 @@ static const rtosc::Ports subports = {
         }},
 };
 
+
 #define rObject FilterParams
 #undef  rChangeCb
-#define rChangeCb obj->changed = true; if ( obj->time) {      \
-    obj->last_update_timestamp = obj->time->time(); }
+#define rChangeCb do { obj->changed = true; if ( obj->time) {      \
+    obj->last_update_timestamp = obj->time->time(); } } while(false)
 const rtosc::Ports FilterParams::ports = {
     rSelf(FilterParams),
-    rPaste,
-    rArrayPaste,
+    rPasteRt,
+    rArrayPasteRt,
     rOption(loc, rProp(internal),
-            rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect),
+            rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect,
+                     dynfilter_0, dynfilter_1, dynfilter_2,
+                     dynfilter_3, dynfilter_4),
             "location of the filter"),
     rOption(Pcategory,          rShort("class"),
-            rOptions(analog, formant, st.var.), rDefault(analog),
+            rOptions(analog, formant, st.var., moog, comb),
+            rDefault(analog), rDefaultDepends(loc),
+            rPreset(dynfilter_1, 2), rPreset(dynfilter_3, formant), rPreset(dynfilter_4, formant),
             "Class of filter"),
     rOption(Ptype,              rShort("type"),
             rOptions(LP1, HP1, LP2, HP2, BP, notch, peak, l.shelf, h.shelf),
-            rDefault(LP2), "Filter Type"),
+            rDefault(LP2), rDefaultDepends(loc),
+            rPreset(dynfilter_0, LP2),
+            rPreset(dynfilter_1, LP1),
+            rPreset(dynfilter_2, BP),
+            rPreset(dynfilter_3, LP1),
+            rPreset(dynfilter_4, LP1),
+            "Filter Type"),
     rParamI(Pstages,            rShort("stages"),
-            rLinear(0,5), rDefault(0), "Filter Stages"),
+            rLinear(0,5), rDefault(0), rDefaultDepends(loc),
+            rPreset(dynfilter_0, 1), rPreset(dynfilter_2, 2),
+            rPreset(dynfilter_3, 1), rPreset(dynfilter_4, 1),
+            "Filter Stages"),
     rParamF(baseq,               rShort("q"),      rUnit(none),  rLog(0.1, 1000),
             rDefaultDepends(loc),
             rPreset(ad_global_filter, 0x1.1592acp+0),
             rPreset(ad_voice_filter, 0x1.e2f3ap+1),
             rPreset(sub_filter, 0x1.1592acp+0),
             rPreset(in_effect, 0x1.384298p+2),
+            rPreset(dynfilter_0, 0x1.384298p+2),
+            rPreset(dynfilter_1, 0x1.384298p+2),
+            rPreset(dynfilter_2, 0x1.384298p+2),
+            rPreset(dynfilter_3, 0x1.d04b16p+2),
+            rPreset(dynfilter_4, 0x1.d04b16p+2),
             "Quality Factor (resonance/bandwidth)"),
     rParamF(basefreq,           rShort("cutoff"),
             rUnit(Hz),    rLog(31.25, 32000),
             rDefaultDepends(loc),
-            rPreset(ad_global_filter, 32000),
-            rPreset(ad_voice_filter, 32000),
-            rPreset(sub_filter, 32000),
+            rPreset(ad_global_filter, 30313.21f),
+            rPreset(ad_voice_filter, 30313.21f),
+            rPreset(sub_filter, 30313.21f),
             rPreset(in_effect, 0x1.f3fffcp+9),
+            rPreset(dynfilter_0, 0x1.65673ep+8),
+            rPreset(dynfilter_1, 0x1.818d7ap+10),
+            rPreset(dynfilter_2, 0x1.f3fffcp+9),
+            rPreset(dynfilter_3, 0x1.d48ab6p+8),
+            rPreset(dynfilter_4, 0x1.f3fffcp+9),
             "Base cutoff frequency"),
     rParamF(freqtracking,       rShort("f.track"), rUnit(%),
             rLinear(-100, 100), rDefault(0.0f),
@@ -98,25 +129,35 @@ const rtosc::Ports FilterParams::ports = {
             rLinear(-30, 30),   rDefault(0.0f),
             "Output Gain"),
     rParamI(Pnumformants,       rShort("formants"),
-            rLinear(1,12),      rDefault(3),
+            rLinear(1,12),      rDefault(3),         rDefaultDepends(loc),
+            rPreset(dynfilter_4, 2),
             "Number of formants to be used"),
     rParamZyn(Pformantslowness, rShort("slew"),
             rDefault(64), "Rate that formants change"),
     rParamZyn(Pvowelclearness,  rShort("clarity"), rDefault(64),
+            rDefaultDepends(loc), rPreset(dynfilter_4, 0),
             "How much each vowel is smudged with the next in sequence. A high clarity will avoid smudging."),
     rParamZyn(Pcenterfreq,      rShort("cutoff"),  rDefault(64),
             "Center Freq (formant)"),
     rParamZyn(Poctavesfreq,     rShort("octaves"), rDefault(64),
             "Number of octaves for formant"),
-
+    rParamZyn(Phpf, rShort("hpf"), rDefault(0),
+            "Waveguide HighPass"),
+    rParamZyn(Plpf, rShort("lpf"), rDefault(127),
+            "Waveguide LowPass"),
     rParamI(Psequencesize,    rShort("seq.size"),
-            rLinear(0, FF_MAX_SEQUENCE), rDefault(3), "Length of vowel sequence"),
+            rLinear(0, FF_MAX_SEQUENCE),
+            rDefault(3), rDefaultDepends(loc),
+            rPreset(dynfilter_3, 2), rPreset(dynfilter_4, 2),
+            "Length of vowel sequence"),
     rParamZyn(Psequencestretch, rShort("seq.str"),
             rDefault(40), "How modulators stretch the sequence"),
     rToggle(Psequencereversed,  rShort("reverse"),
             rDefault(false), "If the modulator input is inverted"),
 
-    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rDoc("Vowel number of this sequence position"), NULL,
+    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rProp(parameter)
+        rDefault([0 1 2 3 4 5 0 1])
+        rDoc("Vowel number of this sequence position"), NULL,
         [](const char *msg, RtData &d){
             FilterParams *obj = (FilterParams *) d.obj;
             const char *mm = msg;
@@ -128,10 +169,15 @@ const rtosc::Ports FilterParams::ports = {
             } else
                 d.reply(d.loc, "i", obj->Psequence[idx].nvowel);
         }},
-    {"type-svf::i", rProp(parameter) rShort("type")
+    {"type-svf::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
         rOptions(low, high, band, notch)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
-
+    {"type-moog::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
+        rOptions(HP, BP, LP)
+            rDoc("Filter Type"), 0, rOptionCb(Ptype)},
+    {"type-comb::i:c:S", rProp(parameter) rProp(enumerated) rShort("type")
+        rOptions(BWD, FWD, both, BWDN, FWDN, bothN)
+            rDoc("Comb Filter Type"), 0, rOptionCb(Ptype)},
     //UI reader
     {"Pvowels:", rDoc("Get Formant Vowels"), NULL,
         [](const char *, RtData &d) {
@@ -144,8 +190,8 @@ const rtosc::Ports FilterParams::ports = {
         rEnabledByCondition(is_formant_filter),
         &subports,
         [](const char *msg, RtData &d) {
-            const char *mm = msg; \
-            while(*mm && !isdigit(*mm)) ++mm; \
+            const char *mm = msg;
+            while(*mm && !isdigit(*mm)) ++mm;
             unsigned idx = atoi(mm);
 
             SNIP;
@@ -207,6 +253,22 @@ const rtosc::Ports FilterParams::ports = {
                         (float)obj->Pstages,
                         cf.b[0], cf.b[1], cf.b[2],
                         0.0,     -cf.a[1], -cf.a[2]);
+            } else if(obj->Pcategory == 3) {
+                int order = 0;
+                float gain = dB2rap(obj->getgain());
+                if(obj->Ptype != 6 && obj->Ptype != 7 && obj->Ptype != 8)
+                    gain = 1.0;
+                int tmp = 4-obj->Ptype;
+                if(tmp < 0 || tmp > 8)
+                    return;
+                auto cf = AnalogFilter::computeCoeff(4-obj->Ptype,
+                        Filter::getrealfreq(obj->getfreq()),
+                        obj->getq(), obj->Pstages,
+                        gain, 48000, order);
+                d.reply(d.loc, "fffffff",
+                        (float)obj->Pstages,
+                        cf.c[0], cf.c[1], cf.c[2],
+                        0.0,     cf.d[1], cf.d[2]);
             }
         }},
     //    "", NULL, [](){}},"/freq"
@@ -259,8 +321,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pfreq = rtosc_argument(msg, 0).i;
-                obj->basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
-                obj->basefreq  = powf(2.0f, obj->basefreq + 9.96578428f);
+                obj->basefreq  = basefreqFromOldPreq(Pfreq);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pfreq);
             } else {
@@ -276,11 +337,11 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pfreqtracking = rtosc_argument(msg, 0).i;
-                obj->freqtracking = 100 * (Pfreqtracking - 64.0f) / (64.0f);
+                obj->freqtracking = 100.0f * (Pfreqtracking - 64.0f) / (64.0f);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pfreqtracking);
             } else {
-                int Pfreqtracking = obj->freqtracking/100.0*64.0 + 64.0;
+                int Pfreqtracking = static_cast<int>(roundf(((obj->freqtracking/100.0f) * 64.0f + 64.0f)));
                 d.reply(d.loc, "i", Pfreqtracking);
             }
         }},
@@ -289,7 +350,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pgain = rtosc_argument(msg, 0).i;
-                obj->gain   = (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
+                obj->gain   = gainFromOldPgain(Pgain); //-30..30dB
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pgain);
             } else {
@@ -303,7 +364,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams*)d.obj;
             if(rtosc_narguments(msg)) {
                 int Pq = rtosc_argument(msg, 0).i;
-                obj->baseq  = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+                obj->baseq  = baseqFromOldPq(Pq);
                 rChangeCb;
                 d.broadcast(d.loc, "i", Pq);
             } else {
@@ -372,13 +433,11 @@ FilterParams::~FilterParams()
 void FilterParams::defaults()
 {
     Ptype = Dtype;
-    Pfreq = Dfreq;
-    Pq    = Dq;
 
     Pstages       = 0;
-    basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
+    basefreq  = (Dfreq / 64.0f - 1.0f) * 5.0f;
     basefreq  = powf(2.0f, basefreq + 9.96578428f);
-    baseq     = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+    baseq     = expf(powf((float) Dq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
 
     gain = 0.0f;
     freqtracking = 0.0f;
@@ -396,20 +455,47 @@ void FilterParams::defaults()
         Psequence[i].nvowel = i % FF_MAX_VOWELS;
 
     Psequencestretch  = 40;
-    Psequencereversed = 0;
+    Psequencereversed = false;
     Pcenterfreq     = 64; //1 kHz
     Poctavesfreq    = 64;
     Pvowelclearness = 64;
+    Phpf    = 0;
+    Plpf    = 127;
 }
 
 void FilterParams::defaults(int n)
 {
     int j = n;
 
+    updateLoc(loc, n);
     for(int i = 0; i < FF_MAX_FORMANTS; ++i) {
         Pvowels[j].formants[i].freq = (int)(RND * 127.0f); //some random freqs
         Pvowels[j].formants[i].q    = 64;
         Pvowels[j].formants[i].amp  = 127;
+    }
+}
+
+void FilterParams::updateLoc(int newloc)
+{
+    loc = newloc;
+    for(int j = 0; j < FF_MAX_VOWELS; ++j)
+        updateLoc(newloc, j);
+}
+
+void FilterParams::updateLoc(int newloc, int n)
+{
+    int j   = n;
+    for(int i = 0; i < FF_MAX_FORMANTS; ++i)
+    {
+        if (newloc == dynfilter_3 && i < 2 && j < 3)
+        {
+            Pvowels[j].formants[i].loc  = j * 3 + i; /* 0 .. 5 */
+        } else if (newloc == dynfilter_4 && i < 2 && j < 2) {
+            Pvowels[j].formants[i].loc  = j * 3 + i; /* 6 .. 9 */
+        } else {
+            Pvowels[j].formants[i].loc =
+                std::numeric_limits<decltype(Pvowels[j].formants[i].loc)>::max();
+        }
     }
 }
 
@@ -426,8 +512,6 @@ void FilterParams::getfromFilterParams(const FilterParams *pars)
         return;
 
     Ptype = pars->Ptype;
-    Pfreq = pars->Pfreq;
-    Pq    = pars->Pq;
 
     Pstages       = pars->Pstages;
     freqtracking  = pars->freqtracking;
@@ -469,12 +553,31 @@ float FilterParams::getq() const
 }
 float FilterParams::getfreqtracking(float notefreq) const
 {
-    return log2f(notefreq / 440.0f) * (freqtracking / 100.0);
+    return log2f(notefreq / 440.0f) * (freqtracking / 100.0f);
 }
 
 float FilterParams::getgain() const
 {
     return gain;
+}
+
+/*
+ * wrappers old <-> new parameters
+ */
+float FilterParams::baseqFromOldPq(int Pq)
+{
+    return expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+}
+
+float FilterParams::gainFromOldPgain(int Pgain)
+{
+    return (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
+}
+
+float FilterParams::basefreqFromOldPreq(int Pfreq)
+{
+    float tmp = (Pfreq / 64.0f - 1.0f) * 5.0f;
+    return powf(2.0f, tmp + 9.96578428f);
 }
 
 /*
@@ -626,6 +729,8 @@ void FilterParams::getfromXML(XMLwrapper& xml)
         gain         = xml.getparreal("gain",       0);
         freqtracking = xml.getparreal("freq_tracking", 0);
     }
+    float basefreq_min = std::atof(ports["basefreq"]->meta()["min"]);
+    basefreq = std::max(basefreq, basefreq_min);
 
     //formant filter parameters
     if(xml.enterbranch("FORMANT_FILTER")) {
@@ -664,7 +769,6 @@ void FilterParams::paste(FilterParams &x)
     COPY(Pcategory);
     COPY(Ptype);
     COPY(basefreq);
-    COPY(Pq);
     COPY(Pstages);
     COPY(freqtracking);
     COPY(gain);

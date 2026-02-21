@@ -89,12 +89,20 @@ int Fl_Osc_Dial::handle(int ev)
 
 void Fl_Osc_Dial::OSC_value(int v)
 {
+    assert(dataType == dataTypeT::type_uchar);
     value(v + value() - floorf(value()) +
           (minimum() == 64 ? 0 : minimum()));
 }
 
+void Fl_Osc_Dial::OSC_value(float v)
+{
+    assert(dataType == dataTypeT::type_float);
+    value(v);
+}
+
 void Fl_Osc_Dial::OSC_value(char v)
 {
+    assert(dataType == dataTypeT::type_uchar);
     value(v + value() - floorf(value()) +
           minimum());
 }
@@ -108,10 +116,19 @@ void Fl_Osc_Dial::cb(void)
 {
     assert(osc);
 
-    if(64 != (int)minimum())
-        oscWrite(ext, "i", (int)(value()-minimum()));
-    else
-        oscWrite(ext, "i", (int)(value()));
+    if(dataType == dataTypeT::type_uchar)
+    {
+        if(64 != (int)minimum())
+            oscWrite(ext, "i", (int)(value()-minimum()));
+        else
+            oscWrite(ext, "i", (int)(value()));
+    }
+    else if(dataType == dataTypeT::type_float)
+    {
+        oscWrite(ext, "f", static_cast<float>(value()));
+    }
+    else { assert(false); }
+
 
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

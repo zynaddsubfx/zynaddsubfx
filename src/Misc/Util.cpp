@@ -85,22 +85,22 @@ float getdetune(unsigned char type,
     switch(type) {
 //	case 1: is used for the default (see below)
         case 2:
-            cdet   = fabs(cdetune * 10.0f);
-            findet = fabs(fdetune / 8192.0f) * 10.0f;
+            cdet   = fabsf(cdetune * 10.0f);
+            findet = fabsf(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet   = fabs(cdetune * 100.0f);
-            findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
+            cdet   = fabsf(cdetune * 100.0f);
+            findet = powf(10, fabsf(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
-            cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+            cdet   = fabsf(cdetune * 701.95500087f); //perfect fifth
             findet =
-                (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
+                (powf(2, fabsf(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
             break;
         //case ...: need to update N_DETUNE_TYPES, if you'll add more
         default:
-            cdet   = fabs(cdetune * 50.0f);
-            findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
+            cdet   = fabsf(cdetune * 50.0f);
+            findet = fabsf(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
             break;
     }
     if(finedetune < 8192)
@@ -129,7 +129,7 @@ void set_realtime()
     sched_param sc;
     sc.sched_priority = 60;
     //if you want get "sched_setscheduler undeclared" from compilation,
-    //you can safely remove the folowing line:
+    //you can safely remove the following line:
     sched_setscheduler(0, SCHED_FIFO, &sc);
     //if (err==0) printf("Real-time");
 #endif
@@ -161,11 +161,11 @@ void os_usleep(long length)
 }
 #endif
 
-//!< maximum lenght a pid has on any POSIX system
+//!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
 
-//!< safe pid lenght guess, posix conform
+//!< safe pid length guess, posix conform
 std::size_t os_guess_pid_length()
 {
     const char* pid_max_file = "/proc/sys/kernel/pid_max";
@@ -221,26 +221,30 @@ float SYNTH_T::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
-    assert(len > (size_t)pos + 1);
-    const int l_pos      = (int)pos,
-              r_pos      = l_pos + 1;
-    const float leftness = pos - l_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+#ifdef NDEBUG
+    (void)len;
+#else
+    assert(len > (size_t)pos + 1 && pos >= 0);
+#endif
+    const unsigned int l_pos      = (int)pos;
+    const unsigned int r_pos      = l_pos + 1;
+    const float rightness = pos - (float)l_pos;
+    return data[l_pos] + (data[r_pos] - data[l_pos]) * rightness;
 }
 
 float cinterpolate(const float *data, size_t len, float pos)
 {
-    const unsigned int i_pos = pos,
-                       l_pos = i_pos % len,
-                       r_pos = l_pos + 1 < len ? l_pos + 1 : 0;
-    const float leftness = pos - i_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+    const unsigned int i_pos = (int)pos;
+    const unsigned int l_pos = i_pos % len;
+    const unsigned int r_pos = (l_pos + 1) < len ? l_pos + 1 : 0;
+    const float rightness = pos - (float)i_pos;
+    return data[l_pos] + (data[r_pos] - data[l_pos]) * rightness;
 }
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
 {
-    char argT[v.size()+1];
-    rtosc_arg_t arg[v.size()];
+    STACKALLOC(char, argT, v.size()+1);
+    STACKALLOC(rtosc_arg_t, arg, v.size());
     unsigned i=0;
     for(auto &vv : v) {
         argT[i]  = 's';
@@ -253,6 +257,38 @@ char *rtosc_splat(const char *path, std::set<std::string> v)
     char *buf = new char[len];
     rtosc_amessage(buf, len, path, argT, arg);
     return buf;
+}
+
+void expanddirname(std::string &dirname) {
+    if (dirname.empty())
+        return;
+
+    // if the directory name starts with a ~ and the $HOME variable is
+    // defined in the environment, replace ~ by the content of $HOME
+    if (dirname.at(0) == '~') {
+        char *home_dirname = getenv("HOME");
+        if (home_dirname != NULL) {
+            dirname = std::string(home_dirname) + dirname.substr(1);
+        }
+    }
+
+#ifdef ZYN_DATADIR
+    {
+        std::string var = "$ZYN_DATADIR";
+        size_t pos = dirname.find(var);
+        if (pos != std::string::npos) {
+            dirname.replace(pos, var.length(), ZYN_DATADIR);
+        }
+    }
+#endif
+
+    normalizedirsuffix(dirname);
+}
+
+void normalizedirsuffix(std::string &dirname) {
+    if(((dirname[dirname.size() - 1]) != '/')
+       && ((dirname[dirname.size() - 1]) != '\\'))
+        dirname += "/";
 }
 
 }

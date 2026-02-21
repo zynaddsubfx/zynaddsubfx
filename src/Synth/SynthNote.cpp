@@ -10,6 +10,7 @@
   of the License, or (at your option) any later version.
 */
 #include "SynthNote.h"
+#include "../Params/Controller.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include <cstring>
@@ -18,13 +19,15 @@
 
 namespace zyn {
 
-SynthNote::SynthNote(SynthParams &pars)
+SynthNote::SynthNote(const SynthParams &pars, bool constPowerMixing)
     :memory(pars.memory),
-    legato(pars.synth, pars.frequency, pars.velocity, pars.portamento,
-            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
+    legato(pars.synth, pars.velocity, pars.portamento,
+            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time),
+            m_constPowerMixing(constPowerMixing)
 {}
 
-SynthNote::Legato::Legato(const SYNTH_T &synth_, float freq, float vel, int port,
+SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
+                          Portamento *portamento,
                           float note_log2_freq, bool quiet, prng_t seed)
     :synth(synth_)
 {
@@ -35,22 +38,20 @@ SynthNote::Legato::Legato(const SYNTH_T &synth_, float freq, float vel, int port
         fade.length = 1;                    // (if something's fishy)
     fade.step  = (1.0f / fade.length);
     decounter  = -10;
-    param.freq = freq;
     param.vel  = vel;
-    param.portamento = port;
+    param.portamento = portamento;
     param.note_log2_freq = note_log2_freq;
     param.seed = seed;
-    lastfreq = 0.0f;
+    lastfreq_log2 = note_log2_freq;
     silent   = quiet;
 }
 
-int SynthNote::Legato::update(LegatoParams pars)
+int SynthNote::Legato::update(const LegatoParams &pars)
 {
     if(pars.externcall)
         msg = LM_Norm;
     if(msg != LM_CatchUp) {
-        lastfreq   = param.freq;
-        param.freq = pars.frequency;
+        lastfreq_log2 = param.note_log2_freq;
         param.vel  = pars.velocity;
         param.portamento = pars.portamento;
         param.note_log2_freq = pars.note_log2_freq;
@@ -91,7 +92,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
                         // the note to the actual parameters.
                         decounter = -10;
                         msg = LM_ToNorm;
-                        LegatoParams pars{param.freq, param.vel, param.portamento,
+                        LegatoParams pars{param.vel, param.portamento,
                                           param.note_log2_freq, false, param.seed};
                         note.legatonote(pars);
                         break;
@@ -132,9 +133,9 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
                         //This freq should make this now silent note to catch-up/resync
                         //with the heard note for the same length it stayed at the
                         //previous freq during the fadeout.
-                        float catchupfreq = param.freq * (param.freq / lastfreq);
-                        LegatoParams pars{catchupfreq, param.vel, param.portamento,
-                                          param.note_log2_freq, false, param.seed};
+                        const float catchupfreq_log2 = 2.0f * param.note_log2_freq - lastfreq_log2;
+                        LegatoParams pars{param.vel, param.portamento,
+                            catchupfreq_log2, false, param.seed};
                         note.legatonote(pars);
                         break;
                     }
@@ -153,7 +154,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
 
 void SynthNote::setVelocity(float velocity_) {
     legato.setSilent(true); //Let legato.update(...) returns 0.
-    LegatoParams pars{legato.getFreq(), velocity_,
+    LegatoParams pars{velocity_,
                legato.getPortamento(), legato.getNoteLog2Freq(), true, legato.getSeed()};
     try {
         legatonote(pars);
@@ -163,8 +164,38 @@ void SynthNote::setVelocity(float velocity_) {
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
 
+void SynthNote::setPitch(float log2_freq_) {
+    legato.setSilent(true); //Let legato.update(...) return 0.
+    LegatoParams pars{legato.getVelocity(),
+               legato.getPortamento(), log2_freq_, true, legato.getSeed()};
+    try {
+        legatonote(pars);
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
+    }
+    legato.setDecounter(0); //avoid chopping sound due fade-in
+}
+
+void SynthNote::setFilterCutoff(float value)
+{
+    /* set current value, if first time */
+    if (filtercutoff_relfreq.isSet() == false)
+        filtercutoff_relfreq = ctl.filtercutoff.relfreq;
+    /* update value */
+    filtercutoff_relfreq =
+        (value - 64.0f) * ctl.filtercutoff.depth / 4096.0f * 3.321928f;
+}
+
+float SynthNote::getFilterCutoffRelFreq(void)
+{
+    if (filtercutoff_relfreq.isSet() == false)
+        return (ctl.filtercutoff.relfreq);
+    else
+        return (filtercutoff_relfreq);
+}
+
 float SynthNote::getRandomFloat() {
-    return (getRandomUint() / (INT32_MAX * 1.0f));
+    return (getRandomUint() / (INT32_MAX_FLOAT * 1.0f));
 }
 
 prng_t SynthNote::getRandomUint() {

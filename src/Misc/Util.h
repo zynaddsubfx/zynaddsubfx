@@ -25,6 +25,12 @@
 
 namespace zyn {
 
+#ifdef _MSC_VER
+#define STACKALLOC(type, name, size) type *name = (type*)(_alloca((size)*sizeof(type)))
+#else
+#define STACKALLOC(type, name, size) type name[size]
+#endif
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 
@@ -61,7 +67,7 @@ void set_realtime();
 /**Os independent sleep in microsecond*/
 void os_usleep(long length);
 
-//! returns pid padded to maximum pid lenght, posix conform
+//! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
 
 std::string legalizeFilename(std::string filename);
@@ -141,10 +147,10 @@ inline void sprng(prng_t p)
 /*
  * The random generator (0.0f..1.0f)
  */
-#ifndef INT32_MAX
-#define INT32_MAX      (2147483647)
+#ifndef INT32_MAX_FLOAT
+#define INT32_MAX_FLOAT   0x7fffff80	/* the float mantissa is only 24-bit */
 #endif
-#define RND (prng() / (INT32_MAX * 1.0f))
+#define RND (prng() / (INT32_MAX_FLOAT * 1.0f))
 
 //Linear Interpolation
 float interpolate(const float *data, size_t len, float pos);
@@ -159,12 +165,19 @@ static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 
 char *rtosc_splat(const char *path, std::set<std::string>);
 
+/** Expands ~ prefix & ZYN_DATADIR in dirname */
+void expanddirname(std::string &dirname);
+
+/** Ensure that the directory name is suffixed by a
+ * directory separator */
+void normalizedirsuffix(std::string &dirname);
+
 /**
  * Port macros - these produce easy and regular port definitions for common
  * types
  */
 #define rParamZyn(name, ...) \
-  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
+  {STRINGIFY(name) "::i",  rProp(parameter) rDefaultProps rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 
 #define rPresetType \
 {"preset-type:", rProp(internal) rDoc("clipboard type of object"), 0, \
@@ -172,23 +185,40 @@ char *rtosc_splat(const char *path, std::set<std::string>);
         rObject *obj = (rObject*)d.obj; \
         d.reply(d.loc, "s", obj->type);}}
 
-#define rPaste \
+// let only realtime pastes reply,
+// because non-realtime pastes need the free on non-realtime side (same thread)
+#define rPasteInternal(isRt) \
 rPresetType, \
 {"paste:b", rProp(internal) rDoc("paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rPaste...\n"); \
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data; \
         rObject &o = *(rObject*)d.obj;\
-        o.paste(paste);}}
+        o.paste(paste);\
+        rObject* ptr = &paste;\
+        if(isRt)\
+            d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);\
+        else \
+            delete ptr;}}
 
-#define rArrayPaste \
+#define rArrayPasteInternal(isRt) \
 {"paste-array:bi", rProp(internal) rDoc("array paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rArrayPaste...\n"); \
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data; \
         int field = rtosc_argument(m,1).i; \
         rObject &o = *(rObject*)d.obj;\
-        o.pasteArray(paste,field);}}
+        o.pasteArray(paste,field);\
+        rObject* ptr = &paste;\
+        if(isRt)\
+            d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);\
+        else\
+            delete ptr;}}
+
+#define rPaste rPasteInternal(false)
+#define rPasteRt rPasteInternal(true)
+#define rArrayPaste rArrayPasteInternal(false)
+#define rArrayPasteRt rArrayPasteInternal(true)
 
 }
 

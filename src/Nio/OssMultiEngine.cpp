@@ -37,6 +37,8 @@ extern zyn::MiddleWare *middleware;
 
 namespace zyn {
 
+static const int OssNonBlocking = 0;
+
 OssMultiEngine :: OssMultiEngine(const SYNTH_T &synth,
     const oss_devs_t &oss_devs)
     :AudioOut(synth),
@@ -86,12 +88,13 @@ OssMultiEngine :: openAudio()
         device = linux_oss_wave_out_dev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
-    handle = open(device, O_WRONLY, O_NONBLOCK);
+    handle = open(device, O_WRONLY | O_NONBLOCK);
     if (handle == -1) {
         cerr << "ERROR - I can't open the "
             << device << '.' << endl;
         return (false);
     }
+    ioctl(handle, FIONBIO, &OssNonBlocking);
     ioctl(handle, SNDCTL_DSP_RESET, 0);
 
     /* Figure out the correct format first */
@@ -236,7 +239,8 @@ OssMultiEngine :: audioThreadCb()
                 for (y = 0; y != synth.buffersize; y++) {
                     float l = part->partoutl[y];
                     float r = part->partoutr[y];
-                    stereoCompressor(synth.samplerate, peaks[x/2], l, r);
+                    if(isOutputCompressionEnabled)
+                        stereoCompressor(synth.samplerate, peaks[x/2], l, r);
                     smps.ps32[y * channels + x] = (int)(l * 2147483647.0f);
                     smps.ps32[y * channels + x + 1] = (int)(r * 2147483647.0f);
                 }
@@ -244,7 +248,8 @@ OssMultiEngine :: audioThreadCb()
                 for (y = 0; y != synth.buffersize; y++) {
                     float l = part->partoutl[y];
                     float r = part->partoutr[y];
-                    stereoCompressor(synth.samplerate, peaks[x/2], l, r);
+                    if(isOutputCompressionEnabled)
+                        stereoCompressor(synth.samplerate, peaks[x/2], l, r);
                     smps.ps16[y * channels + x] = (short int)(l * 32767.0f);
                     smps.ps16[y * channels + x + 1] = (short int)(r * 32767.0f);
                 }

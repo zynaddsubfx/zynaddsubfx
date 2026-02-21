@@ -77,8 +77,8 @@ class Fl_Oscilloscope : public Fl_Box, public Fl_Osc_Widget
             //normalize
             float max=0;
             for (int i=0;i<oscilsize;i++)
-                if(max<fabs(smps[i]))
-                    max=fabs(smps[i]);
+                if(max<fabsf(smps[i]))
+                    max=fabsf(smps[i]);
             if (max<0.00001) max=1.0;
             max *= -1.05;
 

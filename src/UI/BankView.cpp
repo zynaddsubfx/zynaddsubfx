@@ -104,7 +104,7 @@ void BankSlot::update(const char *name__, const char *fname__)
     filename_ = fname__;
     snprintf(labelstr, 127, "%d. %s", nslot, name_.c_str());
     label(labelstr);
-    
+
     if(name_.empty())
         label("");
 
@@ -285,7 +285,7 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
  * - Read From Slot
  * - Write To Slot
  * - Swap Slot First Selection
- * - Swap Slot Second Selction
+ * - Swap Slot Second Selection
  *
  *   TODO restore autoclose functionality
  */
@@ -382,7 +382,7 @@ void BankView::OSC_raw(const char *msg)
             slots[nslot]->update(name, fname);
     }
 }
-        
+
 void BankView::cbwig(Fl_Widget *w)
 {
     cbwig_ = w;

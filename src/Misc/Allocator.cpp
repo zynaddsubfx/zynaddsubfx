@@ -16,6 +16,7 @@
 #include <cstdio>
 #include "../../tlsf/tlsf.h"
 #include "Allocator.h"
+#include "Util.h"
 
 namespace zyn {
 
@@ -49,7 +50,7 @@ struct AllocatorImpl
 Allocator::Allocator(void) : transaction_active()
 {
     impl = new AllocatorImpl;
-    size_t default_size = 10*1024*1024;
+    size_t default_size = 16*1024*1024;
     impl->pools = (next_t*)malloc(default_size);
     impl->pools->next = 0x0;
     impl->pools->pool_size = default_size;
@@ -89,7 +90,7 @@ void AllocatorClass::dealloc_mem(void *memory)
 bool AllocatorClass::lowMemory(unsigned n, size_t chunk_size) const
 {
     //This should stay on the stack
-    void *buf[n];
+    STACKALLOC(void*, buf, n);
     for(unsigned i=0; i<n; ++i)
         buf[i] = tlsf_malloc(impl->tlsf, chunk_size);
     bool outOfMem = false;
@@ -124,15 +125,15 @@ void AllocatorClass::addMemory(void *v, size_t mem_size)
 //From tlsf internals
 typedef struct block_header_t
 {
-	/* Points to the previous physical block. */
-	struct block_header_t* prev_phys_block;
+    /* Points to the previous physical block. */
+    struct block_header_t* prev_phys_block;
 
-	/* The size of this block, excluding the block header. */
-	size_t size;
+    /* The size of this block, excluding the block header. */
+    size_t size;
 
-	/* Next and previous free blocks. */
-	struct block_header_t* next_free;
-	struct block_header_t* prev_free;
+    /* Next and previous free blocks. */
+    struct block_header_t* next_free;
+    struct block_header_t* prev_free;
 } block_header_t;
 static const size_t block_header_free_bit = 1 << 0;
 #endif

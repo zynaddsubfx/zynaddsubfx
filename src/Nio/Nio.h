@@ -57,6 +57,9 @@ namespace Nio
     void waveStop(void);
     void waveEnd(void);
 
+    void setAudioCompressor(bool isEnabled);
+    bool getAudioCompressor(void);
+
     extern bool autoConnect;
     extern bool pidInClientName;
     extern std::string defaultSource;

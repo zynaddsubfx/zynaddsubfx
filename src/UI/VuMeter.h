@@ -30,5 +30,5 @@ class VuMeter: public Fl_Box
                 x=1.0;
             return x;
         }
-}; 
+};
 #endif

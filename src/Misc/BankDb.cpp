@@ -246,7 +246,7 @@ BankEntry BankDb::processXiz(std::string filename,
     int ret = 0;
     time = rand();
 #endif
-    
+
 
     //quickly check if the file exists in the cache and if it is up-to-date
     if(cache.find(fname) != cache.end() &&
@@ -318,7 +318,7 @@ BankEntry BankDb::processXiz(std::string filename,
     //Try to obtain other metadata (expensive)
     XMLwrapper xml;
     ret = xml.loadXMLfile(fname);
-    if(xml.enterbranch("INSTRUMENT")) {
+    if(ret && xml.enterbranch("INSTRUMENT")) {
         if(xml.enterbranch("INFO")) {
             char author[1024];
             char comments[1024];

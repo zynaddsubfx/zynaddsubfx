@@ -5,4 +5,6 @@ Requirements for this directory:
  * pst-sigsys (latex module)
  * auto-pst-pdf (latex module)
  * pst-tools (latex module)
+ * pstricks (latex module)
  * gnuplot
+ * asciidoctor-pdf (ruby module)

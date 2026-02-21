@@ -26,7 +26,7 @@
 
 //Forward Declarations
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(HAVE_CPP_STD_COMPLEX)
 #include <complex>
 #else
 namespace std {
@@ -67,12 +67,17 @@ class  Part;
 
 class  Filter;
 class  AnalogFilter;
+class  MoogFilter;
+class  CombFilter;
 class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
-typedef double fftw_real;
-typedef std::complex<fftw_real> fft_t;
+class  Sync;
+
+
+typedef float fftwf_real;
+typedef std::complex<fftwf_real> fft_t;
 
 /**
  * The number of harmonics of additive synth
@@ -99,7 +104,7 @@ typedef std::complex<fftw_real> fft_t;
 #define NUM_MIDI_PARTS 16
 
 /*
- * Number of Midi channes
+ * Number of Midi channels
  */
 #define NUM_MIDI_CHANNELS 16
 
@@ -134,6 +139,10 @@ typedef std::complex<fftw_real> fft_t;
  */
 #define NUM_KIT_ITEMS 16
 
+/*
+ * Maximum number of "strings" in Sympathetic Resonance Effect
+ */
+#define NUM_SYMPATHETIC_STRINGS 228U // 76*3
 
 /*
  * How is applied the velocity sensing
@@ -174,10 +183,16 @@ typedef std::complex<fftw_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+/*
+ * Maximum length of the reverse delay effect
+ */
+#define MAX_REV_DELAY_SECONDS 4.0f
+
 #define MAX_PRESETTYPE_SIZE 30
 
 #define LOG_2 0.693147181f
 #define PI 3.1415926536f
+#define PIDIV2 1.5707963268f
 #define LOG_10 2.302585093f
 
 /*
@@ -189,7 +204,6 @@ typedef std::complex<fftw_real> fft_t;
  * Envelope Limits
  */
 #define MAX_ENVELOPE_POINTS 40
-#define MIN_ENVELOPE_DB -400
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude
@@ -201,8 +215,8 @@ typedef std::complex<fftw_real> fft_t;
 /*
  * How the amplitude threshold is computed
  */
-#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) \
-                                          / (fabs((b) + (a) \
+#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabsf((b) - (a)) \
+                                          / (fabsf((b) + (a) \
                                                   + 0.0000000001f))) > \
                                          AMPLITUDE_INTERPOLATION_THRESHOLD)
 
@@ -237,6 +251,7 @@ enum ONOFFTYPE {
 
 enum MidiControllers {
     C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
+    C_aftertouch = 1002, C_pitch = 1003,
     C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
     C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
     C_fmamp  = 76,
@@ -253,37 +268,36 @@ enum LegatoMsg {
 
 //is like i=(int)(floor(f))
 #ifdef ASM_F2I_YES
-#define F2I(f, \
-            i) __asm__ __volatile__ ("fistpl %0" : "=m" (i) : "t" (f \
-                                                                   - \
-                                                                   0.49999999f) \
-                                     : "st");
+#define F2I(f, i)\
+    do {\
+        __asm__ __volatile__\
+            ("fistpl %0" : "=m" (i) : "t" (f - 0.49999999f) : "st");\
+    } while (false)
 #else
-#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
+#define F2I(f, i)\
+    do {\
+        (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));\
+    } while (false)
 #endif
 
 
-
-#ifndef  O_BINARY
-#define O_BINARY 0
-#endif
 
 template<class T>
-class m_unique_ptr
+class m_unique_array
 {
-    T* ptr = nullptr;
+    T* ptr = nullptr; //!< @invariant nullptr or pointer to new[]'ed memory
 public:
-    m_unique_ptr() = default;
-    m_unique_ptr(m_unique_ptr&& other) : ptr(other.ptr) {
+    m_unique_array() = default;
+    m_unique_array(m_unique_array&& other) : ptr(other.ptr) {
         other.ptr = nullptr;
     }
-    m_unique_ptr& operator=(m_unique_ptr&& other) {
+    m_unique_array& operator=(m_unique_array&& other) {
         ptr = other.ptr;
         other.ptr = nullptr;
         return *this;
     }
-    m_unique_ptr(const m_unique_ptr& other) = delete;
-    ~m_unique_ptr() { ptr = nullptr; }
+    m_unique_array(const m_unique_array& other) = delete;
+    ~m_unique_array() { delete[] ptr; ptr = nullptr; }
     void resize(unsigned sz) {
         delete[] ptr;
         ptr = new T[sz]; }
@@ -309,7 +323,7 @@ struct SYNTH_T {
     SYNTH_T& operator=(SYNTH_T&& ) = default;
 
     /** the buffer to add noise in order to avoid denormalisation */
-    m_unique_ptr<float> denormalkillbuf;
+    m_unique_array<float> denormalkillbuf;
 
     /**Sampling rate*/
     unsigned int samplerate;
@@ -319,7 +333,7 @@ struct SYNTH_T {
      * All internal transfer of sound data use buffer of this size.
      * All parameters are constant during this period of time, except
      * some parameters(like amplitudes) which are linearly interpolated.
-     * If you increase this you'll ecounter big latencies, but if you
+     * If you increase this you'll encounter big latencies, but if you
      * decrease this the CPU requirements gets high.
      */
     int buffersize;
@@ -344,6 +358,38 @@ struct SYNTH_T {
     }
     void alias(bool randomize=true);
     static float numRandom(void); //defined in Util.cpp for now
+};
+
+class smooth_float {
+private:
+    bool init;
+    float curr_value;
+    float next_value;
+public:
+    smooth_float() {
+        init = false;
+        next_value = curr_value = 0.0f;
+    };
+    smooth_float(const float value) {
+        init = true;
+        next_value = curr_value = value;
+    };
+    operator float() {
+        const float delta = (next_value - curr_value) / 32.0f;
+        curr_value += delta;
+        return (curr_value);
+    };
+    void operator =(const float value) {
+      if (init) {
+          next_value = value;
+      } else {
+          next_value = curr_value = value;
+          init = true;
+      }
+    };
+    bool isSet() const {
+        return (init);
+    };
 };
 
 }

@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
+#include <cstdint>
 
 namespace zyn {
 
@@ -31,10 +32,10 @@ class FilterParams:public PresetsArray
                      const AbsTime *time_ = nullptr);
         FilterParams(consumer_location_t loc,
                      const AbsTime *time_ = nullptr);
-        ~FilterParams();
+        ~FilterParams() override;
 
-        void add2XML(XMLwrapper& xml);
-        void add2XMLsection(XMLwrapper& xml, int n);
+        void add2XML(XMLwrapper& xml) override;
+        void add2XMLsection(XMLwrapper& xml, int n) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
         void getfromXMLsection(XMLwrapper& xml, int n);
@@ -52,18 +53,17 @@ class FilterParams:public PresetsArray
         float getfreqtracking(float notefreq) const ;
         float getgain() const ;
 
-        unsigned Pcategory:2;  //< Filter category (Analog/Formant/StVar)
-        unsigned Ptype:8;      //< Filter type  (for analog lpf,hpf,bpf..)
-        unsigned Pstages:8;    //< filter stages+1
-        float    basefreq;     //< Base cutoff frequency (Hz)
-        float    baseq;        //< Q parameters (resonance or bandwidth)
-        float    freqtracking; //< Tracking of center frequency with note frequency (percentage)
-        float    gain;         //< filter's output gain (dB)
+        unsigned Pcategory:4;  //!< Filter category (Analog/Formant/StVar/Moog/Comb)
+        unsigned Ptype:8;      //!< Filter type  (for analog lpf,hpf,bpf..)
+        unsigned Pstages:8;    //!< filter stages+1
+        float    basefreq;     //!< Base cutoff frequency (Hz)
+        float    baseq;        //!< Q parameters (resonance or bandwidth)
+        float    freqtracking; //!< Tracking of center frequency with note frequency (percentage)
+        float    gain;         //!< filter's output gain (dB)
 
-        int Pq;         //dummy
-        int Pfreq;      //dummy
-        int Pfreqtrack; //dummy
-        int Pgain;      //dummy
+        static float baseqFromOldPq(int Pq);
+        static float gainFromOldPgain(int Pgain);
+        static float basefreqFromOldPreq(int Pfreq);
 
         //Formant filter parameters
         unsigned char Pnumformants; //how many formants are used
@@ -71,15 +71,19 @@ class FilterParams:public PresetsArray
         unsigned char Pvowelclearness; //how vowels are kept clean (how much try to avoid "mixed" vowels)
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
 
+        //Comb filter parameter
+        unsigned char Phpf, Plpf; //the center frequency of the res. func., and the number of octaves
+
         struct Pvowels_t {
             struct formants_t {
+                unsigned char loc; //!< only relevant for DynFilter's default values
                 unsigned char freq, amp, q; //frequency,amplitude,Q
             } formants[FF_MAX_FORMANTS];
         } Pvowels[FF_MAX_VOWELS];
 
         unsigned char Psequencesize; //how many vowels are in the sequence
         unsigned char Psequencestretch; //how the sequence is stretched (how the input from filter envelopes/LFOs/etc. is "stretched")
-        unsigned char Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
+        bool Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
         struct {
             unsigned char nvowel; //the vowel from the position
         } Psequence[FF_MAX_SEQUENCE];
@@ -95,6 +99,7 @@ class FilterParams:public PresetsArray
 
         void defaults(int n); //!< set default for formant @p n
 
+        void updateLoc(int newloc);
         int loc; //!< consumer location
         bool changed;
 
@@ -106,6 +111,7 @@ class FilterParams:public PresetsArray
     private:
         // common
         void setup();
+        void updateLoc(int newloc, int n);
 
         //stored default parameters
         unsigned char Dtype;

@@ -16,10 +16,11 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include <cstdint>
 
 namespace zyn {
 
-enum FMTYPE {
+enum class FMTYPE {
     NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, WAVE_MOD
 };
 
@@ -38,7 +39,7 @@ struct ADnoteGlobalParam {
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
 
-    unsigned char PStereo;
+    bool PStereo;
 
 
     /******************************************
@@ -97,7 +98,7 @@ struct ADnoteGlobalParam {
     Resonance *Reson;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
-    unsigned char Hrandgrouping;
+    bool Hrandgrouping;
 
     const AbsTime *time;
     int64_t last_update_timestamp;
@@ -116,7 +117,7 @@ struct ADnoteVoiceParam {
     void add2XML(XMLwrapper& xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
-    void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson,
+    void enable(const SYNTH_T &synth, FFTwrapper *fft, const Resonance *Reson,
                 const AbsTime *time);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
@@ -151,7 +152,7 @@ struct ADnoteVoiceParam {
     unsigned char PDelay;
 
     /** If the resonance is enabled for this voice */
-    unsigned char Presonance;
+    bool Presonance;
 
     // What external oscil should I use, -1 for internal OscilSmp&FMSmp
     short int Pextoscil, PextFMoscil;
@@ -161,17 +162,18 @@ struct ADnoteVoiceParam {
     unsigned char Poscilphase, PFMoscilphase;
 
     // filter bypass
-    unsigned char Pfilterbypass;
+    bool Pfilterbypass;
+    bool PfilterFcCtlBypass;
 
     /** Voice oscillator */
-    OscilGen *OscilSmp;
+    OscilGen *OscilGn;
 
     /**********************************
     *     FREQUENCY PARAMETERS        *
     **********************************/
 
     /** If the base frequency is fixed to 440 Hz*/
-    unsigned char Pfixedfreq;
+    bool Pfixedfreq;
 
     /* Equal temperate (this is used only if the Pfixedfreq is enabled)
        If this parameter is 0, the frequency is fixed (to 440 Hz);
@@ -194,20 +196,20 @@ struct ADnoteVoiceParam {
     unsigned char POffsetHz;
 
     /* Frequency Envelope */
-    unsigned char   PFreqEnvelopeEnabled;
+    bool PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;
 
     /* Frequency LFO */
-    unsigned char PFreqLfoEnabled;
-    LFOParams    *FreqLfo;
+    bool PFreqLfoEnabled;
+    LFOParams *FreqLfo;
 
 
     /***************************
     *   AMPLITUDE PARAMETERS   *
     ***************************/
 
-    /* Panning       0 - random
-             1 - left
+    /* Panning   0 - random
+                 1 - left
                 64 - center
                127 - right
        The Panning is ignored if the instrument is mono */
@@ -217,18 +219,21 @@ struct ADnoteVoiceParam {
     float volume;
 
     /* If the Volume negative */
-    unsigned char PVolumeminus;
+    bool PVolumeminus;
+
+    /* if AntiAliasing is enabled */
+    bool PAAEnabled;
 
     /* Velocity sensing */
     unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
-    unsigned char   PAmpEnvelopeEnabled;
+    bool PAmpEnvelopeEnabled;
     EnvelopeParams *AmpEnvelope;
 
     /* Amplitude LFO */
-    unsigned char PAmpLfoEnabled;
-    LFOParams    *AmpLfo;
+    bool PAmpLfoEnabled;
+    LFOParams *AmpLfo;
 
 
 
@@ -237,16 +242,16 @@ struct ADnoteVoiceParam {
     *************************/
 
     /* Voice Filter */
-    unsigned char PFilterEnabled;
+    bool PFilterEnabled;
     FilterParams *VoiceFilter;
 
     /* Filter Envelope */
-    unsigned char   PFilterEnvelopeEnabled;
+    bool PFilterEnvelopeEnabled;
     EnvelopeParams *FilterEnvelope;
 
     /* Filter LFO */
-    unsigned char PFilterLfoEnabled;
-    LFOParams    *FilterLfo;
+    bool PFilterLfoEnabled;
+    LFOParams *FilterLfo;
 
     // filter velocity sensing
     unsigned char PFilterVelocityScale;
@@ -258,45 +263,50 @@ struct ADnoteVoiceParam {
     *   MODULLATOR PARAMETERS   *
     ****************************/
 
-    /* Modullator Parameters (0=off,1=Mix,2=RM,3=PM,4=FM.. */
-    unsigned char PFMEnabled;
+    /* Modulator Parameters (0=off,1=Mix,2=RM,3=PM,4=FM.. */
+    FMTYPE PFMEnabled;
 
-    /* Voice that I use as modullator instead of FMSmp.
+    /* Voice that I use as modulator instead of FMSmp.
        It is -1 if I use FMSmp(default).
        It maynot be equal or bigger than current voice */
     short int PFMVoice;
 
-    /* Modullator oscillator */
-    OscilGen *FMSmp;
+    /* Modulator oscillator */
+    OscilGen *FmGn;
 
-    /* Modullator Volume */
+    /* Modulator Volume */
     float FMvolume;
 
-    /* Modullator damping at higher frequencies */
+    /* Modulator damping at higher frequencies */
     unsigned char PFMVolumeDamp;
 
-    /* Modullator Velocity Sensing */
+    /* Modulator Velocity Sensing */
     unsigned char PFMVelocityScaleFunction;
 
-    /* Fine Detune of the Modullator*/
+    /* Fine Detune of the Modulator */
     unsigned short int PFMDetune;
 
-    /* Coarse Detune of the Modullator */
+    /* Coarse Detune of the Modulator */
     unsigned short int PFMCoarseDetune;
 
     /* The detune type */
     unsigned char PFMDetuneType;
 
     /* FM base freq fixed at 440Hz */
-    unsigned char PFMFixedFreq;
+    bool PFMFixedFreq;
 
-    /* Frequency Envelope of the Modullator */
-    unsigned char   PFMFreqEnvelopeEnabled;
+    /* Frequency Envelope of the Modulator */
+    bool PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
-    /* Frequency Envelope of the Modullator */
-    unsigned char   PFMAmpEnvelopeEnabled;
+    /* Frequency Envelope of the Modulator */
+    bool PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
+
+    /* Voice is being synced by modulator
+       false = Hardsync disabled (default)
+       true =  Hardsync enabled */
+    bool PsyncEnabled;
 
     unsigned char *GlobalPDetuneType;
 
@@ -311,13 +321,13 @@ class ADnoteParameters:public PresetsArray
     public:
         ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                          const AbsTime *time_ = nullptr);
-        ~ADnoteParameters();
+        ~ADnoteParameters() override;
 
         ADnoteGlobalParam GlobalPar;
         ADnoteVoiceParam  VoicePar[NUM_VOICES];
 
         void defaults();
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void getfromXML(XMLwrapper& xml);
 
         void paste(ADnoteParameters &a);
@@ -328,7 +338,7 @@ class ADnoteParameters:public PresetsArray
         float getUnisonFrequencySpreadCents(int nvoice) const;
         static const rtosc::Ports &ports;
         void defaults(int n); //n is the nvoice
-        void add2XMLsection(XMLwrapper& xml, int n);
+        void add2XMLsection(XMLwrapper& xml, int n) override;
         void getfromXMLsection(XMLwrapper& xml, int n);
 
         const AbsTime *time;

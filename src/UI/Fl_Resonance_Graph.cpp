@@ -85,7 +85,7 @@ void Fl_Resonance_Graph::draw()
         if(i==1) {
             draw_freq_line(i*100.0,0);
             draw_freq_line(i*1000.0,0);
-        } else 
+        } else
             if (i==5) {
                 draw_freq_line(i*100.0,2);
                 draw_freq_line(i*1000.0,2);
@@ -135,8 +135,10 @@ int Fl_Resonance_Graph::handle(int event)
     if((event==FL_PUSH)||(event==FL_DRAG)){
         const bool leftbutton = Fl::event_button() == FL_LEFT_MOUSE;
 
-        if (x_<0) x_=0;if (y_<0) y_=0;
-        if (x_>=w()) x_=w();if (y_>=h()-1) y_=h()-1;
+        if (x_<0) x_=0;
+        if (y_<0) y_=0;
+        if (x_>=w()) x_=w();
+        if (y_>=h()-1) y_=h()-1;
 
         if ((oldx<0)||(oldx==x_)){
             int sn=(int)(x_*1.0/w()*N_RES_POINTS);
@@ -200,7 +202,7 @@ void Fl_Resonance_Graph::update(void)
     oscWrite("Poctavesfreq");
     oscWrite("PmaxdB");
 }
-        
+
 void Fl_Resonance_Graph::OSC_raw(const char *msg)
 {
     //TODO check the types (OSC regex)

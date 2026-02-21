@@ -73,6 +73,7 @@ class JackEngine:public AudioOut, MidiIn
             unsigned int jackNframes;
             jack_port_t *ports[2];
             jsample_t   *portBuffs[2];
+            float peaks[1];
         } audio;
         struct osc {
             jack_port_t *oscport;
