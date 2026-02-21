@@ -856,7 +856,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     if(!strcmp(msg, "/load-master")) {
         Master *this_master = master_from_mw ? master_from_mw : this;
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
-        // This can not fail anymore, but just to be sure...
+        // if this fails, the new Master has been started too early
         assert(new_master != this_master);
 
         /*
