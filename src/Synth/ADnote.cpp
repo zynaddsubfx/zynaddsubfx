@@ -1669,19 +1669,24 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             fmold = tw[i];
 
-            int FMmodfreqhi = 0;
+
             float phoffs = 0.0f;
             if(FMmode == FMTYPE::SELFPM_MOD) {
-                phoffs = twold * 0.2f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+            /* phoffs is computed from the previous carrier sample (twold).
+             * Multiply by a fixed factor to scale the range of
+             * self pm amount (FM Volume) to sane values
+             */
+                phoffs = twold * 0.00008f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                                vce.FMnewamplitude,
                                                i,
                                                synth.buffersize);
+
             }
             else {
                 phoffs = tw[i];
             }
 
-
+            int FMmodfreqhi = 0;
             F2I(phoffs, FMmodfreqhi);
             float FMmodfreqlo = phoffs-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             if(FMmodfreqlo < 0)
