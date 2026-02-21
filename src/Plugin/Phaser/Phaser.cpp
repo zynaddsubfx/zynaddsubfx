@@ -24,7 +24,7 @@ class PhaserPlugin : public AbstractPluginFX<zyn::Phaser>
 {
 public:
     PhaserPlugin()
-        : AbstractPluginFX(15, 12) {}
+        : AbstractPluginFX(15, 12) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------

@@ -196,16 +196,16 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float inbuffer[buffersize];
+    STACKALLOC(float, inbuffer, buffersize);
 
     memcpy(inbuffer, smp, bufferbytes);
     memset(smp, 0, bufferbytes);
 
-    float formantbuf[buffersize];
+    STACKALLOC(float, formantbuf, buffersize);
 
     for(int j = 0; j < numformants; ++j) {
 
-        float tmpbuf[buffersize];
+        STACKALLOC(float, tmpbuf, buffersize);
 
         for(int i = 0; i < buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;

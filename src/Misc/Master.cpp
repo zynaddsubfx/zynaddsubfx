@@ -58,9 +58,12 @@ static const Ports sysefxPort =
             //be ...Psysefxvol#N/part#M
             //and the number "N" is one or two digits at most
 
-            // go backto the '/'
+            // go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -90,9 +93,12 @@ static const Ports sysefsendto =
         rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same workaround as before
-            //go backto the '/'
+            //go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -640,7 +646,7 @@ class DataObj:public rtosc::RtData
         }
         virtual void reply(const char *msg) override
         {
-            if(rtosc_message_length(msg, -1) == 0)
+            if(rtosc_message_length(msg, std::numeric_limits<size_t>::max()) == 0)
                 fprintf(stderr, "Warning: Invalid Rtosc message '%s'\n", msg);
             bToU->raw_write(msg);
         }
@@ -882,12 +888,12 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     if(strcmp(msg, "/get-vu") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
         if(msg_id > 0)
-            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id, msg,
+            fprintf(stdout, "backend[%d]: '%s'<%s>", msg_id, msg,
                     rtosc_argument_string(msg));
         else
-            fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
+            fprintf(stdout, "backend[*]: '%s'<%s>", msg,
                     rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     ports.dispatch(msg, d, true);
@@ -903,11 +909,11 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     }
     if(!d.matches && !d.forwarded) {// && !ports.apropos(msg)) {
         fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
+        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'",
                 offline ? "offline" : "online",
                 uToB->peak(),
                 rtosc_argument_string(uToB->peak()));
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stderr, "%c[0m\n", 0x1B);
         if(unknown_address_cb)
             unknown_address_cb(unknown_address_cb_ptr, offline, uToB->peak());
     }
@@ -1102,13 +1108,13 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outl2 = part[npart]->partoutl,
+                  *outr2 = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                if (fabsf(outl[i]) > vuoutpeakpartl[npart])
-                    vuoutpeakpartl[npart] = fabsf(outl[i]);
-                if (fabsf(outr[i]) > vuoutpeakpartr[npart])
-                    vuoutpeakpartr[npart] = fabsf(outr[i]);
+                if (fabsf(outl2[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabsf(outl2[i]);
+                if (fabsf(outr2[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabsf(outr2[i]);
             }
         }
         else
@@ -1302,11 +1308,11 @@ bool Master::AudioOut(float *outl, float *outr)
         if(Pinsparts[nefx] >= 0) {
             int efxpart = Pinsparts[nefx];
             if(part[efxpart]->Penabled)
-                insefx[nefx]->out(part[efxpart]->partoutl,
+                insefx[nefx]->out(part[efxpart]->partoutl, // drywet: compensate by raising Part->gain
                                   part[efxpart]->partoutr);
         }
 
-    float gainbuf[synth.buffersize];
+    STACKALLOC(float, gainbuf, synth.buffersize);
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1316,14 +1322,17 @@ bool Master::AudioOut(float *outl, float *outr)
         Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
-        if(pan < 0.5f)
-            newvol.r *= pan * 2.0f;
-        else
-            newvol.l *= (1.0f - pan) * 2.0f;
-        //if(npart==0)
-        //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 
-
+        if(constPowerMixing) {
+            newvol.r *= sqrtf(pan);
+            newvol.l *= sqrtf(1.0f - pan);
+        } else {
+            // compatibility mode
+            if(pan < 0.5f)
+                newvol.r *= pan * 2.0f;
+            else
+                newvol.l *= (1.0f - pan) * 2.0f;
+        }
 
         /* This is where the part volume (and pan) smoothing and application happens */
         if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
@@ -1354,8 +1363,8 @@ bool Master::AudioOut(float *outl, float *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue;  //the effect is disabled
 
-        float tmpmixl[synth.buffersize];
-        float tmpmixr[synth.buffersize];
+        STACKALLOC(float, tmpmixl, synth.buffersize);
+        STACKALLOC(float, tmpmixr, synth.buffersize);
         //Clean up the samples used by the system effects
         memset(tmpmixl, 0, synth.bufferbytes);
         memset(tmpmixr, 0, synth.bufferbytes);
@@ -1388,7 +1397,7 @@ bool Master::AudioOut(float *outl, float *outr)
                 }
             }
 
-        sysefx[nefx]->out(tmpmixl, tmpmixr);
+        sysefx[nefx]->out(tmpmixl, tmpmixr); // drywet: compensate by raising outvolume
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx]->sysefxgetvolume();
@@ -1409,7 +1418,7 @@ bool Master::AudioOut(float *outl, float *outr)
     //Insertion effects for Master Out
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         if(Pinsparts[nefx] == -2)
-            insefx[nefx]->out(outl, outr);
+            insefx[nefx]->out(outl, outr); // drywet: compensate by raising Master Volume
 
     float vol = dB2rap(Volume);
 
@@ -1750,6 +1759,8 @@ int Master::loadXML(const char *filename)
 
 void Master::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
+
     if (xml.hasparreal("volume")) {
         Volume = xml.getparreal("volume", Volume);
     } else {

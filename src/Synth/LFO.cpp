@@ -140,7 +140,6 @@ float LFO::baseOut(const char waveShape, const float phase)
 
 float LFO::biquad(float input)
 {
-    float output;
     if (lfopars.Pcutoff!=cutoff ) // calculate coeffs only if cutoff changed
     {
         cutoff = lfopars.Pcutoff;
@@ -159,14 +158,18 @@ float LFO::biquad(float input)
             b2 = (1 - K / 0.7071f + K * K) * norm;
         }
     }
-    if (cutoff != 127) // at cutoff 127 we bypass filter, nothing to do
+    if (cutoff == 127) // at cutoff 127 we bypass filter, nothing to do
+    {
+        return input;
+    }
+    else
     {
         // lp filter the (s&h) random LFO
-        output = limit(input * a0 + z1, -1.0f, 1.0f);
+        const float output = limit(input * a0 + z1, -1.0f, 1.0f);
         z1 = input * a1 + z2 - b1 * output;
         z2 = input * a2 - b2 * output;
+        return output;
     }
-    return (cutoff==127) ? input : output; // at cutoff 127 bypass filter
 }
 
 void LFO::releasekey()

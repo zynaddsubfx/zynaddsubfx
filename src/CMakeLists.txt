@@ -1,3 +1,5 @@
+set (CMAKE_CXX_STANDARD 17)
+
 #checking include/library paths
 message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_PATH})
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
@@ -5,7 +7,6 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 #Dependency check
 include(CheckFunctionExists)
 include(CheckIncludeFile)
-include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     find_package(PkgConfig)
@@ -21,9 +22,14 @@ find_package(OpenGL) #for FLTK
 find_package(ECM)
 list(APPEND CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
 if(CompileTests AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
-    find_package(LibGit2)
+    # LibGit2's find_package seems to complain if the version.h header does not exist
+    # So let's search for it before even calling find_package...
+    if(EXISTS "/usr/include/git2/version.h")
+        find_package(LibGit2)
+    else()
+        message(STATUS "Could NOT find LibGit2 (missing file: /usr/include/git2/version.h)")
+    endif()
 endif()
-# lash
 if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
     pkg_check_modules(JACK jack)
@@ -52,7 +58,6 @@ else()
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
-set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 CHECK_CXX_SOURCE_COMPILES(
     "#include <future>
     #if ATOMIC_INT_LOCK_FREE<2
@@ -213,7 +218,7 @@ mark_as_advanced(IncludeWhatYouUse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
-set (BuildOptions_ExtendedWarnings "")
+set(ZynBuildOptions_ExtendedWarnings)
 if (ExtendedWarnings)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         # The following generates a list of warning exceptions
@@ -225,8 +230,8 @@ if (ExtendedWarnings)
         # often about the code base. If you want to add exceptions,
         # be VERY CAREFUL, ask the project maintainers for
         # their consent.
-        set (BuildOptions_ExtendedWarnings_List
-        "-Wall" "-Wextra" "-Weverything" # start with really everything
+        list (APPEND ZynBuildOptions_ExtendedWarnings
+        "-Wextra" "-Weverything" # start with really everything
         "-Wno-c++98-compat" "-Wno-c++98-compat-extra-semi" "-Wno-c++98-compat-pedantic" # C++11 is a zyn build requirement
         "-Wno-cast-align" # not relevant for our case
         "-Wno-double-promotion" # Used too often to fix
@@ -244,48 +249,49 @@ if (ExtendedWarnings)
         "-Wno-sign-conversion" # used too often in zyn
         "-Wno-float-equal" # can be disturbing in some cases
         "-Wno-switch-enum" # used too often in zyn
+        "-Wno-unsafe-buffer-usage" # used too often in zyn
+        "-Wimplicit-int-float-conversion" # used too often in zyn
         )
-        STRING(REPLACE ";" " " BuildOptions_ExtendedWarnings "${BuildOptions_ExtendedWarnings_List}")
-        MESSAGE(STATUS "Using extended Warning options: ${BuildOptions_ExtendedWarnings}")
+        MESSAGE(STATUS "Using extended Warning options: ${ZynBuildOptions_ExtendedWarnings}")
     else()
         MESSAGE(WARNING "\"ExtendedWarnings\" selected, but this is only supported for clang - ignoring")
     endif()
 endif()
 
-set (BuildOptions_x86_64AMD
-    "-march=athlon64 -m64 -Wall -Wno-unused-parameter"
+set (ZynBuildOptions_x86_64AMD
+    -march=athlon64;-m64
   CACHE STRING "X86_64 compiler options"
 )
 
-set (BuildOptions_X86_64Core2
-    "-march=core2 -m64 -Wall -Wno-unused-parameter"
+set (ZynBuildOptions_X86_64Core2
+    -march=core2;-m64
   CACHE STRING "X86_64 compiler options"
 )
 
-set (BuildOptions_NEON
-    "-march=armv7-a -mfloat-abi=hard -mfpu=neon -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -mvectorize-with-neon-quad -funsafe-loop-optimizations"
+set (ZynBuildOptions_NEON
+    -march=armv7-a;-mfloat-abi=hard;-mfpu=neon;-mcpu=cortex-a9;-mtune=cortex-a9;-pipe;-mvectorize-with-neon-quad;-funsafe-loop-optimizations
   CACHE STRING "Cortex_a9 compiler options"
 )
 
-check_cxx_compiler_flag("${BuildOptions_NEON} -Werror" SUPPORT_NEON)
+check_cxx_compiler_flag("${ZynBuildOptions_NEON} -Werror" SUPPORT_NEON)
 
-set (BuildOptions_SSE
-	"-msse -msse2 -mfpmath=sse"
+set (ZynBuildOptions_SSE
+    -msse;-msse2;-mfpmath=sse
   CACHE STRING "SSE compiler options"
 )
 
-check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
+check_cxx_compiler_flag("${ZynBuildOptions_SSE} -Werror" SUPPORT_SSE)
 
-set (BuildOptionsBasic
-    "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
+set (ZynBuildOptionsBasic
+    -O3;-ffast-math;-fomit-frame-pointer
     CACHE STRING "basic X86 compiler options"
 )
-STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
+list(APPEND ZynBuildOptionsBasic ${ZynBuildOptions_ExtendedWarnings})
 
-set (BuildOptionsDebug
-    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+set (ZynBuildOptionsDebug
+    -O0;-g3;-ggdb;-Wpointer-arith
     CACHE STRING "Debug build flags")
-STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
+list(APPEND ZynBuildOptionsDebug ${ZynBuildOptions_ExtendedWarnings})
 
 if(IncludeWhatYouUse)
     find_program(IwyuPath NAMES include-what-you-use iwyu)
@@ -366,43 +372,22 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
     add_definitions(-D_GNU_SOURCE=1 -D_POSIX_THREAD_PRIO_INHERIT=1)
 endif()
 
-add_definitions(
-	 -Wall
-	 -Wextra)
+add_compile_options(-Wall -Wextra)
+# Check for -W... and if available, add compile option -Wno-...
+function (zyn_disable_warning W_FLAG)
+    string(TOUPPER "${W_FLAG}" CACHE_VAR)
+    string(REPLACE "-" "_" CACHE_VAR "${CACHE_VAR}")
+    set(_CACHE_VAR "HAVE_WARNING_${CACHE_VAR}")
+    check_cxx_compiler_flag("-W${W_FLAG}" "${CACHE_VAR}")
+    if (${${CACHE_VAR}})
+        add_compile_options("-Wno-${W_FLAG}")
+    endif()
+endfunction ()
 
-check_cxx_compiler_flag("-Wno-stringop-truncation" HAVE_NO_STRINGOP_TRUNCATION)
-if (HAVE_NO_STRINGOP_TRUNCATION)
-    add_definitions(-Wno-stringop-truncation)  # https://stackoverflow.com/questions/50198319
-endif()
-check_cxx_compiler_flag("-Wno-vla-cxx-extension" HAVE_NO_VLA_CXX_EXTENSION)
-if (HAVE_NO_VLA_CXX_EXTENSION)
-    add_definitions(-Wno-vla-cxx-extension)
-endif()
-check_cxx_compiler_flag("-Wno-nan-infinity-disabled" HAVE_NO_NAN_INFINITY_DISABLED)
-if (HAVE_NO_NAN_INFINITY_DISABLED)
-    add_definitions(-Wno-nan-infinity-disabled)  # std::isnan(), https://stackoverflow.com/questions/56097944
-endif()
-
-# macro similar to "check_cxx_compiler_flag", however,
-# it also checks for warnings that are only output if other warnings are active
-macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
-    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
-    
-    check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
-        FAIL_REGEX "unrecognized|option"
-    )
-
-    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-endmacro ()
-
-check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
-    "unrecognized|option"
-    HAVE_NO_INCONSISTENT_MISSING_OVERRIDE
-    )
-if(HAVE_NO_INCONSISTENT_MISSING_OVERRIDE)
-    add_definitions(-Wno-inconsistent-missing-override)
-endif()
+zyn_disable_warning("stringop-truncation")
+zyn_disable_warning("vla-cxx-extension")
+zyn_disable_warning("nan-infinity-disabled")
+zyn_disable_warning("inconsistent-missing-override")
 
 if(HAVE_X86_FISTPL)
     message(STATUS "Compiling with x86 opcode support")
@@ -411,31 +396,30 @@ endif()
 
 if (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Debug")
-	set (CMAKE_CXX_FLAGS_DEBUG ${BuildOptionsDebug})
-	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_DEBUG}")
+	add_compile_options("$<$<CONFIG:Debug>:${ZynBuildOptionsDebug}>")
 else (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Release")
 	
-	set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
+	add_compile_options("$<$<CONFIG:Release>:${ZynBuildOptionsBasic}>")
 
 	if (BuildForAMD_X86_64)
-		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_x86_64AMD}")
+		add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_x86_64AMD}>)
 	endif (BuildForAMD_X86_64)
 	
 	if (BuildForCore2_X86_64)
-			set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_X86_64Core2}")
+		add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_X86_64Core2}>)
 	endif (BuildForCore2_X86_64)
 
 	if (SUPPORT_SSE)
-		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_SSE}")
+		add_compile_options("$<$<CONFIG:Release>:${ZynBuildOptions_SSE}>")
 	endif (SUPPORT_SSE)
 	
 	if (SUPPORT_NEON AND NOT NoNeonPlease)
-		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_NEON}")
+		add_compile_options($<$<CONFIG:Release>:${ZynBuildOptions_NEON}>)
 	endif (SUPPORT_NEON AND NOT NoNeonPlease)
 
-	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
+message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
 
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     add_definitions(-fPIC)
@@ -641,14 +625,14 @@ endif()
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
 target_link_libraries(zynaddsubfx
-    zynaddsubfx_core
+	zynaddsubfx_core
 	zynaddsubfx_nio
-    zynaddsubfx_gui_bridge
+	zynaddsubfx_gui_bridge
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
-    ${PLATFORM_LIBRARIES}
-    )
+	${PLATFORM_LIBRARIES}
+)
 
 if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED

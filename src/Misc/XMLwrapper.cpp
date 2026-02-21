@@ -129,14 +129,15 @@ XMLwrapper::XMLwrapper()
         mxmlElementSetAttr(tree,"encoding","UTF-8");
     */
 
-    mxml_node_t *doctype =
+    [[maybe_unused]] mxml_node_t *doctype =
 #if MXML_MAJOR_VERSION <= 3
         mxmlNewElement(tree, "!DOCTYPE");
+        assert(doctype);
         mxmlElementSetAttr(doctype, "ZynAddSubFX-data", NULL);
 #else
         mxmlNewDeclaration(tree, "DOCTYPE ZynAddSubFX-data");
+        assert(doctype);
 #endif
-    assert(doctype);
 
     node = root = addparams("ZynAddSubFX-data", 4,
                             "version-major", stringFrom<int>(
@@ -552,7 +553,7 @@ int XMLwrapper::getpar127(const string &name, int defaultpar) const
     return getpar(name, defaultpar, 0, 127);
 }
 
-int XMLwrapper::getparbool(const string &name, int defaultpar) const
+bool XMLwrapper::getparbool(const string &name, bool defaultpar) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
                                              node,
@@ -568,10 +569,7 @@ int XMLwrapper::getparbool(const string &name, int defaultpar) const
     if(strval == NULL)
         return defaultpar;
 
-    if((strval[0] == 'Y') || (strval[0] == 'y'))
-        return 1;
-    else
-        return 0;
+    return (strval[0] == 'Y') || (strval[0] == 'y');
 }
 
 void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const

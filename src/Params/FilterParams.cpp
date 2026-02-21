@@ -141,7 +141,10 @@ const rtosc::Ports FilterParams::ports = {
             "Center Freq (formant)"),
     rParamZyn(Poctavesfreq,     rShort("octaves"), rDefault(64),
             "Number of octaves for formant"),
-
+    rParamZyn(Phpf, rShort("hpf"), rDefault(0),
+            "Waveguide HighPass"),
+    rParamZyn(Plpf, rShort("lpf"), rDefault(127),
+            "Waveguide LowPass"),
     rParamI(Psequencesize,    rShort("seq.size"),
             rLinear(0, FF_MAX_SEQUENCE),
             rDefault(3), rDefaultDepends(loc),
@@ -452,10 +455,12 @@ void FilterParams::defaults()
         Psequence[i].nvowel = i % FF_MAX_VOWELS;
 
     Psequencestretch  = 40;
-    Psequencereversed = 0;
+    Psequencereversed = false;
     Pcenterfreq     = 64; //1 kHz
     Poctavesfreq    = 64;
     Pvowelclearness = 64;
+    Phpf    = 0;
+    Plpf    = 127;
 }
 
 void FilterParams::defaults(int n)
@@ -488,7 +493,8 @@ void FilterParams::updateLoc(int newloc, int n)
         } else if (newloc == dynfilter_4 && i < 2 && j < 2) {
             Pvowels[j].formants[i].loc  = j * 3 + i; /* 6 .. 9 */
         } else {
-            Pvowels[j].formants[i].loc = -1;
+            Pvowels[j].formants[i].loc =
+                std::numeric_limits<decltype(Pvowels[j].formants[i].loc)>::max();
         }
     }
 }

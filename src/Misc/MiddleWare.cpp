@@ -781,10 +781,10 @@ public:
                         std::cerr << savefile << std::endl;
                         std::cerr << "first entry that could not be parsed:" << std::endl;
 
-                        for(int i = -res + 1; savefile[i]; ++i)
-                        if(savefile[i] == '\n')
+                        for(int j = -res + 1; savefile[j]; ++j)
+                        if(savefile[j] == '\n')
                         {
-                            savefile.resize(i);
+                            savefile.resize(j);
                             break;
                         }
                         std::cerr << (savefile.c_str() - res) << std::endl;
@@ -1216,15 +1216,15 @@ const rtosc::Ports bankPorts = {
             impl.loadbank(impl.banks[0].dir);
 
             //Reload bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
+            for(int j=0; j<BANK_SIZE; ++j) {
                 d.reply("/bankview", "iss",
-                    i, impl.ins[i].name.c_str(),
-                    impl.ins[i].filename.c_str());
+                    j, impl.ins[j].name.c_str(),
+                    impl.ins[j].filename.c_str());
             }
         } else {
             //Clear all bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
-                d.reply("/bankview", "iss", i, "", "");
+            for(int j=0; j<BANK_SIZE; ++j) {
+                d.reply("/bankview", "iss", j, "", "");
             }
         }
         d.broadcast("/damage", "s", "/bank/");
@@ -2213,7 +2213,7 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
-    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, -1)) {
+    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, (std::numeric_limits<size_t>::max)())) {
         printf("[Warning] Invalid message in sendToRemote <%s, %s>...\n",
                rtmsg, dest.c_str());
         return;
@@ -2257,9 +2257,9 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     //Dump Incoming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
-        fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',
+        fprintf(stdout, "frontend[%c]: '%s'<%s>", forward?'f':broadcast?'b':'N',
                 rtmsg, rtosc_argument_string(rtmsg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     //Activity dot
@@ -2309,7 +2309,8 @@ void MiddleWareImpl::kitEnable(const char *msg)
     int part, kit;
     bool res = idsFromMsg(msg, &part, &kit, nullptr);
     assert(res);
-    kitEnable(part, kit, type);
+    if(res)
+        kitEnable(part, kit, type);
 }
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
@@ -2386,8 +2387,8 @@ void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 
     if(strcmp("/get-vu", msg) && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-        fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "middleware: '%s':%s", msg, rtosc_argument_string(msg));
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     const char *last_path = strrchr(msg, '/');

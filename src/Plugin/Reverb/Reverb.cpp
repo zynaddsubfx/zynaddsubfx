@@ -24,7 +24,7 @@ class ReverbPlugin : public AbstractPluginFX<zyn::Reverb>
 {
 public:
     ReverbPlugin()
-        : AbstractPluginFX(13, 13) {}
+        : AbstractPluginFX(13, 13) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------

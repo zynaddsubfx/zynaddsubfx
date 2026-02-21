@@ -221,7 +221,11 @@ float SYNTH_T::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
+#ifdef NDEBUG
+    (void)len;
+#else
     assert(len > (size_t)pos + 1 && pos >= 0);
+#endif
     const unsigned int l_pos      = (int)pos;
     const unsigned int r_pos      = l_pos + 1;
     const float rightness = pos - (float)l_pos;
@@ -239,8 +243,8 @@ float cinterpolate(const float *data, size_t len, float pos)
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
 {
-    char argT[v.size()+1];
-    rtosc_arg_t arg[v.size()];
+    STACKALLOC(char, argT, v.size()+1);
+    STACKALLOC(rtosc_arg_t, arg, v.size());
     unsigned i=0;
     for(auto &vv : v) {
         argT[i]  = 's';

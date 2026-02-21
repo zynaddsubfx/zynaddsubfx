@@ -239,7 +239,7 @@ static const rtosc::Ports non_realtime_ports =
             "Size of each wavetable element"),
     rOption(Pquality.basenote, rShort("basenote"),
             rOptions(C-2, G-2, C-3, G-3, C-4,
-                G-4, C-5, G-5, G-6,),
+                G-4, C-5, G-5, C-6, G-6),
             rDefaultId(C-4),
             "Base note for wavetable"),
     rOption(Pquality.smpoct, rShort("smp/oct"),
@@ -338,16 +338,16 @@ PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
     oscilgen  = new OscilGen(synth, fft_, resonance);
     oscilgen->ADvsPAD = true;
 
-    FreqEnvelope = new EnvelopeParams(0, 0, time_);
+    FreqEnvelope = new EnvelopeParams(0, false, time_);
     FreqEnvelope->init(ad_global_freq);
     FreqLfo = new LFOParams(ad_global_freq, time_);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
     AmpLfo = new LFOParams(ad_global_amp, time_);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
-    FilterEnvelope = new EnvelopeParams(0, 1, time_);
+    FilterEnvelope = new EnvelopeParams(0, true, time_);
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
 
@@ -404,9 +404,9 @@ void PADnoteParameters::defaults()
     Pquality.oct    = 3;
     Pquality.smpoct = 2;
 
-    PStereo = 1; //stereo
+    PStereo = true; //stereo
     /* Frequency Global Parameters */
-    Pfixedfreq    = 0;
+    Pfixedfreq    = false;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -728,7 +728,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum, 0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -803,7 +803,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum,  0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -917,7 +917,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         samplemax = PAD_MAX_SAMPLES;
 
     //this is used to compute frequency relation to the base frequency
-    float adj[samplemax];
+    STACKALLOC(float, adj, samplemax);
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
     // QtCreator can't capture VLAs (QTCREATORBUG-23722), so this is
@@ -1220,7 +1220,7 @@ void PADnoteParameters::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("FREQUENCY_PARAMETERS")) {
-        Pfixedfreq    = xml.getpar127("fixed_freq", Pfixedfreq);
+        Pfixedfreq    = (bool)xml.getpar("fixed_freq", Pfixedfreq, 0, 1);
         PfixedfreqET  = xml.getpar127("fixed_freq_et", PfixedfreqET);
         PBendAdjust  = xml.getpar127("bend_adjust", PBendAdjust);
         POffsetHz  = xml.getpar127("offset_hz", POffsetHz);

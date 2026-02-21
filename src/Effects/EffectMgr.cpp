@@ -316,6 +316,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     preset = 0;
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
+    if(sync) sync->detach(efx);
     memory.dealloc(efx);
 
     int new_loc = (_nefx == 8) ? dynfilter_0 : in_effect;
@@ -546,6 +547,13 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     //Insertion effect
     if(insertion != 0) {
         float v1, v2;
+
+    if(constPowerMixing)
+    {
+        v1 = sqrtf(1.0f-volume);
+        v2 = sqrtf(volume);
+    } else {
+        // compatibility mode
         if(volume < 0.5f) {
             v1 = 1.0f;
             v2 = volume * 2.0f;
@@ -554,6 +562,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v1 = (1.0f - volume) * 2.0f;
             v2 = 1.0f;
         }
+    }
         if((nefx == 1) || (nefx == 2))
             v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
 
@@ -650,6 +659,8 @@ void EffectMgr::add2XML(XMLwrapper& xml)
 
 void EffectMgr::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
+
     changeeffect(xml.getpar127("type", geteffect()));
 
     if(!geteffect())

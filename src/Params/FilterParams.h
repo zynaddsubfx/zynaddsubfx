@@ -71,6 +71,9 @@ class FilterParams:public PresetsArray
         unsigned char Pvowelclearness; //how vowels are kept clean (how much try to avoid "mixed" vowels)
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
 
+        //Comb filter parameter
+        unsigned char Phpf, Plpf; //the center frequency of the res. func., and the number of octaves
+
         struct Pvowels_t {
             struct formants_t {
                 unsigned char loc; //!< only relevant for DynFilter's default values
@@ -80,7 +83,7 @@ class FilterParams:public PresetsArray
 
         unsigned char Psequencesize; //how many vowels are in the sequence
         unsigned char Psequencestretch; //how the sequence is stretched (how the input from filter envelopes/LFOs/etc. is "stretched")
-        unsigned char Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
+        bool Psequencereversed; //if the input from filter envelopes/LFOs/etc. is reversed(negated)
         struct {
             unsigned char nvowel; //the vowel from the position
         } Psequence[FF_MAX_SEQUENCE];

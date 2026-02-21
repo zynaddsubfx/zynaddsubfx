@@ -22,6 +22,7 @@
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 #include "../Params/ADnoteParameters.h"
+#include "../Params/FilterParams.h"
 #include "../Containers/ScratchString.h"
 #include "../Containers/NotePool.h"
 #include "ModFilter.h"
@@ -32,8 +33,8 @@
 
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
-        WatchManager *wm, const char *prefix)
-    :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
+               WatchManager *wm, const char *prefix, bool constPowerMixing)
+    :SynthNote(spars, constPowerMixing), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
     watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
 {
     memory.beginTransaction();
@@ -284,7 +285,7 @@ int ADnote::setupVoiceUnison(int nvoice)
             break;
         default: //unison for more than 2 subvoices
         {
-            float unison_values[true_unison];
+            STACKALLOC(float, unison_values, true_unison);
             float min = -1e-6f, max = 1e-6f;
             for(int k = 0; k < true_unison; ++k) {
                 const float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
@@ -874,11 +875,13 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
+
+            const float filterFreq = param.VoiceFilter->Pcategory==4 ? getvoicebasefreq(nvoice): basefreq;
+
             vce.Filter = memory.alloc<ModFilter>(*param.VoiceFilter, synth, time, memory, stereo,
-                      basefreq);
+                      filterFreq);
             vce.Filter->updateSense(velocity, param.PFilterVelocityScale,
                     param.PFilterVelocityScaleFunction);
-
 
             if(param.PFilterEnvelopeEnabled) {
                 vce.FilterEnvelope =
@@ -1626,7 +1629,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
+                fmold = fmold + (tw[i] * normalize);
                 tw[i] = fmold;
             }
             vce.FMoldsmp[k] = fmold;
@@ -1664,7 +1667,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             int FMmodfreqhi = 0;
             F2I(tw[i], FMmodfreqhi);
             float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
-            if(FMmodfreqhi < 0)
+            if(FMmodfreqlo < 0)
                 FMmodfreqlo++;
 
             //carrier
@@ -1842,15 +1845,23 @@ int ADnote::noteout(float *outl, float *outr)
                    (is_pwm && vce.unison_size == 2))
                     stereo_pos = 0.0f;
                 float panning = (stereo_pos + 1.0f) * 0.5f;
+                float lvol, rvol;
+                if(constPowerMixing())
+                {
+                    lvol = sqrtf(1.0f - panning);
+                    rvol = sqrtf(panning);
+                }
+                else
+                {
+                    // compatibility mode
+                    lvol = (1.0f - panning) * 2.0f;
+                    if(lvol > 1.0f)
+                        lvol = 1.0f;
 
-
-                float lvol = (1.0f - panning) * 2.0f;
-                if(lvol > 1.0f)
-                    lvol = 1.0f;
-
-                float rvol = panning * 2.0f;
-                if(rvol > 1.0f)
-                    rvol = 1.0f;
+                    rvol = panning * 2.0f;
+                    if(rvol > 1.0f)
+                        rvol = 1.0f;
+                }
 
                 if(vce.unison_invert_phase[k]) {
                     lvol = -lvol;

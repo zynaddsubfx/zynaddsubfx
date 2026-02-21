@@ -87,11 +87,11 @@ Resonance::~Resonance(void)
 
 void Resonance::defaults(void)
 {
-    Penabled     = 0;
+    Penabled     = false;
     PmaxdB       = 20;
     Pcenterfreq  = 64; //1 kHz
     Poctavesfreq = 64;
-    Pprotectthefundamental = 0;
+    Pprotectthefundamental = false;
     ctlcenter = 1.0f;
     ctlbw     = 1.0f;
     for(int i = 0; i < N_RES_POINTS; ++i)

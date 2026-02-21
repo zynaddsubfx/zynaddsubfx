@@ -62,7 +62,7 @@ class AdNoteTest
             lfop->PLFOtype    = randval(0,6);
             lfop->Prandomness = randval(0,127);
             lfop->Pfreqrand   = randval(0,127);
-            lfop->Pcontinous  = randval(0,1);
+            lfop->Pcontinous  = (bool)randval(0,1);
             lfop->Pstretch    = randval(0,127);
             lfop->fel         = (consumer_location_type_t) randval(1,2);
 
@@ -140,7 +140,7 @@ class AdNoteTest
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
 
-            note = new ADnote(defaultPreset, pars,w);
+            note = new ADnote(defaultPreset, pars, w, nullptr, false /* compatibility mode */);
 
         }
 

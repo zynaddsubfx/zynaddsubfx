@@ -114,6 +114,7 @@ class EffectMgr:public Presets
         const SYNTH_T &synth;
 
 
+        bool constPowerMixing = true;
 };
 
 }
