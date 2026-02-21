@@ -148,6 +148,7 @@ void ADnote::setupVoice(int nvoice)
     voice.oscposlo    = memory.valloc<float>(unison);
     voice.oscposhiFM  = memory.valloc<unsigned int>(unison);
     voice.oscposloFM  = memory.valloc<float>(unison);
+    voice.twold       = memory.valloc<float>(unison);
 
     voice.Enabled     = ON;
     voice.fixedfreq   = pars.VoicePar[nvoice].Pfixedfreq;
@@ -160,6 +161,7 @@ void ADnote::setupVoice(int nvoice)
         voice.oscposlo[k]   = 0.0f;
         voice.oscposhiFM[k] = 0;
         voice.oscposloFM[k] = 0.0f;
+        voice.twold[k] = 0.0f;
     }
 
     //the extra points contains the first point
@@ -1676,7 +1678,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
              * Multiply by a fixed factor to scale the range of
              * self pm amount (FM Volume) to sane values
              */
-                phoffs = twold * 0.00008f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                phoffs = vce.twold[k] * 0.00008f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                                vce.FMnewamplitude,
                                                i,
                                                synth.buffersize);
@@ -1706,7 +1708,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
             tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
                     + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
-            twold = tw[i];
+            vce.twold[k] = tw[i];
 
             poslo += freqlo;
             if(poslo >= (1<<24)) {

@@ -120,7 +120,6 @@ class ADnote:public SynthNote
         float note_log2_freq;
         float velocity;
 
-        float twold;
 
         ONOFFTYPE   NoteEnabled;
 
@@ -317,6 +316,8 @@ class ADnote:public SynthNote
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
+
+            float *twold;
 
         } NoteVoicePar[NUM_VOICES];
 
