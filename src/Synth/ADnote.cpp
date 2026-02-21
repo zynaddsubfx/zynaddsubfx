@@ -1672,7 +1672,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             fmold = tw[i];
 
 
-            float phoffs = 0.0f;
+            float phoffs;
             if(FMmode == FMTYPE::SELFPM_MOD) {
             /* phoffs is computed from the previous carrier sample (twold).
              * Multiply by a fixed factor to scale the range of
