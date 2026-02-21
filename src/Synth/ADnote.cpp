@@ -486,6 +486,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 * fmvoldamp * 4.0f;
             break;
         case FMTYPE::FREQ_MOD:
+        case FMTYPE::SELFPM_MOD:
             FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
                 * fmvoldamp * 4.0f;
             break;
@@ -619,6 +620,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             case FMTYPE::FREQ_MOD:
+            case FMTYPE::SELFPM_MOD:
                 FMVolume =
                     (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
@@ -1638,7 +1640,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             vce.FMoldsmp[k] = fmold;
         }
     }
-    else {  //Phase or PWM modulation
+    else if(FMmode == FMTYPE::PHASE_MOD || FMmode == FMTYPE::PW_MOD) {  //Phase or PWM modulation
         const float normalize = synth.oscilsize_f / 262144.0f;
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
@@ -1669,8 +1671,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
             int FMmodfreqhi = 0;
             float phoffs = 0.0f;
-            if(true) { //FMmode == FMTYPE::SELFPM_MOD) {
-                phoffs = twold * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+            if(FMmode == FMTYPE::SELFPM_MOD) {
+                phoffs = twold * 0.2f * INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                                vce.FMnewamplitude,
                                                i,
                                                synth.buffersize);
@@ -1801,6 +1803,7 @@ int ADnote::noteout(float *outl, float *outr)
                     case FMTYPE::FREQ_MOD:
                     case FMTYPE::PHASE_MOD:
                     case FMTYPE::PW_MOD:
+                    case FMTYPE::SELFPM_MOD:
                         ComputeVoiceOscillatorFrequencyModulation(nvoice,
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
