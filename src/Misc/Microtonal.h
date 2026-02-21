@@ -41,11 +41,14 @@ struct KbmInfo
 struct OctaveTuning {
     unsigned char type; //1 for cents or 2 for division
 
-    // the real tuning (eg. +1.05946f for one halftone)
-    // or 2.0f for one octave
-    float tuning;
+    /*
+     * The real tuning in logarithmic power of two.
+     * For example 1/12 for one halftone and
+     * 1 for one octave.
+     */
+    float tuning_log2;
 
-    //the real tunning is x1/x2
+    //the real tuning is x1/x2
     unsigned int x1, x2;
 };
 
@@ -66,20 +69,22 @@ class Microtonal
         /**Destructor*/
         ~Microtonal();
         void defaults();
+        /**Updates the logarithmic power of two frequency for a given note
+         */
+        bool updatenotefreq_log2(float &note_log2_freq, int keyshift) const;
         /**Calculates the frequency for a given note
          */
         float getnotefreq(float note_log2_freq, int keyshift) const;
 
-
         //Parameters
         /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
-        unsigned char Pinvertupdown;
+        bool Pinvertupdown;
 
         /**the central key of the inversion*/
         unsigned char Pinvertupdowncenter;
 
-        /**0 for 12 key temperate scale, 1 for microtonal*/
-        unsigned char Penabled;
+        /**false for 12 key temperate scale, true for microtonal*/
+        bool Penabled;
 
         /**the note of "A" key*/
         unsigned char PAnote;
@@ -101,7 +106,7 @@ class Microtonal
         unsigned char Pmapsize;
 
         /**Mapping ON/OFF*/
-        unsigned char Pmappingenabled;
+        bool Pmappingenabled;
         /**Mapping (keys)*/
         short int Pmapping[128];
 
@@ -111,9 +116,9 @@ class Microtonal
         // Functions
         /** Return the current octave size*/
         unsigned char getoctavesize() const;
-        /**Convert tunning to string*/
+        /**Convert tuning to string*/
         void tuningtoline(int n, char *line, int maxn);
-        /**load the tunnings from a .scl file*/
+        /**load the tunings from a .scl file*/
         static int loadscl(SclInfo &scl, const char *filename);
         /**load the mapping from .kbm file*/
         static int loadkbm(KbmInfo &kbm, const char *filename);
@@ -148,7 +153,7 @@ class Microtonal
         unsigned char octavesize;
         OctaveTuning octave[MAX_OCTAVE_SIZE];
     private:
-        //loads a line from the text file, while ignoring the lines beggining with "!"
+        //loads a line from the text file, while ignoring the lines beginning with "!"
         static int loadline(FILE *file, char *line);
         //Grab a 0..127 integer from the provided descriptor
 

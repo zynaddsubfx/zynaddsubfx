@@ -31,6 +31,7 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
         //void OSC_value(float);
         void OSC_value(int);
         void OSC_value(char);
+        void OSC_value(float);
         using Fl_Osc_Widget::OSC_value;
 
         //Refetch parameter information
@@ -44,7 +45,14 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
         virtual void rebase(std::string new_base) override;
 
         void cb(void);
+
+        //! normally, it's all uchar. this hack makes it a float dial
+        void make_float() { dataType = dataTypeT::type_float; }
     private:
+        enum class dataTypeT
+        {
+            type_uchar, type_float
+        } dataType = dataTypeT::type_uchar;
         bool alt_style;
         bool dead;
         std::pair<Fl_Callback*, void*> cb_data;

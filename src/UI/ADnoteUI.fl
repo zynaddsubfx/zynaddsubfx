@@ -178,7 +178,7 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
 else voicelistitemgroup->activate();
 o->redraw();}
         private xywh {30 5 20 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
-        code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
+        code0 {char tmp[12];snprintf(tmp,12,"%d",nvoice+1);o->label(strdup(tmp));}
         code1 {o->init("Enabled");}
         class Fl_Osc_Check
       }
@@ -189,11 +189,6 @@ class ADnoteUI *adnoteui = ui->partui->adnoteui;
 adnoteui->ADnoteVoice->show();
 adnoteui->currentvoicecounter->value(nvoice+1);
 adnoteui->currentvoicecounter->do_callback();
-class ADvoiceUI *advoice = adnoteui->advoice;
-if (advoice->mod_type->value() == 0)
-    advoice->voiceFMparametersgroup->deactivate();
-else
-    advoice->voiceFMparametersgroup->activate();
 }
         xywh {53 6 40 15} box THIN_UP_BOX labelsize 11
       }
@@ -462,7 +457,7 @@ fmoscil->rebase(loc);
 else
 fmoscil->rebase(loc+"../VoicePar"+to_s(o->value()-1)+"/");
 voiceFMparametersgroup->redraw();} open
-                xywh {560 420 75 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
+                xywh {560 420 60 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
                 code0 {o->add("Internal");}
                 code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtM.%2d",i+1);o->add(tmp);};}
                 code3 {o->init("PextFMoscil",-1);}
@@ -470,7 +465,7 @@ voiceFMparametersgroup->redraw();} open
               } {}
             }
             Fl_Choice extMod {
-              label {External Mod.}
+              label {Ext. Mod.}
               callback {if ((int) o->value() != 0) {
     modoscil->deactivate();
     modfrequency->deactivate();
@@ -479,7 +474,7 @@ voiceFMparametersgroup->redraw();} open
     modfrequency->activate();
 };
 voiceFMparametersgroup->redraw();} open
-              xywh {635 40 85 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+              xywh {620 40 80 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");}
               code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i+1);o->add(tmp);};}
               code2 {o->init("PFMVoice", -1);}
@@ -489,45 +484,48 @@ voiceFMparametersgroup->redraw();} open
           }
           Fl_Choice mod_type {
             label {Type:}
-            callback {if (o->value()==0) voiceFMparametersgroup->deactivate();
-else voiceFMparametersgroup->activate();
-o->redraw();}
             xywh {535 40 80 20} down_box BORDER_BOX align 5
             code0 {o->init("PFMEnabled");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
               label OFF
-              xywh {40 40 100 20} labelfont 1
+              xywh {40 40 90 20} labelfont 1
             }
             MenuItem {} {
-              label MORPH
-              xywh {50 50 100 20} labelfont 1
+              label MRPH
+              xywh {50 50 90 20} labelfont 1
             }
             MenuItem {} {
               label RING
-              xywh {60 60 100 20} labelfont 1
+              xywh {60 60 90 20} labelfont 1
             }
             MenuItem {} {
               label PM
-              xywh {70 70 100 20} labelfont 1
+              xywh {70 70 90 20} labelfont 1
             }
             MenuItem {} {
               label FM
-              xywh {80 80 100 20} labelfont 1
+              xywh {80 80 90 20} labelfont 1
             }
             MenuItem {} {
               label PWM
-              xywh {90 90 100 20} labelfont 1
+              xywh {90 90 90 20} labelfont 1
             }
             MenuItem {} {
               label WAVE
-              xywh {100 100 100 20} labelfont 1
+              xywh {100 100 90 20} labelfont 1
             }
             MenuItem {} {
               label PITCH
-              xywh {110 110 100 20} labelfont 1 deactivate
+              xywh {110 110 90 20} labelfont 1 deactivate
             }
+          }
+          Fl_Check_Button {} {
+            label Sync
+            tooltip {Oscillator Hard Synchronization} xywh {700 40 55 20} down_box DOWN_BOX labelfont 1 labelsize 11
+            code0 {o->init("PsyncEnabled");}
+            class Fl_Osc_Check
           }
           Fl_Group {} {
             label FREQUENCY open
@@ -833,7 +831,7 @@ o->redraw();}
         Fl_Group activeVoiceID {
           label 01
           xywh {5 5 55 35} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 16
-          code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
+          code0 {char tmp[12];snprintf(tmp,12,"%d",nvoice+1);o->label(strdup(tmp));}
         } {}
         Fl_Choice {} {
           callback {switch (o->value()) {
@@ -938,7 +936,7 @@ delete(oscedit);
   } {
     code {nvoice = nvoice_;
     loc = base+"VoicePar"+to_s(nvoice)+"/";
-    char tmp[50];snprintf(tmp,10,"%d",nvoice+1);
+    char tmp[50];snprintf(tmp,12,"%d",nvoice+1);
     activeVoiceID->label(strdup(tmp));
     extoscil->clear();
     extoscil->add("Internal");
@@ -1167,10 +1165,6 @@ ADnoteVoiceList->show();}
       Fl_Button {} {
         label {Show Voice Parameters}
         callback {
-        if (advoice->mod_type->value() == 0)
-            advoice->voiceFMparametersgroup->deactivate();
-        else
-            advoice->voiceFMparametersgroup->activate();
         ADnoteVoice->show();}
         xywh {5 400 170 25} labelsize 12
       }

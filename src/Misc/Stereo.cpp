@@ -23,12 +23,4 @@ Stereo<T>::Stereo(const T &val)
     :l(val), r(val)
 {}
 
-template<class T>
-Stereo<T> &Stereo<T>::operator=(const Stereo<T> &nstr)
-{
-    l = nstr.l;
-    r = nstr.r;
-    return *this;
-}
-
 }

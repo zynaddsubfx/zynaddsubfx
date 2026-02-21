@@ -158,7 +158,7 @@ class XMLwrapper
         /**Get the the branch_id and limits it between the min and max.
          * if min==max==0, it will not limit it
          * if there isn't any id, will return min
-         * this must be called only imediately after enterbranch()
+         * this must be called only immediately after enterbranch()
          */
         int getbranchid(int min, int max) const;
 
@@ -187,7 +187,7 @@ class XMLwrapper
          * @param name The parameter name.
          * @param defaultpar The default value if the real value is not found.
          */
-        int getparbool(const std::string &name, int defaultpar) const;
+        bool getparbool(const std::string &name, bool defaultpar) const;
 
         /**
          * Get the string value stored in the node.
@@ -230,8 +230,8 @@ class XMLwrapper
                          float min,
                          float max) const;
 
-        bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
-
+        bool minimal; /**<false if all parameters will be stored (used for clipboard, also false to SaveFullXML)*/
+        bool SaveFullXml; /**<true to ensure disabled parts also get saved. Altered by configuration parameter of the same name. */
         /**
          * Sets the current tree's PAD Synth usage
          */
@@ -264,7 +264,7 @@ class XMLwrapper
         /**
          * Loads specified file and returns data.
          *
-         * Will load a gziped file or an uncompressed file.
+         * Will load a gzipped file or an uncompressed file.
          * @param filename the file
          * @return The decompressed data
          */

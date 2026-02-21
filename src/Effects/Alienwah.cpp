@@ -28,6 +28,8 @@ using std::complex;
 rtosc::Ports Alienwah::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(wah 1, wah 2, wah 3, wah 4)
+                  rProp(alias)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -36,7 +38,10 @@ rtosc::Ports Alienwah::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127), rPresetsAt(3, 93)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+               rDefault(63), rPresetsAt(3, 46),
+               rPresetsAt(16, 127, 127, 127, 93)),
     rEffParPan(),
     rEffPar(Pfreq,     2, rShort("freq") rPresets(70, 73, 63, 25),
             "Effect Frequency"),
@@ -102,7 +107,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         complex<float> tmp = clfol * x + oldclfol * x1;
 
         complex<float> out = tmp * oldl[oldk];
-        out += (1 - fabs(fb)) * smp.l[i] * pangainL;
+        out += (1 - fabsf(fb)) * smp.l[i] * pangainL;
 
         oldl[oldk] = out;
         float l = out.real() * 10.0f * (fb + 0.1f);
@@ -111,7 +116,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         tmp = clfor * x + oldclfor * x1;
 
         out = tmp * oldr[oldk];
-        out += (1 - fabs(fb)) * smp.r[i] * pangainR;
+        out += (1 - fabsf(fb)) * smp.r[i] * pangainR;
 
         oldr[oldk] = out;
         float r = out.real() * 10.0f * (fb + 0.1f);
@@ -149,7 +154,7 @@ void Alienwah::setdepth(unsigned char _Pdepth)
 void Alienwah::setfb(unsigned char _Pfb)
 {
     Pfb = _Pfb;
-    fb  = fabs((Pfb - 64.0f) / 64.1f);
+    fb  = fabsf((Pfb - 64.0f) / 64.1f);
     fb  = sqrtf(fb);
     if(fb < 0.4f)
         fb = 0.4f;
@@ -183,11 +188,11 @@ void Alienwah::setdelay(unsigned char _Pdelay)
     cleanup();
 }
 
-void Alienwah::setpreset(unsigned char npreset)
+unsigned char Alienwah::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 11;
-    const int     NUM_PRESETS = 4;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 11
+#define	NUM_PRESETS 4
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //AlienWah1
         {127, 64, 70, 0,   0, 62,  60,  105, 25, 0, 64},
         //AlienWah2
@@ -197,16 +202,24 @@ void Alienwah::setpreset(unsigned char npreset)
         //AlienWah4
         {93,  64, 25, 0,   1, 66,  101, 11,  47, 0, 86}
     };
-
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    if(insertion == 0)
-        changepar(0, presets[npreset][0] / 2);  //lower the volume if this is system effect
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if (npar == 0 && insertion == 0) {
+            /* lower the volume if this is system effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
 }
 
+void Alienwah::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Alienwah::changepar(int npar, unsigned char value)
 {

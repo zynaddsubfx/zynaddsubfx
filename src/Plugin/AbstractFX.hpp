@@ -30,6 +30,7 @@
 #include "Params/FilterParams.h"
 #include "Effects/Effect.h"
 #include "Misc/Allocator.h"
+#include "Misc/Time.h"
 #include "zyn-version.h"
 
 /* ------------------------------------------------------------------------------------------------------------
@@ -41,11 +42,12 @@ class AbstractPluginFX : public Plugin
 public:
     AbstractPluginFX(const uint32_t params, const uint32_t programs)
         : Plugin(params-2, programs, 0),
+          time(getBufferSize(), getSampleRate()),
+          effect(nullptr),
           paramCount(params-2), // volume and pan handled by host
           programCount(programs),
           bufferSize(getBufferSize()),
           sampleRate(getSampleRate()),
-          effect(nullptr),
           efxoutl(nullptr),
           efxoutr(nullptr)
     {
@@ -55,7 +57,12 @@ public:
         std::memset(efxoutl, 0, sizeof(float)*bufferSize);
         std::memset(efxoutr, 0, sizeof(float)*bufferSize);
 
-        doReinit(true);
+        // set default tempo
+        time.tempo = 120;
+        time.bar = 0;
+        time.beat = 0;
+        time.tick = 0.0f;
+        time.bpm = 0.0f;
     }
 
     ~AbstractPluginFX() override
@@ -64,6 +71,42 @@ public:
         delete[] efxoutr;
         delete effect;
         delete filterpar;
+    }
+
+    virtual void doReinit(bool firstInit)
+    {
+        // save current param values before recreating effect
+        uchar params[paramCount];
+
+        if (effect != nullptr)
+        {
+            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
+                params[i] = effect->getpar(i+2);
+
+            delete effect;
+        }
+        else
+        {
+            firstInit = true;
+        }
+
+        zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
+
+        effect = instantiateFX(pars);
+
+        if (firstInit)
+        {
+            effect->setpreset(0);
+        }
+        else
+        {
+            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
+                effect->changepar(i+2, params[i]);
+        }
+
+        // reset volume and pan
+        effect->changepar(0, 127);
+        effect->changepar(1, 64);
     }
 
 protected:
@@ -168,6 +211,11 @@ protected:
     */
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
+
+        const TimePosition& timePosition = getTimePosition();
+        //~ printf("DISTRHO_PLUGIN_WANT_TIMEPOS:  %d\n",DISTRHO_PLUGIN_WANT_TIMEPOS);
+
+
         if (outputs[0] != inputs[0])
             copyWithMultiply(outputs[0], inputs[0], 0.5f, frames);
         else
@@ -178,6 +226,20 @@ protected:
         else
             multiply(outputs[1], 0.5f, frames);
 
+        if(timePosition.bbt.valid) {
+            time.hostSamples = frames;
+            time.bar = timePosition.bbt.bar;
+            time.beat = timePosition.bbt.beat;
+            time.tick = timePosition.bbt.tick;
+            time.beatsPerBar = timePosition.bbt.beatsPerBar;
+            time.tempo = timePosition.bbt.beatsPerMinute;
+            time.bpm = timePosition.bbt.beatsPerMinute;
+            time.ppq = timePosition.bbt.ticksPerBeat;
+            time.playing = timePosition.playing;
+        }
+        else {
+            time.bpm = 0;
+        }
         // FIXME: Make Zyn use const floats
         effect->out(zyn::Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
 
@@ -226,6 +288,9 @@ protected:
     }
 
     // -------------------------------------------------------------------------------------------------------
+    zyn::AbsTime time;
+
+    zyn::Effect* effect;
 
 private:
     const uint32_t paramCount;
@@ -234,42 +299,17 @@ private:
     uint32_t bufferSize;
     double   sampleRate;
 
-    zyn::Effect* effect;
+
     float*  efxoutl;
     float*  efxoutr;
     zyn::FilterParams* filterpar;
 
     zyn::AllocatorClass allocator;
 
-    void doReinit(const bool firstInit)
+
+    virtual ZynFX* instantiateFX(zyn::EffectParams pars)
     {
-        // save current param values before recreating effect
-        uchar params[paramCount];
-
-        if (effect != nullptr)
-        {
-            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
-                params[i] = effect->getpar(i+2);
-
-            delete effect;
-        }
-
-        zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
-        effect = new ZynFX(pars);
-
-        if (firstInit)
-        {
-            effect->setpreset(0);
-        }
-        else
-        {
-            for (int i=0, count=static_cast<int>(paramCount); i<count; ++i)
-                effect->changepar(i+2, params[i]);
-        }
-
-        // reset volume and pan
-        effect->changepar(0, 127);
-        effect->changepar(1, 64);
+        return new ZynFX(pars);
     }
 
     void addWithMultiply(float* dst, const float* src, const float multiplier, const uint32_t frames) noexcept

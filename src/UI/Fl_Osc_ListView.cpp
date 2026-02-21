@@ -18,11 +18,11 @@ Fl_Osc_ListView::Fl_Osc_ListView(int x,int y, int w, int h, const char *label)
     :Fl_Browser(x,y,w,h,label), data(0)
 {}
 
-Fl_Osc_ListView::~Fl_Osc_ListView(void) 
+Fl_Osc_ListView::~Fl_Osc_ListView(void)
 {
     delete data;
 };
-        
+
 void Fl_Osc_ListView::init(const char *path_)
 {
     Fl_Osc_Pane *pane = fetch_osc_pane(this);

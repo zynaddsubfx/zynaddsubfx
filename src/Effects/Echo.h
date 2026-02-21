@@ -20,13 +20,14 @@
 namespace zyn {
 
 /**Echo Effect*/
-class Echo:public Effect
+class Echo final:public Effect
 {
     public:
         Echo(EffectParams pars);
         ~Echo();
 
         void out(const Stereo<float *> &input);
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         /**
          * Sets the value of the chosen variable

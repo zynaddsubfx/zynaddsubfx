@@ -123,7 +123,7 @@ int EnvelopeFreeEdit::getnearest(int x,int y) const
 
 static float dt(char val)
 {
-    return (powf(2.0f, val / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
+    return (powf(2.0f, val / 127.0f * 12.0f) - 1.0f) * 10.0f; //milliseconds
 }
 
 float EnvelopeFreeEdit::getdt(int i) const
@@ -156,7 +156,7 @@ void EnvelopeFreeEdit::draw(void)
     fl_line_style(FL_SOLID);
     fl_line(ox+2,midline,ox+lx-2,midline);
 
-    //draws the evelope points and lines
+    //draws the envelope points and lines
     Fl_Color alb=FL_WHITE;
     if (!active_r()) alb=fl_rgb_color(180,180,180);
     fl_color(alb);
@@ -283,10 +283,11 @@ int EnvelopeFreeEdit::handle(int event)
               if (pair!=NULL) pair->redraw();
               return 1;
           }
+          // fall through
       case FL_DRAG:
           if (currentpoint>=0){
               old_mod_state = mod_state;
-              mod_state = ctrldown << 1 | altdown;
+              mod_state = ctrldown << 1 | (int)altdown;
               if (old_mod_state != mod_state) {
                   cpx=x_;
                   cpy=y_;

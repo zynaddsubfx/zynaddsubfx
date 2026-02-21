@@ -24,12 +24,12 @@ namespace zyn {
 class PADnote:public SynthNote
 {
     public:
-        PADnote(const PADnoteParameters *parameters, SynthParams pars,
-                const int &interpolation, WatchManager *wm=0, const char *prefix=0);
+        PADnote(const PADnoteParameters *parameters, const SynthParams &pars,
+                const int &interpolation, WatchManager *wm=0, const char *prefix=0, bool constPowerMixing = true);
         ~PADnote();
 
         SynthNote *cloneLegato(void);
-        void legatonote(LegatoParams pars);
+        void legatonote(const LegatoParams &pars);
 
         int noteout(float *outl, float *outr);
         bool finished() const;
@@ -39,7 +39,7 @@ class PADnote:public SynthNote
 
         void releasekey();
     private:
-        void setup(float freq, float velocity, int portamento_,
+        void setup(float velocity, Portamento *portamento,
                    float note_log2_freq, bool legato = false, WatchManager *wm=0, const char *prefix=0);
         void fadein(float *smps);
         void computecurrentparameters();
@@ -49,12 +49,13 @@ class PADnote:public SynthNote
         int   poshi_l, poshi_r;
         float poslo;
 
-        float basefreq;
+        float note_log2_freq;
         float BendAdjust;
         float OffsetHz;
         bool  firsttime;
 
-        int nsample, portamento;
+        int nsample;
+        Portamento *portamento;
 
         int Compute_Linear(float *outl,
                            float *outr,

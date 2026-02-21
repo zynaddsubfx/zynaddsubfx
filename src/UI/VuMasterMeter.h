@@ -88,7 +88,7 @@ class VuMasterMeter: public VuMeter
             if (irmsdbl>2) fl_rectf(X+irmsdbl-1,Y+H/2,3,VULENY,255,255,0);
 
 
-            //draw the red box if clipping has occured
+            //draw the red box if clipping has occurred
             if (clipped==0) fl_rectf(X+VULENX+2,Y+1,W-VULENX-3,H-4,0,0,10);
             else fl_rectf(X+VULENX+2,Y+1,W-VULENX-3,H-4,250,10,10);
 

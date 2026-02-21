@@ -48,7 +48,7 @@ void Fl_Osc_Roller::OSC_value(char v)
 {
     value(v);
 }
-        
+
 void Fl_Osc_Roller::update(void)
 {
     oscWrite(name);
@@ -57,7 +57,7 @@ void Fl_Osc_Roller::update(void)
 void Fl_Osc_Roller::cb(void)
 {
     oscWrite(name, "i", (int)value());
-    
+
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }

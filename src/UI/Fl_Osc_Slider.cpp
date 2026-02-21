@@ -70,8 +70,8 @@ void Fl_Osc_Slider::cb(void)
     else if(osc_type == 'i')
         oscWrite(ext, "i", (int)(val-min_));
     else {
-	fprintf(stderr, "invalid `c' from slider %s%s, using `i'\n", loc.c_str(), ext.c_str());
-	oscWrite(ext, "i", (int)(val-min_));
+        fprintf(stderr, "invalid `c' from slider %s%s, using `i'\n", loc.c_str(), ext.c_str());
+        oscWrite(ext, "i", (int)(val-min_));
     }
     //OSC_value(val);
 
@@ -132,6 +132,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
                         break;
                     case FL_CTRL:
                         divisor = 128;
+                        // fall through
                     default:
                         step_ = absrange / divisor;
                         if (step_ < 1)
@@ -232,7 +233,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
         default:
             handled = Fl_Slider::handle(ev, X, Y, W, H);
     }
-    
+
     return handled;
 }
 

@@ -18,7 +18,8 @@ set(UI_fl_files
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
+# X11_LIBRARY_DIRS is for libXpm.
+link_directories(${LIBLO_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
 set_source_files_properties(UI/MasterUI.h PROPERTIES GENERATED 1)
 fltk_wrap_ui(zynaddsubfx_gui ${UI_fl_files})
 
@@ -88,7 +89,7 @@ add_dependencies(zynaddsubfx_gui_bridge zynaddsubfx_gui)
 
 
 if(NtkGui)
-  target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES})
+  target_link_libraries(zynaddsubfx_gui ${NTK_IMAGES_LIBRARIES} ${NTK_LIBRARIES})
 endif(NtkGui)
 
 if(FltkGui)

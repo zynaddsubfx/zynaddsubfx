@@ -28,35 +28,40 @@ using rtosc::RtData;
     int nfilt = atoi(msg-2); \
     int id    = 10+nfilt*5+offset; \
     if(rtosc_narguments(msg)) \
-        obj->changepar(id, rtosc_argument(msg,0).i);\
-    else \
-        d.reply(d.loc, "i", obj->getpar(id))
+    { \
+        obj->changepar(id, enum_key_from_msg(d.port->meta(), msg)); \
+    } else { \
+        d.reply(d.loc, "i", obj->getpar(id)); }
 
 #define rEnd }
 
 static rtosc::Ports filterports {
-    {"Ptype::i", rProp(parameter) rOptions(Off, LP1, HP1, LP2,
-            HP2, BP, notch, peak, l.shelf, h.shelf)
+    {"Ptype::i:S", rProp(parameter) rProp(enumerated) rOptions(Off, LP1, HP1, LP2,
+            HP2, BP, notch, peak, l.shelf, h.shelf) rDefault(0)
         rShort("type") rDoc("Filter Type"), 0,
         rBegin;
         rEQ(0);
         rEnd},
     {"Pfreq::i", rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("freq"), 0,
         rBegin;
         rEQ(1);
         rEnd},
     {"Pgain::i", rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("gain"), 0,
         rBegin;
         rEQ(2);
         rEnd},
     {"Pq::i",    rProp(parameter) rMap(min, 0) rMap(max, 127)
+        rDefault(64)
         rShort("q") rDoc("Resonance/Bandwidth"), 0,
         rBegin;
         rEQ(3);
         rEnd},
     {"Pstages::i", rProp(parameter) rMap(min, 0) rMap(max, 4)
+        rDefault(0)
         rShort("stages") rDoc("Additional filter stages"), 0,
         rBegin;
         rEQ(4);
@@ -64,6 +69,7 @@ static rtosc::Ports filterports {
 };
 
 rtosc::Ports EQ::ports = {
+    rEffParVol(rDefault(67)),
     {"filter#8/", 0, &filterports,
         rBegin;
         (void)obj;
@@ -100,11 +106,6 @@ EQ::EQ(EffectParams pars)
     :Effect(pars)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
-        filter[i].Ptype   = 0;
-        filter[i].Pfreq   = 64;
-        filter[i].Pgain   = 64;
-        filter[i].Pq      = 64;
-        filter[i].Pstages = 0;
         filter[i].l = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
         filter[i].r = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
     }
@@ -157,20 +158,30 @@ void EQ::setvolume(unsigned char _Pvolume)
     volume    = (!insertion) ? 1.0f : outvolume;
 }
 
-
-void EQ::setpreset(unsigned char npreset)
+unsigned char EQ::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 1;
-    const int     NUM_PRESETS = 2;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define PRESET_SIZE 1
+#define NUM_PRESETS 2
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         {67}, //EQ 1
         {67}  //EQ 2
     };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        return presets[npreset][npar];
+    } else if (npar >= 10 && npar < (10 + MAX_EQ_BANDS * 5)) {
+        static const unsigned char bp_preset[5] = { 0, 64, 64, 64, 0 };
+        return bp_preset[npar % 5];
+    }
+    return 0;
+}
+
+void EQ::setpreset(unsigned char npreset)
+{
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
 }
 
@@ -287,8 +298,8 @@ void EQ::getFilter(float *a, float *b) const
         auto &F = filter[i];
         if(F.Ptype == 0)
             continue;
-        const double Fb[3] = {F.l->coeff.c[0], F.l->coeff.c[1], F.l->coeff.c[2]};
-        const double Fa[3] = {1.0f, -F.l->coeff.d[1], -F.l->coeff.d[2]};
+        const float Fb[3] = {F.l->coeff.c[0], F.l->coeff.c[1], F.l->coeff.c[2]};
+        const float Fa[3] = {1.0f, -F.l->coeff.d[1], -F.l->coeff.d[2]};
 
         for(int j=0; j<F.Pstages+1; ++j) {
             for(int k=0; k<3; ++k) {

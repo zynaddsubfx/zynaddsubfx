@@ -69,7 +69,7 @@ void Fl_EQGraph::draw_freq_line(float freq, int type)
                    break;
         case 1:fl_line_style(FL_DOT);break;
         case 2:fl_line_style(FL_DASH);break;
-    }; 
+    };
 
 
     if ((freqx>0.0)&&(freqx<1.0))
@@ -103,7 +103,7 @@ void Fl_EQGraph::draw(void)
         if(i==1) {
             draw_freq_line(i*100.0,0);
             draw_freq_line(i*1000.0,0);
-        } else 
+        } else
             if (i==5) {
                 draw_freq_line(i*10.0,2);
                 draw_freq_line(i*100.0,2);
@@ -160,7 +160,7 @@ double Fl_EQGraph::getresponse(int maxy,float freq) const
     float mag = 1;
     //std::complex<float> num_res = 0;
     //std::complex<float> dem_res = 0;
-         
+
 
     for(int i = 0; i < MAX_EQ_BANDS*MAX_FILTER_STAGES; ++i) {
         if(num[3*i] == 0)

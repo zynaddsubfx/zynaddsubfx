@@ -423,7 +423,7 @@ cbwidget->do_callback();}
               xywh {105 105 100 20} labelfont 1 labelsize 11
             }
             MenuItem {} {
-              label Quater
+              label Quarter
               xywh {115 115 100 20} labelfont 1 labelsize 11
             }
             MenuItem {} {

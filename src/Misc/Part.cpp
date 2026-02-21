@@ -20,6 +20,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Synth/Portamento.h"
 #include "../Synth/Resonance.h"
 #include "../Synth/SynthNote.h"
 #include "../Synth/ADnote.h"
@@ -31,6 +32,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
+#include <ctime>
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
@@ -43,6 +45,7 @@ using rtosc::RtData;
 
 #define rObject Part
 static const Ports partPorts = {
+    rSelf(Part, rEnabledBy(Penabled)),
     rRecurs(kit, 16, "Kit"),//NUM_KIT_ITEMS
     rRecursp(partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
@@ -50,13 +53,14 @@ static const Ports partPorts = {
               "How many parts are before this in the Master"),
 #undef  rChangeCb
 #define rChangeCb if(obj->Penabled == false) obj->AllNotesOff();
-    rToggle(Penabled, rShort("enable"), rDefaultDepends(partno),
-            rPresets(true), rDefault(false), "Part enable"),
+    rToggle(Penabled, rShort("enable"),
+            rPreset(0, true), rDefault(false), rDefaultDepends(partno),
+            "Part enable"),
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
-#define rChangeCb obj->setVolume(obj->Volume);
-    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
+#define rChangeCb obj->setVolumedB(obj->Volume);
+    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB),
             rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
     {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
@@ -66,8 +70,8 @@ static const Ports partPorts = {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", (int) roundf(96.0f * obj->Volume / 40.0f + 96.0f));
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            obj->Volume  = obj->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
-            obj->setVolume(obj->Volume);
+            obj->Volume  = obj->volume127TodB(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+            obj->setVolumedB(obj->Volume);
             d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
         }}},
 #define rChangeCb obj->setPpanning(obj->Ppanning);
@@ -75,15 +79,26 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
     rParamI(Pkeylimit, rShort("limit"), rProp(parameter),
-    rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
+#undef rChangeCb
+#define rChangeCb obj->setvoicelimit(obj->Pvoicelimit);
+    rParamI(Pvoicelimit, rShort("vlimit"), rProp(parameter),
+            rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
     rParamZyn(Pmaxkey, rShort("max"), rDefault(127), "Max Used Key"),
-    rParamZyn(Pkeyshift, rShort("shift"), rDefault(64), "Part keyshift"),
-    rParamZyn(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
-              rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
-              "Active MIDI channel"),
+    {"Pkeyshift::i", rShort("shift") rProp(parameter) rLinear(-64,63) rUnit(semitones)
+    rDefault(0) rDoc("Part Key Shift"), 0, [](const char *m, RtData&d) {
+    if(rtosc_narguments(m)==0) {
+        d.reply(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);
+    } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+        ((Part*)d.obj)->Pkeyshift=(limit<char>(rtosc_argument(m,0).i+64,0,127));
+        d.broadcast(d.loc, "i", ((Part*)d.obj)->Pkeyshift-64);}}},
+    rOption(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
+            rDefaultDepends(partno),
+            rPresets(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
+            "Active MIDI channel"),
     rParamZyn(Pvelsns,   rShort("sense"), rDefault(64), "Velocity sensing"),
     rParamZyn(Pveloffs,  rShort("offset"), rDefault(64),"Velocity offset"),
     rToggle(Pnoteon, rDefault(true), "If the channel accepts note on events"),
@@ -102,10 +117,10 @@ static const Ports partPorts = {
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, rDefault(""),
         "Instrument comments"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "User specified label"),
-    rArrayI(Pefxroute, NUM_PART_EFX,
-            rOptions(Next Effect,Part Out,Dry Out),
-            ":default\0=[\"Next Effect\"S...]\0",
-            "Effect Routing"),
+    rArrayOption(Pefxroute, NUM_PART_EFX,
+        rOptions(Next Effect,Part Out,Dry Out),
+        ":default\0=[\"Next Effect\"S...]\0",
+        "Effect Routing"),
     rArrayT(Pefxbypass, NUM_PART_EFX, rDefault([false...]),
         "If an effect is bypassed"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
@@ -114,14 +129,8 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato)
-        rDoc("Synthesis polyphony type\n"
-                "Polyphonic - Each note is played independently\n"
-                "Monophonic - A single note is played at a time with"
-                " envelopes resetting between notes\n"
-                "Legato     - A single note is played at a time without"
-                " envelopes resetting between notes\n"
-            ), NULL,
+    {"polyType::i:c:S", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+        rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
@@ -129,6 +138,8 @@ static const Ports partPorts = {
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
+                if(p->Platchmode)
+                    res = 3;
                 return res;
             };
 
@@ -137,22 +148,37 @@ static const Ports partPorts = {
                 return;
             }
 
-            int i = rtosc_argument(msg, 0).i;
+            int i;
+            if(rtosc_type(msg, 0) == 'S') {
+                auto prop = d.port->meta();
+                i = enum_key(prop, rtosc_argument(msg, 0).s);
+                assert(!prop["min"] || i >= atoi(prop["min"]));
+                assert(!prop["max"] || i <= atoi(prop["max"]));
+            } else {
+                i = rtosc_argument(msg, 0).i;
+            }
             if(i == 0) {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
+                p->Platchmode = 0;
             } else if(i==1) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 0;
-            } else {
+                p->Platchmode = 0;
+            } else if(i==2) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
+                p->Platchmode = 0;
+            } else {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+                p->Platchmode = 1;
             }
             d.broadcast(d.loc, "i", get_polytype());
         }
     },
     {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
-        [](const char *, RtData &d)
+        [](const char *, RtData &)
         {
             //XXX todo forward this event for middleware to handle
             //Part *p = (Part*)d.obj;
@@ -165,8 +191,29 @@ static const Ports partPorts = {
 
             //d.broadcast("/damage", "s", part_loc);
         }},
-
-
+        {"savexml:", rProp(internal) rDoc("Save Part to the file it has been loaded from"), 0,
+        [](const char *, RtData &d)
+        {
+            Part *p = (Part*)d.obj;
+            int err;
+            if (p->loaded_file[0] == '\0') {  // if part was never loaded or saved
+                time_t rawtime;     // make a new name from date and time
+                char filename[32];
+                time (&rawtime);
+                const struct tm* timeinfo = localtime (&rawtime);
+                strftime (filename,23,"%F_%R.xiz",timeinfo);
+                err = p->saveXML(filename);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), filename, err ? "failed" : "ok");
+            }
+            else
+            {
+                err = p->saveXML(p->loaded_file);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), p->loaded_file, err ? "failed" : "ok");
+            }
+            if (err)
+                d.reply("/alert", "s",
+                        "Failed To Save File, please check file permissions");
+        }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
     //        auto loc = d.loc;
@@ -200,14 +247,14 @@ static const Ports kitPorts = {
             rPreset(true, true), rPreset(false, false),
             "Kit item enable"),
     rToggle(Pmuted,  rDefault(false), "Kit item mute"),
-    rParamZyn(Pminkey, rDefault(0),  "Kit item min key"),
-    rParamZyn(Pmaxkey, rDefault(127)  "Kit item max key"),
+    rParamZyn(Pminkey, rDefault(0),   "Kit item min key"),
+    rParamZyn(Pmaxkey, rDefault(127), "Kit item max key"),
     rToggle(Padenabled, rDefaultDepends(firstkit),
             rPreset(true, true), rPreset(false, false),
             "ADsynth enable"),
     rToggle(Psubenabled, rDefault(false), "SUBsynth enable"),
     rToggle(Ppadenabled, rDefault(false), "PADsynth enable"),
-    rParamZyn(Psendtoparteffect,
+    rOption(Psendtoparteffect,
             rOptions(FX1, FX2, FX3, Off), rDefault(FX1),
             "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "Kit User Specified Label"),
@@ -239,12 +286,13 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* sync_,
     const int &gzip_compression, const int &interpolation,
     Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),
     Ppolymode(true),
     Plegatomode(false),
+    Platchmode(false),
     partoutl(new float[synth_.buffersize]),
     partoutr(new float[synth_.buffersize]),
     ctl(synth_, &time_),
@@ -254,9 +302,12 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     memory(alloc),
     synth(synth_),
     time(time_),
+    sync(sync_),
     gzip_compression(gzip_compression),
     interpolation(interpolation)
 {
+    loaded_file[0] = '\0';
+
     if(prefix_)
         fast_strcpy(prefix, prefix_, sizeof(prefix));
     else
@@ -276,7 +327,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time);
+        partefx[nefx]    = new EffectMgr(memory, synth, 1, &time, sync);
         Pefxbypass[nefx] = false;
     }
     assert(partefx[0]);
@@ -287,13 +338,15 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
-    oldfreq      = -1.0f;
+    silent = false;
+    oldfreq_log2 = -1.0f;
+    oldportamento = NULL;
+    legatoportamento = NULL;
 
     cleanup();
 
     Pname = new char[PART_MAX_NAME_LEN];
 
-    oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;
 
     defaults();
@@ -316,7 +369,7 @@ void Part::cloneTraits(Part &p) const
 #define CLONE(x) p.x = this->x
     CLONE(Penabled);
 
-    p.setVolume(this->Volume);
+    p.setVolumedB(this->Volume);
     p.setPpanning(this->Ppanning);
 
     CLONE(Pminkey);
@@ -331,8 +384,11 @@ void Part::cloneTraits(Part &p) const
     CLONE(Ppolymode);
     CLONE(Plegatomode);
     CLONE(Pkeylimit);
+    CLONE(Pvoicelimit);
 
-    CLONE(ctl);
+    // Controller has a reference, so it can not be re-assigned
+    // So, destroy and reconstruct it.
+    p.ctl.~Controller(); new (&p.ctl) Controller(this->ctl);
 }
 
 void Part::defaults()
@@ -343,13 +399,14 @@ void Part::defaults()
     Pnoteon     = 1;
     Ppolymode   = 1;
     Plegatomode = 0;
-    setVolume(0.0);
+    setVolumedB(0.0);
     Pkeyshift = 64;
     Prcvchn   = 0;
     setPpanning(64);
     Pvelsns   = 64;
     Pveloffs  = 64;
     Pkeylimit = 15;
+    Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
 }
@@ -435,12 +492,16 @@ Part::~Part()
 
 static void assert_kit_sanity(const Part::Kit *kits)
 {
+#ifdef NDEBUG
+    (void)kits;
+#else
     for(int i=0; i<NUM_KIT_ITEMS; ++i) {
         //an enabled kit must have a corresponding parameter object
         assert(!kits[i].Padenabled  || kits[i].adpars);
         assert(!kits[i].Ppadenabled || kits[i].padpars);
         assert(!kits[i].Psubenabled || kits[i].subpars);
     }
+#endif
 }
 
 static int kit_usage(const Part::Kit *kits, int note, int mode)
@@ -469,9 +530,8 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
 /*
  * Note On Messages
  */
-bool Part::NoteOn(note_t note,
+bool Part::NoteOnInternal(note_t note,
                   unsigned char velocity,
-                  int masterkeyshift,
                   float note_log2_freq)
 {
     //Verify Basic Mode and sanity
@@ -490,7 +550,6 @@ bool Part::NoteOn(note_t note,
     if(isMonoMode() || isLegatoMode()) {
         monomemPush(note);
         monomem[note].velocity  = velocity;
-        monomem[note].mkeyshift = masterkeyshift;
         monomem[note].note_log2_freq = note_log2_freq;
 
     } else if(!monomemEmpty())
@@ -504,37 +563,95 @@ bool Part::NoteOn(note_t note,
 
     //Compute Note Parameters
     const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
-    const int   partkeyshift = (int)Pkeyshift - 64;
-    const int   keyshift     = masterkeyshift + partkeyshift;
-    const float notebasefreq = getBaseFreq(note_log2_freq, keyshift);
-
-    if(notebasefreq < 0.0f)
-        return false;
 
     //Portamento
     lastnote = note;
-    if(oldfreq < 1.0f)
-        oldfreq = notebasefreq;//this is only the first note is played
+
+    /* check if first note is played */
+    if(oldfreq_log2 < 0.0f)
+        oldfreq_log2 = note_log2_freq;
 
     // For Mono/Legato: Force Portamento Off on first
     // notes. That means it is required that the previous note is
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
-    bool portamento = false;
-    if(Ppolymode || isRunningNote)
-        portamento = ctl.initportamento(oldfreq, notebasefreq, doingLegato);
+    PortamentoRealtime *portamento_realtime = NULL;
+    // If there is a currently ongoing glide, shift the starting point
+    // for any new portamento to where the current glide is right now
+    if (oldportamento && oldportamento->portamento.active)
+        oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
+    // Non-portamento settings and conditions say the note may have
+    // portamento, but it remains for Portamento.init to make the
+    // final decision depending on the portamento enable, threshold and
+    // other parameters.
+    Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2, oldportamentofreq_log2, note_log2_freq);
+    if(portamento.active) {
+        // If we're doing legato and we already have a portamento structure,
+        // reuse it.
+        if (doingLegato && legatoportamento) {
+            portamento_realtime = legatoportamento;
+            portamento_realtime->portamento = portamento;
+        } else {
+            // Create new one if we don't already have one, or for each
+            // note in poly/mono mode
+            portamento_realtime = memory.alloc<PortamentoRealtime>
+                (this,
+                 memory,
+                 // Cleanup function: Destroy any references we might
+                 // have to the current realtime pointer so that it
+                 // can not be (re)used, with disastrous results.
+                 [](PortamentoRealtime *realtime)
+                    {
+                        assert(realtime);
+                        Part *part = static_cast<Part *>(realtime->handle);
+                        assert(part);
+                        if (realtime == part->oldportamento) {
+                            // Since the last note is going away, capture
+                            // the portamento:ed pitch offset to our saved
+                            // previous note. This will be our starting
+                            // point for the next portamento glide.
+                            if (realtime->portamento.active)
+                                part->oldportamentofreq_log2 +=
+                                    realtime->portamento.freqdelta_log2;
+                            part->oldportamento = NULL;
+                        }
+                        if (realtime == part->legatoportamento)
+                            part->legatoportamento = NULL;
+                    },
+                 portamento
+                );
+            if (doingLegato)
+                legatoportamento = portamento_realtime;
+        }
+    }
 
-    oldfreq = notebasefreq;
+    // Create the portamento pointer that we distribute to the synth notes
+    Portamento *portamentoptr = NULL;
+    if(portamento_realtime)
+        portamentoptr = &portamento_realtime->portamento;
+
+    // Save note freq and pointer to portamento state for next note
+    oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = portamento_realtime;
 
     //Adjust Existing Notes
     if(doingLegato) {
-        LegatoParams pars = {notebasefreq, vel, portamento, note_log2_freq, true, prng()};
-        notePool.applyLegato(note, pars);
+        LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
+        notePool.applyLegato(note, pars, portamento_realtime);
         return true;
     }
 
+    // We know now that we are not doing legato, so we destroy the reference
+    // to the previous legato portamento info so we don't try to reuse it
+    legatoportamento = NULL;
+
     if(Ppolymode)
         notePool.makeUnsustainable(note);
+
+    // in latch mode release latched notes before creating the new one
+    if(Platchmode)
+        notePool.releaseLatched();
 
     //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
@@ -543,22 +660,28 @@ bool Part::NoteOn(note_t note,
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
-        SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
-            portamento, note_log2_freq, false, prng()};
+        SynthParams pars{memory, ctl, synth, time, vel,
+            portamentoptr, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
+
+        // Enforce voice limit, before we trigger new note
+        limit_voices(note);
 
         try {
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i});
+                            wm, (pre+"kit"+i+"/adpars/").c_str, constPowerMixing), 0, i},
+                                    portamento_realtime);
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i});
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str, constPowerMixing), 1, i},
+                                    portamento_realtime);
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/padpars/").c_str), 2, i});
+                            (pre+"kit"+i+"/padpars/").c_str, constPowerMixing), 2, i},
+                                    portamento_realtime);
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
@@ -588,13 +711,44 @@ void Part::NoteOff(note_t note) //release the key
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
             continue;
-        if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+        // if latch is on we ignore noteoff, but set the state to latched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
             if((isMonoMode() || isLegatoMode()) && !monomemEmpty())
                 MonoMemRenote();//Play most recent still active note
             else
                 notePool.release(desc);
         }
         else {   //the sustain pedal is pushed
+            if(desc.canSustain())
+                desc.doSustain();
+            else {
+                notePool.release(desc);
+            }
+        }
+    }
+}
+
+/*
+ * This handles the MIDI All Notes Off message (the 'notes off' in 'all notes
+ * off' refers to note off events, not actually silencing all playing
+ * voices).
+ */
+void Part::ReleaseAllKeys(void)
+{
+    // Clear all notes from list.
+    monomemClear();
+
+    for(auto &desc:notePool.activeDesc()) {
+        if(!desc.playing())
+            continue;
+        // if latch is on we ignore noteoff, but set the state to latched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+            notePool.release(desc);
+        } else {   //the sustain pedal is pushed
             if(desc.canSustain())
                 desc.doSustain();
             else
@@ -604,13 +758,17 @@ void Part::NoteOff(note_t note) //release the key
 }
 
 void Part::PolyphonicAftertouch(note_t note,
-				unsigned char velocity,
-				int masterkeyshift)
+                unsigned char velocity)
 {
-    (void) masterkeyshift;
-
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
+
+    /*
+     * Don't allow the velocity to reach zero.
+     * Keep it alive until note off.
+     */
+    if(velocity == 0)
+        velocity = 1;
 
     // MonoMem stuff:
     if(!Ppolymode)   // if Poly is off
@@ -635,7 +793,7 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_expression:
             ctl.setexpression(par);
-            setVolume(Volume); //update the volume
+            setVolumedB(Volume); //update the volume
             break;
         case C_portamento:
             ctl.setportamento(par);
@@ -662,9 +820,10 @@ void Part::SetController(unsigned int type, int par)
         case C_volume:
             ctl.setvolume(par);
             if(ctl.volume.receive != 0)
-                volume = ctl.volume.volume;
+                setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
-                setVolume(Volume);
+                /* FIXME: why do this? */
+                setVolumedB(Volume);
             break;
         case C_sustain:
             ctl.setsustain(par);
@@ -678,10 +837,9 @@ void Part::SetController(unsigned int type, int par)
             ctl.resetall();
             ReleaseSustainedKeys();
             if(ctl.volume.receive != 0)
-                volume = ctl.volume.volume;
+                setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
-                setVolume(Volume);
-            setVolume(Volume); //update the volume
+                setVolumedB(Volume);
             setPpanning(Ppanning); //update the panning
 
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
@@ -710,11 +868,57 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_resonance_bandwidth:
             ctl.setresonancebw(par);
-            kit[0].adpars->GlobalPar.Reson->
-            sendcontroller(C_resonance_bandwidth, ctl.resonancebandwidth.relbw);
+            for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
+                if(kit[item].adpars == NULL)
+                    continue;
+                kit[item].adpars->GlobalPar.Reson->
+                sendcontroller(C_resonance_bandwidth,
+                               ctl.resonancebandwidth.relbw);
+            }
             break;
     }
 }
+
+/*
+ * Per note controllers.
+ */
+void Part::SetController(unsigned int type, note_t note, float value,
+                         int masterkeyshift)
+{
+    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
+        return;
+
+    switch (type) {
+    case C_aftertouch:
+        PolyphonicAftertouch(note, floorf(value));
+        break;
+    case C_pitch: {
+        if (getNoteLog2Freq(masterkeyshift, value) == false)
+            break;
+
+        /* Make sure MonoMem's frequency information is kept up to date */
+        if(!Ppolymode)
+            monomem[note].note_log2_freq = value;
+
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setPitch(value);
+        }
+        break;
+    }
+    case C_filtercutoff:
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setFilterCutoff(value);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 /*
  * Release the sustained keys
  */
@@ -726,22 +930,7 @@ void Part::ReleaseSustainedKeys()
         if(monomemBack() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote();  // To play most recent still held note.
 
-    for(auto &d:notePool.activeDesc())
-        if(d.sustained())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
-}
-
-/*
- * Release all keys
- */
-
-void Part::ReleaseAllKeys()
-{
-    for(auto &d:notePool.activeDesc())
-        if(!d.released())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
+    notePool.releaseSustainingNotes();
 }
 
 // Call NoteOn(...) with the most recent still held key as new note
@@ -750,18 +939,19 @@ void Part::MonoMemRenote()
 {
     note_t mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
-    NoteOn(mmrtempnote,
+    NoteOnInternal(mmrtempnote,
            monomem[mmrtempnote].velocity,
-           monomem[mmrtempnote].mkeyshift,
            monomem[mmrtempnote].note_log2_freq);
 }
 
-float Part::getBaseFreq(float note_log2_freq, int keyshift) const
+bool Part::getNoteLog2Freq(int masterkeyshift, float &note_log2_freq)
 {
-    if(Pdrummode)
-        return 440.0f * powf(2.0f, note_log2_freq - (69.0f / 12.0f));
-    else
-        return microtonal->getnotefreq(note_log2_freq, keyshift);
+    if(Pdrummode) {
+        note_log2_freq += log2f(440.0f) - 69.0f / 12.0f;
+        return true;
+    }
+    return microtonal->updatenotefreq_log2(note_log2_freq,
+        (int)Pkeyshift - 64 + masterkeyshift);
 }
 
 float Part::getVelocity(uint8_t velocity, uint8_t velocity_sense,
@@ -800,6 +990,36 @@ void Part::setkeylimit(unsigned char Pkeylimit_)
         notePool.enforceKeyLimit(keylimit);
 }
 
+/*
+ * Enforce voice limit
+ */
+void Part::limit_voices(int new_note)
+{
+    int voicelimit = Pvoicelimit;
+    if(voicelimit == 0) /* voice limit disabled */
+        return;
+
+    /* If we're called because a new note is imminent, we need to enforce
+     * one less note than the limit, so we don't go above the limit when the
+     * new note is triggered.
+     */
+    if (new_note >= 0)
+        voicelimit--;
+
+    int running_voices = notePool.getRunningVoices();
+    if(running_voices >= voicelimit)
+        notePool.enforceVoiceLimit(voicelimit, new_note);
+}
+
+/*
+ * Set Part's voice limit
+ */
+void Part::setvoicelimit(unsigned char Pvoicelimit_)
+{
+    Pvoicelimit = Pvoicelimit_;
+
+    limit_voices(-1);
+}
 
 /*
  * Prepare all notes to be turned off
@@ -814,6 +1034,24 @@ void Part::AllNotesOff()
  */
 void Part::ComputePartSmps()
 {
+    /* When we are in the process of being disabled (Penabled set to false),
+     * AllNotesOff will be called, setting killallnotes, which causes all
+     * playing voices to terminate and the signal level being graciously
+     * muted during the course of the current buffer. After that, all
+     * subsequent output buffers will be set to 0 until we are enabled again.
+     */
+    if (!Penabled && !killallnotes) {
+        /* We only need to clear the output buffer once when disabled; since
+         * it's static within the part it's wasteful to do it every time. */
+        if (!silent) {
+            memset(partoutl, 0, synth.bufferbytes);
+            memset(partoutr, 0, synth.bufferbytes);
+            silent = true;
+        }
+        return;
+    }
+    silent = false;
+
     assert(partefx[0]);
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
         memset(partfxinputl[nefx], 0, synth.bufferbytes);
@@ -823,8 +1061,8 @@ void Part::ComputePartSmps()
     for(auto &d:notePool.activeDesc()) {
         d.age++;
         for(auto &s:notePool.activeNotes(d)) {
-            float tmpoutr[synth.buffersize];
-            float tmpoutl[synth.buffersize];
+            STACKALLOC(float, tmpoutr, synth.buffersize);
+            STACKALLOC(float, tmpoutl, synth.buffersize);
             auto &note = *s.note;
             note.noteout(&tmpoutl[0], &tmpoutr[0]);
 
@@ -836,6 +1074,8 @@ void Part::ComputePartSmps()
             if(note.finished())
                 notePool.kill(s);
         }
+    if (d.portamentoRealtime)
+        d.portamentoRealtime->portamento.update();
     }
 
     //Apply part's effects and mix them
@@ -871,22 +1111,36 @@ void Part::ComputePartSmps()
         for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
             partefx[nefx]->cleanup();
     }
-    ctl.updateportamento();
 }
 
 /*
  * Parameter control
  */
-float Part::volume127ToFloat(unsigned char volume_)
+
+float Part::volume127TodB(unsigned char volume_)
 {
+    assert( volume_  <= 127 );
     return (volume_ - 96.0f) / 96.0f * 40.0;
 }
 
-void Part::setVolume(float Volume_)
+void Part::setVolumedB(float Volume_)
 {
+    //Fixes bug with invalid loading
+    if(fabs(Volume_ - 50.0f) < 0.001)
+        Volume_ = 0.0f;
+
+    Volume_ = limit(Volume_, -40.0f, 13.333f);
+
+    assert(Volume_ < 14.0);
     Volume = Volume_;
-    volume =
-        dB2rap(Volume) * ctl.expression.relvolume;
+
+    float volume = dB2rap( Volume_ );
+
+    /* printf( "Volume: %f, Expression %f\n", volume, ctl.expression.relvolume ); */
+
+    assert( volume <= dB2rap(14.0f) );
+
+    gain = volume * ctl.expression.relvolume;
 }
 
 void Part::setPpanning(char Ppanning_)
@@ -948,7 +1202,7 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
     for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
         xml.beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml.addparbool("enabled", kit[i].Penabled);
-        if(kit[i].Penabled != 0) {
+        if(kit[i].Penabled != 0 || xml.SaveFullXml) {
             xml.addparstr("name", (char *)kit[i].Pname);
 
             xml.addparbool("muted", kit[i].Pmuted);
@@ -958,21 +1212,21 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
             xml.addpar("send_to_instrument_effect", kit[i].Psendtoparteffect);
 
             xml.addparbool("add_enabled", kit[i].Padenabled);
-            if(kit[i].Padenabled && kit[i].adpars) {
-                xml.beginbranch("ADD_SYNTH_PARAMETERS");
+            if((kit[i].Padenabled  || xml.SaveFullXml) && kit[i].adpars) {
+               xml.beginbranch("ADD_SYNTH_PARAMETERS");
                 kit[i].adpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("sub_enabled", kit[i].Psubenabled);
-            if(kit[i].Psubenabled && kit[i].subpars) {
+            if((kit[i].Psubenabled || xml.SaveFullXml) && kit[i].subpars) {
                 xml.beginbranch("SUB_SYNTH_PARAMETERS");
                 kit[i].subpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("pad_enabled", kit[i].Ppadenabled);
-            if(kit[i].Ppadenabled && kit[i].padpars) {
+            if((kit[i].Ppadenabled || xml.SaveFullXml) && kit[i].padpars) {
                 xml.beginbranch("PAD_SYNTH_PARAMETERS");
                 kit[i].padpars->add2XML(xml);
                 xml.endbranch();
@@ -1019,6 +1273,7 @@ void Part::add2XML(XMLwrapper& xml)
     xml.addparbool("poly_mode", Ppolymode);
     xml.addpar("legato_mode", Plegatomode);
     xml.addpar("key_limit", Pkeylimit);
+    xml.addpar("voice_limit", Pvoicelimit);
 
     xml.beginbranch("INSTRUMENT");
     add2XMLinstrument(xml);
@@ -1050,6 +1305,13 @@ int Part::loadXMLinstrument(const char *filename)
 
     if(xml.enterbranch("INSTRUMENT") == 0)
         return -10;
+
+    // store filename in member variable
+    int length = sizeof(loaded_file)-1;
+    strncpy(loaded_file, filename, length);
+    // set last element to \0 in case filename is too long or not terminated
+    loaded_file[length]='\0';
+
     getfromXMLinstrument(xml);
     xml.exitbranch();
 
@@ -1123,6 +1385,7 @@ void Part::monomemClear(void)
 
 void Part::getfromXMLinstrument(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
     if(xml.enterbranch("INFO")) {
         xml.getparstr("name", (char *)Pname, PART_MAX_NAME_LEN);
         xml.getparstr("author", (char *)info.Pauthor, MAX_INFO_TEXT_SIZE);
@@ -1141,10 +1404,10 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
             if(xml.enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
             setkititemstatus(i, xml.getparbool("enabled", kit[i].Penabled));
-            if(kit[i].Penabled == 0) {
-                xml.exitbranch();
-                continue;
-            }
+//           if(kit[i].Penabled == 0) { // Remove this as it loses data that may be in the xml file but disabled!
+//                xml.exitbranch();
+//                continue;
+//            }
 
             xml.getparstr("name", (char *)kit[i].Pname, PART_MAX_NAME_LEN);
 
@@ -1203,6 +1466,8 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
                                           Pefxroute[nefx],
                                           0,
                                           NUM_PART_EFX);
+            if(Pefxroute[nefx]>2) // fix for broken savefiles
+                Pefxroute[nefx]=2;
             partefx[nefx]->setdryonly(Pefxroute[nefx] == 2);
             Pefxbypass[nefx] = xml.getparbool("bypass", Pefxbypass[nefx]);
             xml.exitbranch();
@@ -1213,11 +1478,12 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
 
 void Part::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
     Penabled = xml.getparbool("enabled", Penabled);
     if (xml.hasparreal("volume")) {
-        setVolume(xml.getparreal("volume", Volume));
+        setVolumedB(xml.getparreal("volume", Volume));
     } else {
-        setVolume(volume127ToFloat(xml.getpar127("volume", -40.0f)));
+        setVolumedB(volume127TodB( xml.getpar127("volume", 96)));
     }
     setPpanning(xml.getpar127("panning", Ppanning));
 
@@ -1234,7 +1500,9 @@ void Part::getfromXML(XMLwrapper& xml)
     Plegatomode = xml.getparbool("legato_mode", Plegatomode); //older versions
     if(!Plegatomode)
         Plegatomode = xml.getpar127("legato_mode", Plegatomode);
-    Pkeylimit = xml.getpar127("key_limit", Pkeylimit);
+    int keylimit_max = std::atoi(ports["Pkeylimit"]->meta()["max"]);
+    Pkeylimit = std::min(keylimit_max, xml.getpar127("key_limit", Pkeylimit));
+    Pvoicelimit = xml.getpar127("voice_limit", Pvoicelimit);
 
 
     if(xml.enterbranch("INSTRUMENT")) {
@@ -1243,7 +1511,15 @@ void Part::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("CONTROLLER")) {
+        const bool upgrade_3_0_7 = (xml.fileversion() < version_type(3,0,7));
+
         ctl.getfromXML(xml);
+        // Before version 3.0.7, mono and legato modes always had auto
+        // portamento (and poly mode never did, but in that case
+        // portamento.automode will default to off, so no need to do anything
+        // here).
+        if (upgrade_3_0_7 && !Ppolymode)
+            ctl.portamento.automode = true;
         xml.exitbranch();
     }
 }
@@ -1261,7 +1537,7 @@ uint8_t Part::Kit::sendto(void) const
 
 bool Part::Kit::validNote(char note) const
 {
-    return !Pmuted && inRange((uint8_t)note, Pminkey, Pmaxkey);
+    return !Pmuted && Penabled && inRange((uint8_t)note, Pminkey, Pmaxkey);
 }
 
 }

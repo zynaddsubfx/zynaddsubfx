@@ -6,8 +6,9 @@ For example, you may change the reverb time when playing to keyboard or
 flanger's lfo frequency.
 You can disable the NRPN receiving by deselecting the "NRPN" checkbox from the
 main window (near "Master Keyshift" counter).
-The controls can be sent on any midi channel 
-(the midi channels numbers are ignored).
+The controls for system effects can be sent on any midi channel 
+The controls for insertion effects on channel 0 are for system insertion effects 
+the controls on channels 1 .. 15 are for the corresponding part insertion effects
 
 The parameters are:
 
@@ -120,7 +121,7 @@ AlienWah
 [orange]#09 - Left/Right Crossing (FC)#
 10 - Phase+
 
-Distorsion
+Distortion
 ~~~~~~~~~~
 
 [verse]

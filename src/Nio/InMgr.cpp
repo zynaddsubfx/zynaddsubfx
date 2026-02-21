@@ -45,6 +45,13 @@ ostream &operator<<(ostream &out, const MidiEvent &ev)
             << "         value(" << ev.value << ")";
             break;
 
+        case M_FLOAT_CTRL:
+            out << "MidiNote: controller(" << ev.num << ")\n"
+            << "          channel(" << ev.channel << ")\n"
+            << "          note(" << ev.value << ")\n"
+            << "          log2_value(" << ev.log2_freq << ")";
+            break;
+
         case M_PGMCHANGE:
             out << "PgmChange: program(" << ev.num << ")\n"
             << "           channel(" << ev.channel << ")";
@@ -84,12 +91,16 @@ void InMgr::putEvent(MidiEvent ev)
         work.post();
 }
 
-void InMgr::flush(unsigned frameStart, unsigned frameStop)
+bool InMgr::flush(unsigned frameStart, unsigned frameStop)
 {
     MidiEvent ev;
+    bool endReached = true;
+
     while(!work.trywait()) {
         queue.peak(ev);
         if(ev.time < (int)frameStart || ev.time > (int)frameStop) {
+            //Check if end was reached
+            endReached = ev.time < (int)frameStart;
             //Back out of transaction
             work.post();
             //printf("%d vs [%d..%d]\n",ev.time, frameStart, frameStop);
@@ -120,6 +131,10 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                     master->setController(ev.channel, ev.num, ev.value);
                 break;
 
+            case M_FLOAT_CTRL:
+                master->setController(ev.channel, ev.num, ev.value, ev.log2_freq);
+                break;
+
             case M_PGMCHANGE:
                 for(int i=0; i < NUM_MIDI_PARTS; ++i) {
                     //set the program of the parts assigned to the midi channel
@@ -134,6 +149,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
         }
     }
+    return endReached;
 }
 
 bool InMgr::empty(void) const

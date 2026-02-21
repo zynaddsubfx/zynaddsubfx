@@ -35,7 +35,7 @@ class VuPartMeter: public VuMeter
             //}
 
             //draw the vu lines
-            const int idb = db*(H-2); 
+            const int idb = db*(H-2);
 
             fl_rectf(X,Y+H-idb,W,idb,0,200,255);
             fl_rectf(X,Y,W,H-idb,0,0,0);
@@ -48,7 +48,7 @@ class VuPartMeter: public VuMeter
                 if(i%10 == 0) fl_rectf(X, Y+H-ty, W, 1,0, 230, 240);
             }
         }
-        
+
         void update(float x)
         {
             const float _db = limit((MIN_DB-rap2dB(x))/MIN_DB);

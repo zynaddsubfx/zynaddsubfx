@@ -80,7 +80,7 @@ class OssEngine:public AudioOut, MidiIn
             bool en;
             bool is32bit;
         } audio;
-        
+
         const char* linux_oss_wave_out_dev;
 
         //Midi
@@ -93,7 +93,7 @@ class OssEngine:public AudioOut, MidiIn
             bool en;
             bool run;
         } midi;
-        
+
         const char* linux_oss_seq_in_dev;
 };
 

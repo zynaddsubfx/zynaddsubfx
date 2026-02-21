@@ -12,6 +12,7 @@
 
 #include <rtosc/thread-link.h>
 #include <lo/lo.h>
+#include <limits>
 #include <string>
 #include <thread>
 
@@ -192,7 +193,7 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     {
         if (long long winId = atoll(embedId))
         {
-            // running as plugin
+            // embedId passed means running as plugin
             isPlugin = true;
             MasterUI::menu_mastermenu[11].hide(); // file -> nio settings
             MasterUI::menu_mastermenu[26].deactivate(); // misc -> switch interface mode
@@ -202,6 +203,8 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
                 MasterUI::menu_mastermenu[13].hide(); // file -> exit
                 fl_embed(ui->masterwindow, winId);
             }
+#else
+            (void) winId; // Silences compiler warning.
 #endif
             ui->masterwindow->show();
         }
@@ -338,7 +341,7 @@ class UI_Interface:public Fl_Osc_Interface
             //Send to known url
             if(!sendtourl.empty()) {
                 lo_message msg  = lo_message_deserialise((void*)rtmsg,
-                        rtosc_message_length(rtmsg, rtosc_message_length(rtmsg,-1)), NULL);
+                        rtosc_message_length(rtmsg, rtosc_message_length(rtmsg,(std::numeric_limits<size_t>::max)())), NULL);
                 lo_address addr = lo_address_new_from_url(sendtourl.c_str());
                 lo_send_message(addr, rtmsg, msg);
             }
@@ -556,13 +559,23 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     (void) argc;
     (void) user_data;
     char buffer[8192];
+    size_t size;
+
+    size = lo_message_length(msg, path);
+    if (size > sizeof(buffer)) {
+        /*
+         * Sometimes search results may return too much data to handle
+         * by the lo_buffer. Just print a warning and ignore such
+         * messages for now.
+         */
+        fprintf(stderr, "guimain.cpp:%u Received too many bytes "
+            "%zu > %zu (ignored)\n", __LINE__, size, sizeof(buffer));
+        return 0;
+    }
     memset(buffer, 0, sizeof(buffer));
-    size_t size = sizeof(buffer);
-    assert(lo_message_length(msg, path) <= sizeof(buffer));
     lo_message_serialise(msg, path, buffer, &size);
     assert(size <= sizeof(buffer));
     lo_buffer.raw_write(buffer);
-
     return 0;
 }
 
@@ -574,9 +587,10 @@ void watch_lo(void)
 
 const char *help_message =
 "zynaddsubfx-ext-gui [options] uri - Connect to remote ZynAddSubFX\n"
-"    --help   print this help message\n"
-"    --no-uri run without a remote ZynAddSubFX\n"
-"    --embed  window ID [Internal Flag For Embedding Windows]\n"
+"    --help               print this help message\n"
+"    --no-uri             run without a remote ZynAddSubFX\n"
+"    --embed <window ID>  internal flag to let UI run in plugin mode\n"
+"                         NTK only: Embed master window into passed window\n"
 "\n"
 "    example: zynaddsubfx-ext-gui osc.udp://localhost:1234/\n"
 "      This will connect to a running zynaddsubfx instance on the same\n"

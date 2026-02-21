@@ -15,11 +15,14 @@
 
 namespace zyn {
 
+typedef float filter_func_t(unsigned int, float, float);
+typedef float base_func_t(float, float);
+
 typedef float (*base_func)(float, float);
-base_func getBaseFunction(unsigned char func);
+base_func_t* getBaseFunction(unsigned char func);
 
 typedef float (*filter_func)(unsigned int, float, float);
-filter_func getFilter(unsigned char func);
+filter_func_t* getFilter(unsigned char func);
 
 float rmsNormalOfBaseFunction(unsigned char func,
     int oscilsize, unsigned char basefuncpar); // TODO: swap params

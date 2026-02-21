@@ -63,7 +63,7 @@ void FormantFilterGraph::OSC_value(int x, const char *loc)
 }
 void FormantFilterGraph::OSC_value(unsigned x, void *v)
 {
-    assert(x = sizeof(Pvowels));
+    assert(x == sizeof(Pvowels));
     memcpy(&Pvowels[0], v, x);
     redraw();
 }

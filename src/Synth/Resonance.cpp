@@ -28,7 +28,7 @@ namespace zyn {
 
 const rtosc::Ports Resonance::ports = {
     rSelf(Resonance),
-    rPaste,
+    rPasteRt,
     rToggle(Penabled,      rShort("enable"), rDefault(false),
             "resonance enable"),
     rToggle(Pprotectthefundamental, rShort("p.fund."), rDefault(false),
@@ -87,11 +87,11 @@ Resonance::~Resonance(void)
 
 void Resonance::defaults(void)
 {
-    Penabled     = 0;
+    Penabled     = false;
     PmaxdB       = 20;
     Pcenterfreq  = 64; //1 kHz
     Poctavesfreq = 64;
-    Pprotectthefundamental = 0;
+    Pprotectthefundamental = false;
     ctlcenter = 1.0f;
     ctlbw     = 1.0f;
     for(int i = 0; i < N_RES_POINTS; ++i)
@@ -209,7 +209,7 @@ void Resonance::randomize(int type)
 
 void Resonance::zero(void)
 {
-    for(int i=0; i<N_RES_POINTS; ++i) 
+    for(int i=0; i<N_RES_POINTS; ++i)
         setpoint(i,64);
 }
 

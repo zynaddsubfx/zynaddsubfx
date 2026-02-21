@@ -22,10 +22,11 @@ namespace zyn {
 typedef uint8_t note_t; //Global MIDI note definition
 
 struct LegatoParams;
+class PortamentoRealtime;
 class NotePool
 {
     public:
-        //Currently this wastes a ton of bits due ot the legatoMirror flag
+        //Currently this wastes a ton of bits due to the legatoMirror flag
         struct NoteDescriptor {
             //acceptable overlap after 2 minutes
             //run time at 48kHz 8 samples per buffer
@@ -37,6 +38,7 @@ class NotePool
             uint8_t size;
             uint8_t status;
             bool    legatoMirror;
+            PortamentoRealtime *portamentoRealtime;
             bool operator==(NoteDescriptor);
 
             //status checks
@@ -44,6 +46,9 @@ class NotePool
             bool off(void) const;
             bool sustained(void) const;
             bool released(void) const;
+            bool entombed(void) const;
+            bool dying(void) const;
+            bool latched(void) const;
 
             //status transitions
             void setStatus(uint8_t s);
@@ -118,25 +123,34 @@ class NotePool
         NotePool(void);
 
         //Operations
-        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato=false);
-        void insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc);
+        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc,
+                        PortamentoRealtime *portamento_realtime=NULL, bool legato=false);
+        void insertLegatoNote(NoteDescriptor desc, SynthDescriptor sdesc);
 
         void upgradeToLegato(void);
-        void applyLegato(note_t note, LegatoParams &par);
+        void applyLegato(note_t note, const LegatoParams &par, PortamentoRealtime *portamento_realtime=NULL);
 
         void makeUnsustainable(note_t note);
+
+        void releaseLatched();
 
         bool full(void) const;
         bool synthFull(int sdesc_count) const;
 
-        //Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
+        //Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
         bool existsRunningNote(void) const;
         int getRunningNotes(void) const;
         void enforceKeyLimit(int limit);
+        int getRunningVoices(void) const;
+        void enforceVoiceLimit(int limit, int preferred_note);
+        void limitVoice(int preferred_note);
 
         void releasePlayingNotes(void);
+        void releaseSustainingNotes(void);
         void releaseNote(note_t note);
         void release(NoteDescriptor &d);
+        void latch(NoteDescriptor &d);
+
 
         void killAllNotes(void);
         void killNote(note_t note);

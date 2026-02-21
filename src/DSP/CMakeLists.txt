@@ -4,6 +4,10 @@ set(zynaddsubfx_dsp_SRCS
     DSP/Filter.cpp
     DSP/FormantFilter.cpp
     DSP/SVFilter.cpp
+    DSP/MoogFilter.cpp
+    DSP/CombFilter.cpp
+    DSP/Reverter.cpp
     DSP/Unison.cpp
+    DSP/Value_Smoothing_Filter.cpp
     PARENT_SCOPE
 )

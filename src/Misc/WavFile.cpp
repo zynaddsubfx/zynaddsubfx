@@ -50,7 +50,7 @@ WavFile::~WavFile()
         fwrite("WAVEfmt ", 8, 1, file);
         chunksize = 16;
         fwrite(&chunksize, 4, 1, file);
-        unsigned short int formattag = 1;     //uncompresed wave
+        unsigned short int formattag = 1;     //uncompressed wave
         fwrite(&formattag, 2, 1, file);
         unsigned short int nchannels = channels;     //stereo
         fwrite(&nchannels, 2, 1, file);

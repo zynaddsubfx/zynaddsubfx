@@ -15,6 +15,9 @@ decl {\#include <stdio.h>} {public
 decl {\#include <string.h>} {public
 } 
 
+decl {\#include <FL/Enumerations.H>} {public
+} 
+
 decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
@@ -78,7 +81,7 @@ class MicrotonalUI {} {
         Fl_Button applybutton {
           label Retune
           callback {apply();}
-          tooltip {Retune the synth accorging to the inputs from "Tunnings" and "Keyboard Mappings"} xywh {8 413 107 28} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13
+          tooltip {Retune the synth accorging to the inputs from "Tunings" and "Keyboard Mappings"} xywh {8 413 107 28} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13
         }
         Fl_Value_Output octavesizeoutput {
           label {nts./oct.}
@@ -122,11 +125,15 @@ if (true) {
        updateTuningsInput();
        nameinput->update();
        commentinput->update();
+\#if FL_API_VERSION >= 10404
+       tuningsinput->insert_position(0);
+\#else
        tuningsinput->position(0);
+\#endif
        octavesizeoutput->update();
      }
      }
-          tooltip {Inport Scala .scl file (tunnings)} xywh {243 411 84 15} box THIN_UP_BOX labelfont 1 labelsize 10
+          tooltip {Inport Scala .scl file (tunings)} xywh {243 411 84 15} box THIN_UP_BOX labelfont 1 labelsize 10
         }
         Fl_Group keymappinggroup {
           label {Keyboard Mapping} open
@@ -180,7 +187,11 @@ if (filename==NULL) return;
 osc->write("/load_kbm", "s", filename);
 if (true) {
        updateMappingInput();
+\#if FL_API_VERSION >= 10404
+       mappinginput->insert_position(0);
+\#else
        mappinginput->position(0);
+\#endif
        mapsizeoutput->update();
        firstnotecounter->update();
        lastnotecounter->update();
@@ -198,7 +209,7 @@ if (true) {
         Fl_Counter anotecounter {
           label {"A" Note}
           callback {
-          /*if (microtonal->getnotefreq(o->value(),0)<0.0) o->textcolor(FL_RED);
+          /*if (microtonal->getnotefreq(o->value() / 12.0f,0)<0.0) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);*/
 
 o->redraw();}

@@ -84,6 +84,7 @@ int WidgetPDial::handle(int event)
             }
             oldvalue = value();
             old_y = Fl::event_y();
+            // fall through
         case FL_DRAG:
             getPos();
             old_mod_state = mod_state;
@@ -188,7 +189,7 @@ void WidgetPDial::draw()
     box( FL_NO_BOX );
 
     Fl_Dial::draw();
-    
+
     return;
 #else
     const int cx = x(), cy = y(), sx = w(), sy = h();

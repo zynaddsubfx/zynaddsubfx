@@ -19,7 +19,7 @@
 #include "Presets.h"
 #include <string>
 #include <functional>
-
+#include <cstdint>
 namespace zyn {
 
 /**
@@ -37,10 +37,10 @@ class PADnoteParameters:public Presets
     public:
         PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
                           const AbsTime *time_ = nullptr);
-        ~PADnoteParameters();
+        ~PADnoteParameters() override;
 
         void defaults();
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void getfromXML(XMLwrapper& xml);
 
         void paste(PADnoteParameters &p);
@@ -50,10 +50,17 @@ class PADnoteParameters:public Presets
         float getprofile(float *smp, int size);
 
         //parameters
-
-        //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
-        //the harmonic profile is used only on mode 0
-        unsigned char Pmode;
+        //! the mode how bandwidth is created
+        //! the harmonic profile is used only on mode 0
+        enum class pad_mode
+        {
+            //! "normal" mode, generate the wave with bandwidth
+            bandwidth,
+            //! bandwidth = 0, almost like adnote
+            discrete,
+            //! filtered noise
+            continous
+        } Pmode;
 
         //Harmonic profile (the frequency distribution of a single harmonic)
         struct {
@@ -74,7 +81,7 @@ class PADnoteParameters:public Presets
                 unsigned char par1;
                 unsigned char par2;
             } amp;
-            bool autoscale; //if the scale of the harmonic profile is computed automaticaly
+            bool autoscale; //if the scale of the harmonic profile is computed automatically
             unsigned char onehalf; //what part of the base function is used to make the distribution
         } Php;
 
@@ -94,7 +101,7 @@ class PADnoteParameters:public Presets
 
         //frequency parameters
         //If the base frequency is fixed to 440 Hz
-        unsigned char Pfixedfreq;
+        bool Pfixedfreq;
 
         /* Equal temperate (this is used only if the Pfixedfreq is enabled)
            If this parameter is 0, the frequency is fixed (to 440 Hz);
@@ -110,7 +117,7 @@ class PADnoteParameters:public Presets
         LFOParams      *FreqLfo; //Frequency LFO
 
         //Amplitude parameters
-        unsigned char PStereo;
+        bool PStereo;
         /* Panning -  0 - random
                   1 - left
                  64 - center
@@ -169,7 +176,8 @@ class PADnoteParameters:public Presets
         //! RT sample data
         Sample sample[PAD_MAX_SAMPLES];
 
-        typedef std::function<void(int,PADnoteParameters::Sample&)> callback;
+        //! callback type for sampleGenerator
+        typedef std::function<void(int,PADnoteParameters::Sample&&)> callback;
 
         //! PAD synth main function
         //! Generate spectrum and run IFFTs on it

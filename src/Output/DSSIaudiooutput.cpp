@@ -12,7 +12,7 @@
 */
 
 /*
- * Inital working DSSI output code contributed by Stephen G. Parry
+ * Initial working DSSI output code contributed by Stephen G. Parry
  */
 
 //this file contains code used from trivial_synth.c from
@@ -47,6 +47,8 @@ namespace Nio {
     set<string> getSinks(void){return set<string>();}
     string getSource(void){return "";}
     string getSink(void){return "";}
+    void setAudioCompressor(bool){}
+    bool getAudioCompressor(void){return false;}
 }
 } // namespace zyn
 

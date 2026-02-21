@@ -80,22 +80,25 @@ static const rtosc::Ports realtime_ports =
     rParamI(PDetune,        rShort("fine"), rLinear(0, 16383), rDefault(8192),
         "Fine Detune"),
     rParamI(PCoarseDetune,  rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,  rShort("type"),
+    rOption(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
             rDefault(L10cents), "Magnitude of Detune"),
 
     {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData &d)
         {
+            // MiddleWare calls this to send the generated sample buffers to us
+            assert(rtosc_argument(m,2).b.len == sizeof(void*));
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;
-            unsigned n = atoi(mm);
+            int n = atoi(mm);
+            float *oldsmp = p->sample[n].smp;
             p->sample[n].size     = rtosc_argument(m,0).i;
             p->sample[n].basefreq = rtosc_argument(m,1).f;
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
-
-            //XXX TODO memory managment (deallocation of smp buffer)
+            if (oldsmp)
+                d.reply("/free", "sb", "PADsample", sizeof(void*), &oldsmp);
         }},
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
@@ -109,14 +112,18 @@ static const rtosc::Ports realtime_ports =
         [](const char *msg, RtData &d)
         {
             PADnoteParameters *obj = (PADnoteParameters *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
@@ -124,34 +131,45 @@ static const rtosc::Ports realtime_ports =
         [](const char *msg, RtData &d)
         {
             PADnoteParameters *obj = (PADnoteParameters *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
     {"paste:b", rProp(internal) rDoc("paste port"), 0,
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
         rObject &o = *(rObject*)d.obj;
-        o.pasteRT(paste);}}
+        o.pasteRT(paste);
+        rObject* ptr = &paste;\
+        d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);}}
 
 };
 static const rtosc::Ports non_realtime_ports =
 {
     rSelf(PADnoteParameters),
     rPresetType,
+#undef rDefaultProps
+#define rDefaultProps rProp(non-realtime)
     {"paste:b", rProp(internal) rDoc("paste port"), 0,
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
         rObject &o = *(rObject*)d.obj;
         o.paste(paste);
         //avoid the match to forward the request along
-        d.matches--;}},
+        d.matches--;
+        // "/damage" is not replied here yet - this is handled later when
+        // pasting the realtime ports
+    }},
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(resonance, "Resonance"),
@@ -161,7 +179,7 @@ static const rtosc::Ports non_realtime_ports =
             rOptions(bandwidth,discrete,continious),
             rDefault(bandwidth),
             "Harmonic Distribution Model"),
-    rOption(Php.base.type, rOptions(Gaussian, Rectanglar, Double Exponential),
+    rOption(Php.base.type, rOptions(Gaussian, Rectangular, Double Exponential),
             rShort("shape"), rDefault(Gaussian),
             "Harmonic profile shape"),
     rParamZyn(Php.base.par1, rShort("warp"),      rDefault(80),
@@ -180,15 +198,15 @@ static const rtosc::Ports non_realtime_ports =
 
     //Harmonic Modulation
     rOption(Php.amp.type, rShort("mult"), rOptions(Off, Gauss, Sine, Flat),
-            rDefault(Off), "Type of amplitude multipler"),
+            rDefault(Off), "Type of amplitude multiplier"),
     rParamZyn(Php.amp.par1, rShort("p1"),   rDefault(80),
         "Amplitude multiplier parameter"),
-    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(60),
+    rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(64),
         "Amplitude multiplier parameter"),
     rToggle(Php.autoscale,  rShort("auto"), rDefault(true),
         "Autoscaling Harmonics"),
     rOption(Php.onehalf, rShort("side"),
-            rOptions(Full, Upper Half, Lower Half), rDefault(Full)
+            rOptions(Full, Upper Half, Lower Half), rDefault(Full),
             "Harmonic cutoff model"),
 
     //Harmonic Bandwidth
@@ -204,7 +222,7 @@ static const rtosc::Ports non_realtime_ports =
     rOption(Phrpos.type,
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
                 Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Harmonic Overtone shifting mode"),
     rParamI(Phrpos.par1, rShort("p1"), rLinear(0,255), rDefault(0),
         "Harmonic position parameter"),
@@ -221,7 +239,7 @@ static const rtosc::Ports non_realtime_ports =
             "Size of each wavetable element"),
     rOption(Pquality.basenote, rShort("basenote"),
             rOptions(C-2, G-2, C-3, G-3, C-4,
-                G-4, C-5, G-5, G-6,),
+                G-4, C-5, G-5, C-6, G-6),
             rDefaultId(C-4),
             "Base note for wavetable"),
     rOption(Pquality.smpoct, rShort("smp/oct"),
@@ -230,18 +248,21 @@ static const rtosc::Ports non_realtime_ports =
             "Samples per octave"),
     rParamI(Pquality.oct, rShort("octaves"), rLinear(0,7), rDefault(3),
             "Number of octaves to sample (above the first sample"),
+#undef rDefaultProps
+#define rDefaultProps
 
-    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rLinear(0,1000)
-        rDefault(500) rDoc("Bandwith Of Harmonics"), NULL,
+    {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rProp(non-realtime) rLinear(0,1000)
+        rDefault(500) rDoc("Bandwidth Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             if(rtosc_narguments(msg)) {
                 p->setPbandwidth(rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", p->Pbandwidth);
             } else {
                 d.reply(d.loc, "i", p->Pbandwidth);
             }}},
 
-    {"bandwidthvalue:", rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
+    {"bandwidthvalue:", rProp(non-realtime) rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
         [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             d.reply(d.loc, "f", p->setPbandwidth(p->Pbandwidth));
@@ -293,6 +314,7 @@ static const rtosc::Ports non_realtime_ports =
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };
+#undef rDefaultProps
 #undef rChangeCb
 
 const rtosc::Ports &PADnoteParameters::non_realtime_ports = zyn::non_realtime_ports;
@@ -316,16 +338,16 @@ PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
     oscilgen  = new OscilGen(synth, fft_, resonance);
     oscilgen->ADvsPAD = true;
 
-    FreqEnvelope = new EnvelopeParams(0, 0, time_);
+    FreqEnvelope = new EnvelopeParams(0, false, time_);
     FreqEnvelope->init(ad_global_freq);
     FreqLfo = new LFOParams(ad_global_freq, time_);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
     AmpLfo = new LFOParams(ad_global_amp, time_);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
-    FilterEnvelope = new EnvelopeParams(0, 1, time_);
+    FilterEnvelope = new EnvelopeParams(0, true, time_);
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
 
@@ -352,7 +374,7 @@ PADnoteParameters::~PADnoteParameters()
 
 void PADnoteParameters::defaults()
 {
-    Pmode = 0;
+    Pmode = pad_mode::bandwidth;
     Php.base.type      = 0;
     Php.base.par1      = 80;
     Php.freqmult       = 0;
@@ -382,9 +404,9 @@ void PADnoteParameters::defaults()
     Pquality.oct    = 3;
     Pquality.smpoct = 2;
 
-    PStereo = 1; //stereo
+    PStereo = true; //stereo
     /* Frequency Global Parameters */
-    Pfixedfreq    = 0;
+    Pfixedfreq    = false;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -442,14 +464,14 @@ float PADnoteParameters::getprofile(float *smp, int size)
         smp[i] = 0.0f;
     const int supersample = 16;
     float     basepar     = powf(2.0f, (1.0f - Php.base.par1 / 127.0f) * 12.0f);
-    float     freqmult    = floor(powf(2.0f,
+    float     freqmult    = floorf(powf(2.0f,
                                        Php.freqmult / 127.0f
                                        * 5.0f) + 0.000001f);
 
-    float modfreq = floor(powf(2.0f,
+    float modfreq = floorf(powf(2.0f,
                                Php.modulator.freq / 127.0f
                                * 5.0f) + 0.000001f);
-    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / sqrt(
+    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / sqrtf(
         modfreq);
     float amppar1 =
         powf(2.0f, powf(Php.amp.par1 / 127.0f, 2.0f) * 10.0f) - 0.999f;
@@ -491,7 +513,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
         //do the modulation of the profile
         x += sinf(x_before_freq_mult * 3.1415926f * modfreq) * modpar1;
-        x  = fmod(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
+        x  = fmodf(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
 
 
         //this is the base function of the profile
@@ -505,7 +527,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                     f = 1.0f;
                 break;
             case 2:
-                f = expf(-(fabs(x)) * sqrt(basepar));
+                f = expf(-(fabsf(x)) * sqrtf(basepar));
                 break;
             default:
                 f = expf(-(x * x) * basepar);
@@ -525,7 +547,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
             case 2:
                 amp = 0.5f
                       * (1.0f
-                         + cosf(3.1415926f * origx * sqrt(amppar1 * 4.0f + 1.0f)));
+                         + cosf(3.1415926f * origx * sqrtf(amppar1 * 4.0f + 1.0f)));
                 break;
             case 3:
                 amp = 1.0f
@@ -535,7 +557,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
         //apply the amplitude multiplier
         float finalsmp = f;
-        if(Php.amp.type != 0)
+        if(Php.amp.type != 0) {
             switch(Php.amp.mode) {
                 case 0:
                     finalsmp = amp * (1.0f - amppar2) + finalsmp * amppar2;
@@ -553,7 +575,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                                   + powf(amppar2, 4.0f) * 20.0f + 0.0001f);
                     break;
             }
-        ;
+        }
 
         smp[i / supersample] += finalsmp / supersample;
     }
@@ -640,7 +662,7 @@ float PADnoteParameters::getNhr(int n) const
         case 5:
             result = n0
                      + sinf(n0 * par2 * par2 * PI
-                            * 0.999f) * sqrt(par1) * 2.0f + 1.0f;
+                            * 0.999f) * sqrtf(par1) * 2.0f + 1.0f;
             break;
         case 6:
             tmp    = powf(par2 * 2.0f, 2.0f) + 0.1f;
@@ -656,7 +678,7 @@ float PADnoteParameters::getNhr(int n) const
 
     const float par3 = Phrpos.par3 / 255.0f;
 
-    const float iresult = floor(result + 0.5f);
+    const float iresult = floorf(result + 0.5f);
     const float dresult = result - iresult;
 
     return iresult + (1.0f - par3) * dresult;
@@ -697,7 +719,7 @@ static float Pbwscale_translate(char Pbwscale)
 //Requires
 // - bandwidth scaling power
 // - bandwidth
-// - oscilator harmonics at various frequences (oodles of data)
+// - oscillator harmonics at various frequencies (oodles of data)
 // - sampled resonance
 void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int size,
@@ -706,7 +728,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum, 0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -740,12 +762,12 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             amp *= resonance->getfreqresponse(realfreq);
 
         if(ibw > profilesize) { //if the bandwidth is larger than the profilesize
-            const float rap   = sqrt((float)profilesize / (float)ibw);
+            const float rap   = sqrtf((float)profilesize / (float)ibw);
             const int   cfreq =
                 (int) (realfreq
                        / (synth.samplerate_f * 0.5f) * size) - ibw / 2;
             for(int i = 0; i < ibw; ++i) {
-                const int src    = i * rap * rap;
+                const int src    = (int)(i * rap * rap);
                 const int spfreq = i + cfreq;
                 if(spfreq < 0)
                     continue;
@@ -755,7 +777,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             }
         }
         else {  //if the bandwidth is smaller than the profilesize
-            const float rap = sqrt((float)ibw / (float)profilesize);
+            const float rap = sqrtf((float)ibw / (float)profilesize);
             const float ibasefreq = realfreq / (synth.samplerate_f * 0.5f) * size;
             for(int i = 0; i < profilesize; ++i) {
                 const float idfreq = (i / (float)profilesize - 0.5f) * ibw;
@@ -781,7 +803,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq) const
 {
-    float harmonics[synth.oscilsize];
+    STACKALLOC(float, harmonics, synth.oscilsize);
     memset(spectrum,  0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
@@ -804,14 +826,14 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        const int cfreq = realfreq / (synth.samplerate_f * 0.5f) * size;
+        const int cfreq = (int)(realfreq / (synth.samplerate_f * 0.5f) * size);
 
-        spectrum[cfreq] = amp + 1e-9;
+        spectrum[cfreq] = amp + (float)1e-9;
     }
 
     //In continous mode the spectrum gets additional interpolation between the
     //spectral peaks
-    if(Pmode != 1) { //continous mode
+    if(Pmode == pad_mode::continous) { //continous mode
         int old = 0;
         for(int k = 1; k < size; ++k)
             if((spectrum[k] > 1e-10) || (k == (size - 1))) {
@@ -842,9 +864,9 @@ void PADnoteParameters::applyparameters(std::function<bool()> do_abort,
     if(do_abort())
         return;
     unsigned num = sampleGenerator([this]
-                       (unsigned N, PADnoteParameters::Sample &smp) {
+                       (unsigned N, PADnoteParameters::Sample&& smp) {
                            delete[] sample[N].smp;
-                           sample[N] = smp;
+                           sample[N] = std::move(smp);
                        },
                        do_abort, max_threads);
 
@@ -895,31 +917,34 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         samplemax = PAD_MAX_SAMPLES;
 
     //this is used to compute frequency relation to the base frequency
-    float adj[samplemax];
+    STACKALLOC(float, adj, samplemax);
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
+    // QtCreator can't capture VLAs (QTCREATORBUG-23722), so this is
+    // a workaround to allow using the IDE
+    float * const adj_ptr = adj;
 
     const PADnoteParameters* this_c = this;
 
     auto thread_cb = [basefreq, bwadjust, &cb, do_abort,
                       samplesize, samplemax, spectrumsize,
-                      &adj, &profile, this_c](
+                      adj_ptr, &profile, this_c](
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
-        FFTwrapper *fft      = new FFTwrapper(samplesize);
-        fft_t      *fftfreqs = new fft_t[samplesize / 2];
-        float      *spectrum = new float[spectrumsize];
+        FFTwrapper    *fft      = new FFTwrapper(samplesize);
+        FFTfreqBuffer  fftfreqs = fft->allocFreqBuf();
+        float         *spectrum = new float[spectrumsize];
 
         for(int nsample = 0; nsample < samplemax; ++nsample)
         if(nsample % nthreads == threadno)
-         {
+        {
             if(do_abort())
                 break;
             const float basefreqadjust =
-                powf(2.0f, adj[nsample] - adj[samplemax - 1] * 0.5f);
+                powf(2.0f, adj_ptr[nsample] - adj_ptr[samplemax - 1] * 0.5f);
 
-            if(this_c->Pmode == 0)
+            if(this_c->Pmode == pad_mode::bandwidth)
                 this_c->generatespectrum_bandwidthMode(spectrum,
                                                        spectrumsize,
                                                        basefreq*basefreqadjust,
@@ -930,28 +955,28 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
                 this_c->generatespectrum_otherModes(spectrum, spectrumsize,
                                                     basefreq * basefreqadjust);
 
-            //the last samples contains the first samples
+            //the last samples contain the first samples
             //(used for linear/cubic interpolation)
             const int extra_samples = 5;
             PADnoteParameters::Sample newsample;
             newsample.smp = new float[samplesize + extra_samples];
 
             newsample.smp[0] = 0.0f;
+            fftfreqs[0] = fft_t(0, 0);
             for(int i = 1; i < spectrumsize; ++i) //randomize the phases
                 fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
             //that's all; here is the only ifft for the whole sample;
             //no windows are used ;-)
-            fft->freqs2smps(fftfreqs, newsample.smp);
-
+            fft->freqs2smps_noconst_input(fftfreqs, fft->allocSampleBuf(newsample.smp));
 
             //normalize(rms)
             float rms = 0.0f;
             for(int i = 0; i < samplesize; ++i)
                 rms += newsample.smp[i] * newsample.smp[i];
-            rms = sqrt(rms);
+            rms = sqrtf(rms);
             if(rms < 0.000001f)
                 rms = 1.0f;
-            rms *= sqrt(262144.0f / samplesize);//262144=2^18
+            rms *= sqrtf(262144.0f / samplesize);//262144=2^18
             for(int i = 0; i < samplesize; ++i)
                 newsample.smp[i] *= 1.0f / rms * 50.0f;
 
@@ -962,12 +987,12 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             //yield new sample
             newsample.size     = samplesize;
             newsample.basefreq = basefreq * basefreqadjust;
-            cb(nsample, newsample);
+            cb(nsample, std::move(newsample));
         }
 
         //Cleanup
         delete (fft);
-        delete[] fftfreqs;
+        delete[] fftfreqs.data;
         delete[] spectrum;
     };
 
@@ -1017,7 +1042,7 @@ void PADnoteParameters::add2XML(XMLwrapper& xml)
     xml.setPadSynth(true);
 
     xml.addparbool("stereo", PStereo);
-    xml.addpar("mode", Pmode);
+    xml.addpar("mode", (int)Pmode);
     xml.addpar("bandwidth", Pbandwidth);
     xml.addpar("bandwidth_scale", Pbwscale);
 
@@ -1117,7 +1142,7 @@ void PADnoteParameters::add2XML(XMLwrapper& xml)
 void PADnoteParameters::getfromXML(XMLwrapper& xml)
 {
     PStereo    = xml.getparbool("stereo", PStereo);
-    Pmode      = xml.getpar127("mode", 0);
+    Pmode      = (pad_mode)xml.getpar127("mode", 0);
     Pbandwidth = xml.getpar("bandwidth", Pbandwidth, 0, 1000);
     Pbwscale   = xml.getpar127("bandwidth_scale", Pbwscale);
 
@@ -1195,7 +1220,7 @@ void PADnoteParameters::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("FREQUENCY_PARAMETERS")) {
-        Pfixedfreq    = xml.getpar127("fixed_freq", Pfixedfreq);
+        Pfixedfreq    = (bool)xml.getpar("fixed_freq", Pfixedfreq, 0, 1);
         PfixedfreqET  = xml.getpar127("fixed_freq_et", PfixedfreqET);
         PBendAdjust  = xml.getpar127("bend_adjust", PBendAdjust);
         POffsetHz  = xml.getpar127("offset_hz", POffsetHz);

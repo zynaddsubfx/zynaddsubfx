@@ -36,6 +36,8 @@ using namespace std;
 
 namespace zyn {
 
+static const int OssNonBlocking = 0;
+
 /*
  * The following statemachine converts MIDI commands to USB MIDI
  * packets, derived from Linux's usbmidi.c, which was written by
@@ -216,12 +218,13 @@ bool OssEngine::openAudio()
         device = linux_oss_wave_out_dev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
-    audio.handle = open(device, O_WRONLY, O_NONBLOCK);
+    audio.handle = open(device, O_WRONLY | O_NONBLOCK);
     if(audio.handle == -1) {
         cerr << "ERROR - I can't open the "
              << device << '.' << endl;
         return false;
     }
+    ioctl(audio.handle, FIONBIO, &OssNonBlocking);
     ioctl(audio.handle, SNDCTL_DSP_RESET, NULL);
 
     /* Figure out the correct format first */
@@ -354,11 +357,13 @@ bool OssEngine::openMidi()
         device = linux_oss_seq_in_dev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
-    handle = open(device, O_RDONLY, O_NONBLOCK);
+    handle = open(device, O_RDONLY | O_NONBLOCK);
 
     if(-1 == handle)
         return false;
     midi.handle = handle;
+
+    ioctl(midi.handle, FIONBIO, &OssNonBlocking);
 
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -410,7 +415,8 @@ void *OssEngine::audioThreadCb()
         for(int i = 0; i < synth.buffersize; ++i) {
             float l = smps.l[i];
             float r = smps.r[i];
-            stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+            if(isOutputCompressionEnabled)
+                stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
 
             if (audio.is32bit) {
                 audio.smps.ps32[i * 2]     = (int) (l * 2147483647.0f);

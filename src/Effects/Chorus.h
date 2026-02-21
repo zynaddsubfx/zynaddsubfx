@@ -17,18 +17,39 @@
 #include "EffectLFO.h"
 #include "../Misc/Stereo.h"
 
-#define MAX_CHORUS_DELAY 250.0f //ms
+
+
+
 
 namespace zyn {
 
+#define MAX_CHORUS_DELAY 250.0f //ms
+
+// Chorus modes
+// CHORUS default chorus mode
+// FLANGE flanger mode (very short delays)
+// TRIPLE 120° triple phase chorus
+// DUAL   180° dual phase chorus
+
+#define CHORUS_MODES \
+    CHORUS,\
+    FLANGE,\
+    TRIPLE,\
+    DUAL
+
 /**Chorus and Flange effects*/
-class Chorus:public Effect
+class Chorus final:public Effect
 {
     public:
+        enum ChorusModes {
+            CHORUS_MODES
+        };
+
         Chorus(EffectParams pars);
         /**Destructor*/
         ~Chorus();
         void out(const Stereo<float *> &input);
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         /**
          * Sets the value of the chosen variable
@@ -72,13 +93,15 @@ class Chorus:public Effect
 
         static rtosc::Ports ports;
     private:
+        inline float getSample(float* delayline, float mdel, int dk);
+
         //Chorus Parameters
         unsigned char Pvolume;
         unsigned char Pdepth;      //the depth of the Chorus(ms)
         unsigned char Pdelay;      //the delay (ms)
         unsigned char Pfb;         //feedback
-        unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
-        unsigned char Poutsub;     //if I wish to substract the output instead of the adding it
+        unsigned char Pflangemode; //mode as described above in CHORUS_MODES
+        unsigned char Poutsub;     //if I wish to subtract the output instead of the adding it
         EffectLFO     lfo;         //lfo-ul chorus
 
 
@@ -90,11 +113,18 @@ class Chorus:public Effect
 
         //Internal Values
         float depth, delay, fb;
-        float dl1, dl2, dr1, dr2, lfol, lfor;
+        float dlHist, dlNew, lfol;
+        float drHist, drNew, lfor;
+        float dlHist2, dlNew2;
+        float drHist2, drNew2;
+        float dlHist3, dlNew3;
+        float drHist3, drNew3;
         int   maxdelay;
         Stereo<float *> delaySample;
-        int dlk, drk, dlhi;
+        int dlk, drk;
         float getdelay(float xlfo);
+
+        float output;
 };
 
 }

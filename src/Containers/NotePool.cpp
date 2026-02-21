@@ -11,13 +11,14 @@
 */
 #include "NotePool.h"
 #include "../Misc/Allocator.h"
+#include "../Synth/Portamento.h"
 #include "../Synth/SynthNote.h"
 #include <cstring>
 #include <cassert>
 #include <iostream>
 
-#define SUSTAIN_BIT 0x04
-#define NOTE_MASK   0x03
+#define SUSTAIN_BIT 0x08
+#define NOTE_MASK   0x07
 
 namespace zyn {
 
@@ -25,9 +26,24 @@ enum NoteStatus {
     KEY_OFF                    = 0x00,
     KEY_PLAYING                = 0x01,
     KEY_RELEASED_AND_SUSTAINED = 0x02,
-    KEY_RELEASED               = 0x03
+    KEY_RELEASED               = 0x03,
+    KEY_ENTOMBED               = 0x04,
+    KEY_LATCHED                = 0x05
 };
 
+const char *getStatus(int status)
+{
+    switch((enum NoteStatus)(status&NOTE_MASK))
+    {
+        case KEY_OFF:                     return "OFF ";
+        case KEY_PLAYING:                 return "PLAY";
+        case KEY_RELEASED_AND_SUSTAINED:  return "SUST";
+        case KEY_RELEASED:                return "RELA";
+        case KEY_ENTOMBED:                return "TOMB";
+        case KEY_LATCHED:                 return "LTCH";
+        default:                          return "INVD";
+    }
+}
 
 NotePool::NotePool(void)
     :needs_cleaning(0)
@@ -41,6 +57,11 @@ bool NotePool::NoteDescriptor::playing(void) const
     return (status&NOTE_MASK) == KEY_PLAYING;
 }
 
+bool NotePool::NoteDescriptor::latched(void) const
+{
+    return (status&NOTE_MASK) == KEY_LATCHED;
+}
+
 bool NotePool::NoteDescriptor::sustained(void) const
 {
     return (status&NOTE_MASK) == KEY_RELEASED_AND_SUSTAINED;
@@ -49,6 +70,18 @@ bool NotePool::NoteDescriptor::sustained(void) const
 bool NotePool::NoteDescriptor::released(void) const
 {
     return (status&NOTE_MASK) == KEY_RELEASED;
+}
+
+bool NotePool::NoteDescriptor::entombed(void) const
+{
+    return (status&NOTE_MASK) == KEY_ENTOMBED;
+}
+
+// Notes that are no longer playing, for whatever reason.
+bool NotePool::NoteDescriptor::dying(void) const
+{
+    return (status&NOTE_MASK) == KEY_ENTOMBED ||
+           (status&NOTE_MASK) == KEY_RELEASED;
 }
 
 bool NotePool::NoteDescriptor::off(void) const
@@ -119,7 +152,7 @@ static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
     return desc_id;
 }
 
-NotePool::activeDescIter      NotePool::activeDesc(void)
+NotePool::activeDescIter NotePool::activeDesc(void)
 {
     cleanup();
     return activeDescIter{*this};
@@ -153,7 +186,7 @@ int NotePool::usedSynthDesc(void) const
     return cnt;
 }
 
-void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
+void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, PortamentoRealtime *portamento_realtime, bool legato)
 {
     //Get first free note descriptor
     int desc_id = getMergeableDescriptor(note, sendto, legato, ndesc);
@@ -170,11 +203,12 @@ void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, boo
         sdesc_id++;
     }
 
-    ndesc[desc_id].note         = note;
-    ndesc[desc_id].sendto       = sendto;
-    ndesc[desc_id].size        += 1;
-    ndesc[desc_id].status       = KEY_PLAYING;
-    ndesc[desc_id].legatoMirror = legato;
+    ndesc[desc_id].note                = note;
+    ndesc[desc_id].sendto              = sendto;
+    ndesc[desc_id].size               += 1;
+    ndesc[desc_id].status              = KEY_PLAYING;
+    ndesc[desc_id].legatoMirror        = legato;
+    ndesc[desc_id].portamentoRealtime  = portamento_realtime;
 
     sdesc[sdesc_id] = desc;
     return;
@@ -190,25 +224,43 @@ void NotePool::upgradeToLegato(void)
     for(auto &d:activeDesc())
         if(d.playing())
             for(auto &s:activeNotes(d))
-                insertLegatoNote(d.note, d.sendto, s);
+                insertLegatoNote(d, s);
 }
 
-void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc)
+void NotePool::insertLegatoNote(NoteDescriptor desc, SynthDescriptor sdesc)
 {
-    assert(desc.note);
+    assert(sdesc.note);
     try {
-        desc.note = desc.note->cloneLegato();
-        insertNote(note, sendto, desc, true);
+        sdesc.note = sdesc.note->cloneLegato();
+        // No portamentoRealtime for the legatoMirror descriptor
+        insertNote(desc.note, desc.sendto, sdesc, NULL, true);
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to insert legato note: " << ba.what() << std::endl;
     }
 };
 
-//There should only be one pair of notes which are still playing
-void NotePool::applyLegato(note_t note, LegatoParams &par)
+//There should only be one pair of notes which are still playing.
+//Note however that there can be releasing legato notes already in the
+//list when we get called, so need to handle that.
+void NotePool::applyLegato(note_t note, const LegatoParams &par, PortamentoRealtime *portamento_realtime)
 {
     for(auto &desc:activeDesc()) {
+        //Currently, there can actually be more than one legato pair, while a
+        //previous legato pair is releasing and a new one is started, and we
+        //don't want to change anything about notes which are releasing.
+        if (desc.dying())
+            continue;
         desc.note = note;
+        // Only set portamentoRealtime for the primary of the two note
+        // descriptors in legato mode, or we'll get two note descriptors
+        // with the same realtime pointer, causing double updateportamento,
+        // and deallocation crashes.
+        if (!desc.legatoMirror) {
+            //If realtime is already set, we mustn't set it to NULL or we'll
+            //leak the old portamento.
+            if (portamento_realtime)
+                desc.portamentoRealtime = portamento_realtime;
+        }
         for(auto &synth:activeNotes(desc))
             try {
                 synth.note->legatonote(par);
@@ -246,10 +298,10 @@ bool NotePool::synthFull(int sdesc_count) const
     return actually_free < sdesc_count;
 }
 
-//Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
+//Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINED
 bool NotePool::existsRunningNote(void) const
 {
-    //printf("runing note # =%d\n", getRunningNotes());
+    //printf("running note # =%d\n", getRunningNotes());
     return getRunningNotes();
 }
 
@@ -259,7 +311,7 @@ int NotePool::getRunningNotes(void) const
     int running_count = 0;
 
     for(auto &desc:activeDesc()) {
-        if(desc.playing() == false && desc.sustained() == false)
+        if(desc.playing() == false && desc.sustained() == false && desc.latched() == false)
             continue;
         if(running[desc.note] != false)
             continue;
@@ -268,6 +320,7 @@ int NotePool::getRunningNotes(void) const
     }
     return running_count;
 }
+
 void NotePool::enforceKeyLimit(int limit)
 {
     int notes_to_kill = getRunningNotes() - limit;
@@ -281,12 +334,13 @@ void NotePool::enforceKeyLimit(int limit)
             //There must be something to kill
             oldest  = nd.age;
             to_kill = &nd;
-        } else if(to_kill->released() && nd.playing()) {
+        } else if(to_kill->dying() && nd.playing()) {
             //Prefer to kill off a running note
             oldest = nd.age;
             to_kill = &nd;
-        } else if(nd.age > oldest && !(to_kill->playing() && nd.released())) {
-            //Get an older note when it doesn't move from running to released
+        } else if(nd.age > oldest && !(to_kill->playing() && nd.dying())) {
+            //Get an older note when it doesn't move from running to
+            //released (or entombed)
             oldest = nd.age;
             to_kill = &nd;
         }
@@ -294,17 +348,127 @@ void NotePool::enforceKeyLimit(int limit)
 
     if(to_kill) {
         auto &tk = *to_kill;
-        if(tk.released() || tk.sustained())
+        if(tk.dying() || tk.sustained())
             kill(*to_kill);
         else
             entomb(*to_kill);
     }
 }
 
+int NotePool::getRunningVoices(void) const
+{
+    int running_count = 0;
+
+    for(auto &desc:activeDesc()) {
+        // We don't count entombed voices as they will soon be dropped
+        if (desc.entombed())
+            continue;
+        running_count++;
+    }
+
+    return running_count;
+}
+
+// Silence one voice, trying to the select the one that will be the least
+// intrusive, preferably preferred_note if possible..
+void NotePool::limitVoice(int preferred_note)
+{
+    NoteDescriptor *oldest_released = NULL;
+    NoteDescriptor *oldest_released_samenote = NULL;
+    NoteDescriptor *oldest_sustained = NULL;
+    NoteDescriptor *oldest_sustained_samenote = NULL;
+    NoteDescriptor *oldest_latched = NULL;
+    NoteDescriptor *oldest_latched_samenote = NULL;
+    NoteDescriptor *oldest_playing = NULL;
+    NoteDescriptor *oldest_playing_samenote = NULL;
+
+    for(auto &nd : activeDesc()) {
+        // printf("Scanning %d (%s (%d), age %u)\n", nd.note, getStatus(nd.status), nd.status, nd.age);
+        if (nd.released()) {
+            if (!oldest_released || nd.age > oldest_released->age)
+                oldest_released = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_released_samenote || oldest_released_samenote->age))
+                oldest_released_samenote = &nd;
+        } else if (nd.sustained()) {
+            if (!oldest_sustained || nd.age > oldest_sustained->age)
+                oldest_sustained = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_sustained_samenote || oldest_sustained_samenote->age))
+                oldest_sustained_samenote = &nd;
+        } else if (nd.latched()) {
+            if (!oldest_latched || nd.age > oldest_latched->age)
+                oldest_latched = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_latched_samenote || oldest_latched_samenote->age))
+                oldest_latched_samenote = &nd;
+        } else if (nd.playing()) {
+            if (!oldest_playing || nd.age > oldest_playing->age)
+                oldest_playing = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_playing_samenote || oldest_playing_samenote->age))
+                oldest_playing_samenote = &nd;
+        }
+    }
+
+    // Prioritize which note to kill: if a released note exists, take that,
+    // otherwise sustained, latched or playing, in that order.
+    // Within each category, favour a voice that is already playing the
+    // same note, which minimizes stealing notes that are still playing
+    // something significant, especially when there are a lot of repeated
+    // notes being played.
+    // If we don't have anything to kill, there's a logical error somewhere,
+    // but we can't do anything about it here so just silently return.
+
+    NoteDescriptor *to_kill = NULL;
+
+    if (oldest_released_samenote)
+        to_kill = oldest_released_samenote;
+    else if (oldest_released)
+        to_kill = oldest_released;
+    else if (oldest_sustained_samenote)
+        to_kill = oldest_sustained_samenote;
+    else if (oldest_sustained)
+        to_kill = oldest_sustained;
+    else if (oldest_latched_samenote)
+        to_kill = oldest_latched_samenote;
+    else if (oldest_latched)
+        to_kill = oldest_latched;
+    else if (oldest_playing_samenote)
+        to_kill = oldest_playing_samenote;
+    else if (oldest_playing)
+        to_kill = oldest_playing;
+
+    if (to_kill) {
+        // printf("Will kill %d (age %d)\n", to_kill->note, to_kill->age);
+        entomb(*to_kill);
+    }
+}
+
+void NotePool::enforceVoiceLimit(int limit, int preferred_note)
+{
+    int notes_to_kill = getRunningVoices() - limit;
+
+    while (notes_to_kill-- > 0)
+        limitVoice(preferred_note);
+}
+
+
 void NotePool::releasePlayingNotes(void)
 {
     for(auto &d:activeDesc()) {
-        if(d.playing() || d.sustained()) {
+        if(d.playing() || d.sustained() || d.latched()) {
+            d.setStatus(KEY_RELEASED);
+            for(auto s:activeNotes(d))
+                s.note->releasekey();
+        }
+    }
+}
+
+void NotePool::releaseSustainingNotes(void)
+{
+    for(auto &d:activeDesc()) {
+        if(d.sustained()) {
             d.setStatus(KEY_RELEASED);
             for(auto s:activeNotes(d))
                 s.note->releasekey();
@@ -317,6 +481,19 @@ void NotePool::release(NoteDescriptor &d)
     d.setStatus(KEY_RELEASED);
     for(auto s:activeNotes(d))
         s.note->releasekey();
+}
+
+void NotePool::latch(NoteDescriptor &d)
+{
+    d.setStatus(KEY_LATCHED);
+}
+
+void NotePool::releaseLatched()
+{
+    for(auto &desc:activeDesc())
+        if(desc.latched())
+            for(auto s:activeNotes(desc))
+                s.note->releasekey();
 }
 
 void NotePool::killAllNotes(void)
@@ -338,6 +515,8 @@ void NotePool::kill(NoteDescriptor &d)
     d.setStatus(KEY_OFF);
     for(auto &s:activeNotes(d))
         kill(s);
+    if (d.portamentoRealtime)
+        d.portamentoRealtime->memory.dealloc(d.portamentoRealtime);
 }
 
 void NotePool::kill(SynthDescriptor &s)
@@ -349,21 +528,9 @@ void NotePool::kill(SynthDescriptor &s)
 
 void NotePool::entomb(NoteDescriptor &d)
 {
-    d.setStatus(KEY_RELEASED);
+    d.setStatus(KEY_ENTOMBED);
     for(auto &s:activeNotes(d))
         s.note->entomb();
-}
-
-const char *getStatus(int status_bits)
-{
-    switch(status_bits)
-    {
-        case 0:  return "OFF ";
-        case 1:  return "PLAY";
-        case 2:  return "SUST";
-        case 3:  return "RELA";
-        default: return "INVD";
-    }
 }
 
 void NotePool::cleanup(void)
@@ -403,8 +570,11 @@ void NotePool::cleanup(void)
             ndesc[i].size = new_length[i];
             if(new_length[i] != 0)
                 ndesc[cum_new++] = ndesc[i];
-            else
+            else {
                 ndesc[i].setStatus(KEY_OFF);
+                if (ndesc[i].portamentoRealtime)
+                    ndesc[i].portamentoRealtime->memory.dealloc(ndesc[i].portamentoRealtime);
+            }
         }
         memset(ndesc+cum_new, 0, sizeof(*ndesc)*(POLYPHONY-cum_new));
     }

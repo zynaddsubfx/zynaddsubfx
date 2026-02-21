@@ -54,6 +54,7 @@ int Fl_Osc_TSlider::handle(int event)
                 return(1);
             tipwin->position(Fl::event_x_root()-Fl::event_x()+x(),
                              Fl::event_y_root()-Fl::event_y()+h()+y()+5);
+            // fall through
         case FL_DRAG:
             tipwin->showValue(transform(value()));
             break;
@@ -64,7 +65,7 @@ int Fl_Osc_TSlider::handle(int event)
                 tipwin->hide();
             return 1;
     }
-    
+
     return super;
 }
 

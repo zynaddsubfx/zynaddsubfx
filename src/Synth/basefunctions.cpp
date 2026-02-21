@@ -12,9 +12,10 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <cmath>
-#include <ccomplex>
+#include <complex>
 
 #include "globals.h"
 #include "basefunctions.h"
@@ -26,7 +27,7 @@ namespace zyn {
 
 FUNC(pulse)
 {
-    return (fmod(x, 1.0f) < a) ? -1.0f : 1.0f;
+    return (fmodf(x, 1.0f) < a) ? -1.0f : 1.0f;
 }
 
 FUNC(saw)
@@ -36,7 +37,7 @@ FUNC(saw)
     else
     if(a > 0.99999f)
         a = 0.99999f;
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(x < a)
         return x / a * 2.0f - 1.0f;
     else
@@ -45,7 +46,7 @@ FUNC(saw)
 
 FUNC(triangle)
 {
-    x = fmod(x + 0.25f, 1);
+    x = fmodf(x + 0.25f, 1);
     a = 1 - a;
     if(a < 0.00001f)
         a = 0.00001f;
@@ -63,7 +64,7 @@ FUNC(triangle)
 
 FUNC(power)
 {
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(a < 0.00001f)
         a = 0.00001f;
     else
@@ -74,7 +75,7 @@ FUNC(power)
 
 FUNC(gauss)
 {
-    x = fmod(x, 1) * 2.0f - 1.0f;
+    x = fmodf(x, 1) * 2.0f - 1.0f;
     if(a < 0.00001f)
         a = 0.00001f;
     return expf(-x * x * (expf(a * 8) + 5.0f)) * 2.0f - 1.0f;
@@ -96,7 +97,7 @@ FUNC(diode)
 
 FUNC(abssine)
 {
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(a < 0.00001f)
         a = 0.00001f;
     else
@@ -109,7 +110,7 @@ FUNC(pulsesine)
 {
     if(a < 0.00001f)
         a = 0.00001f;
-    x = (fmod(x, 1) - 0.5f) * expf((a - 0.5f) * logf(128));
+    x = (fmodf(x, 1) - 0.5f) * expf((a - 0.5f) * logf(128));
     if(x < -0.5f)
         x = -0.5f;
     else
@@ -121,12 +122,12 @@ FUNC(pulsesine)
 
 FUNC(stretchsine)
 {
-    x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
+    x = fmodf(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 4;
     if(a > 0.0f)
         a *= 2;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(fabsf(x), a);
     if(x < 0)
         b = -b;
     return -sinf(b * PI);
@@ -134,7 +135,7 @@ FUNC(stretchsine)
 
 FUNC(chirp)
 {
-    x = fmod(x, 1.0f) * 2.0f * PI;
+    x = fmodf(x, 1.0f) * 2.0f * PI;
     a = (a - 0.5f) * 4;
     if(a < 0.0f)
         a *= 2.0f;
@@ -144,10 +145,10 @@ FUNC(chirp)
 
 FUNC(absstretchsine)
 {
-    x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
+    x = fmodf(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 9;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(fabsf(x), a);
     if(x < 0)
         b = -b;
     return -powf(sinf(b * PI), 2);
@@ -167,22 +168,22 @@ FUNC(sqr)
 
 FUNC(spike)
 {
-    float b = a * 0.66666; // the width of the range: if a == 0.5, b == 0.33333
+    float b = a * 0.66666f; // the width of the range: if a == 0.5, b == 0.33333
 
     if(x < 0.5) {
         if(x < (0.5 - (b / 2.0)))
             return 0.0;
         else {
-            x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
-            return x * (2.0 / b); // this is the slope: 1 / (b / 2)
+            x = (x + (b / 2) - 0.5f) * (2.f / b); // shift to zero, and expand to range from 0 to 1
+            return x * (2.f / b); // this is the slope: 1 / (b / 2)
         }
     }
     else {
         if(x > (0.5 + (b / 2.0)))
             return 0.0;
         else {
-            x = (x - 0.5) * (2.0 / b);
-            return (1 - x) * (2.0 / b);
+            x = (x - .5f) * (2.f / b);
+            return (1 - x) * (2.f / b);
         }
     }
 }
@@ -200,29 +201,93 @@ FUNC(circle)
         if((x < -b) || (x > b))
             y = 0;
         else
-            y = sqrt(1 - (pow(x, 2) / pow(b, 2)));  // normally * a^2, but a stays 1
+            y = sqrtf(1 - (powf(x, 2) / powf(b, 2)));  // normally * a^2, but a stays 1
     }
     else {
         x = x - 3; // x goes from -1 to 1 as well
         if((x < -b) || (x > b))
             y = 0;
         else
-            y = -sqrt(1 - (pow(x, 2) / pow(b, 2)));
+            y = -sqrtf(1 - (powf(x, 2) / powf(b, 2)));
     }
     return y;
 }
 
-base_func getBaseFunction(unsigned char func)
+static float
+power_cosinus_32(float _x, double _power)
 {
-    if(!func)
-        return NULL;
+    uint32_t x = (_x - floorf(_x)) * (1ULL << 32);
+    double retval;
+    uint8_t num;
 
-    if(func == 127) //should be the custom wave
-        return NULL;
+    /* Handle special cases, if any */
+    switch (x) {
+    case 0xFFFFFFFFU:
+    case 0x00000000U:
+        return (1.0f);
+    case 0x3FFFFFFFU:
+    case 0x40000000U:
+    case 0xBFFFFFFFU:
+    case 0xC0000000U:
+        return (0.0f);
+    case 0x7FFFFFFFU:
+    case 0x80000000U:
+        return (-1.0f);
+    }
 
-    func--;
-    assert(func < 15);
-    base_func functions[] = {
+    /* Apply "grey" encoding */
+    for (uint32_t mask = 1U << 31; mask != 1; mask /= 2) {
+        if (x & mask)
+            x ^= (mask - 1);
+    }
+
+    /* Find first set bit */
+    for (num = 0; num != 30; num++) {
+        if (x & (1U << num)) {
+            num++;
+            break;
+        }
+    }
+
+    /* Initialize return value */
+    retval = 0.0;
+
+    /* Compute the rest of the power series */
+    for (; num != 30; num++) {
+        if (x & (1U << num))
+            retval = pow((1.0 - retval) / 2.0, _power);
+        else
+            retval = pow((1.0 + retval) / 2.0, _power);
+    }
+
+    /* Check if halfway */
+    if (x & (1ULL << 30))
+        retval = -retval;
+
+    return (retval);
+}
+
+//
+// power argument magic values:
+//     0.0: Converges to a square wave
+//     0.5: Sinus wave
+//     1.0: Triangle wave
+// x: phase value [0..1>
+//
+static float
+power_sinus_32(float _x, double _power)
+{
+    return (power_cosinus_32(_x + 0.75f, _power));
+}
+
+FUNC(powersinus)
+{
+    return (power_sinus_32(x, 2.0 * a));
+}
+
+base_func_t *getBaseFunction(unsigned char func)
+{
+    static base_func_t * const functions[] = {
         basefunc_triangle,
         basefunc_pulse,
         basefunc_saw,
@@ -238,7 +303,16 @@ base_func getBaseFunction(unsigned char func)
         basefunc_sqr,
         basefunc_spike,
         basefunc_circle,
+        basefunc_powersinus,
     };
+    if(!func)
+        return NULL;
+
+    if(func == 127) //should be the custom wave
+        return NULL;
+
+    func--;
+    assert(func < (sizeof(functions)/sizeof(functions[0])));
     return functions[func];
 }
 
@@ -277,7 +351,7 @@ FILTER(bp1)
     float tmp = powf(5.0f, par2 * 2.0f);
     gain = powf(gain, tmp);
     if(gain < 1e-5)
-        gain = 1e-5;
+        gain = (float)1e-5;
     return gain;
 }
 
@@ -304,7 +378,7 @@ FILTER(hp2)
 
 FILTER(bp2)
 {
-    return (fabs(powf(2,
+    return (fabsf(powf(2,
                       (1.0f
                        - par)
                       * 7)
@@ -313,7 +387,7 @@ FILTER(bp2)
 
 FILTER(bs2)
 {
-    return (fabs(powf(2,
+    return (fabsf(powf(2,
                       (1.0f
                        - par)
                       * 7)
@@ -322,7 +396,7 @@ FILTER(bs2)
 
 bool floatEq(float a, float b)
 {
-    const float fudge = .01;
+    const float fudge = .01f;
     return a + fudge > b && a - fudge < b;
 }
 
@@ -369,16 +443,26 @@ FILTER(s)
         gain = powf(2.0f, par2 * par2 * 8.0f);
     return gain;
 }
+
+FILTER(lpsk)
+{
+    float tmp2PIf = 2.0f * PI * (1.05f-par)*64.0f;
+    std::complex<float> s  (0.0f,2.0f*PI*i);
+    float vOut = tmp2PIf * tmp2PIf;
+    std::complex<float> vIn = s*s + tmp2PIf*s/((par2)+(2.0f*par*par2)+0.5f) + tmp2PIf*tmp2PIf;
+    return std::abs((vOut*vOut*vOut) / (vIn*vIn*vIn));
+
+}
 #undef FILTER
 
-filter_func getFilter(unsigned char func)
+filter_func_t *getFilter(unsigned char func)
 {
     if(!func)
         return NULL;
 
     func--;
     assert(func < 13);
-    filter_func functions[] = {
+    static filter_func_t * const functions[] = {
         osc_lp,
         osc_hp1,
         osc_hp1b,
@@ -391,8 +475,15 @@ filter_func getFilter(unsigned char func)
         osc_cos,
         osc_sin,
         osc_low_shelf,
-        osc_s
+        osc_s,
+        osc_lpsk
     };
+
+    if(!func)
+        return NULL;
+
+    func--;
+    assert(func < (sizeof(functions)/sizeof(functions[0])));
     return functions[func];
 }
 
@@ -414,7 +505,7 @@ float rmsNormalOfBaseFunction(unsigned char func,
 {
     struct
     {
-        base_func bf;
+        base_func_t* bf;
         int oscilsize;
         float par;
         float operator[](std::size_t i) const {

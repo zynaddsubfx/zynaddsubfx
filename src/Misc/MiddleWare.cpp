@@ -23,6 +23,7 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include <lo/lo.h>
 
 #include <unistd.h>
@@ -31,14 +32,21 @@
 #include "../UI/Fl_Osc_Interface.h"
 
 #include <map>
+#include <queue>
 
 #include "Util.h"
 #include "CallbackRepeater.h"
 #include "Master.h"
+#include "MsgParsing.h"
 #include "Part.h"
 #include "PresetExtractor.h"
 #include "../Containers/MultiPseudoStack.h"
 #include "../Params/PresetsStore.h"
+#include "../Params/EnvelopeParams.h"
+#include "../Params/LFOParams.h"
+#include "../Params/FilterParams.h"
+#include "../Effects/EffectMgr.h"
+#include "../Synth/Resonance.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
@@ -94,6 +102,10 @@ static void liblo_error_cb(int i, const char *m, const char *loc)
     fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
 }
 
+// we need to access this before the definitions
+// bad style?
+static const rtosc::Ports& getNonRtParamPorts();
+
 static int handler_function(const char *path, const char *types, lo_arg **argv,
         int argc, lo_message msg, void *user_data)
 {
@@ -116,24 +128,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
 
-    if(!strcmp(buffer, "/path-search") &&
-       !strcmp("ss", rtosc_argument_string(buffer)))
-    {
-        char reply_buffer[1024*20];
-        std::size_t length =
-            rtosc::path_search(Master::ports, buffer, 128,
-                               reply_buffer, sizeof(reply_buffer));
-        if(length) {
-            lo_message msg  = lo_message_deserialise((void*)reply_buffer,
-                                                     length, NULL);
-            lo_address addr = lo_address_new_from_url(mw->activeUrl().c_str());
-            if(addr)
-                lo_send_message(addr, reply_buffer, msg);
-            lo_address_free(addr);
-            lo_message_free(msg);
-        }
-    }
-    else if(buffer[0]=='/' && strrchr(buffer, '/')[1])
+    if(buffer[0]=='/' && strrchr(buffer, '/')[1])
     {
         mw->transmitMsg(rtosc::Ports::collapsePath(buffer));
     }
@@ -172,6 +167,28 @@ void deallocate(const char *str, void *v)
         delete (SclInfo*)v;
     else if(!strcmp(str, "Microtonal"))
         delete (Microtonal*)v;
+    else if(!strcmp(str, "ADnoteParameters"))
+        delete (ADnoteParameters*)v;
+    else if(!strcmp(str, "SUBnoteParameters"))
+        delete (SUBnoteParameters*)v;
+    else if(!strcmp(str, "PADnoteParameters"))
+        delete (PADnoteParameters*)v;
+    else if(!strcmp(str, "EffectMgr"))
+        delete (EffectMgr*)v;
+    else if(!strcmp(str, "EnvelopeParams"))
+        delete (EnvelopeParams*)v;
+    else if(!strcmp(str, "FilterParams"))
+        delete (FilterParams*)v;
+    else if(!strcmp(str, "LFOParams"))
+        delete (LFOParams*)v;
+    else if(!strcmp(str, "OscilGen"))
+        delete (OscilGen*)v;
+    else if(!strcmp(str, "Resonance"))
+        delete (Resonance*)v;
+    else if(!strcmp(str, "rtosc::AutomationMgr"))
+        delete (rtosc::AutomationMgr*)v;
+    else if(!strcmp(str, "PADsample"))
+        delete[] (float*)v;
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -181,6 +198,7 @@ void deallocate(const char *str, void *v)
  *                    PadSynth Setup                                         *
  *****************************************************************************/
 
+// This lets MiddleWare compute non-realtime PAD synth data and send it to the backend
 void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 {
     //printf("preparing padsynth parameters\n");
@@ -189,7 +207,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 
 #ifdef WIN32
     unsigned num = p->sampleGenerator([&path,&d]
-                       (unsigned N, PADnoteParameters::Sample &s)
+                       (unsigned N, PADnoteParameters::Sample &&s)
                        {
                            //printf("sending info to '%s'\n",
                            //       (path+to_s(N)).c_str());
@@ -199,11 +217,12 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 #else
     std::mutex rtdata_mutex;
     unsigned num = p->sampleGenerator([&rtdata_mutex, &path,&d]
-                       (unsigned N, PADnoteParameters::Sample &s)
+                       (unsigned N, PADnoteParameters::Sample&& s)
                        {
                            //printf("sending info to '%s'\n",
                            //       (path+to_s(N)).c_str());
                            rtdata_mutex.lock();
+                           // send non-realtime computed data to PADnoteParameters
                            d.chain((path+to_s(N)).c_str(), "ifb",
                                    s.size, s.basefreq, sizeof(float*), &s.smp);
                            rtdata_mutex.unlock();
@@ -217,6 +236,73 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     }
 }
 
+/******************************************************************************
+ *                      MIDI Serialization                                    *
+ *                                                                            *
+ ******************************************************************************/
+void saveMidiLearn(XMLwrapper &xml, const rtosc::MidiMappernRT &midi)
+{
+    xml.beginbranch("midi-learn");
+    for(auto value:midi.inv_map) {
+        XmlNode binding("midi-binding");
+        auto biject = std::get<3>(value.second);
+        binding["osc-path"]  = value.first;
+        binding["coarse-CC"] = to_s(std::get<1>(value.second));
+        binding["fine-CC"]   = to_s(std::get<2>(value.second));
+        binding["type"]      = "i";
+        binding["minimum"]   = to_s(biject.min);
+        binding["maximum"]   = to_s(biject.max);
+        xml.add(binding);
+    }
+    xml.endbranch();
+}
+
+void loadMidiLearn(XMLwrapper &xml, rtosc::MidiMappernRT &midi)
+{
+    using rtosc::Port;
+    if(xml.enterbranch("midi-learn")) {
+        auto nodes = xml.getBranch();
+
+        //TODO clear mapper
+
+        for(auto node:nodes) {
+            if(node.name != "midi-binding" ||
+                    !node.has("osc-path") ||
+                    !node.has("coarse-CC"))
+                continue;
+            const string path = node["osc-path"];
+            const int    CC   = atoi(node["coarse-CC"].c_str());
+            const Port  *p    = Master::ports.apropos(path.c_str());
+            if(p) {
+                printf("loading midi port...\n");
+                midi.addNewMapper(CC, *p, path);
+            } else {
+                printf("unknown midi bindable <%s>\n", path.c_str());
+            }
+        }
+        xml.exitbranch();
+    } else
+        printf("cannot find 'midi-learn' branch...\n");
+}
+
+void connectMidiLearn(int par, int chan, bool isNrpn, string path, rtosc::MidiMappernRT &midi)
+{
+    const rtosc::Port *p = Master::ports.apropos(path.c_str());
+    if(p) {
+        if(isNrpn)
+            printf("mapping midi NRPN: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
+        else
+            printf("mapping midi CC: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
+
+        if(chan<1) chan=1;
+        int ID = (isNrpn<<18) + (((chan-1)&0x0f)<<14) + par;
+        //~ printf("ID = %d\n", ID);
+
+        midi.addNewMapper(ID, *p, path);
+    } else {
+        printf("unknown port to midi bind <%s>\n", path.c_str());
+    }
+}
 /******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
@@ -258,8 +344,8 @@ struct NonRtObjStore
             std::string nbase = base+"adpars/VoicePar"+to_s(k)+"/";
             if(adpars) {
                 auto &nobj = adpars->VoicePar[k];
-                objmap[nbase+"OscilSmp/"]     = nobj.OscilSmp;
-                objmap[nbase+"FMSmp/"] = nobj.FMSmp;
+                objmap[nbase+"OscilSmp/"] = nobj.OscilGn;
+                objmap[nbase+"FMSmp/"]    = nobj.FmGn;
             } else {
                 objmap[nbase+"OscilSmp/"] = nullptr;
                 objmap[nbase+"FMSmp/"]    = nullptr;
@@ -298,6 +384,10 @@ struct NonRtObjStore
 
     void handleOscil(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
+        assert(d.message);
+        assert(msg);
+        assert(msg >= d.message);
+        assert(msg - d.message < 256);
         void *osc = get(obj_rl);
         if(osc)
         {
@@ -305,9 +395,15 @@ struct NonRtObjStore
             d.obj = osc;
             OscilGen::non_realtime_ports.dispatch(msg, d);
         }
-        else
-            fprintf(stderr, "Warning: trying to access oscil object \"%s\","
-                            "which does not exist\n", obj_rl.c_str());
+        else {
+            // print warning, except in rtosc::walk_ports
+            if(!strstr(d.message, "/pointer"))
+            {
+                fprintf(stderr, "Warning: trying to access oscil object \"%s\","
+                                "which does not exist\n", obj_rl.c_str());
+            }
+            d.obj = nullptr; // tell walk_ports that there's nothing to recurse here...
+        }
     }
     void handlePad(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
@@ -322,7 +418,7 @@ struct NonRtObjStore
                 strcpy(d.loc, obj_rl.c_str());
                 d.obj = pad;
                 PADnoteParameters::non_realtime_ports.dispatch(msg, d);
-                if(rtosc_narguments(msg)) {
+                if(d.matches && rtosc_narguments(msg)) {
                     if(!strcmp(msg, "oscilgen/prepare"))
                         ; //ignore
                     else {
@@ -330,10 +426,16 @@ struct NonRtObjStore
                     }
                 }
             }
-            else
-                fprintf(stderr, "Warning: trying to access pad synth object "
-                                "\"%s\", which does not exist\n",
-                        obj_rl.c_str());
+            else {
+                // print warning, except in rtosc::walk_ports
+                if(!strstr(d.message, "/pointer"))
+                {
+                    fprintf(stderr, "Warning: trying to access pad synth object "
+                                    "\"%s\", which does not exist\n",
+                            obj_rl.c_str());
+                }
+                d.obj = nullptr; // tell walk_ports that there's nothing to recurse here...
+            }
         }
     }
 };
@@ -403,6 +505,11 @@ namespace Nio
                     d.reply(d.loc, "s", Nio::getSink().c_str());
                 else
                     Nio::setSink(rtosc_argument(msg,0).s);}},
+        {"audio-compressor::T:F", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, Nio::getAudioCompressor() ? "T" : "F");
+                else
+                    Nio::setAudioCompressor(rtosc_argument(msg,0).T);}},
     };
 }
 
@@ -426,12 +533,16 @@ public:
 
 class MiddleWareImpl
 {
+    // messages chained with MwDataObj::chain
+    // must yet be handled after a previous handleMsg
+    std::queue<std::vector<char>> msgsToHandle;
 public:
     MiddleWare *parent;
     Config* const config;
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
     ~MiddleWareImpl(void);
+    void discardAllbToUButHandleFree();
     void recreateMinimalMaster();
 
     //Check offline vs online mode in plugins
@@ -471,6 +582,7 @@ public:
         if(actual_load[npart] != pending_load[npart])
             return;
         assert(actual_load[npart] <= pending_load[npart]);
+        assert(filename);
 
         //load part in async fashion when possible
 #ifndef WIN32
@@ -478,10 +590,13 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
                                    master->time,
+                                   master->sync,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
                                    &master->microtonal, master->fft, &master->watcher,
                                    ("/part"+to_s(npart)+"/").c_str());
+                p->partno  = npart % NUM_MIDI_CHANNELS;
+                p->Prcvchn = npart % NUM_MIDI_CHANNELS;
                 if(p->loadXMLinstrument(filename))
                     fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 
@@ -505,6 +620,8 @@ public:
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
+        p->partno  = npart % NUM_MIDI_CHANNELS;
+        p->Prcvchn = npart % NUM_MIDI_CHANNELS;
 
         if(p->loadXMLinstrument(filename))
             fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
@@ -533,9 +650,12 @@ public:
 
         Part *p = new Part(*master->memory, synth,
                 master->time,
+                master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
                 &master->microtonal, master->fft);
+        p->partno  = npart % NUM_MIDI_CHANNELS;
+        p->Prcvchn = npart % NUM_MIDI_CHANNELS;
         p->applyparameters();
         obj_store.extractPart(p, npart);
         kits.extractPart(p, npart);
@@ -543,7 +663,8 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         parent->transmitMsg("/load-part", "ib", npart, sizeof(Part *), &p);
-        GUI::raiseUi(ui, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
+        for(void* uihandle : ui)
+            GUI::raiseUi(uihandle, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
     }
 
     //Well, you don't get much crazier than changing out all of your RT
@@ -585,7 +706,12 @@ public:
         return 0;
     }
 
-    int saveMaster(const char *filename, bool osc_format = false)
+    // Save all possible parameters
+    // In user language, this is called "saving a master", but we
+    // are saving parameters owned by Master and by MiddleWare
+    // Return 0 if OK, <0 if not
+    int saveParams(const char *filename, std::string& savefile,
+		   bool osc_format = false)
     {
         int res;
         if(osc_format)
@@ -596,17 +722,113 @@ public:
             // after the savefile will have been saved, it will be loaded into this
             // dummy master, and then the two masters will be compared
             zyn::Config config;
-            zyn::SYNTH_T* synth = new zyn::SYNTH_T;
-            synth->buffersize = master->synth.buffersize;
-            synth->samplerate = master->synth.samplerate;
-            synth->alias();
-            zyn::Master master2(*synth, &config);
-            master->copyMasterCbTo(&master2);
-            master2.frozenState = true;
+            config.cfg.SaveFullXml = master->SaveFullXml;
 
-            doReadOnlyOp([this,filename,&dispatcher,&master2,&res](){
-                             res = master->saveOSC(filename, &dispatcher,
-                                                   &master2);});
+            zyn::SYNTH_T* synth2 = new zyn::SYNTH_T;
+            synth2->buffersize = master->synth.buffersize;
+            synth2->samplerate = master->synth.samplerate;
+            synth2->alias();
+
+            {
+                zyn::Master master2(*synth2, &config);
+                master->copyMasterCbTo(&master2);
+                master2.frozenState = true;
+
+                std::set<std::string> alreadyWritten;
+                rtosc_version m_version =
+                {
+                    (unsigned char) version.get_major(),
+                    (unsigned char) version.get_minor(),
+                    (unsigned char) version.get_revision()
+                };
+                savefile = rtosc::save_to_file(getNonRtParamPorts(), this, "ZynAddSubFX", m_version, alreadyWritten, {});
+                savefile += '\n';
+
+                doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res,&alreadyWritten]()
+                {
+                    savefile = master->saveOSC(savefile, alreadyWritten);
+#if 1
+                    // load the savefile string into another master to compare the results
+                    // between the original and the savefile-loaded master
+                    // this requires a temporary master switch
+                    Master* old_master = master;
+                    dispatcher.updateMaster(&master2);
+                    while(old_master->isMasterSwitchUpcoming()) { os_usleep(50000); }
+
+                    res = master2.loadOSCFromStr(savefile.c_str(), &dispatcher);
+                    // TODO: compare MiddleWare, too?
+
+                    // The above call is done by this thread (i.e. the MiddleWare thread), but
+                    // it sends messages to master2 in order to load the values
+                    // We need to wait until savefile has been loaded into master2
+                    int i;
+                    for(i = 0; i < 20 && master2.uToB->hasNext(); ++i)
+                        os_usleep(50000);
+                    if(i >= 20) // >= 1 second?
+                    {
+                        // Master failed to fetch its messages
+                        res = -1;
+                    }
+                    printf("Saved in less than %d ms.\n", 50*i);
+
+                    dispatcher.updateMaster(old_master);
+                    while(master2.isMasterSwitchUpcoming()) { os_usleep(50000); }
+#endif
+                    if(res < 0)
+                    {
+                        std::cerr << "invalid savefile (or a backend error)!" << std::endl;
+                        std::cerr << "complete savefile:" << std::endl;
+                        std::cerr << savefile << std::endl;
+                        std::cerr << "first entry that could not be parsed:" << std::endl;
+
+                        for(int j = -res + 1; savefile[j]; ++j)
+                        if(savefile[j] == '\n')
+                        {
+                            savefile.resize(j);
+                            break;
+                        }
+                        std::cerr << (savefile.c_str() - res) << std::endl;
+
+                        res = -1;
+                    }
+                    else
+                    {
+                        char* xml = master->getXMLData(),
+                            * xml2 = master2.getXMLData();
+                        // TODO: below here can be moved out of read only op
+
+                        res = strcmp(xml, xml2) ? -1 : 0;
+
+                        if(res == 0)
+                        {
+                            if(filename && *filename)
+                            {
+                                std::ofstream ofs(filename);
+                                ofs << savefile;
+                            }
+                        }
+                        else
+                        {
+                            std::cout << savefile << std::endl;
+                            std::cerr << "Cannot write OSC savefile!! (see tmp1.txt and tmp2.txt)"
+                                      << std::endl;
+                            {
+                                std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
+                                tmp1 << xml;
+                                tmp2 << xml2;
+                            }
+                            int sys_ret = system("diff tmp1.txt tmp2.txt");
+                            if(sys_ret)
+                                puts("FAILED to compare tmp1.txt and tmp2.txt. Please compare manually.");
+                            res = -1;
+                        }
+
+                        free(xml);
+                        free(xml2);
+                    }
+                });
+            }
+            delete synth2;
         }
         else // xml format
         {
@@ -709,7 +931,13 @@ public:
     void kitEnable(int part, int kit, int type);
 
     // Handle an event with special cases
-    void handleMsg(const char *msg);
+    void handleMsg(const char *msg, bool msg_comes_from_realtime = false);
+
+    // Add a message for handleMsg to a queue
+    void queueMsg(const char* msg)
+    {
+        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, -1));
+    }
 
     void write(const char *path, const char *args, ...);
     void write(const char *path, const char *args, va_list va);
@@ -747,9 +975,6 @@ public:
     //Only valid until freed
     Master *previous_master = nullptr;
 
-    //The ONLY means that any chunk of UI code should have for interacting with the
-    //backend
-    Fl_Osc_Interface *osc;
     //Synth Engine Parameters
     ParamStore kits;
 
@@ -757,10 +982,15 @@ public:
     void(*idle)(void*);
     void* idle_ptr;
 
-    //General UI callback
-    cb_t cb;
-    //UI handle
-    void *ui;
+    //General UI callbacks
+    cb_t cb[2];
+    //UI handles
+    void *ui[2];
+
+    //The ONLY means that any chunk of UI code should have for interacting with the
+    //backend
+    //Note: Only the first UI is defined to have such an interface
+    Fl_Osc_Interface *osc;
 
     std::atomic_int pending_load[NUM_MIDI_PARTS];
     std::atomic_int actual_load[NUM_MIDI_PARTS];
@@ -769,7 +999,7 @@ public:
     rtosc::UndoHistory undo;
 
     //MIDI Learn
-    //rtosc::MidiMappernRT midi_mapper;
+    rtosc::MidiMappernRT midi_mapper;
 
     //Link To the Realtime
     rtosc::ThreadLink *bToU;
@@ -865,7 +1095,7 @@ class MwDataObj:public rtosc::RtData
         {
             assert(msg);
             // printf("chain call on <%s>\n", msg);
-            mwi->handleMsg(msg);
+            mwi->queueMsg(msg);
         }
 
         virtual void chain(const char *path, const char *args, ...) override
@@ -903,7 +1133,7 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
 
     while((fn = readdir(dir))) {
 #ifndef WIN32
-        bool is_dir = fn->d_type & DT_DIR;
+        bool is_dir = fn->d_type == DT_DIR;
         //it could still be a symbolic link
         if(!is_dir) {
             string path = string(folder) + "/" + fn->d_name;
@@ -951,7 +1181,7 @@ static int extractInt(const char *msg)
 
 static const char *chomp(const char *msg)
 {
-    while(*msg && *msg!='/') ++msg; \
+    while(*msg && *msg!='/') ++msg;
     msg = *msg ? msg+1 : msg;
     return msg;
 };
@@ -986,17 +1216,18 @@ const rtosc::Ports bankPorts = {
             impl.loadbank(impl.banks[0].dir);
 
             //Reload bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
+            for(int j=0; j<BANK_SIZE; ++j) {
                 d.reply("/bankview", "iss",
-                    i, impl.ins[i].name.c_str(),
-                    impl.ins[i].filename.c_str());
+                    j, impl.ins[j].name.c_str(),
+                    impl.ins[j].filename.c_str());
             }
         } else {
             //Clear all bank slots
-            for(int i=0; i<BANK_SIZE; ++i) {
-                d.reply("/bankview", "iss", i, "", "");
+            for(int j=0; j<BANK_SIZE; ++j) {
+                d.reply("/bankview", "iss", j, "", "");
             }
         }
+        d.broadcast("/damage", "s", "/bank/");
         rEnd},
     {"bank_list:", 0, 0,
         rBegin;
@@ -1146,6 +1377,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1159,6 +1391,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1168,7 +1401,7 @@ const rtosc::Ports bankPorts = {
         rEnd},
     {"search_results:", 0, 0,
         rBegin;
-        d.reply("/bank/search_results", "");
+        d.reply("/bank/search_results", "N");
         rEnd},
 };
 
@@ -1218,13 +1451,52 @@ void save_cb(const char *msg, RtData &d)
     // the read-only operation writes to the buffer again. Copy to string:
     const string file = rtosc_argument(msg, 0).s;
     uint64_t request_time = 0;
+    bool saveToString = false;
     if(rtosc_narguments(msg) > 1)
         request_time = rtosc_argument(msg, 1).t;
+    if(rtosc_narguments(msg) > 2)
+        saveToString = rtosc_argument(msg, 2).T;
 
-    int res = impl.saveMaster(file.c_str(), osc_format);
+    std::string savefile;
+    int res = impl.saveParams(file.c_str(), savefile, osc_format);
     d.broadcast(d.loc, (res == 0) ? "stT" : "stF",
                 file.c_str(), request_time);
+
+    if(saveToString)
+    {
+        std::size_t max_each = 768;
+        std::size_t msgcount = 0;
+        std::size_t msgmax = (savefile.length()-1) / max_each;
+        for(std::size_t pos = 0; pos < savefile.length(); pos += max_each)
+        {
+            std::size_t len = std::min(max_each, savefile.length() - pos);
+            d.reply(d.loc, "stiis",
+                    file.c_str(), request_time, msgcount++, msgmax,
+                    savefile.substr(pos, len).c_str());
+        }
+    }
 }
+
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+#endif
+
+void gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
+        const int N,
+        char *types,
+        rtosc_arg_t *args)
+{
+        types[N] = 0;
+        for(int i=0; i<N; ++i) {
+            args[i].s = files[i].c_str();
+            types[i]  = 's';
+        }
+}
+
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#pragma GCC pop_options
+#endif
 
 /*
  * BASE/part#/kititem#
@@ -1233,7 +1505,7 @@ void save_cb(const char *msg, RtData &d)
  * BASE/part#/kit#/padpars/prepare
  * BASE/part#/kit#/padpars/oscil/\*
  */
-static rtosc::Ports middwareSnoopPorts = {
+static rtosc::Ports nonRtParamPorts = {
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
@@ -1251,6 +1523,9 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin
         impl.obj_store.handlePad(chomp(chomp(chomp(msg))), d);
         rEnd},
+};
+
+static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
     {"bank/", 0, &bankPorts,
         rBegin;
         d.obj = &impl.master->bank;
@@ -1265,11 +1540,10 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.doReadOnlyOp([&impl,slot,part_id,&err](){
                 err = impl.master->bank.savetoslot(slot, impl.master->part[part_id]);});
         if(err) {
-            char buffer[1024];
-            rtosc_message(buffer, 1024, "/alert", "s",
+            d.reply("/alert", "s",
                     "Failed To Save To Bank Slot, please check file permissions");
-            GUI::raiseUi(impl.ui, buffer);
         }
+        else d.broadcast("/damage", "s", "/bank/search_results/");
         rEnd},
     {"config/", 0, &Config::ports,
         rBegin;
@@ -1281,7 +1555,7 @@ static rtosc::Ports middwareSnoopPorts = {
         d.obj = (void*)obj->parent;
         real_preset_ports.dispatch(chomp(msg), d);
         if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's')
-            d.reply("/damage", "s", rtosc_argument(msg, 0).s);
+            d.broadcast("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"io/", 0, &Nio::ports,               [](const char *msg, RtData &d) {
         Nio::ports.dispatch(chomp(msg), d);}},
@@ -1289,6 +1563,44 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         impl.kitEnable(msg);
         d.forward();
+        rEnd},
+    {"save_xcz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        saveMidiLearn(xml, impl.midi_mapper);
+        xml.saveXMLfile(file, impl.master->gzip_compression);
+        rEnd},
+    {"load_xcz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        xml.loadXMLfile(file);
+        loadMidiLearn(xml, impl.midi_mapper);
+        rEnd},
+    {"clear_xcz:", 0, 0,
+        rBegin;
+        impl.midi_mapper.clear();
+        rEnd},
+    {"midi-map-cc:is", rDoc("bind a midi CC on CH to an OSC path"), 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const string path = rtosc_argument(msg, 1).s;
+        connectMidiLearn(par, 1, false, path, impl.midi_mapper);
+        rEnd},
+    {"midi-map-cc:iis", rDoc("bind a midi CC on CH to an OSC path"), 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const int ch = rtosc_argument(msg, 1).i;
+        const string path = rtosc_argument(msg, 2).s;
+        connectMidiLearn(par, ch, false, path, impl.midi_mapper);
+        rEnd},
+    {"midi-map-nrpn:iis", rDoc("bind nrpn on channel to an OSC path"), 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const int ch = rtosc_argument(msg, 1).i;
+        const string path = rtosc_argument(msg, 2).s;
+        connectMidiLearn(par, ch, true, path, impl.midi_mapper);
         rEnd},
     {"save_xlz:s", 0, 0,
         rBegin;
@@ -1324,7 +1636,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.saveXsz(file, d);
         rEnd},
-    {"load_scl:s", 0, 0,
+    {"load_scl:s", rDoc("Load a scale from a file"), 0,
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadScl(file, d);
@@ -1334,8 +1646,8 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadKbm(file, d);
         rEnd},
-    {"save_xmz:s:st", 0, 0, save_cb<false>},
-    {"save_osc:s:st", 0, 0, save_cb<true>},
+    {"save_xmz:s:st:stT:stF", 0, 0, save_cb<false>},
+    {"save_osc:s:st:stT:stF", 0, 0, save_cb<true>},
     {"save_xiz:is", 0, 0,
         rBegin;
         const int   part_id = rtosc_argument(msg,0).i;
@@ -1370,11 +1682,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
         char        *types = new char[N+1];
-        types[N] = 0;
-        for(int i=0; i<N; ++i) {
-            args[i].s = files[i].c_str();
-            types[i]  = 's';
-        }
+        gcc_10_1_0_is_dumb(files, N, types, args);
 
         d.replyArray(d.loc, types, args);
         delete [] types;
@@ -1389,11 +1697,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
         char        *types = new char[N+1];
-        types[N] = 0;
-        for(int i=0; i<N; ++i) {
-            args[i].s = files[i].c_str();
-            types[i]  = 's';
-        }
+        gcc_10_1_0_is_dumb(files, N, types, args);
 
         d.replyArray(d.loc, types, args);
         delete [] types;
@@ -1423,14 +1727,18 @@ static rtosc::Ports middwareSnoopPorts = {
     {"reset_master:", 0, 0,
         rBegin;
         impl.loadMaster(NULL);
-        d.reply("/damage", "s", "/");
+        d.broadcast("/damage", "s", "/");
         rEnd},
-    {"load_xiz:is", 0, 0,
+    {"load_xiz:is:ist", 0, 0,
         rBegin;
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
+        uint64_t request_time = 0;
+        if(rtosc_narguments(msg) > 2)
+            request_time = rtosc_argument(msg, 2).t;
         impl.pending_load[part_id]++;
         impl.loadPart(part_id, file, impl.master, d);
+        d.broadcast(d.loc, "stT", file, request_time);
         rEnd},
     {"load-part:is", 0, 0,
         rBegin;
@@ -1463,7 +1771,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         int id = extractInt(msg);
         impl.loadClearPart(id);
-        d.reply("/damage", "s", ("/part"+to_s(id)).c_str());
+        d.broadcast("/damage", "s", ("/part"+to_s(id)).c_str());
         rEnd},
     {"undo:", 0, 0,
         rBegin;
@@ -1474,54 +1782,56 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.undo.seekHistory(+1);
         rEnd},
     //port to observe the midi mappings
-    //{"midi-learn-values:", 0, 0,
-    //    rBegin;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto  key   = keys(midi.inv_map);
-    //    //cc-id, path, min, max
-//#define MAX_MIDI 32
-    //    rtosc_arg_t args[MAX_MIDI*4];
-    //    char        argt[MAX_MIDI*4+1] = {};
-    //    int j=0;
-    //    for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
-    //        auto val = midi.inv_map[key[i]];
-    //        if(std::get<1>(val) == -1)
-    //            continue;
-    //        argt[4*j+0]   = 'i';
-    //        args[4*j+0].i = std::get<1>(val);
-    //        argt[4*j+1]   = 's';
-    //        args[4*j+1].s = key[i].c_str();
-    //        argt[4*j+2]   = 'i';
-    //        args[4*j+2].i = 0;
-    //        argt[4*j+3]   = 'i';
-    //        args[4*j+3].i = 127;
-    //        j++;
+    {"mlearn-values:", 0, 0,
+        rBegin;
+        auto &midi  = impl.midi_mapper;
+        auto  key   = keys(midi.inv_map);
+        //cc-id, path, min, max
+#define MAX_MIDI 32
+        rtosc_arg_t args[MAX_MIDI*4];
+        char        argt[MAX_MIDI*4+1] = {};
+        int j=0;
+        for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
+            auto par = midi.inv_map[key[i]];
+            if(std::get<1>(par) == -1)
+                continue;
+            auto bounds = midi.getBounds(key[i].c_str());
+            argt[4*j+0]   = 'i';
+            args[4*j+0].i = std::get<1>(par);
+            argt[4*j+1]   = 's';
+            args[4*j+1].s = key[i].c_str();
+            argt[4*j+2]   = 'f';
+            args[4*j+2].f = std::get<0>(bounds);
+            argt[4*j+3]   = 'f';
+            args[4*j+3].f = std::get<1>(bounds);
+            j++;
 
-    //    }
-    //    d.replyArray(d.loc, argt, args);
-//#undef  MAX_MIDI
-    //    rEnd},
-    //{"learn:s", 0, 0,
-    //    rBegin;
-    //    string addr = rtosc_argument(msg, 0).s;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto map    = midi.getMidiMappingStrings();
-    //    if(map.find(addr) != map.end())
-    //        midi.map(addr.c_str(), false);
-    //    else
-    //        midi.map(addr.c_str(), true);
-    //    rEnd},
-    //{"unlearn:s", 0, 0,
-    //    rBegin;
-    //    string addr = rtosc_argument(msg, 0).s;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto map    = midi.getMidiMappingStrings();
-    //    midi.unMap(addr.c_str(), false);
-    //    midi.unMap(addr.c_str(), true);
-    //    rEnd},
+        }
+        d.replyArray(d.loc, argt, args);
+#undef  MAX_MIDI
+        rEnd},
+    {"mlearn:s", 0, 0,
+        rBegin;
+        string addr = rtosc_argument(msg, 0).s;
+        auto &midi  = impl.midi_mapper;
+        auto map    = midi.getMidiMappingStrings();
+        if(map.find(addr) != map.end())
+            midi.map(addr.c_str(), false);
+        else
+            midi.map(addr.c_str(), true);
+        rEnd},
+    {"munlearn:s", 0, 0,
+        rBegin;
+        string addr = rtosc_argument(msg, 0).s;
+        auto &midi  = impl.midi_mapper;
+        auto map    = midi.getMidiMappingStrings();
+        midi.unMap(addr.c_str(), false);
+        midi.unMap(addr.c_str(), true);
+        rEnd},
     //drop this message into the abyss
     {"ui/title:", 0, 0, [](const char *, RtData &) {}},
-    {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
+    {"quit:", rDoc("Stops the Zynaddsubfx process"),
+     0, [](const char *, RtData&) {Pexitprogram = 1;}},
     // may only be called when Master is not being run
     {"change-synth:iiit", 0, 0,
         rBegin
@@ -1549,6 +1859,22 @@ static rtosc::Ports middwareSnoopPorts = {
     }
 };
 
+static rtosc::MergePorts middwareSnoopPorts =
+{
+    &nonRtParamPorts,
+    &middwareSnoopPortsWithoutNonRtParams
+};
+
+const rtosc::MergePorts allPorts =
+{
+    // order is important: params should be queried on Master first
+    // (because MiddleWare often just redirects, hiding the metadata)
+    &Master::ports,
+    &middwareSnoopPorts
+};
+const rtosc::Ports& getNonRtParamPorts() { return nonRtParamPorts; }
+const rtosc::MergePorts& MiddleWare::getAllPorts() { return allPorts; }
+
 static rtosc::Ports middlewareReplyPorts = {
     {"echo:ss", 0, 0,
         rBegin;
@@ -1566,8 +1892,8 @@ static rtosc::Ports middlewareReplyPorts = {
     {"request-memory:", 0, 0,
         rBegin;
         //Generate out more memory for the RT memory pool
-        //5MBi chunk
-        size_t N  = 5*1024*1024;
+        //8MBi chunk
+        size_t N  = 8*1024*1024;
         void *mem = malloc(N);
         impl.uToB->write("/add-rt-memory", "bi", sizeof(void*), &mem, N);
         rEnd},
@@ -1576,8 +1902,15 @@ static rtosc::Ports middlewareReplyPorts = {
         Bank &bank        = impl.master->bank;
         const int part    = rtosc_argument(msg, 0).i;
         const int program = rtosc_argument(msg, 1).i + 128*bank.bank_lsb;
-        impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master, d);
-        impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s", impl.master->bank.ins[program].name.c_str());
+        if (program >= BANK_SIZE) {
+            fprintf(stderr, "bank:program number %d:%d is out of range.",
+                    program >> 7, program & 0x7f);
+            return;
+        }
+        const char *fn  = impl.master->bank.ins[program].filename.c_str();
+        impl.loadPart(part, fn, impl.master, d);
+        impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s",
+                         fn ? impl.master->bank.ins[program].name.c_str() : "");
         rEnd},
     {"setbank:c", 0, 0,
         rBegin;
@@ -1589,6 +1922,10 @@ static rtosc::Ports middlewareReplyPorts = {
         rBegin;
         if(impl.recording_undo)
             impl.undo.recordEvent(msg);
+        rEnd},
+    {"midi-use-CC:i", 0, 0,
+        rBegin;
+        impl.midi_mapper.useFreeID(rtosc_argument(msg, 0).i);
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
@@ -1602,7 +1939,7 @@ static rtosc::Ports middlewareReplyPorts = {
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     Config* config, int preferrred_port)
-    :parent(mw), config(config), ui(nullptr), synth(std::move(synth_)),
+    :parent(mw), config(config), ui{nullptr,nullptr}, synth(std::move(synth_)),
     presetsstore(*config), autoSave(-1, [this]() {
             auto master = this->master;
             this->doReadOnlyOp([master](){
@@ -1614,8 +1951,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 {
     bToU = new rtosc::ThreadLink(4096*2*16,1024/16);
     uToB = new rtosc::ThreadLink(4096*2*16,1024/16);
-    //midi_mapper.base_ports = &Master::ports;
-    //midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
+    midi_mapper.base_ports = &Master::ports;
+    midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
     if(preferrred_port != -1)
         server = lo_server_new_with_proto(to_s(preferrred_port).c_str(),
                                           LO_UDP, liblo_error_cb);
@@ -1630,7 +1967,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 
 
     //dummy callback for starters
-    cb = [](void*, const char*){};
+    for(cb_t& uicb : cb)
+        uicb = [](void*, const char*){};
     idle = 0;
     idle_ptr = 0;
 
@@ -1666,8 +2004,18 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     offline = false;
 }
 
+void MiddleWareImpl::discardAllbToUButHandleFree()
+{
+    while(bToU->hasNext()) {
+        const char *rtmsg = bToU->read();
+        if(!strcmp(rtmsg, "/free"))
+                bToUhandle(rtmsg);
+    }
+}
+
 MiddleWareImpl::~MiddleWareImpl(void)
 {
+    discardAllbToUButHandleFree();
 
     if(server)
         lo_server_free(server);
@@ -1693,8 +2041,8 @@ void zyn::MiddleWareImpl::recreateMinimalMaster()
  *   1) Middleware sends /freeze_state to backend
  *   2) Middleware waits on /state_frozen from backend
  *      All intervening commands are held for out of order execution
- *   3) Aquire memory
- *      At this time by the memory barrier we are guarenteed that all old
+ *   3) Acquire memory
+ *      At this time by the memory barrier we are guaranteed that all old
  *      writes are done and assuming the freezing logic is sound, then it is
  *      impossible for any other parameter to change at this time
  *   3) Middleware performs saving operation
@@ -1714,20 +2062,15 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     assert(uToB);
     uToB->write("/freeze_state","");
 
-    std::list<const char *> fico;
     int tries = 0;
     while(tries++ < 10000) {
-        if(!bToU->hasNext()) {
+        if(!bToU->hasNextLookahead()) {
             os_usleep(500);
             continue;
         }
-        const char *msg = bToU->read();
+        const char *msg = bToU->read_lookahead();
         if(!strcmp("/state_frozen", msg))
             break;
-        size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
-        char *save_buf = new char[bytes];
-        memcpy(save_buf, msg, bytes);
-        fico.push_back(save_buf);
     }
 
     assert(tries < 10000);//if this happens, the backend must be dead
@@ -1739,10 +2082,6 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 
     //Now to resume normal operations
     uToB->write("/thaw_state","");
-    for(auto x:fico) {
-        uToB->raw_write(x);
-        delete [] x;
-    }
 }
 
 //Offline detection code:
@@ -1829,29 +2168,20 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     assert(uToB);
     uToB->write("/freeze_state","");
 
-    std::list<const char *> fico;
     int tries = 0;
     while(tries++ < 2000) {
-        if(!bToU->hasNext()) {
+        if(!bToU->hasNextLookahead()) {
             os_usleep(500);
             continue;
         }
-        const char *msg = bToU->read();
+        const char *msg = bToU->read_lookahead();
         if(!strcmp("/state_frozen", msg))
             break;
-        size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
-        char *save_buf = new char[bytes];
-        memcpy(save_buf, msg, bytes);
-        fico.push_back(save_buf);
     }
 
     if(canfail) {
         //Now to resume normal operations
         uToB->write("/thaw_state","");
-        for(auto x:fico) {
-            uToB->raw_write(x);
-            delete [] x;
-        }
         return false;
     }
 
@@ -1864,21 +2194,18 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
 
     //Now to resume normal operations
     uToB->write("/thaw_state","");
-    for(auto x:fico) {
-        uToB->raw_write(x);
-        delete [] x;
-    }
     return true;
 }
 
 void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 {
-    //Always send to the local UI
+    //Always send to the local UIs
     sendToRemote(rtmsg, "GUI");
+    sendToRemote(rtmsg, "GUI2");
 
     //Send to remote UI if there's one listening
     for(auto rem:known_remotes)
-        if(rem != "GUI")
+        if(rem != "GUI" && rem != "GUI2")
             sendToRemote(rtmsg, rem);
 
     broadcast = false;
@@ -1886,15 +2213,18 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
-    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, -1)) {
-        printf("[Warning] Invalid message in sendToRemote <%s>...\n", rtmsg);
+    if(!rtmsg || rtmsg[0] != '/' || !rtosc_message_length(rtmsg, (std::numeric_limits<size_t>::max)())) {
+        printf("[Warning] Invalid message in sendToRemote <%s, %s>...\n",
+               rtmsg, dest.c_str());
         return;
     }
 
     //printf("sendToRemote(%s:%s,%s)\n", rtmsg, rtosc_argument_string(rtmsg),
     //        dest.c_str());
     if(dest == "GUI") {
-        cb(ui, rtmsg);
+        cb[0](ui[0], rtmsg);
+    } else if(dest == "GUI2") {
+        cb[1](ui[1], rtmsg);
     } else if(!dest.empty()) {
         lo_message msg  = lo_message_deserialise((void*)rtmsg,
                 rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
@@ -1905,8 +2235,8 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 
         //Send to known url
         lo_address addr = lo_address_new_from_url(dest.c_str());
-        if(addr)
-            lo_send_message(addr, rtmsg, msg);
+        if(addr && server)
+            lo_send_message_from(addr, server, rtmsg, msg);
         lo_address_free(addr);
         lo_message_free(msg);
     }
@@ -1924,12 +2254,12 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
 
-    //Dump Incomming Events For Debugging
+    //Dump Incoming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
-        fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',
+        fprintf(stdout, "frontend[%c]: '%s'<%s>", forward?'f':broadcast?'b':'N',
                 rtmsg, rtosc_argument_string(rtmsg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     //Activity dot
@@ -1948,8 +2278,8 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     if(d.matches == 0) {
         if(forward) {
             forward = false;
-            handleMsg(rtmsg);
-        } if(broadcast)
+            handleMsg(rtmsg, true);
+        } else if(broadcast)
             broadcastToRemote(rtmsg);
         else
             sendToCurrentRemote(rtmsg);
@@ -1976,21 +2306,11 @@ void MiddleWareImpl::kitEnable(const char *msg)
     else
         return;
 
-    const char *tmp = strstr(msg, "part");
-
-    if(tmp == NULL)
-        return;
-
-    const int part = atoi(tmp+4);
-
-    tmp = strstr(msg, "kit");
-
-    if(tmp == NULL)
-        return;
-
-    const int kit = atoi(tmp+3);
-
-    kitEnable(part, kit, type);
+    int part, kit;
+    bool res = idsFromMsg(msg, &part, &kit, nullptr);
+    assert(res);
+    if(res)
+        kitEnable(part, kit, type);
 }
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
@@ -2022,8 +2342,39 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
 /*
  * Handle all messages traveling to the realtime side.
  */
-void MiddleWareImpl::handleMsg(const char *msg)
+void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 {
+    // handle path-search
+    if(!msg_comes_from_realtime)
+    {
+        if(!strcmp(msg, "/path-search") &&
+            (!strcmp("ss",  rtosc_argument_string(msg)) ||
+             !strcmp("ssT", rtosc_argument_string(msg)) ) )
+        {
+            constexpr bool debug_path_search = false;
+            if(debug_path_search) {
+                fprintf(stderr, "MW: path-search: %s, %s\n",
+                        rtosc_argument(msg, 0).s, rtosc_argument(msg, 1).s);
+            }
+            bool reply_with_query = rtosc_narguments(msg) == 3;
+
+            char reply_buffer[1024*20];
+            std::size_t length =
+                rtosc::path_search(MiddleWare::getAllPorts(), msg, 128,
+                                   reply_buffer, sizeof(reply_buffer),
+                                   rtosc::path_search_opts::sorted_and_unique_prefix,
+                                   reply_with_query);
+            if(length) {
+                sendToRemote(reply_buffer, parent->activeUrl());
+            }
+            else {
+                if(debug_path_search)
+                    fprintf(stderr, "  -> no reply!\n");
+            }
+            return;
+        }
+    }
+
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
@@ -2036,8 +2387,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     if(strcmp("/get-vu", msg) && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-        fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "middleware: '%s':%s", msg, rtosc_argument_string(msg));
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     const char *last_path = strrchr(msg, '/');
@@ -2052,12 +2403,26 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     //A message unmodified by snooping
     if(d.matches == 0 || d.forwarded) {
-        //if(strcmp("/get-vu", msg)) {
-        //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
-        //}
-        uToB->raw_write(msg);
+        if(msg_comes_from_realtime) {
+            // don't reply the same msg to realtime - avoid cycles
+            //printf("Message from RT will not be replied to RT: <%s:%s>...\n",
+            //       msg, rtosc_argument_string(msg));
+        } else {
+            //if(strcmp("/get-vu", msg)) {
+            //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
+            //}
+            uToB->raw_write(msg);
+        }
     } else {
         //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
+    }
+
+    // now handle all chained messages
+    while(!msgsToHandle.empty())
+    {
+        std::vector<char> front = msgsToHandle.front();
+        msgsToHandle.pop();
+        handleMsg(front.data());
     }
 }
 
@@ -2114,7 +2479,7 @@ void MiddleWare::enableAutoSave(int interval_sec)
     impl->autoSave.dt = interval_sec;
 }
 
-int MiddleWare::checkAutoSave(void)
+int MiddleWare::checkAutoSave(void) const
 {
     //save spec zynaddsubfx-PID-autosave.xmz
     const std::string home     = getenv("HOME");
@@ -2181,10 +2546,11 @@ void MiddleWare::doReadOnlyOp(std::function<void()> fn)
     impl->doReadOnlyOp(fn);
 }
 
-void MiddleWare::setUiCallback(void(*cb)(void*,const char *), void *ui)
+void MiddleWare::setUiCallback(std::size_t gui_id, void(*cb)(void*,const char *), void *ui)
 {
-    impl->cb = cb;
-    impl->ui = ui;
+    assert(gui_id < sizeof(impl->cb)/sizeof(impl->cb[0]));
+    impl->cb[gui_id] = cb;
+    impl->ui[gui_id] = ui;
 }
 
 void MiddleWare::setIdleCallback(void(*cb)(void*), void *ptr)
@@ -2219,6 +2585,39 @@ void MiddleWare::transmitMsg_va(const char *path, const char *args, va_list va)
         fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
+void MiddleWare::transmitMsgGui(std::size_t gui_id, const char *msg)
+{
+    if(gui_id == 0 && activeUrl() != "GUI") {
+        transmitMsg("/echo", "ss", "OSC_URL", "GUI");
+        activeUrl("GUI");
+    } else if(gui_id == 1 && activeUrl() != "GUI2") {
+        transmitMsg("/echo", "ss", "OSC_URL", "GUI2");
+        activeUrl("GUI2");
+    }
+    transmitMsg(msg);
+}
+
+void MiddleWare::transmitMsgGui(std::size_t gui_id, const char *path, const char *args, ...)
+{
+    char buffer[1024];
+    va_list va;
+    va_start(va,args);
+    if(rtosc_vmessage(buffer,1024,path,args,va))
+        transmitMsgGui(gui_id, buffer);
+    else
+        fprintf(stderr, "Error in transmitMsgGui(...)\n");
+    va_end(va);
+}
+
+void MiddleWare::transmitMsgGui_va(std::size_t gui_id, const char *path, const char *args, va_list va)
+{
+    char buffer[1024];
+    if(rtosc_vmessage(buffer, 1024, path, args, va))
+        transmitMsgGui(gui_id, buffer);
+    else
+        fprintf(stderr, "Error in transmitMsgGui(va)n");
+}
+
 void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
 {
     auto *mem = impl->multi_thread_source.alloc();
@@ -2233,6 +2632,7 @@ void MiddleWare::messageAnywhere(const char *path, const char *args, ...)
         fprintf(stderr, "Middleware::messageAnywhere message too big...\n");
         impl->multi_thread_source.free(mem);
     }
+    va_end(va);
 }
 
 
@@ -2246,7 +2646,12 @@ void MiddleWare::pendingSetProgram(int part, int program)
     impl->bToU->write("/setprogram", "cc", part, program);
 }
 
-std::string MiddleWare::activeUrl(void)
+std::string zyn::MiddleWare::getProgramName(int program) const
+{
+    return impl->master->bank.ins[program].name;
+}
+
+std::string MiddleWare::activeUrl(void) const
 {
     return impl->last_url;
 }
@@ -2261,12 +2666,26 @@ const SYNTH_T &MiddleWare::getSynth(void) const
     return impl->synth;
 }
 
-const char* MiddleWare::getServerAddress(void) const
+char* MiddleWare::getServerAddress(void) const
 {
     if(impl->server)
         return lo_server_get_url(impl->server);
     else
-        return "NULL";
+        return nullptr;
+}
+
+char* MiddleWare::getServerPort(void) const
+{
+    char* addr = getServerAddress();
+    char* result;
+    if(addr)
+    {
+        result = lo_url_get_port(addr);
+        free(addr);
+    }
+    else
+        result = nullptr;
+    return result;
 }
 
 const PresetsStore& MiddleWare::getPresetsStore() const
@@ -2291,10 +2710,16 @@ void MiddleWare::switchMaster(Master* new_master)
 
     if(impl->master->hasMasterCb())
     {
+        impl->master->setMasterSwitchUpcoming();
         // inform the realtime thread about the switch
         // this will be done by calling the mastercb
         transmitMsg("/switch-master", "b", sizeof(Master*), &new_master);
     }
+}
+
+void MiddleWare::discardAllbToUButHandleFree()
+{
+    impl->discardAllbToUButHandleFree();
 }
 
 }

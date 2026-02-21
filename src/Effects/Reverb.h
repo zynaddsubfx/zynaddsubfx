@@ -22,7 +22,7 @@
 namespace zyn {
 
 /**Creates Reverberation Effects*/
-class Reverb:public Effect
+class Reverb final:public Effect
 {
     public:
         Reverb(EffectParams pars);
@@ -30,6 +30,7 @@ class Reverb:public Effect
         void out(const Stereo<float *> &smp);
         void cleanup(void);
 
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;

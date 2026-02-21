@@ -47,9 +47,11 @@ static const rtosc::Ports ports = {
     rParamI(cfg.SoundBufferSize, "Size of processed audio buffer"),
     rParamI(cfg.OscilSize, "Size Of Oscillator Wavetable"),
     rToggle(cfg.SwapStereo, "Swap Left And Right Channels"),
+    rToggle(cfg.AudioOutputCompressor, "Apply Compressor to Audio Output"),
     rToggle(cfg.BankUIAutoClose, "Automatic Closing of BackUI After Patch Selection"),
     rParamI(cfg.GzipCompression, "Level of Gzip Compression For Save Files"),
     rParamI(cfg.Interpolation, "Level of Interpolation, Linear/Cubic"),
+    rToggle(cfg.SaveFullXml, "Include Disabled parts in save"),
     {"cfg.presetsDirList", rDoc("list of preset search directories"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
@@ -139,7 +141,7 @@ static const rtosc::Ports ports = {
             d.broadcast(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
         }},
     {"clear-favorites:", rDoc("Clear favorite directories"), 0,
-        [](const char *msg, rtosc::RtData &d) {
+        [](const char *, rtosc::RtData &d) {
             Config &c = *(Config*)d.obj;
             for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i)
                 c.cfg.favoriteList[i] = "";
@@ -158,7 +160,7 @@ static const rtosc::Ports ports = {
 
         }},
     {"favorites:", /*rProp(parameter)*/ 0, 0,
-        [](const char *msg, rtosc::RtData &d)
+        [](const char *, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
             char        *argt = new char[MAX_BANK_ROOT_DIRS+1];
@@ -192,7 +194,8 @@ void Config::init()
     cfg.SampleRate      = 44100;
     cfg.SoundBufferSize = 256;
     cfg.OscilSize  = 1024;
-    cfg.SwapStereo = 0;
+    cfg.SwapStereo = false;
+    cfg.AudioOutputCompressor = 0;
 
     cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
     snprintf(cfg.oss_devs.linux_wave_out, MAX_STRING_SIZE, "/dev/dsp");
@@ -202,13 +205,14 @@ void Config::init()
     cfg.WindowsWaveOutId = 0;
     cfg.WindowsMidiInId  = 0;
 
-    cfg.BankUIAutoClose = 0;
+    cfg.BankUIAutoClose = false;
 
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
-    cfg.CheckPADsynth = 1;
-    cfg.IgnoreProgramChange = 0;
+    cfg.SaveFullXml = false;
+    cfg.CheckPADsynth = true;
+    cfg.IgnoreProgramChange = false;
 
     cfg.UserInterfaceMode = 0;
     cfg.VirKeybLayout     = 1;
@@ -241,7 +245,7 @@ void Config::init()
 #endif
         cfg.bankRootDirList[3] = "banks";
 #ifdef ZYN_DATADIR
-        cfg.bankRootDirList[4] = ZYN_DATADIR "/banks";
+        cfg.bankRootDirList[4] = "$ZYN_DATADIR/banks";
 #else
         cfg.bankRootDirList[4] = "/usr/share/zynaddsubfx/banks";
         cfg.bankRootDirList[5] = "/usr/local/share/zynaddsubfx/banks";
@@ -258,7 +262,7 @@ void Config::init()
 #endif
         cfg.presetsDirList[2] = "presets";
 #ifdef ZYN_DATADIR
-        cfg.presetsDirList[3] = ZYN_DATADIR "/presets";
+        cfg.presetsDirList[3] = "$ZYN_DATADIR/presets";
 #else
         cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
         cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
@@ -316,14 +320,18 @@ void Config::readConfig(const char *filename)
                                       cfg.OscilSize,
                                       MAX_AD_HARMONICS * 2,
                                       131072);
-        cfg.SwapStereo = xmlcfg.getpar("swap_stereo",
-                                       cfg.SwapStereo,
+        cfg.SwapStereo = (bool) xmlcfg.getpar("swap_stereo",
+                                              cfg.SwapStereo,
+                                              0,
+                                              1);
+        cfg.AudioOutputCompressor = xmlcfg.getpar("audio_output_compressor",
+                                       cfg.AudioOutputCompressor,
                                        0,
                                        1);
-        cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
-                                            cfg.BankUIAutoClose,
-                                            0,
-                                            1);
+        cfg.BankUIAutoClose = (bool) xmlcfg.getpar("bank_window_auto_close",
+                                                   cfg.BankUIAutoClose,
+                                                   0,
+                                                   1);
 
         cfg.GzipCompression = xmlcfg.getpar("gzip_compression",
                                             cfg.GzipCompression,
@@ -336,15 +344,20 @@ void Config::readConfig(const char *filename)
                                            0,
                                            1);
 
-        cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
-                                          cfg.CheckPADsynth,
-                                          0,
-                                          1);
+        cfg.SaveFullXml  = (bool) xmlcfg.getpar("SaveFullXml",
+                                                cfg.SaveFullXml,
+                                                0,
+                                                1);
 
-        cfg.IgnoreProgramChange = xmlcfg.getpar("ignore_program_change",
-                                          cfg.IgnoreProgramChange,
-                                          0,
-                                          1);
+        cfg.CheckPADsynth = (bool) xmlcfg.getpar("check_pad_synth",
+                                                 cfg.CheckPADsynth,
+                                                 0,
+                                                 1);
+
+        cfg.IgnoreProgramChange = (bool) xmlcfg.getpar("ignore_program_change",
+                                                       cfg.IgnoreProgramChange,
+                                                       0,
+                                                       1);
 
 
         cfg.UserInterfaceMode = xmlcfg.getpar("user_interface_mode",
@@ -369,7 +382,7 @@ void Config::readConfig(const char *filename)
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
             }
-        
+
         //Get favs
         for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
             if(xmlcfg.enterbranch("FAVSROOT", i)) {
@@ -411,6 +424,7 @@ void Config::saveConfig(const char *filename) const
     xmlcfg->addpar("sound_buffer_size", cfg.SoundBufferSize);
     xmlcfg->addpar("oscil_size", cfg.OscilSize);
     xmlcfg->addpar("swap_stereo", cfg.SwapStereo);
+    xmlcfg->addpar("audio_output_compressor", cfg.AudioOutputCompressor);
     xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
 
     xmlcfg->addpar("gzip_compression", cfg.GzipCompression);
@@ -437,7 +451,7 @@ void Config::saveConfig(const char *filename) const
             xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);
             xmlcfg->endbranch();
         }
-        
+
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!cfg.favoriteList[i].empty()) {
             xmlcfg->beginbranch("FAVSROOT", i);
@@ -446,6 +460,7 @@ void Config::saveConfig(const char *filename) const
         }
 
     xmlcfg->addpar("interpolation", cfg.Interpolation);
+    xmlcfg->addpar("SaveFullXml", cfg.SaveFullXml);
 
     //linux stuff
     xmlcfg->addparstr("linux_oss_wave_out_dev", cfg.oss_devs.linux_wave_out);

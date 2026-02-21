@@ -33,7 +33,6 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
-#define EXPAND(x) x
 #define rObject ADnoteVoiceParam
 
 #undef rChangeCb
@@ -43,8 +42,8 @@ static const Ports voicePorts = {
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->OscilSmp == NULL) return;
-        data.obj = obj->OscilSmp;
+            if(obj->OscilGn == NULL) return;
+        data.obj = obj->OscilGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -53,8 +52,8 @@ static const Ports voicePorts = {
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->FMSmp == NULL) return;
-        data.obj = obj->FMSmp;
+            if(obj->FmGn == NULL) return;
+        data.obj = obj->FmGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -71,7 +70,7 @@ static const Ports voicePorts = {
     rRecurp(VoiceFilter,    "Optional Voice Filter"),
 
 //    rToggle(Enabled,       rShort("enable"), "Voice Enable"),
-    rParamI(Unison_size, rShort("size"), rMap(min, 0), rMap(max, 50),
+    rParamI(Unison_size, rShort("size"), rMap(min, 1), rMap(max, 50),
         rDefault(1), "Number of subvoices"),
     rParamZyn(Unison_phase_randomness, rShort("ph.rnd."), rDefault(127),
         "Phase Randomness"),
@@ -87,7 +86,7 @@ static const Ports voicePorts = {
             rOptions(none, random, 50%, 33%, 25%), rDefault(none),
             "Subvoice Phases"),
     rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC),
-        rDefault(Sound), "Type of Sound"),
+        rLinear(0,127), rDefault(Sound), "Type of Sound"),
     rParamZyn(PDelay,        rShort("delay"), rDefault(0),
         "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), rDefault(true),
@@ -102,7 +101,8 @@ static const Ports voicePorts = {
         "FM Oscillator Phase"),
     rToggle(Pfilterbypass,   rShort("bypass"), rDefault(false),
         "Filter Bypass"),
-
+    rToggle(PfilterFcCtlBypass,   rShort("CtlBypass"), rDefault(false),
+        "Filter Fc Controll Bypass"),
     //Freq Stuff
     rToggle(Pfixedfreq,      rShort("fixed"),  rDefault(false),
         "If frequency is fixed"),
@@ -117,7 +117,7 @@ static const Ports voicePorts = {
         rDefault(8192),           "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"),     rDefault(0),
         "Coarse Detune"),
-    rParamZyn(PDetuneType,        rShort("type"),
+    rOption(PDetuneType,        rShort("type"),
         rOptions(L35cents, L10cents, E100cents, E1200cents), rDefault(L35cents),
         "Magnitude of Detune"),
     rToggle(PFreqEnvelopeEnabled, rShort("enable"),     rDefault(false),
@@ -135,11 +135,11 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(127.0f * (1.0f + obj->volume/60.0f)));
-            else 
+            else
                 obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
         }},
-    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
-        rDoc("Part Volume"), NULL,
+    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB)
+        rDefault(-0x1.983064p+3) rLinear(-60.0f, 0.0f) rDoc("Part Volume"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -152,6 +152,8 @@ static const Ports voicePorts = {
         }},
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),
         "Signal Inverter"), //do we really need this??
+    rToggle(PAAEnabled,        rShort("enable"), rDefault(false),
+        "AntiAliasing Enable"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127),
         "Velocity Sensing"),
     rToggle(PAmpEnvelopeEnabled, rShort("enable"), rDefault(false),
@@ -171,10 +173,10 @@ static const Ports voicePorts = {
     rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64),
         "Filter Velocity Function Shape"),
 
- 
+
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
-                frequency, pulse, wave), rDefault(none), "Modulator mode"),
+                frequency, pulse, wave), rLinear(0,127), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
     rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
@@ -188,18 +190,18 @@ static const Ports voicePorts = {
             rLinear(0, 16383), rDefault(8192), "Modulator Fine Detune"),
     rParamI(PFMCoarseDetune,            rShort("coarse"), rDefault(0),
             "Modulator Coarse Detune"),
-    rParamZyn(PFMDetuneType,            rShort("type"),
-              rOptions(L35cents, L10cents, E100cents, E1200cents),
-              rDefault(L35cents),
-              "Modulator Detune Magnitude"),
+    rOption(PFMDetuneType,            rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            rDefault(L35cents),
+            "Modulator Detune Magnitude"),
     rToggle(PFMFixedFreq,               rShort("fixed"),  rDefault(false),
             "Modulator Frequency Fixed"),
     rToggle(PFMFreqEnvelopeEnabled,  rShort("enable"), rDefault(false),
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
-
-
+    rToggle(PsyncEnabled,               rShort("sync"),  rDefault(false),
+            "Oscillator Hard Sync"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
@@ -342,7 +344,7 @@ static const Ports globalPorts = {
     rParamI(PDetune,              rShort("fine"),
             rLinear(0, 16383), rDefault(8192), "Fine Detune"),
     rParamI(PCoarseDetune,   rShort("coarse"), rDefault(0), "Coarse Detune"),
-    rParamZyn(PDetuneType,   rShort("type"),
+    rOption(PDetuneType,   rShort("type"),
               rOptions(L35cents, L10cents, E100cents, E1200cents),
               rDefault(L10cents),
               "Detune Scaling Type"),
@@ -362,9 +364,9 @@ static const Ports globalPorts = {
         {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
-                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412)/60.0f)));
-            else 
-                obj->Volume = 12.0412 - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
+                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412f)/60.0f)));
+            else
+                obj->Volume = 12.0412f - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
@@ -443,13 +445,15 @@ static const Ports globalPorts = {
 #define rChangeCb obj->last_update_timestamp = obj->time->time();
 static const Ports adPorts = {//XXX 16 should not be hard coded
     rSelf(ADnoteParameters),
-    rPaste,
-    rArrayPaste,
-    rRecurs(VoicePar, NUM_VOICES),
+    rPasteRt,
+    rArrayPasteRt,
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
      rProp(parameter) rShort("enable") rDoc("Voice Enable")
      rDefault([true false false ...]),
      NULL, rArrayTCbMember(VoicePar, Enabled)},
+    // this must come after "VoicePar#.../..." ports, so rtosc::apropos finds
+    // the more exact path first (bug in apropos)
+    rRecurs(VoicePar, NUM_VOICES, "Voice Parameters"),
     rRecur(GlobalPar, "Adnote Parameters"),
 };
 #undef rChangeCb
@@ -477,16 +481,16 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
 ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
-    FreqEnvelope = new EnvelopeParams(0, 0, time_);
+    FreqEnvelope = new EnvelopeParams(0, false, time_);
     FreqEnvelope->init(ad_global_freq);
     FreqLfo = new LFOParams(ad_global_freq, time_);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
     AmpLfo = new LFOParams(ad_global_amp, time_);
 
     GlobalFilter   = new FilterParams(ad_global_filter, time_);
-    FilterEnvelope = new EnvelopeParams(0, 1, time_);
+    FilterEnvelope = new EnvelopeParams(0, true, time_);
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
@@ -506,7 +510,7 @@ void ADnoteParameters::defaults()
 void ADnoteGlobalParam::defaults()
 {
     /* Frequency Global Parameters */
-    PStereo = 1; //stereo
+    PStereo = true; //stereo
     PDetune = 8192; //zero
     PCoarseDetune = 0;
     PDetuneType   = 1;
@@ -525,7 +529,7 @@ void ADnoteGlobalParam::defaults()
     PPunchTime     = 60;
     PPunchStretch  = 64;
     PPunchVelocitySensing = 72;
-    Hrandgrouping = 0;
+    Hrandgrouping = false;
 
     /* Filter Global Parameters*/
     PFilterVelocityScale = 0;
@@ -557,34 +561,36 @@ void ADnoteVoiceParam::defaults()
     Unison_phase_randomness = 127;
 
     Type = 0;
-    Pfixedfreq    = 0;
+    Pfixedfreq    = false;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz     = 64;
-    Presonance    = 1;
-    Pfilterbypass = 0;
+    Presonance    = true;
+    Pfilterbypass = false;
+    PfilterFcCtlBypass = false;
     Pextoscil     = -1;
     PextFMoscil   = -1;
     Poscilphase   = 64;
     PFMoscilphase = 64;
     PDelay                    = 0;
     volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
-    PVolumeminus              = 0;
+    PVolumeminus              = false;
+    PAAEnabled                = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
     PCoarseDetune             = 0;
     PDetuneType               = 0;
-    PFreqLfoEnabled           = 0;
-    PFreqEnvelopeEnabled      = 0;
-    PAmpEnvelopeEnabled       = 0;
-    PAmpLfoEnabled            = 0;
+    PFreqLfoEnabled           = false;
+    PFreqEnvelopeEnabled      = false;
+    PAmpEnvelopeEnabled       = false;
+    PAmpLfoEnabled            = false;
     PAmpVelocityScaleFunction = 127;
-    PFilterEnabled            = 0;
-    PFilterEnvelopeEnabled    = 0;
-    PFilterLfoEnabled         = 0;
+    PFilterEnabled            = false;
+    PFilterEnvelopeEnabled    = false;
+    PFilterLfoEnabled         = false;
     PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
-    PFMEnabled                = 0;
+    PFMEnabled                = FMTYPE::NONE;
     PFMFixedFreq              = false;
 
     //I use the internal oscillator (-1)
@@ -595,12 +601,13 @@ void ADnoteVoiceParam::defaults()
     PFMDetune       = 8192;
     PFMCoarseDetune = 0;
     PFMDetuneType   = 0;
-    PFMFreqEnvelopeEnabled   = 0;
-    PFMAmpEnvelopeEnabled    = 0;
+    PFMFreqEnvelopeEnabled   = false;
+    PFMAmpEnvelopeEnabled    = false;
     PFMVelocityScaleFunction = 64;
+    PsyncEnabled = false;
 
-    OscilSmp->defaults();
-    FMSmp->defaults();
+    OscilGn->defaults();
+    FmGn->defaults();
 
     AmpEnvelope->defaults();
     AmpLfo->defaults();
@@ -628,27 +635,27 @@ void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
 }
 
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
-                              Resonance *Reson, const AbsTime *time)
+                              const Resonance *Reson, const AbsTime *time)
 {
-    OscilSmp = new OscilGen(synth, fft, Reson);
-    FMSmp    = new OscilGen(synth, fft, NULL);
+    OscilGn  = new OscilGen(synth, fft, Reson);
+    FmGn    = new OscilGen(synth, fft, NULL);
 
-    AmpEnvelope = new EnvelopeParams(64, 1, time);
+    AmpEnvelope = new EnvelopeParams(64, true, time);
     AmpEnvelope->init(ad_voice_amp);
     AmpLfo = new LFOParams(ad_voice_amp, time);
 
-    FreqEnvelope = new EnvelopeParams(0, 0, time);
+    FreqEnvelope = new EnvelopeParams(0, false, time);
     FreqEnvelope->init(ad_voice_freq);
     FreqLfo = new LFOParams(ad_voice_freq, time);
 
     VoiceFilter    = new FilterParams(ad_voice_filter, time);
-    FilterEnvelope = new EnvelopeParams(0, 0, time);
+    FilterEnvelope = new EnvelopeParams(0, false, time);
     FilterEnvelope->init(ad_voice_filter);
     FilterLfo = new LFOParams(ad_voice_filter, time);
 
-    FMFreqEnvelope = new EnvelopeParams(0, 0, time);
+    FMFreqEnvelope = new EnvelopeParams(0, false, time);
     FMFreqEnvelope->init(ad_voice_fm_freq);
-    FMAmpEnvelope = new EnvelopeParams(64, 1, time);
+    FMAmpEnvelope = new EnvelopeParams(64, true, time);
     FMAmpEnvelope->init(ad_voice_fm_amp);
 }
 
@@ -658,7 +665,7 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
 float ADnoteParameters::getBandwidthDetuneMultiplier() const
 {
     float bw = (GlobalPar.PBandwidth - 64.0f) / 64.0f;
-    bw = powf(2.0f, bw * powf(fabs(bw), 0.2f) * 5.0f);
+    bw = powf(2.0f, bw * powf(fabsf(bw), 0.2f) * 5.0f);
 
     return bw;
 }
@@ -673,7 +680,7 @@ float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) const
 }
 
 float ADnoteVoiceParam::getUnisonFrequencySpreadCents(void) const {
-    return powf(Unison_frequency_spread / 127.0 * 2.0f, 2.0f) * 50.0f; //cents
+    return powf(Unison_frequency_spread / 127.0f * 2.0f, 2.0f) * 50.0f; //cents
 }
 
 /*
@@ -686,8 +693,8 @@ void ADnoteParameters::KillVoice(int nvoice)
 
 void ADnoteVoiceParam::kill()
 {
-    delete OscilSmp;
-    delete FMSmp;
+    delete OscilGn;
+    delete FmGn;
 
     delete AmpEnvelope;
     delete AmpLfo;
@@ -769,11 +776,13 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
     xml.addparbool("filter_enabled", PFilterEnabled);
     xml.addparbool("filter_bypass", Pfilterbypass);
+    xml.addparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
 
-    xml.addpar("fm_enabled", PFMEnabled);
+    xml.addpar("fm_enabled", (int)PFMEnabled);
+    xml.addparbool("sync_enabled", PsyncEnabled);
 
     xml.beginbranch("OSCIL");
-    OscilSmp->add2XML(xml);
+    OscilGn->add2XML(xml);
     xml.endbranch();
 
 
@@ -849,8 +858,8 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         xml.endbranch();
     }
 
-    if((PFMEnabled != 0) || (fmoscilused != 0)
-       || (!xml.minimal)) {
+    if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
+       || (!xml.minimal) || PsyncEnabled) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
@@ -880,8 +889,9 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
             xml.endbranch();
         }
 
+
         xml.beginbranch("OSCIL");
-        FMSmp->add2XML(xml);
+        FmGn->add2XML(xml);
         xml.endbranch();
 
         xml.endbranch();
@@ -975,10 +985,10 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume = 12.0412 - 60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412f + 60.0f * (vol / 96.0f - 1.0f);
         } else if (upgrade_3_0_5) {
             printf("file version less than 3.0.5\n");
-            Volume = 12.0412 + xml.getparreal("volume", Volume);
+            Volume = 12.0412f + xml.getparreal("volume", Volume);
         } else {
             Volume = xml.getparreal("volume", Volume);
         }
@@ -992,8 +1002,8 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
         PPunchStretch  = xml.getpar127("punch_stretch", PPunchStretch);
         PPunchVelocitySensing = xml.getpar127("punch_velocity_sensing",
                                                PPunchVelocitySensing);
-        Hrandgrouping = xml.getpar127("harmonic_randomness_grouping",
-                                       Hrandgrouping);
+        Hrandgrouping = (bool) xml.getpar("harmonic_randomness_grouping",
+                                           Hrandgrouping, 0, 1);
 
         if(xml.enterbranch("AMPLITUDE_ENVELOPE")) {
             AmpEnvelope->getfromXML(xml);
@@ -1121,10 +1131,11 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMoscilphase);
     copy(PFilterEnabled);
     copy(Pfilterbypass);
+    copy(PfilterFcCtlBypass);
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
-    RCopy(OscilSmp);
+    RCopy(OscilGn);
 
 
     copy(PPanning);
@@ -1180,10 +1191,10 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMDetuneType);
     copy(PFMFreqEnvelopeEnabled);
 
-
     RCopy(FMFreqEnvelope);
+    copy(PsyncEnabled);
 
-    RCopy(FMSmp);
+    RCopy(FmGn);
 
     if ( time ) {
         last_update_timestamp = time->time();
@@ -1234,7 +1245,10 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
 void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 {
     Enabled     = xml.getparbool("enabled", 0);
-    Unison_size = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_in_file = xml.getpar127("unison_size", Unison_size);
+    unsigned char unison_min = std::atoi(ports["Unison_size"]->meta()["min"]);
+    unsigned char unison_max = std::atoi(ports["Unison_size"]->meta()["max"]);
+    Unison_size = std::min(std::max(unison_in_file, unison_min), unison_max);
     Unison_frequency_spread = xml.getpar127("unison_frequency_spread",
                                              Unison_frequency_spread);
     Unison_stereo_spread = xml.getpar127("unison_stereo_spread",
@@ -1258,10 +1272,12 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMoscilphase  = xml.getpar127("oscil_fm_phase", PFMoscilphase);
     PFilterEnabled = xml.getparbool("filter_enabled", PFilterEnabled);
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
-    PFMEnabled     = xml.getpar127("fm_enabled", PFMEnabled);
+    PfilterFcCtlBypass  = xml.getparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
+    PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
+    PsyncEnabled   = xml.getparbool("sync_enabled", PsyncEnabled);
 
     if(xml.enterbranch("OSCIL")) {
-        OscilSmp->getfromXML(xml);
+        OscilGn->getfromXML(xml);
         xml.exitbranch();
     }
 
@@ -1273,7 +1289,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            volume    = -60.0f * ( 1.0f - vol / 127.0f);
+            volume    = 60.0f * (vol / 127.0f - 1.0f);
         } else {
             volume    = xml.getparreal("volume", volume);
         }
@@ -1388,7 +1404,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
             }
 
             if(xml.enterbranch("OSCIL")) {
-                FMSmp->getfromXML(xml);
+                FmGn->getfromXML(xml);
                 xml.exitbranch();
             }
 

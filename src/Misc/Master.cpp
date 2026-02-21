@@ -19,6 +19,7 @@
 #include "zyn-version.h"
 #include "../Misc/Stereo.h"
 #include "../Misc/Util.h"
+#include "../Misc/Sync.h"
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
@@ -57,9 +58,12 @@ static const Ports sysefxPort =
             //be ...Psysefxvol#N/part#M
             //and the number "N" is one or two digits at most
 
-            // go backto the '/'
+            // go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -68,15 +72,15 @@ static const Ports sysefxPort =
             assert(isdigit(*index_1));
             if(isdigit(index_1[-1]))
                 index_1--;
-            int ind1 = atoi(index_1);
+            int ind1 = atoi(index_1); //efx
 
             //Now get the second index like normal
             while(!isdigit(*m)) m++;
-            int ind2 = atoi(m);
+            int ind2 = atoi(m); //part
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i /*vol*/);
                 d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
@@ -89,9 +93,12 @@ static const Ports sysefsendto =
         rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same workaround as before
-            //go backto the '/'
+            //go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -136,7 +143,7 @@ static int get_next_int(const char *msg)
 }
 
 static const Ports mapping_ports = {
-    {"offset::f", rProp(parameter) rDefault(0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
+    {"offset::f", rProp(parameter) rDefault(0.0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -147,7 +154,7 @@ static const Ports mapping_ports = {
         } else
             d.reply(d.loc, "f", a.getSlotSubOffset(slot, param));
         rEnd},
-    {"gain::f", rProp(parameter) rDefault(100) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
+    {"gain::f", rProp(parameter) rDefault(100.0) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -189,7 +196,7 @@ static const Ports auto_param_ports = {
             d.broadcast(d.loc, "s", a.slots[slot].automations[param].param_path);
         }
         else
-			d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
+                        d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
     {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
@@ -233,7 +240,7 @@ static const Ports slot_ports = {
     //                              rtosc_argument(msg, 1).s,
     //                              rtosc_argument(msg, 2).T);
     //    rEnd},
-    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
+    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.f) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
         rBegin;
         int num = d.idx[0];
         if(!strcmp("f",rtosc_argument_string(msg))) {
@@ -272,7 +279,7 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
+    {"active::T:F",  rProp(parameter) rDefault(false) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
         if(rtosc_narguments(msg)) {
@@ -365,12 +372,16 @@ static const Ports automate_ports = {
                     std::swap(aa.map.control_points[k], ab.map.control_points[k]);
             }
         }
+        {
+            rtosc::AutomationMgr* ptr = &b;
+            d.reply("/free", "sb", "rtosc::AutomationMgr", sizeof(rtosc::AutomationMgr*), &ptr);
+        }
         rEnd},
 };
 
 #undef  rBegin
 #undef  rEnd
-#define rBegin [](const char *msg, RtData &d) { Master *m = (Master*)d.obj
+#define rBegin [](const char *msg, RtData &d) { (void)msg; Master *m = (Master*)d.obj
 #define rEnd }
 
 static const Ports watchPorts = {
@@ -388,6 +399,7 @@ static const Ports master_ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
+    rRecur(HDDRecorder, "HDD recorder"),
     rRecur(microtonal, "Microtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
     rArrayOption(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
@@ -464,7 +476,7 @@ static const Ports master_ports = {
                master->Volume  = master->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
                d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
            }}},
-    rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,13.3333f),
+    rParamF(Volume, rShort("volume"), rDefault(-6.67 (-0x1.aaaaacp+2)), rLinear(-40.0f,13.3333f),
              rUnit(dB), "Master Volume"),
     {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
         [](const char *msg, rtosc::RtData &d) {
@@ -476,11 +488,16 @@ static const Ports master_ports = {
             SNIP;
             sysefsendto.dispatch(msg, d);
         }},
-
-    {"noteOn:iii", rDoc("Noteon Event"), 0,
+    {"noteOn:iii:iiif", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
-            M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+            if (rtosc_narguments(m) > 3)
+                /* Manually specify the frequency as 4th argument */
+                M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i,rtosc_argument(m,3).f);
+            else
+                /* Standard MIDI noteOn */
+                M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);
+        }},
 
     {"noteOff:ii", rDoc("Noteoff Event"), 0,
         [](const char *m,RtData &d){
@@ -490,11 +507,18 @@ static const Ports master_ports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-
     {"setController:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+    {"tempo::i", rProp(parameter) rDefault(120) rShort("Tempo") rUnit(BPM) rDoc("Tempo / Beats per minute") rLinear(40, 200), 0,
+        rBegin;
+        if(!strcmp("i",rtosc_argument_string(msg))) {
+            m->time.tempo = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", m->time.tempo);
+        } else
+            d.reply(d.loc, "i", m->time.tempo);
+        rEnd},
     {"Panic:", rDoc("Stop all sound"), 0,
         [](const char *, RtData &d) {
             Master &M =  *(Master*)d.obj;
@@ -513,6 +537,13 @@ static const Ports master_ports = {
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
             M->frozenState = false;}},
+    {"midi-learn/", rDoc("MIDI Learn Classic"), &rtosc::MidiMapperRT::ports,
+        [](const char *msg, RtData &d) {
+            Master *M =  (Master*)d.obj;
+            SNIP;
+            printf("residue message = <%s>\n", msg);
+            d.obj = &M->midi;
+            rtosc::MidiMapperRT::ports.dispatch(msg,d);}},
     {"automate/", rDoc("MIDI Learn/Plugin Automation support"), &automate_ports,
         [](const char *msg, RtData &d) {
             SNIP;
@@ -553,7 +584,7 @@ static const Ports master_ports = {
                 assert(!*obj->dnd_buffer);
                 const char* var = rtosc_argument(msg, 0).s;
                 printf("receiving /last_dnd %s\n",var);
-                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size);
+                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size-1);
             }
         rBOIL_END },
     {"config/", rNoDefaults
@@ -563,18 +594,6 @@ static const Ports master_ports = {
         SNIP
             preset_ports.dispatch(msg, data);
         rBOIL_END},
-    {"HDDRecorder/preparefile:s", rDoc("Init WAV file"), 0, [](const char *msg, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.preparefile(rtosc_argument(msg, 0).s, 1);}},
-    {"HDDRecorder/start:", rDoc("Start recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.start();}},
-    {"HDDRecorder/stop:", rDoc("Stop recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.stop();}},
-    {"HDDRecorder/pause:", rDoc("Pause recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.pause();}},
     {"watch/", rDoc("Interface to grab out live synthesis state"), &watchPorts,
         rBOIL_BEGIN;
         SNIP;
@@ -582,7 +601,7 @@ static const Ports master_ports = {
         rBOIL_END},
     {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
             [](const char*,RtData&) {}},
-    {"learn:s", rProp(depricated) rDoc("MIDI Learn"), 0,
+    {"learn:s", rProp(deprecated) rDoc("MIDI Learn"), 0,
         rBegin;
         int free_slot = m->automate.free_slot();
         if(free_slot >= 0) {
@@ -627,7 +646,7 @@ class DataObj:public rtosc::RtData
         }
         virtual void reply(const char *msg) override
         {
-            if(rtosc_message_length(msg, -1) == 0)
+            if(rtosc_message_length(msg, std::numeric_limits<size_t>::max()) == 0)
                 fprintf(stderr, "Warning: Invalid Rtosc message '%s'\n", msg);
             bToU->raw_write(msg);
         }
@@ -706,6 +725,10 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
 
 void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 {
+    //Clear out old data
+    for(int i=0; i<midi.nslots; ++i)
+        midi.clearSlot(i);
+
     if(xml.enterbranch("automation")) {
         for(int i=0; i<midi.nslots; ++i) {
             auto &slot = midi.slots[i];
@@ -750,19 +773,30 @@ void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 }
 
 Master::Master(const SYNTH_T &synth_, Config* config)
-    :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
+    :HDDRecorder(synth_), time(synth_), sync(), ctl(synth_, &time),
     microtonal(config->cfg.GzipCompression), bank(config),
     automate(16,4,8),
     frozenState(false), pendingMemory(false),
     synth(synth_), gzip_compression(config->cfg.GzipCompression)
 {
+    SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
+
+    sync = new Sync();
+
+    // set default tempo
+    time.tempo = 120;
+    time.bar = 0;
+    time.beat = 0;
+    time.tick = 0.0f;
+    time.bpm = 0.0f;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
     automate.set_instance(this);
-    //midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
     automate.backend  = [this](const char *msg) {applyOscEvent(msg);};
 
     memory = new AllocatorClass();
@@ -782,19 +816,29 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         fakepeakpart[npart]  = 0;
     }
 
+
     ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
+    {
+        part[npart] = new Part(*memory, synth, time, sync, config->cfg.GzipCompression,
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
+        smoothing_part_l[npart].sample_rate( synth.samplerate );
+        smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+        smoothing_part_r[npart].sample_rate( synth.samplerate );
+        smoothing_part_r[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+    }
+
+    smoothing.sample_rate( synth.samplerate );
+    smoothing.reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time);
+        insefx[nefx] = new EffectMgr(*memory, synth, 1, &time, sync);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
+        sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time, sync);
 
     //Note Visualization
     memset(activeNotes, 0, sizeof(activeNotes));
@@ -827,6 +871,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
             this_master->mastercb(this_master->mastercb_ptr, new_master);
         }
         bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+        masterSwitchUpcoming = false;
         return false;
     } else if(!strcmp(msg, "/switch-master")) {
         // if the other stuff from load-master is needed optionally
@@ -835,6 +880,7 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
         if (hasMasterCb())
             mastercb(mastercb_ptr, new_master);
+        masterSwitchUpcoming = false;
         return false;
     }
 
@@ -842,12 +888,12 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     if(strcmp(msg, "/get-vu") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
         if(msg_id > 0)
-            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id, msg,
+            fprintf(stdout, "backend[%d]: '%s'<%s>", msg_id, msg,
                     rtosc_argument_string(msg));
         else
-            fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
+            fprintf(stdout, "backend[*]: '%s'<%s>", msg,
                     rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[0m\n", 0x1B);
     }
 
     ports.dispatch(msg, d, true);
@@ -863,18 +909,15 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     }
     if(!d.matches && !d.forwarded) {// && !ports.apropos(msg)) {
         fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
+        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'",
                 offline ? "offline" : "online",
                 uToB->peak(),
                 rtosc_argument_string(uToB->peak()));
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stderr, "%c[0m\n", 0x1B);
+        if(unknown_address_cb)
+            unknown_address_cb(unknown_address_cb_ptr, offline, uToB->peak());
     }
     else if(d.forwarded)
-        bToU->raw_write(msg);
-
-    if(d.matches == 0 && !d.forwarded)
-        fprintf(stderr, "Unknown path '%s:%s'\n", msg, rtosc_argument_string(msg));
-    if(d.forwarded)
         bToU->raw_write(msg);
 
     return true;
@@ -901,7 +944,6 @@ void Master::defaults()
     union {float f; uint32_t i;} convert;
     convert.i = 0xC0D55556;
     Volume = convert.f;
-    oldVolume = Volume;
     setPkeyshift(64);
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -937,6 +979,7 @@ void Master::defaults()
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
+        sync->notify();
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
@@ -967,15 +1010,10 @@ void Master::noteOff(char chan, note_t note)
  */
 void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
-    if(velocity) {
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-            if(chan == part[npart]->Prcvchn)
-                if(part[npart]->Penabled)
-                    part[npart]->PolyphonicAftertouch(note, velocity, keyshift);
-
-    }
-    else
-        this->noteOff(chan, note);
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if(chan == part[npart]->Prcvchn)
+            if(part[npart]->Penabled)
+                part[npart]->PolyphonicAftertouch(note, velocity);
 }
 
 /*
@@ -986,6 +1024,7 @@ void Master::setController(char chan, int type, int par)
     if(frozenState)
         return;
     automate.handleMidi(chan, type, par);
+    midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
@@ -998,8 +1037,13 @@ void Master::setController(char chan, int type, int par)
                         sysefx[parlo]->seteffectparrt(valhi, vallo);
                     break;
                 case 0x08: //Insertion Effects
-                    if(parlo < NUM_INS_EFX)
+                    if(chan == 0 && parlo < NUM_INS_EFX)
                         insefx[parlo]->seteffectparrt(valhi, vallo);
+                    else if (chan < NUM_MIDI_PARTS && parlo < NUM_PART_EFX)
+                        part[chan-1]->partefx[parlo]->seteffectparrt(valhi, vallo);
+                    break;
+                default:
+                    midi.handleCC(parhi<<7&parlo,valhi<<7&vallo, chan, true);
                     break;
             }
         }
@@ -1017,16 +1061,30 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::vuUpdate(const float *outr, const float *outl)
+/*
+ * Per note controllers
+ */
+void Master::setController(char chan, int type, note_t note, float value)
+{
+    if(frozenState)
+        return;
+
+    /* Send the controller to all part assigned to the channel */
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            part[npart]->SetController(type, note, value, keyshift);
+}
+
+void Master::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
     vu.outpeakr = 1e-12;
     for(int i = 0; i < synth.buffersize; ++i) {
-        if(fabs(outl[i]) > vu.outpeakl)
-            vu.outpeakl = fabs(outl[i]);
-        if(fabs(outr[i]) > vu.outpeakr)
-            vu.outpeakr = fabs(outr[i]);
+        if(fabsf(outl[i]) > vu.outpeakl)
+            vu.outpeakl = fabsf(outl[i]);
+        if(fabsf(outr[i]) > vu.outpeakr)
+            vu.outpeakr = fabsf(outr[i]);
     }
     if((vu.outpeakl > 1.0f) || (vu.outpeakr > 1.0f))
         vu.clipped = 1;
@@ -1050,13 +1108,13 @@ void Master::vuUpdate(const float *outr, const float *outl)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outr = part[npart]->partoutl,
-            *outl = part[npart]->partoutr;
+            float *outl2 = part[npart]->partoutl,
+                  *outr2 = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                if (fabs(outl[i]) > vuoutpeakpartl[npart])
-                    vuoutpeakpartl[npart] = fabs(outl[i]);
-                if (fabs(outr[i]) > vuoutpeakpartr[npart])
-                    vuoutpeakpartr[npart] = fabs(outr[i]);
+                if (fabsf(outl2[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabsf(outl2[i]);
+                if (fabsf(outr2[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabsf(outr2[i]);
             }
         }
         else
@@ -1104,57 +1162,61 @@ bool Master::hasMasterCb() const
     return !!mastercb;
 }
 
+void Master::setAudioCompressor(bool enabled)
+{
+    Nio::setAudioCompressor(enabled);
+}
 
 #if 0
 template <class T>
 struct def_skip
 {
-	static void skip(const char*& argptr) { argptr += sizeof(T); }
+        static void skip(const char*& argptr) { argptr += sizeof(T); }
 };
 
 template <class T>
 struct str_skip
 {
-	static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
+        static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
 };
 
 template<class T, class Display = T, template<class TMP> class SkipsizeFunc = def_skip>
 void _dump_prim_arg(const char*& argptr, std::ostream& os)
 {
-	os << ' ' << (Display)*(const T*)argptr;
-	SkipsizeFunc<T>::skip(argptr);
+        os << ' ' << (Display)*(const T*)argptr;
+        SkipsizeFunc<T>::skip(argptr);
 }
 
 void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 {
-	assert(*ptr == '/');
-	os << ptr;
+        assert(*ptr == '/');
+        os << ptr;
 
-	while(*++ptr) ; // skip address
-	while(!*++ptr) ; // skip 0s
+        while(*++ptr) ; // skip address
+        while(!*++ptr) ; // skip 0s
 
-	assert(*ptr == ',');
-	os << ' ' << (ptr + 1);
+        assert(*ptr == ',');
+        os << ' ' << (ptr + 1);
 
-	const char* argptr = ptr;
-	while(*++argptr) ; // skip type string
-	while(!*++argptr) ; // skip 0s
+        const char* argptr = ptr;
+        while(*++argptr) ; // skip type string
+        while(!*++argptr) ; // skip 0s
 
-	char c;
-	while((c = *++ptr))
-	{
-		switch(c)
-		{
-			case 'i':
-				_dump_prim_arg<int32_t>(argptr, os); break;
-			case 'c':
-				_dump_prim_arg<int32_t, char>(argptr, os); break;
-		//	case 's':
-		//		_dump_prim_arg<char, const char*>(argptr, os); break;
-			default:
-				exit(1);
-		}
-	}
+        char c;
+        while((c = *++ptr))
+        {
+                switch(c)
+                {
+                        case 'i':
+                                _dump_prim_arg<int32_t>(argptr, os); break;
+                        case 'c':
+                                _dump_prim_arg<int32_t, char>(argptr, os); break;
+                //      case 's':
+                //              _dump_prim_arg<char, const char*>(argptr, os); break;
+                        default:
+                                exit(1);
+                }
+        }
 
 }
 #endif
@@ -1205,13 +1267,14 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
 /*
  * Master audio out (the final sound)
  */
-bool Master::AudioOut(float *outr, float *outl)
+bool Master::AudioOut(float *outl, float *outr)
 {
+
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
         printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
     //Normal Limits
-    if(!pendingMemory && memory->lowMemory(4,1024*1024)) {
+    if(!pendingMemory && memory->lowMemory(6,1024*1024)) {
         printf("Requesting more memory\n");
         bToU->write("/request-memory", "");
         pendingMemory = true;
@@ -1221,12 +1284,10 @@ bool Master::AudioOut(float *outr, float *outl)
     if(!runOSC(outl, outr, false))
         return false;
 
-
     //Handle watch points
     if(bToU)
         watcher.write_back = bToU;
     watcher.tick();
-
 
     //Swaps the Left channel with Right Channel
     if(swaplr)
@@ -1237,67 +1298,73 @@ bool Master::AudioOut(float *outr, float *outl)
     memset(outr, 0, synth.bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
+    //Note: We do this regardless if the part is enabled or not, to allow
+    //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled)
-            part[npart]->ComputePartSmps();
+        part[npart]->ComputePartSmps();
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         if(Pinsparts[nefx] >= 0) {
             int efxpart = Pinsparts[nefx];
             if(part[efxpart]->Penabled)
-                insefx[nefx]->out(part[efxpart]->partoutl,
+                insefx[nefx]->out(part[efxpart]->partoutl, // drywet: compensate by raising Part->gain
                                   part[efxpart]->partoutr);
         }
 
+    STACKALLOC(float, gainbuf, synth.buffersize);
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         if(!part[npart]->Penabled)
             continue;
 
-        Stereo<float> newvol(part[npart]->volume),
-        oldvol(part[npart]->oldvolumel,
-               part[npart]->oldvolumer);
+        Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
-        if(pan < 0.5f)
-            newvol.l *= pan * 2.0f;
-        else
-            newvol.r *= (1.0f - pan) * 2.0f;
-        //if(npart==0)
-        //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 
-        //the volume or the panning has changed and needs interpolation
-        if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
-           || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
-            for(int i = 0; i < synth.buffersize; ++i) {
-                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
-                                                        i, synth.buffersize),
-                                  INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
-                                                        i, synth.buffersize));
-                part[npart]->partoutl[i] *= vol.l;
-                part[npart]->partoutr[i] *= vol.r;
-            }
-            part[npart]->oldvolumel = newvol.l;
-            part[npart]->oldvolumer = newvol.r;
+        if(constPowerMixing) {
+            newvol.r *= sqrtf(pan);
+            newvol.l *= sqrtf(1.0f - pan);
+        } else {
+            // compatibility mode
+            if(pan < 0.5f)
+                newvol.r *= pan * 2.0f;
+            else
+                newvol.l *= (1.0f - pan) * 2.0f;
         }
-        else {
-            for(int i = 0; i < synth.buffersize; ++i) { //the volume did not changed
+
+        /* This is where the part volume (and pan) smoothing and application happens */
+        if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutl[i] *= gainbuf[i];
+        }
+        else
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
                 part[npart]->partoutl[i] *= newvol.l;
+        }
+
+        if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutr[i] *= gainbuf[i];
+        }
+        else
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
                 part[npart]->partoutr[i] *= newvol.r;
-            }
         }
     }
-
 
     //System effects
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx) {
         if(sysefx[nefx]->geteffect() == 0)
             continue;  //the effect is disabled
 
-        float tmpmixl[synth.buffersize];
-        float tmpmixr[synth.buffersize];
+        STACKALLOC(float, tmpmixl, synth.buffersize);
+        STACKALLOC(float, tmpmixr, synth.buffersize);
         //Clean up the samples used by the system effects
         memset(tmpmixl, 0, synth.bufferbytes);
         memset(tmpmixr, 0, synth.bufferbytes);
@@ -1330,7 +1397,7 @@ bool Master::AudioOut(float *outr, float *outl)
                 }
             }
 
-        sysefx[nefx]->out(tmpmixl, tmpmixr);
+        sysefx[nefx]->out(tmpmixl, tmpmixr); // drywet: compensate by raising outvolume
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx]->sysefxgetvolume();
@@ -1351,29 +1418,28 @@ bool Master::AudioOut(float *outr, float *outl)
     //Insertion effects for Master Out
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         if(Pinsparts[nefx] == -2)
-            insefx[nefx]->out(outl, outr);
+            insefx[nefx]->out(outl, outr); // drywet: compensate by raising Master Volume
 
+    float vol = dB2rap(Volume);
 
     //Master Volume
-    float oldvol = dB2rap(oldVolume);
-    float newvol = dB2rap(Volume);
-    if(ABOVE_AMPLITUDE_THRESHOLD(oldvol, newvol)) {
-        for(int i = 0; i < synth.buffersize; ++i) {
-            float vol = INTERPOLATE_AMPLITUDE(oldvol, newvol,
-                                              i, synth.buffersize);
+    /* this is where the master volume smoothing and application happens */
+    if ( smoothing.apply( gainbuf, synth.buffersize, vol ) )
+    {
+        for ( int i = 0; i < synth.buffersize; ++i )
+        {
+            outl[i] *= gainbuf[i];
+            outr[i] *= gainbuf[i];
+        }
+    }
+    else
+    {
+        for ( int i = 0; i < synth.buffersize; ++i )
+        {
             outl[i] *= vol;
             outr[i] *= vol;
         }
     }
-    else {
-        // No interpolation
-        float vol = dB2rap(Volume);
-        for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= vol;
-            outr[i] *= vol;
-        }
-    }
-    oldVolume = Volume;
 
     vuUpdate(outl, outr);
 
@@ -1395,7 +1461,6 @@ bool Master::AudioOut(float *outr, float *outl)
     if(seconds > 10*60) {//10 minute trial
         shutup = true;
         for(int i = 0; i < synth.buffersize; ++i) {
-            float tmp = (synth.buffersize_f - i) / synth.buffersize_f;
             outl[i] *= 0.0f;
             outr[i] *= 0.0f;
         }
@@ -1411,11 +1476,40 @@ bool Master::AudioOut(float *outr, float *outl)
 
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
+//
+// beatType is not being used yet.
+// but beatsPerBar/beatType could be used to
+// match numerator/denominator along with bpm to plugin host
+
 void Master::GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
-                                float *outr)
+                                float *outr,
+                                int bar,
+                                int beat,
+                                float tick,
+                                float beatsPerBar,
+                                float /*beatType*/,
+                                float bpm,
+                                float PPQ,
+                                bool playing,
+                                size_t frames)
 {
+
+    if(bpm) {
+        time.hostSamples = frames;
+        time.bar = bar;
+        time.beat = beat;
+        time.tick = tick;
+        time.beatsPerBar = beatsPerBar;
+        time.tempo = bpm;
+        time.bpm = bpm;
+        time.ppq = PPQ;
+        time.playing = playing;
+    }
+    else
+        time.bpm = 0;
+
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
@@ -1553,8 +1647,12 @@ void Master::add2XML(XMLwrapper& xml)
     microtonal.add2XML(xml);
     xml.endbranch();
 
-    saveAutomation(xml, automate);
+    if (SaveFullXml) {
+        xml.SaveFullXml=true; // save disabled parts
+        xml.minimal=false;
+    }
 
+    saveAutomation(xml, automate);
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         xml.beginbranch("PART", npart);
         part[npart]->add2XML(xml);
@@ -1661,11 +1759,12 @@ int Master::loadXML(const char *filename)
 
 void Master::getfromXML(XMLwrapper& xml)
 {
+    constPowerMixing = xml.fileversion() >= version_type(3,0,7);
+
     if (xml.hasparreal("volume")) {
         Volume = xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
-        oldVolume = Volume;
     }
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);
@@ -1760,88 +1859,13 @@ char* Master::getXMLData()
 
 // this is being called as a "read only op" directly by the MiddleWare thread;
 // note that the Master itself is frozen
-int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
-                    Master* master2)
+std::string Master::saveOSC(std::string savefile, std::set<std::string>& alreadyWritten)
 {
-    std::string savefile = rtosc::save_to_file(ports, this,
-                                               "ZynAddSubFX",
-                                               version_in_rtosc_fmt());
-
-    // load the savefile string into another master to compare the results
-    // between the original and the savefile-loaded master
-    // this requires a temporary master switch
-    dispatcher->updateMaster(master2);
-
-    int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
-
-    // The above call is done by this thread (i.e. the MiddleWare thread), but
-    // it sends messages to master2 in order to load the values
-    // We need to wait until savefile has been loaded into master2
-    int i;
-    for(i = 0; i < 20 && master2->uToB->hasNext(); ++i)
-        usleep(50000);
-    if(i >= 20) // >= 1 second?
-    {
-        // Master failed to fetch its messages
-        rval = -1;
-    }
-    printf("Saved in less than %d ms.\n", 50*i);
-
-    dispatcher->updateMaster(this);
-
-    if(rval < 0)
-    {
-        std::cerr << "invalid savefile (or a backend error)!" << std::endl;
-        std::cerr << "complete savefile:" << std::endl;
-        std::cerr << savefile << std::endl;
-        std::cerr << "first entry that could not be parsed:" << std::endl;
-
-        for(int i = -rval + 1; savefile[i]; ++i)
-        if(savefile[i] == '\n')
-        {
-            savefile.resize(i);
-            break;
-        }
-        std::cerr << (savefile.c_str() - rval) << std::endl;
-
-        rval = -1;
-    }
-    else
-    {
-        char* xml = getXMLData(),
-            * xml2 = master2->getXMLData();
-
-        rval = strcmp(xml, xml2) ? -1 : 0;
-
-        if(rval == 0)
-        {
-            if(filename && *filename)
-            {
-                std::ofstream ofs(filename);
-                ofs << savefile;
-            }
-            else {
-                std::cout << "The savefile content follows" << std::endl;
-                std::cout << "---->8----" << std::endl;
-                std::cout << savefile << std::endl;
-                std::cout << "---->8----" << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << savefile << std::endl;
-            std::cerr << "Can not write OSC savefile!! (see tmp1.txt and tmp2.txt)"
-                      << std::endl;
-            std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
-            tmp1 << xml;
-            tmp2 << xml2;
-            rval = -1;
-        }
-
-        free(xml);
-        free(xml2);
-    }
-    return rval;
+    return rtosc::save_to_file(ports, this,
+                               nullptr, version_in_rtosc_fmt(), // both unused
+                               alreadyWritten,
+                               {"non-realtime"}, // excluded non-reatlime ports
+                               savefile);
 }
 
 int Master::loadOSCFromStr(const char *file_content,

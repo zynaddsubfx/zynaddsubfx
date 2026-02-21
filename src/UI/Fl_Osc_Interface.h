@@ -47,7 +47,7 @@ class Fl_Osc_Widget
         //Smoothly change the base path
         virtual void rebase(std::string new_base){(void)new_base;};
         void oscMove(std::string new_ext){(void)new_ext;};
-        //Explict version for weirdly routed controls
+        //Explicit version for weirdly routed controls
         void oscMove(std::string old_loc, std::string new_loc){(void)old_loc;(void)new_loc;};
 };
 #endif

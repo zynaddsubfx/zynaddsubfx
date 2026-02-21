@@ -143,7 +143,7 @@ void Nio::preferredSampleRate(unsigned &rate)
     while(fgets(buffer, sizeof(buffer), ps))
         if(strstr(buffer, "jack"))
             break;
-    fclose(ps);
+    pclose(ps);
 
     if(!strstr(buffer, "jack"))
         return;
@@ -185,6 +185,16 @@ void Nio::waveStop(void)
 void Nio::waveEnd(void)
 {
     out->wave->destroyFile();
+}
+
+void Nio::setAudioCompressor(bool isEnabled)
+{
+    out->setAudioCompressor(isEnabled);
+}
+
+bool Nio::getAudioCompressor(void)
+{
+    return out->getAudioCompressor();
 }
 
 }

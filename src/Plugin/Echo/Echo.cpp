@@ -24,7 +24,7 @@ class EchoPlugin : public AbstractPluginFX<zyn::Echo>
 {
 public:
     EchoPlugin()
-        : AbstractPluginFX(7, 9) {}
+        : AbstractPluginFX(7, 9) {doReinit(true);}
 
 protected:
    /* --------------------------------------------------------------------------------------------------------

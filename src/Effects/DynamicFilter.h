@@ -20,13 +20,14 @@
 namespace zyn {
 
 /**DynamicFilter Effect*/
-class DynamicFilter:public Effect
+class DynamicFilter final:public Effect
 {
     public:
-        DynamicFilter(EffectParams pars, const AbsTime *time = nullptr);
+        DynamicFilter(EffectParams pars);
         ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset) { setpreset(npreset, false); };
         void setpreset(unsigned char npreset, bool protect);
         void changepar(int npar, unsigned char value);

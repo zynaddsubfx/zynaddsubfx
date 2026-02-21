@@ -68,6 +68,7 @@ MiddleWare *middleware;
 
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
+bool      compr = false; // enables output audio compressor
 
 // forward declarations of namespace zyn
 namespace zyn
@@ -202,7 +203,7 @@ void InitWinMidi(int midi)
         long int res=midiInOpen(&winmidiinhandle,i,(DWORD_PTR)(void*)WinMidiInProc,0,CALLBACK_FUNCTION);
         if(res == MMSYSERR_NOERROR) {
             res=midiInStart(winmidiinhandle);
-            printf("[INFO] Starting Windows MIDI At %d with code %d(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
+            printf("[INFO] Starting Windows MIDI At %d with code %ld(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
             if(res == 0)
                 return;
         } else
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
     synth.buffersize = config.cfg.SoundBufferSize;
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
+    compr = config.cfg.AudioOutputCompressor;
 
     Nio::preferredSampleRate(synth.samplerate);
 
@@ -248,7 +250,7 @@ int main(int argc, char *argv[])
 
     sprng(time(NULL));
 
-    // for option entrys with the 3rd member (flag) pointing here,
+    // for option entries with the 3rd member (flag) pointing here,
     // getopt_long*() will return 0 and set this flag to the 4th member (val)
     int getopt_flag;
 
@@ -459,7 +461,7 @@ int main(int argc, char *argv[])
                     rtosc::OscDocFormatter s;
                     ofstream outfile(optarguments);
                     s.prog_name    = "ZynAddSubFX";
-                    s.p            = &Master::ports;
+                    s.p            = &MiddleWare::getAllPorts();
                     s.uri          = "http://example.com/fake/";
                     s.doc_origin   = "http://example.com/fake/url.xml";
                     s.author_first = "Mark";
@@ -471,7 +473,7 @@ int main(int argc, char *argv[])
                 if(optarguments)
                 {
                     ofstream outfile(optarguments);
-                    dump_json(outfile, Master::ports);
+                    dump_json(outfile, MiddleWare::getAllPorts());
                 }
                 break;
             case 'Z':
@@ -607,6 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
+
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
@@ -619,7 +622,7 @@ int main(int argc, char *argv[])
     }
 
     InitWinMidi(wmidi);
-
+    master->setAudioCompressor(compr);
 
     gui = NULL;
 
@@ -627,9 +630,9 @@ int main(int argc, char *argv[])
     printf("[INFO] startup OSC\n");
     typedef std::vector<const char *> wait_t;
     wait_t msg_waitlist;
-    middleware->setUiCallback([](void*v,const char*msg) {
+    middleware->setUiCallback(0, [](void*v,const char*msg) {
             wait_t &wait = *(wait_t*)v;
-            size_t len = rtosc_message_length(msg, -1);
+            size_t len = rtosc_message_length(msg, (std::numeric_limits<size_t>::max)());
             char *copy = new char[len];
             memcpy(copy, msg, len);
             wait.push_back(copy);
@@ -638,7 +641,7 @@ int main(int argc, char *argv[])
     printf("[INFO] UI calbacks\n");
     if(!noui)
         gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
-    middleware->setUiCallback(GUI::raiseUi, gui);
+    middleware->setUiCallback(0, GUI::raiseUi, gui);
     middleware->setIdleCallback([](void*){GUI::tickUi(gui);}, NULL);
 
     //Replay Startup Responses
@@ -663,7 +666,6 @@ int main(int argc, char *argv[])
             GUI::raiseUi(gui, "/alert-reload", "i", old_save);
         middleware->enableAutoSave(auto_save_interval);
     }
-    printf("[INFO] NSM Stuff\n");
 
     //TODO move this stuff into Cmake
 #if USE_NSM && defined(WIN32)
@@ -677,6 +679,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if USE_NSM
+    printf("[INFO] NSM Stuff\n");
     char *nsm_url = getenv("NSM_URL");
 
     if(nsm_url) {
@@ -691,8 +694,8 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    printf("[INFO] LASH Stuff\n");
 #if USE_NSM
+    printf("[INFO] LASH Stuff\n");
     if(!nsm)
 #endif
     {
@@ -708,12 +711,13 @@ int main(int argc, char *argv[])
 #endif
     if(!noui) {
         printf("[INFO] Launching Zyn-Fusion...\n");
-        const char *addr = middleware->getServerAddress();
+        char *addr = middleware->getServerAddress();
 #ifndef WIN32
         gui_pid = fork();
         if(gui_pid == 0) {
             auto exec_fusion = [&addr](const char* path) {
-                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload", nullptr); };
+#ifndef __APPLE__
             if(fusion_dir && *fusion_dir)
             {
                 std::string fusion = fusion_dir;
@@ -733,6 +737,7 @@ int main(int argc, char *argv[])
                     exec_fusion(fusion.c_str());
                 }
             }
+#endif
             exec_fusion("./zyn-fusion");
             exec_fusion("/opt/zyn-fusion/zyn-fusion");
             exec_fusion("zyn-fusion");
@@ -759,6 +764,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 #endif
+        free(addr);
     }
 #endif
 
@@ -799,7 +805,7 @@ int main(int argc, char *argv[])
 done:
 #endif
         GUI::tickUi(gui);
-#endif
+#endif // !WIN32
         middleware->tick();
 #ifdef WIN32
         Sleep(1);
@@ -817,7 +823,7 @@ done:
         }
 #endif
 #endif
-    }
+    } // while !Pexitprogram
 
     mem_locker.unlock();
 

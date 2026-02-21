@@ -21,10 +21,10 @@ namespace zyn {
 
 EffectParams::EffectParams(Allocator &alloc_, bool insertion_, float *efxoutl_, float *efxoutr_,
             unsigned char Ppreset_, unsigned int srate_, int bufsize_, FilterParams *filterpars_,
-            bool filterprotect_)
+            bool filterprotect_, const AbsTime *time_)
     :alloc(alloc_), insertion(insertion_), efxoutl(efxoutl_), efxoutr(efxoutr_),
      Ppreset(Ppreset_), srate(srate_), bufsize(bufsize_), filterpars(filterpars_),
-     filterprotect(filterprotect_)
+     filterprotect(filterprotect_), time(time_)
 {}
 Effect::Effect(EffectParams pars)
     :Ppreset(pars.Ppreset),
@@ -33,6 +33,7 @@ Effect::Effect(EffectParams pars)
       filterpars(pars.filterpars),
       insertion(pars.insertion),
       memory(pars.alloc),
+      time(pars.time),
       samplerate(pars.srate),
       buffersize(pars.bufsize)
 {

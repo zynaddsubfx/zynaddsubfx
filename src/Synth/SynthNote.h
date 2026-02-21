@@ -20,15 +20,15 @@ namespace zyn {
 
 class Allocator;
 class Controller;
+class Portamento;
 struct SynthParams
 {
     Allocator &memory;   //Memory Allocator for the Note to use
     const Controller &ctl;
     const SYNTH_T    &synth;
     const AbsTime    &time;
-    float     frequency; //Note base frequency
     float     velocity;  //Velocity of the Note
-    bool      portamento;//True if portamento is used for this note
+    Portamento *portamento; //Realtime portamento info
     float     note_log2_freq; //Floating point value of the note
     bool      quiet;     //Initial output condition for legato notes
     prng_t    seed;      //Random seed
@@ -36,9 +36,8 @@ struct SynthParams
 
 struct LegatoParams
 {
-    float frequency;
     float velocity;
-    bool portamento;
+    Portamento *portamento;
     float note_log2_freq; //Floating point value of the note
     bool externcall;
     prng_t seed;
@@ -47,7 +46,7 @@ struct LegatoParams
 class SynthNote
 {
     public:
-        SynthNote(SynthParams &pars);
+        SynthNote(const SynthParams &pars, bool constPowerMixing);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples
@@ -65,16 +64,25 @@ class SynthNote
         /**Make a note die off next buffer compute*/
         virtual void entomb(void) = 0;
 
-        virtual void legatonote(LegatoParams pars) = 0;
+        virtual void legatonote(const LegatoParams &pars) = 0;
 
         virtual SynthNote *cloneLegato(void) = 0;
 
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
 
+        /* For per-note pitch */
+        void setPitch(float log2_freq_);
+
+        /* For per-note filter cutoff */
+        void setFilterCutoff(float);
+        float getFilterCutoffRelFreq(void);
+
         /* Random numbers with own seed */
         float getRandomFloat();
         prng_t getRandomUint();
+
+        bool constPowerMixing() const { return m_constPowerMixing; }
 
         //Realtime Safe Memory Allocator For notes
         class Allocator  &memory;
@@ -83,15 +91,16 @@ class SynthNote
         class Legato
         {
             public:
-                Legato(const SYNTH_T &synth_, float freq, float vel, int port,
+                Legato(const SYNTH_T &synth_, float vel,
+                       Portamento *portamento,
                        float note_log2_freq, bool quiet, prng_t seed);
 
                 void apply(SynthNote &note, float *outl, float *outr);
-                int update(LegatoParams pars);
+                int update(const LegatoParams &pars);
 
             private:
                 bool      silent;
-                float     lastfreq;
+                float     lastfreq_log2;
                 LegatoMsg msg;
                 int       decounter;
                 struct { // Fade In/Out vars
@@ -99,10 +108,12 @@ class SynthNote
                     float m, step;
                 } fade;
             public:
+                //TODO: portamento and note freq are used not just for legato,
+                //so should they really be here in the Legato class?
                 struct { // Note parameters
-                    float  freq, vel;
-                    bool   portamento;
-                    float  note_log2_freq;
+                    float               freq, vel;
+                    Portamento         *portamento;
+                    float               note_log2_freq;
                     prng_t seed;
                 } param;
                 const SYNTH_T &synth;
@@ -110,7 +121,7 @@ class SynthNote
             public: /* Some get routines for legatonote calls (aftertouch feature)*/
                 float getFreq() {return param.freq; }
                 float getVelocity() {return param.vel; }
-                bool  getPortamento() {return param.portamento; }
+                Portamento *getPortamento() {return param.portamento; }
                 float getNoteLog2Freq() {return param.note_log2_freq; }
                 prng_t getSeed() {return param.seed;}
                 void setSilent(bool silent_) {silent = silent_; }
@@ -123,6 +134,9 @@ class SynthNote
         const SYNTH_T    &synth;
         const AbsTime    &time;
         WatchManager     *wm;
+        smooth_float     filtercutoff_relfreq;
+    private:
+        bool m_constPowerMixing;
 };
 
 }

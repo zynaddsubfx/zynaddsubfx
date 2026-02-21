@@ -16,6 +16,10 @@
 
 class Fl_Osc_Interface;
 
+namespace rtosc {
+    struct MergePorts;
+}
+
 namespace zyn {
 
 struct SYNTH_T;
@@ -40,14 +44,14 @@ class MiddleWare
         //instances are in use OR when there was a crash
         //
         //When an old save is found return the id of the save file
-        int checkAutoSave(void);
+        int checkAutoSave(void) const;
 
         void removeAutoSave(void);
 
         //return  UI interface
         Fl_Osc_Interface *spawnUiApi(void);
         //Set callback to push UI events to
-        void setUiCallback(void(*cb)(void*,const char *),void *ui);
+        void setUiCallback(std::size_t gui_id, void(*cb)(void*,const char *),void *ui);
         //Set callback to run while busy
         void setIdleCallback(void(*cb)(void*),void *ptr);
         //Handle events
@@ -61,6 +65,13 @@ class MiddleWare
         //Handle a rtosc Message uToB
         void transmitMsg_va(const char *, const char *args, va_list va);
 
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui(std::size_t gui_id, const char * msg);
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui(std::size_t gui_id, const char *, const char *args, ...);
+        //Handle a rtosc Message uToB, if sender is GUI
+        void transmitMsgGui_va(std::size_t gui_id, const char *, const char *args, va_list va);
+
         //Send a message to middleware from an arbitrary thread
         void messageAnywhere(const char *msg, const char *args, ...);
 
@@ -72,20 +83,28 @@ class MiddleWare
         //NOTE: Can only be called by realtime thread
         void pendingSetProgram(int part, int program);
 
+        std::string getProgramName(int program) const;
+
         //Get/Set the active bToU url
-        std::string activeUrl(void);
+        std::string activeUrl(void) const;
         void activeUrl(std::string u);
         //View Synthesis Parameters
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
-        const char* getServerAddress(void) const;
-        
+        char* getServerAddress(void) const;
+        char* getServerPort(void) const;
+
         const PresetsStore& getPresetsStore() const;
         PresetsStore& getPresetsStore();
 
         //!Make @p new_master the current master
         //!@warning use with care, and only in frozen state
         void switchMaster(Master* new_master);
+
+        void discardAllbToUButHandleFree();
+
+        static const rtosc::MergePorts& getAllPorts();
+
     private:
         class MiddleWareImpl *impl;
 };

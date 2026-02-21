@@ -27,7 +27,10 @@
  #define DISTRHO_PLUGIN_HAS_EMBED_UI    0
  #define DISTRHO_PLUGIN_HAS_EXTERNAL_UI 1
 #elif defined(ZEST_GUI)
+ #define DGL_OPENGL                     1
+ #define HAVE_OPENGL                    1
  #define DISTRHO_PLUGIN_HAS_UI          1
+ #define DISTRHO_PLUGIN_HAS_EMBED_UI    1
 #else
  #define DISTRHO_PLUGIN_HAS_UI          0
 #endif
@@ -39,6 +42,8 @@
 #define DISTRHO_PLUGIN_WANT_PROGRAMS    1
 #define DISTRHO_PLUGIN_WANT_STATE       1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE  1
+#define DISTRHO_PLUGIN_WANT_TIMEPOS     1
+#define DISTRHO_PLUGIN_MINIMUM_BUFFER_SIZE 131072
 
 enum Parameters {
     kParamSlot1,
