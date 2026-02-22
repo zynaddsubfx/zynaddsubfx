@@ -1368,7 +1368,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
             (xml.getparreal("volume", -1) < 0);
 
-        PFMVoice      = xml.getpar("input_voice", PFMVoice, -1, nvoice - 1);
+        PFMVoice      = xml.getpar("input_voice", PFMVoice, -1, nvoice);
         if (upgrade_3_0_3) {
             int Pvolume = xml.getpar127("volume", 0);
             FMvolume    = 100.0f * Pvolume / 127.0f;

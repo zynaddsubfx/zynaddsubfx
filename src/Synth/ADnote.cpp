@@ -662,7 +662,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
     // Forbids the Modulation Voice to be greater or equal than voice
     for(int i = 0; i < NUM_VOICES; ++i)
-        if(NoteVoicePar[i].FMVoice >= i)
+        if(NoteVoicePar[i].FMVoice > i)
             NoteVoicePar[i].FMVoice = -1;
 
     // Voice Parameter init
@@ -826,7 +826,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
     // Forbids the Modulation Voice to be greater or equal than voice
     for(int i = 0; i < NUM_VOICES; ++i)
-        if(NoteVoicePar[i].FMVoice >= i)
+        if(NoteVoicePar[i].FMVoice > i)
             NoteVoicePar[i].FMVoice = -1;
 
     // Voice Parameter init
@@ -1367,7 +1367,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
 
-    if(NoteVoicePar[nvoice].FMVoice >= 0) {
+    if(NoteVoicePar[nvoice].FMVoice > 0) {
         //if I use VoiceOut[] as modullator
         int FMVoice = NoteVoicePar[nvoice].FMVoice;
         for(int k = 0; k < vce.unison_size; ++k) {
