@@ -263,7 +263,7 @@ class ADnote:public SynthNote
 
             // Voice Output used by other voices if use this as modullator
             float *VoiceOut;
-            
+
 
             /* Wave of the Voice */
             float *FMSmp;
