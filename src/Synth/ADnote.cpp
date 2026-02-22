@@ -957,9 +957,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
     }
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
-        for(int i = nvoice + 1; i < NUM_VOICES; ++i)
+        for(int i = nvoice; i < NUM_VOICES; ++i)
             tmp[i] = 0;
-        for(int i = nvoice + 1; i < NUM_VOICES; ++i)
+        for(int i = nvoice; i < NUM_VOICES; ++i)
             if((NoteVoicePar[i].FMVoice == nvoice) && (tmp[i] == 0)) {
                 NoteVoicePar[nvoice].VoiceOut =
                     memory.valloc<float>(synth.buffersize);
@@ -1367,7 +1367,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
 
-    if(NoteVoicePar[nvoice].FMVoice > 0) {
+    if(NoteVoicePar[nvoice].FMVoice >= 0) {
         //if I use VoiceOut[] as modullator
         int FMVoice = NoteVoicePar[nvoice].FMVoice;
         for(int k = 0; k < vce.unison_size; ++k) {
