@@ -54,6 +54,17 @@ class ADnote:public SynthNote
 
 
         virtual SynthNote *cloneLegato(void) override;
+    // special FMVoice value meaning: use Part post-effect output as modulator
+    static const int FMVOICE_PART_FEEDBACK = -2;
+
+    /**Hook called by Part after an effect writes its output.
+     * Implementations may copy the post-effect buffers into internal
+     * per-voice buffers (e.g. VoiceOut) so they can be used as
+     * modulation sources on the next processing block.
+     * Default behaviour is to do nothing (see SynthNote).
+     */
+    virtual void applyPartEffectToRelevantVoices(const float *efxoutl,
+                                                 const float *efxoutr);
     private:
 
         void setupVoice(int nvoice);
@@ -252,6 +263,7 @@ class ADnote:public SynthNote
 
             // Voice Output used by other voices if use this as modullator
             float *VoiceOut;
+            
 
             /* Wave of the Voice */
             float *FMSmp;

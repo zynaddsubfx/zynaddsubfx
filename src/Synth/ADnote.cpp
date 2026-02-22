@@ -966,8 +966,39 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 tmp[i] = 1;
             }
 
+        // Also allocate VoiceOut if this voice is configured to receive
+        // Part post-effect feedback (FMVOICE_PART_FEEDBACK).
+        if(!NoteVoicePar[nvoice].VoiceOut &&
+           NoteVoicePar[nvoice].FMVoice == FMVOICE_PART_FEEDBACK) {
+            NoteVoicePar[nvoice].VoiceOut = memory.valloc<float>(synth.buffersize);
+        }
+
         if(NoteVoicePar[nvoice].VoiceOut)
             memset(NoteVoicePar[nvoice].VoiceOut, 0, synth.bufferbytes);
+    }
+}
+
+void ADnote::applyPartEffectToRelevantVoices(const float *efxoutl,
+                                             const float *efxoutr)
+{
+    // Copy the post-effect buffers into any voice that requested
+    // part-feedback (FMVoice == FMVOICE_PART_FEEDBACK). This allows
+    // that voice to use the last-part-effect output as its modulation
+    // source on the next processing block.
+    for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
+        auto &voice = NoteVoicePar[nvoice];
+        if (voice.FMVoice != FMVOICE_PART_FEEDBACK)
+            continue;
+        if (!voice.VoiceOut)
+            continue; // allocation should have happened in init; be defensive
+
+        if (stereo) {
+            for (int i = 0; i < synth.buffersize; ++i)
+                voice.VoiceOut[i] = efxoutl[i] + efxoutr[i];
+        } else {
+            // Mono: use left channel as the input
+            memcpy(voice.VoiceOut, efxoutl, synth.bufferbytes);
+        }
     }
 }
 
