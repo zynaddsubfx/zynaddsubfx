@@ -439,7 +439,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     voice.FMFreqFixed  = param.PFMFixedFreq;
 
     //Triggers when a user enables modulation on a running voice
-    if(!first_run && (voice.FMEnabled != FMTYPE::NONE || voice.syncEnabled) && voice.FMSmp == NULL && voice.FMVoice < 0) {
+    if(!first_run && (voice.FMEnabled != FMTYPE::NONE || voice.syncEnabled) && voice.FMSmp == NULL && voice.FMVoice == -1) {
         param.FmGn->newrandseed(prng());
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
@@ -710,7 +710,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE || NoteVoicePar[nvoice].syncEnabled)
-           && (NoteVoicePar[nvoice].FMVoice < 0)) {
+           && (NoteVoicePar[nvoice].FMVoice == -1)) {
             pars.VoicePar[nvoice].FmGn->newrandseed(prng());
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
@@ -903,7 +903,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         }
 
         /* Voice Modulation Parameters Init */
-        if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0)) {
+        if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice == -1)) {
             param.FmGn->newrandseed(prng());
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
@@ -960,7 +960,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         for(int i = nvoice; i < NUM_VOICES; ++i)
             tmp[i] = 0;
         for(int i = nvoice; i < NUM_VOICES; ++i)
-            if((NoteVoicePar[i].FMVoice == nvoice) && (tmp[i] == 0)) {
+            if((NoteVoicePar[i].FMVoice == nvoice ) && (tmp[i] == 0)) {
                 NoteVoicePar[nvoice].VoiceOut =
                     memory.valloc<float>(synth.buffersize);
                 tmp[i] = 1;
@@ -968,9 +968,11 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         // Also allocate VoiceOut if this voice is configured to receive
         // Part post-effect feedback (FMVOICE_PART_FEEDBACK).
-        if(!NoteVoicePar[nvoice].VoiceOut &&
-           NoteVoicePar[nvoice].FMVoice == FMVOICE_PART_FEEDBACK) {
+
+        if(!NoteVoicePar[nvoice].VoiceOut && NoteVoicePar[nvoice].FMVoice == FMVOICE_PART_FEEDBACK) {
             NoteVoicePar[nvoice].VoiceOut = memory.valloc<float>(synth.buffersize);
+            //~ printf("NoteVoicePar[nvoice].FMVoice: FMVOICE_PART_FEEDBACK\n");
+
         }
 
         if(NoteVoicePar[nvoice].VoiceOut)
@@ -985,16 +987,20 @@ void ADnote::applyPartEffectToRelevantVoices(const float *efxoutl,
     // part-feedback (FMVoice == FMVOICE_PART_FEEDBACK). This allows
     // that voice to use the last-part-effect output as its modulation
     // source on the next processing block.
+    //~ printf("applyPartEffectToRelevantVoices\n");
     for (int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         auto &voice = NoteVoicePar[nvoice];
         if (voice.FMVoice != FMVOICE_PART_FEEDBACK)
             continue;
         if (!voice.VoiceOut)
             continue; // allocation should have happened in init; be defensive
-
+        //~ printf("nvoice: %d\n", nvoice);
+        //~ printf("stereo: %d\n", stereo);
         if (stereo) {
-            for (int i = 0; i < synth.buffersize; ++i)
+            for (int i = 0; i < synth.buffersize; ++i) {
                 voice.VoiceOut[i] = efxoutl[i] + efxoutr[i];
+                //~ if(i==0) printf("voice.VoiceOut[i]: %f\n", voice.VoiceOut[i]);
+            }
         } else {
             // Mono: use left channel as the input
             memcpy(voice.VoiceOut, efxoutl, synth.bufferbytes);
@@ -1398,7 +1404,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
 
-    if(NoteVoicePar[nvoice].FMVoice >= 0) {
+    if(NoteVoicePar[nvoice].FMVoice != -1) {
         //if I use VoiceOut[] as modullator
         int FMVoice = NoteVoicePar[nvoice].FMVoice;
         for(int k = 0; k < vce.unison_size; ++k) {
@@ -1409,7 +1415,7 @@ inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
                                             i,
                                             synth.buffersize);
                 tw[i] = tw[i]
-                    * (1.0f - amp) + amp * NoteVoicePar[FMVoice].VoiceOut[i];
+                    * (1.0f - amp) + amp * NoteVoicePar[FMVoice==-2 ? nvoice : FMVoice].VoiceOut[i];
             }
         }
     }
@@ -1457,20 +1463,20 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
         vce.FMnewamplitude = 1.0f;
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
-    if(NoteVoicePar[nvoice].FMVoice >= 0)
+    if(NoteVoicePar[nvoice].FMVoice != -1)
         // if I use VoiceOut[] as modullator
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
+            int FMVoice = NoteVoicePar[nvoice].FMVoice;
             for(int i = 0; i < synth.buffersize; ++i) {
                 const float amp = INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
                                             vce.FMnewamplitude,
                                             i,
                                             synth.buffersize);
-                int FMVoice = NoteVoicePar[nvoice].FMVoice;
-                tw[i] *= (1.0f - amp) + amp * NoteVoicePar[FMVoice].VoiceOut[i];
+                tw[i] *= (1.0f - amp) + amp * NoteVoicePar[FMVoice==-2 ? nvoice : FMVoice].VoiceOut[i];
             }
         }
-    else
+    else if(NoteVoicePar[nvoice].FMVoice == -1)
         for(int k = 0; k < vce.unison_size; ++k) {
             int    poshiFM  = vce.oscposhiFM[k];
             float  posloFM  = vce.oscposloFM[k];
@@ -1512,12 +1518,12 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
     if(vce.FMoldamplitude > 1.0f)
         vce.FMoldamplitude = 1.0f;
 
-    if(vce.FMVoice >= 0)
+    if(vce.FMVoice != -1)
         // if I use VoiceOut[] as modulator
         // copy it to tmpwave_unison[][]
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
-            const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
+            const float *smps = NoteVoicePar[(vce.FMVoice == -2) ? nvoice : NoteVoicePar[nvoice].FMVoice].VoiceOut;
             memcpy(tw, smps, synth.bufferbytes);
         }
     else{
@@ -1597,11 +1603,11 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode)
 {
     Voice& vce = NoteVoicePar[nvoice];
-    if(vce.FMVoice >= 0) {
+    if(vce.FMVoice != -1) {
         //if I use VoiceOut[] as modulator
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
-            const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
+            const float *smps = NoteVoicePar[(vce.FMVoice == -2) ? nvoice : vce.FMVoice].VoiceOut;
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 for (int i = 0; i < synth.buffersize; ++i)
                     tw[i] = -smps[i];
@@ -2169,7 +2175,7 @@ void ADnote::Voice::kill(Allocator &memory, const SYNTH_T &synth)
     memory.dealloc(FMFreqEnvelope);
     memory.dealloc(FMAmpEnvelope);
 
-    if((FMEnabled != FMTYPE::NONE) && (FMVoice < 0))
+    if((FMEnabled != FMTYPE::NONE) && (FMVoice == -1))
         memory.devalloc(FMSmp);
 
     if(VoiceOut)
