@@ -1557,6 +1557,7 @@ Master::~Master()
 
     delete fft;
     delete memory;
+    delete sync;
 }
 
 
