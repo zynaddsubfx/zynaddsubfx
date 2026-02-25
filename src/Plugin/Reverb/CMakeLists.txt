@@ -1,40 +1,21 @@
+dpf_add_plugin(ZynReverb
+    TARGETS clap lv2 vst2 vst3
+    FILES_DSP
+        Reverb.cpp
+)
 
-include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho .)
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
-add_library(ZynReverb_lv2 SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Reverb.cpp)
-add_library(ZynReverb_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Reverb.cpp)
+target_link_libraries(ZynReverb PRIVATE zynaddsubfx_core)
 
-set_target_properties(ZynReverb_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
-set_target_properties(ZynReverb_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynReverb_lv2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynReverb_lv2 PROPERTIES OUTPUT_NAME "ZynReverb")
-set_target_properties(ZynReverb_lv2 PROPERTIES PREFIX "")
-
-set_target_properties(ZynReverb_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST2")
-set_target_properties(ZynReverb_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynReverb_vst PROPERTIES RUNTIME_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynReverb_vst PROPERTIES OUTPUT_NAME "ZynReverb")
-set_target_properties(ZynReverb_vst PROPERTIES PREFIX "")
-
-if(APPLE)
-    target_link_libraries(ZynReverb_lv2 zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_lv2_descriptor" "-Wl,-exported_symbol,_lv2_generate_ttl")
-    target_link_libraries(ZynReverb_vst zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_VSTPluginMain")
-else()
-    target_link_libraries(ZynReverb_lv2 zynaddsubfx_core ${OS_LIBRARIES})
-    target_link_libraries(ZynReverb_vst zynaddsubfx_core ${OS_LIBRARIES})
-endif()
-
-install(TARGETS ZynReverb_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynReverb.lv2/)
-install(TARGETS ZynReverb_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
-
-add_custom_command(TARGET ZynReverb_lv2 POST_BUILD
-    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynReverb_lv2>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
-
-add_dependencies(ZynReverb_lv2 lv2-ttl-generator)
+dpf__determine_vst3_package_architecture(vst3_arch)
+install(TARGETS ZynReverb-lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynReverb.lv2/)
+install(TARGETS ZynReverb-vst2 LIBRARY DESTINATION ${PluginLibDir}/vst/)
+install(TARGETS ZynReverb-vst3 LIBRARY DESTINATION ${PluginLibDir}/vst3/ZynReverb.vst3/Contents/${vst3_arch}/)
+install(TARGETS ZynReverb-clap LIBRARY DESTINATION ${PluginLibDir}/clap/)
 
 install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynReverb.ttl
-    DESTINATION ${PluginLibDir}/lv2/ZynReverb.lv2/)
+	${CMAKE_BINARY_DIR}/bin/ZynReverb.lv2/manifest.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynReverb.lv2/presets.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynReverb.lv2/ZynReverb_dsp.ttl
+	DESTINATION ${PluginLibDir}/lv2/ZynReverb.lv2/)

@@ -74,7 +74,7 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Time";
             parameter.symbol = "time";
             parameter.ranges.def = 63.0f;
@@ -85,7 +85,7 @@ protected:
             parameter.ranges.def = 24.0f;
             break;
         case 2:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Feedback";
             parameter.symbol = "fb";
             parameter.ranges.def = 0.0f;
@@ -113,7 +113,7 @@ protected:
             parameter.ranges.def = 5.0f;
             break;
         case 7:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Damp";
             parameter.symbol = "damp";
             parameter.ranges.def = 83.0f;
