@@ -38,7 +38,7 @@ static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
     rPasteRt,
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
-    rParamF(Volume,  rShort("volume"), rDefault(0), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
+    rParamF(Volume,  rShort("volume"), rDefault(0.f), rUnit(dB), rLinear(-60.0f,20.0f), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
     rParamF(AmpVelocityScaleFunction, rShort("sense"), rDefault(70.86),
         rLinear(0.0, 100.0), "Amplitude Velocity Sensing function"),
@@ -85,9 +85,9 @@ static const rtosc::Ports SUBnotePorts = {
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
-    rParamI(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
+    rOption(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type"),
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
-            rDefault(Harmonic)
+            rDefault(Harmonic),
             "Spread of harmonic frequencies"),
     rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255), rShort("p1"),
             rDefault(0), "Overtone Parameter"),
@@ -101,7 +101,7 @@ static const rtosc::Ports SUBnotePorts = {
             rDefault(2), "Number of filter stages"),
     rParamZyn(Pbandwidth, rShort("bandwidth"), rDefault(40),
               "Bandwidth of filters"),
-    rParamZyn(Phmagtype,  rShort("mag. type"),
+    rOption(Phmagtype,  rShort("mag. type"),
               rOptions(linear, -40dB, -60dB, -80dB, -100dB),
               rDefault(linear), "Magnitude scale"),
     rArray(Phmag, MAX_SUB_HARMONICS, rDefault([127 0 0 ...]),
@@ -233,15 +233,15 @@ SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
         : Presets(), time(time_), last_update_timestamp(0)
 {
     setpresettype("Psubsynth");
-    AmpEnvelope = new EnvelopeParams(64, 1, time_);
+    AmpEnvelope = new EnvelopeParams(64, true, time_);
     AmpEnvelope->init(ad_global_amp);
-    FreqEnvelope = new EnvelopeParams(64, 0, time_);
+    FreqEnvelope = new EnvelopeParams(64, false, time_);
     FreqEnvelope->init(sub_freq);
-    BandWidthEnvelope = new EnvelopeParams(64, 0, time_);
+    BandWidthEnvelope = new EnvelopeParams(64, false, time_);
     BandWidthEnvelope->init(sub_bandwidth);
 
     GlobalFilter = new FilterParams(sub_filter, time_);
-    GlobalFilterEnvelope = new EnvelopeParams(0, 1, time_);
+    GlobalFilterEnvelope = new EnvelopeParams(0, true, time_);
     GlobalFilterEnvelope->init(sub_filter);
 
     defaults();
@@ -304,7 +304,7 @@ void SUBnoteParameters::defaults()
     PPanning = 64;
     AmpVelocityScaleFunction = 70.86;
 
-    Pfixedfreq   = 0;
+    Pfixedfreq   = false;
     PfixedfreqET = 0;
     PBendAdjust = 88; // 64 + 24
     POffsetHz = 64;
@@ -312,14 +312,14 @@ void SUBnoteParameters::defaults()
     Pbandwidth   = 40;
     Phmagtype    = 0;
     Pbwscale     = 64;
-    Pstereo      = 1;
+    Pstereo      = true;
     Pstart = 1;
 
     PDetune = 8192;
     PCoarseDetune = 0;
     PDetuneType   = 1;
-    PFreqEnvelopeEnabled      = 0;
-    PBandWidthEnvelopeEnabled = 0;
+    PFreqEnvelopeEnabled      = false;
+    PBandWidthEnvelopeEnabled = false;
 
     POvertoneSpread.type = 0;
     POvertoneSpread.par1 = 0;
@@ -333,7 +333,7 @@ void SUBnoteParameters::defaults()
     }
     Phmag[0] = 127;
 
-    PGlobalFilterEnabled = 0;
+    PGlobalFilterEnabled = false;
     PGlobalFilterVelocityScale = 0;
     PGlobalFilterVelocityScaleFunction = 64;
 
@@ -577,7 +577,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
             (!xml.hasparreal("volume"));
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume    = -60.0f * ( 1.0f - vol / 96.0f);
+            Volume    = 60.0f * (vol / 96.0f - 1.0f);
         } else {
             Volume    = xml.getparreal("volume", Volume);
         }

@@ -37,8 +37,8 @@
 namespace zyn {
 
 SUBnote::SUBnote(const SUBnoteParameters *parameters, const SynthParams &spars,
-    WatchManager *wm, const char *prefix) :
-    SynthNote(spars),
+    WatchManager *wm, const char *prefix, bool constPowerMixing) :
+    SynthNote(spars, constPowerMixing),
     watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
     watch_legato(wm, prefix, "noteout/legato"),
     pars(*parameters),
@@ -519,8 +519,8 @@ void SUBnote::computeallfiltercoefs(bpfilter *filters, float envfreq,
 
 void SUBnote::chanOutput(float *out, bpfilter *bp, int buffer_size)
 {
-    float tmprnd[buffer_size];
-    float tmpsmp[buffer_size];
+    STACKALLOC(float, tmprnd, buffer_size);
+    STACKALLOC(float, tmpsmp, buffer_size);
 
     //Initialize Random Input
     for(int i = 0; i < buffer_size; ++i)
@@ -579,6 +579,18 @@ int SUBnote::noteout(float *outl, float *outr)
         }
         firsttick = false;
     }
+    // compute panning factors
+    float pan_l, pan_r;
+    if(constPowerMixing())
+    {   // sqrt 3dB constant power mode
+        pan_l = sqrtf(1.0f - panning);
+        pan_r = sqrtf(panning);
+    }
+    else
+    {   // compatibility mode
+        pan_l = (1.0f - panning);
+        pan_r = (panning);
+    }
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
         // Amplitude interpolation
@@ -587,14 +599,15 @@ int SUBnote::noteout(float *outl, float *outr)
                                                  newamplitude,
                                                  i,
                                                  synth.buffersize);
-            outl[i] *= tmpvol * panning;
-            outr[i] *= tmpvol * (1.0f - panning);
+            outl[i] *= tmpvol * pan_l;
+            outr[i] *= tmpvol * pan_r;
         }
     else
         for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= newamplitude * panning;
-            outr[i] *= newamplitude * (1.0f - panning);
+            outl[i] *= newamplitude * pan_l;
+            outr[i] *= newamplitude * pan_r;
         }
+
     watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;
     computecurrentparameters();

@@ -32,7 +32,7 @@ class Part
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
          * @param fft_ Pointer to the FFTwrapper*/
-        Part(Allocator &alloc, const SYNTH_T &synth, const AbsTime &time,
+        Part(Allocator &alloc, const SYNTH_T &synth, const AbsTime &time, Sync* sync,
              const int& gzip_compression, const int& interpolation,
              Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm=0, const char *prefix=0);
         /**Destructor*/
@@ -126,7 +126,7 @@ class Part
         void setvoicelimit(unsigned char Pvoicelimit);
         void setkititemstatus(unsigned kititem, bool Penabled_);
 
-        unsigned char partno; /**<if it's the Master's first part*/
+        unsigned char partno; /**<the part number in Master*/
         bool          Penabled; /**<if the part is enabled*/
         float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
@@ -231,7 +231,9 @@ class Part
         Allocator  &memory;
         const SYNTH_T &synth;
         const AbsTime &time;
+        Sync* sync;
         const int &gzip_compression, &interpolation;
+        bool constPowerMixing = true;
 };
 
 }

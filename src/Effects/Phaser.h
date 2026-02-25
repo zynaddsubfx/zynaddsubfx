@@ -25,7 +25,7 @@
 
 namespace zyn {
 
-class Phaser:public Effect
+class Phaser final:public Effect
 {
     public:
         Phaser(EffectParams pars);
@@ -64,7 +64,6 @@ class Phaser:public Effect
         void setphase(unsigned char Pphase);
 
         //Internal Variables
-        bool  barber; //Barber pole phasing flag
         float distortion, width, offsetpct;
         float feedback, depth, phase;
         Stereo<float *> old, xn1, yn1;

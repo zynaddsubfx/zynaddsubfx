@@ -194,7 +194,7 @@ void Config::init()
     cfg.SampleRate      = 44100;
     cfg.SoundBufferSize = 256;
     cfg.OscilSize  = 1024;
-    cfg.SwapStereo = 0;
+    cfg.SwapStereo = false;
     cfg.AudioOutputCompressor = 0;
 
     cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
@@ -205,14 +205,14 @@ void Config::init()
     cfg.WindowsWaveOutId = 0;
     cfg.WindowsMidiInId  = 0;
 
-    cfg.BankUIAutoClose = 0;
+    cfg.BankUIAutoClose = false;
 
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
-    cfg.SaveFullXml = 0;
-    cfg.CheckPADsynth = 1;
-    cfg.IgnoreProgramChange = 0;
+    cfg.SaveFullXml = false;
+    cfg.CheckPADsynth = true;
+    cfg.IgnoreProgramChange = false;
 
     cfg.UserInterfaceMode = 0;
     cfg.VirKeybLayout     = 1;
@@ -245,7 +245,7 @@ void Config::init()
 #endif
         cfg.bankRootDirList[3] = "banks";
 #ifdef ZYN_DATADIR
-        cfg.bankRootDirList[4] = ZYN_DATADIR "/banks";
+        cfg.bankRootDirList[4] = "$ZYN_DATADIR/banks";
 #else
         cfg.bankRootDirList[4] = "/usr/share/zynaddsubfx/banks";
         cfg.bankRootDirList[5] = "/usr/local/share/zynaddsubfx/banks";
@@ -262,7 +262,7 @@ void Config::init()
 #endif
         cfg.presetsDirList[2] = "presets";
 #ifdef ZYN_DATADIR
-        cfg.presetsDirList[3] = ZYN_DATADIR "/presets";
+        cfg.presetsDirList[3] = "$ZYN_DATADIR/presets";
 #else
         cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
         cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
@@ -320,18 +320,18 @@ void Config::readConfig(const char *filename)
                                       cfg.OscilSize,
                                       MAX_AD_HARMONICS * 2,
                                       131072);
-        cfg.SwapStereo = xmlcfg.getpar("swap_stereo",
-                                       cfg.SwapStereo,
-                                       0,
-                                       1);
+        cfg.SwapStereo = (bool) xmlcfg.getpar("swap_stereo",
+                                              cfg.SwapStereo,
+                                              0,
+                                              1);
         cfg.AudioOutputCompressor = xmlcfg.getpar("audio_output_compressor",
                                        cfg.AudioOutputCompressor,
                                        0,
                                        1);
-        cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
-                                            cfg.BankUIAutoClose,
-                                            0,
-                                            1);
+        cfg.BankUIAutoClose = (bool) xmlcfg.getpar("bank_window_auto_close",
+                                                   cfg.BankUIAutoClose,
+                                                   0,
+                                                   1);
 
         cfg.GzipCompression = xmlcfg.getpar("gzip_compression",
                                             cfg.GzipCompression,
@@ -344,20 +344,20 @@ void Config::readConfig(const char *filename)
                                            0,
                                            1);
 
-        cfg.SaveFullXml  = xmlcfg.getpar("SaveFullXml",
-                                           cfg.SaveFullXml,
-                                           0,
-                                           1);
+        cfg.SaveFullXml  = (bool) xmlcfg.getpar("SaveFullXml",
+                                                cfg.SaveFullXml,
+                                                0,
+                                                1);
 
-        cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
-                                          cfg.CheckPADsynth,
-                                          0,
-                                          1);
+        cfg.CheckPADsynth = (bool) xmlcfg.getpar("check_pad_synth",
+                                                 cfg.CheckPADsynth,
+                                                 0,
+                                                 1);
 
-        cfg.IgnoreProgramChange = xmlcfg.getpar("ignore_program_change",
-                                          cfg.IgnoreProgramChange,
-                                          0,
-                                          1);
+        cfg.IgnoreProgramChange = (bool) xmlcfg.getpar("ignore_program_change",
+                                                       cfg.IgnoreProgramChange,
+                                                       0,
+                                                       1);
 
 
         cfg.UserInterfaceMode = xmlcfg.getpar("user_interface_mode",

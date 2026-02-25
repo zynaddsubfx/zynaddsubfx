@@ -73,6 +73,9 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
+class  Sync;
+
+
 typedef float fftwf_real;
 typedef std::complex<fftwf_real> fft_t;
 
@@ -180,6 +183,11 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+/*
+ * Maximum length of the reverse delay effect
+ */
+#define MAX_REV_DELAY_SECONDS 4.0f
+
 #define MAX_PRESETTYPE_SIZE 30
 
 #define LOG_2 0.693147181f
@@ -196,7 +204,6 @@ typedef std::complex<fftwf_real> fft_t;
  * Envelope Limits
  */
 #define MAX_ENVELOPE_POINTS 40
-#define MIN_ENVELOPE_DB -400
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude
@@ -274,10 +281,6 @@ enum LegatoMsg {
 #endif
 
 
-
-#ifndef  O_BINARY
-#define O_BINARY 0
-#endif
 
 template<class T>
 class m_unique_array

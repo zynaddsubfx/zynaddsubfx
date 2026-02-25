@@ -78,13 +78,13 @@ class Microtonal
 
         //Parameters
         /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
-        unsigned char Pinvertupdown;
+        bool Pinvertupdown;
 
         /**the central key of the inversion*/
         unsigned char Pinvertupdowncenter;
 
-        /**0 for 12 key temperate scale, 1 for microtonal*/
-        unsigned char Penabled;
+        /**false for 12 key temperate scale, true for microtonal*/
+        bool Penabled;
 
         /**the note of "A" key*/
         unsigned char PAnote;
@@ -106,7 +106,7 @@ class Microtonal
         unsigned char Pmapsize;
 
         /**Mapping ON/OFF*/
-        unsigned char Pmappingenabled;
+        bool Pmappingenabled;
         /**Mapping (keys)*/
         short int Pmapping[128];
 

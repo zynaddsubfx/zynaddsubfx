@@ -25,6 +25,12 @@
 
 namespace zyn {
 
+#ifdef _MSC_VER
+#define STACKALLOC(type, name, size) type *name = (type*)(_alloca((size)*sizeof(type)))
+#else
+#define STACKALLOC(type, name, size) type name[size]
+#endif
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 
@@ -159,12 +165,19 @@ static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 
 char *rtosc_splat(const char *path, std::set<std::string>);
 
+/** Expands ~ prefix & ZYN_DATADIR in dirname */
+void expanddirname(std::string &dirname);
+
+/** Ensure that the directory name is suffixed by a
+ * directory separator */
+void normalizedirsuffix(std::string &dirname);
+
 /**
  * Port macros - these produce easy and regular port definitions for common
  * types
  */
 #define rParamZyn(name, ...) \
-  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
+  {STRINGIFY(name) "::i",  rProp(parameter) rDefaultProps rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 
 #define rPresetType \
 {"preset-type:", rProp(internal) rDoc("clipboard type of object"), 0, \

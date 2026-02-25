@@ -46,6 +46,8 @@ rtosc::Ports Phaser::ports = {
                            Phaser 5, Phaser 6,
                            APhaser 1, APhaser 2, APhaser 3, APhaser 4,
                            APhaser 5, APhaser 6)
+                  rProp(alias)
+                  rDefault(0)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -54,7 +56,8 @@ rtosc::Ports Phaser::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(64), rPreset(3, 39), rPreset(10, 25)),
+    rEffParVol(rDefaultDepends(preset),
+            rDefault(64), rPreset(3, 39), rPreset(10, 25)),
     rEffParPan(),
     rEffPar(lfo.Pfreq,       2, rShort("freq"),
             rPresets(36, 35, 31, 22, 20, 53, 14, 14, 9, 14, 127, 1),
@@ -134,8 +137,6 @@ void Phaser::analog_setup()
     offset[10] = 0.2762545f;
     offset[11] = 0.5215785f;
 
-    barber = 0;  //Deactivate barber pole phasing by default
-
     mis       = 1.0f;
     Rmin      = 625.0f; // 2N5457 typical on resistance at Vgs = 0
     Rmax      = 22000.0f; // Resistor parallel to FET
@@ -202,13 +203,6 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
         g.r += diff.r;
 
         Stereo<float> xn(input.l[i] * pangainL, input.r[i] * pangainR);
-
-        if(barber) {
-            g.l += 0.25;
-            g.l -= floorf(g.l);
-            g.r += 0.25;
-            g.r -= floorf(g.r);
-        }
 
         xn.l = applyPhase(xn.l, g.l, fb.l, hpf.l, yn1.l, xn1.l);
         xn.r = applyPhase(xn.r, g.r, fb.r, hpf.r, yn1.r, xn1.r);
@@ -471,7 +465,6 @@ void Phaser::changepar(int npar, unsigned char value)
         case 4:
             lfo.PLFOtype = value;
             lfo.updateparams();
-            barber = (2 == value);
             break;
         case 5:
             lfo.Pstereo = value;
@@ -504,7 +497,7 @@ void Phaser::changepar(int npar, unsigned char value)
             setdistortion(value);
             break;
         case 14:
-            Panalog = value;
+            Panalog = (value!=0);
             break;
     }
 }

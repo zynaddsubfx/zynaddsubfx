@@ -4,7 +4,7 @@ dpf_add_plugin(ZynChorus
         Chorus.cpp
 )
 
-target_include_directories(ZynChorus PUBLIC ".")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynChorus PRIVATE zynaddsubfx_core)
 

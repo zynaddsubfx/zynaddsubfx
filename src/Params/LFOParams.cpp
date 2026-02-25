@@ -78,7 +78,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
             "Frequency Randomness (calculated uniformly at each cycle)"),
     rParamF(delay, rShort("delay"), rSpecial(disable), rUnit(S),
-              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0),
+              rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0.0),
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
     rParamF(fadein, rShort("f.in"), rSpecial(disable), rUnit(S),
@@ -159,7 +159,7 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, false, loc_unspecified, time_)
 {
 }
 
@@ -172,7 +172,7 @@ LFOParams::LFOParams(float freq_,
                      float delay_,
                      float fadein_,
                      float fadeout_,
-                     char Pcontinous_,
+                     bool  Pcontinous_,
                      consumer_location_t loc,
                      const AbsTime *time_) : loc(loc),
                                              time(time_),
@@ -208,7 +208,7 @@ LFOParams::LFOParams(consumer_location_t loc,
         Ddelay      = delay_;
         Dfadein     = 0.0f;
         Dfadeout    = 10.0f;
-        Dcontinous  = 0;
+        Dcontinous  = false;
 
     };
 

@@ -20,6 +20,7 @@
 #define DISTRHO_PLUGIN_CLAP_ID "zynaddsubfx.fx.reverb"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
+#define DISTRHO_PLUGIN_WANT_TIMEPOS  1
 #define DISTRHO_PLUGIN_IS_RT_SAFE    1
 #define DISTRHO_PLUGIN_IS_SYNTH      0
 #define DISTRHO_PLUGIN_NUM_INPUTS    2

@@ -20,7 +20,7 @@
 namespace zyn {
 
 /**Echo Effect*/
-class Echo:public Effect
+class Echo final:public Effect
 {
     public:
         Echo(EffectParams pars);

@@ -4,7 +4,7 @@ dpf_add_plugin(ZynDistortion
         Distortion.cpp
 )
 
-target_include_directories(ZynDistortion PUBLIC ".")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynDistortion PRIVATE zynaddsubfx_core)
 

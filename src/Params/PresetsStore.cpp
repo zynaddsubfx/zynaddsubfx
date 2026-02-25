@@ -87,6 +87,7 @@ void PresetsStore::scanforpresets()
 
         //open directory
         string dirname = config.cfg.presetsDirList[i];
+        expanddirname(dirname);
         DIR   *dir     = opendir(dirname.c_str());
         if(dir == NULL)
             continue;
@@ -98,15 +99,7 @@ void PresetsStore::scanforpresets()
             if(filename.find(ftype) == string::npos)
                 continue;
 
-            //ensure proper path is formed
-            char tmpc = dirname[dirname.size() - 1];
-            const char *tmps;
-            if((tmpc == '/') || (tmpc == '\\'))
-                tmps = "";
-            else
-                tmps = "/";
-
-            string location = "" + dirname + tmps + filename;
+            string location = dirname + filename;
 
             //trim file type off of name
             string name_type = filename.substr(0, filename.find(ftype));
@@ -138,15 +131,10 @@ void PresetsStore::copypreset(XMLwrapper &xml, char *type, string name)
     name = legalizeFilename(name);
 
     //make path legal
-    const string dirname = config.cfg.presetsDirList[0];
-    char tmpc = dirname[dirname.size() - 1];
-    const char *tmps;
-    if((tmpc == '/') || (tmpc == '\\'))
-        tmps = "";
-    else
-        tmps = "/";
+    string dirname = config.cfg.presetsDirList[0];
+    expanddirname(dirname);
 
-    string filename("" + dirname + tmps + name + "." + &type[1] + ".xpz");
+    string filename("" + dirname + name + "." + &type[1] + ".xpz");
 
     xml.saveXMLfile(filename, config.cfg.GzipCompression);
 }

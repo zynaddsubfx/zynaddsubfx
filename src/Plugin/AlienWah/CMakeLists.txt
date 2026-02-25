@@ -4,7 +4,7 @@ dpf_add_plugin(ZynAlienWah
         AlienWah.cpp
 )
 
-target_include_directories(ZynAlienWah PUBLIC .)
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynAlienWah PRIVATE zynaddsubfx_core)
 

@@ -41,18 +41,18 @@ class AudioOut:public virtual Engine
 
         virtual void setAudioEn(bool nval) = 0;
         virtual bool getAudioEn() const    = 0;
-        
+
         bool isOutputCompressionEnabled = 0;
 
     protected:
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        const Stereo<float *> getNext();
+        Stereo<float *> getNext();
 
         const SYNTH_T &synth;
         int samplerate;
         int bufferSize;
-        
+
 };
 
 }

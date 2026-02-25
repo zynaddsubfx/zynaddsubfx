@@ -30,6 +30,8 @@ rtosc::Ports Reverb::ports = {
     {"preset::i", rOptions(Cathedral1, Cathedral2, Cathedral3,
             Hall1, Hall2, Room1, Room2, Basement,
             Tunnel, Echoed1, Echoed2, VeryLong1, VeryLong2)
+                  rDefault(0)
+                  rProp(alias)
                   rProp(parameter)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
@@ -39,9 +41,14 @@ rtosc::Ports Reverb::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(90), rPresets(80, 80, 80),
-               rPresetsAt(5, 100, 100, 110, 85, 95)),
-    rEffParPan(rPreset(8, 80)),
+    rPresetForVolume,
+    rEffParVol(rDefaultDepends(presetOfVolume),
+          rDefault(90),
+          rPresets(80, 80, 80),
+          rPresetsAt(5, 100, 100, 110, 85, 95),
+          rPresetsAt(16, 40, 40, 40, 45, 45),
+          rPresetsAt(21, 50, 50, 55, 42, 47, 45, 45, 45)),
+    rEffParPan(rDefaultDepends(preset), rPreset(8, 80)),
     rEffPar(Ptime,    2, rShort("time"), rLinear(0, 127),
             rPresets(63, 69, 69, 51, 53, 33, 21, 14, 84, 26, 40, 93, 111),
             "Length of Reverb"),
@@ -51,13 +58,13 @@ rtosc::Ports Reverb::ports = {
     rEffPar(Pidelayfb,4, rShort("i.fb"), rPresetsAt(8, 42, 71, 71), rDefault(0),
             "Feedback for first impulse"),
     rEffPar(Plpf,     7, rShort("lpf"),
-            rPreset(1, 85), rPresetsAt(62, 127, 51, 114, 114, 114),
+            rPreset(0, 85), rPresetsAt(6, 62, 127, 51, 114, 114, 114, 114),
             rDefault(127), "Low pass filter"),
     rEffPar(Phpf,     8, rShort("hpf"),
-            rPresets(5), rPresetsAt(2, 75, 21, 75), rPreset(7, 50),
+            rPresets(5), rPresetsAt(2, 75, 21, 75), rPreset(7, 5),
             rPreset(12, 90), rDefault(0), "High pass filter"),
-    rEffPar(Plohidamp,9, rShort("damp"), rDefault(0),
-            rPresets(83, 71, 78, 78, 71, 106, 77, 71, 78, 64, 88, 77, 74)
+    rEffPar(Plohidamp,9, rShort("damp"),
+            rPresets(83, 71, 78, 78, 71, 106, 77, 71, 78, 64, 88, 77, 74),
             "Dampening"),
     //Todo make this a selector
     rEffParOpt(Ptype,    10, rShort("type"),
@@ -193,7 +200,7 @@ void Reverb::out(const Stereo<float *> &smp)
     if(!Pvolume && insertion)
         return;
 
-    float inputbuf[buffersize];
+    STACKALLOC(float, inputbuf, buffersize);
     for(int i = 0; i < buffersize; ++i)
         inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
 

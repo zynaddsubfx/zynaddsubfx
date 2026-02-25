@@ -39,7 +39,8 @@ class ADnote:public SynthNote
          * @param pars Note Parameters
          * @param spars Synth Engine Agnostic Parameters*/
         ADnote(ADnoteParameters *pars, const SynthParams &spars,
-                WatchManager *wm=0, const char *prefix=0);
+                WatchManager *wm=0, const char *prefix=0,
+                bool constPowerMixing = true);
         /**Destructor*/
         ~ADnote();
 
@@ -101,7 +102,7 @@ class ADnote:public SynthNote
          * @param FMmode modulation type 0=Phase 1=Frequency*/
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode);
-        //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+        inline void ComputeVoiceOscillatorSync(int nvoice);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
@@ -259,6 +260,10 @@ class ADnote:public SynthNote
 
             Envelope *FMFreqEnvelope;
             Envelope *FMAmpEnvelope;
+
+
+            /* if Oscillator Sync is enabled */
+            bool syncEnabled;
 
             /********************************************************/
             /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */

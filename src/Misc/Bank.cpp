@@ -301,7 +301,6 @@ int Bank::newbank(string newbankdirname)
     bankdir = config->cfg.bankRootDirList[0];
 
     expanddirname(bankdir);
-    normalizedirsuffix(bankdir);
 
     bankdir += newbankdirname;
 #ifdef _WIN32
@@ -458,21 +457,13 @@ void Bank::scanrootdir(string rootdir)
         return;
 
     bankstruct bank;
-
-    const char *separator = "/";
-    if(rootdir.size()) {
-        char tmp = rootdir[rootdir.size() - 1];
-        if((tmp == '/') || (tmp == '\\'))
-            separator = "";
-    }
-
     struct dirent *fn;
     while((fn = readdir(dir))) {
         const char *dirname = fn->d_name;
         if(dirname[0] == '.')
             continue;
 
-        bank.dir  = rootdir + separator + dirname + '/';
+        bank.dir  = rootdir + dirname + '/';
         bank.name = dirname;
         //find out if the directory contains at least 1 instrument
         bool isbank = false;
@@ -572,25 +563,5 @@ void Bank::deletefrombank(int pos)
 Bank::ins_t::ins_t()
     :name(""), filename("")
 {}
-
-void Bank::expanddirname(std::string &dirname) {
-    if (dirname.empty())
-        return;
-
-    // if the directory name starts with a ~ and the $HOME variable is
-    // defined in the environment, replace ~ by the content of $HOME
-    if (dirname.at(0) == '~') {
-        char *home_dirname = getenv("HOME");
-        if (home_dirname != NULL) {
-            dirname = std::string(home_dirname) + dirname.substr(1);
-        }
-    }
-}
-
-void Bank::normalizedirsuffix(string &dirname) const {
-    if(((dirname[dirname.size() - 1]) != '/')
-       && ((dirname[dirname.size() - 1]) != '\\'))
-        dirname += "/";
-}
 
 }

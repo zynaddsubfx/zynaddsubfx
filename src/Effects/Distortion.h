@@ -19,7 +19,7 @@
 namespace zyn {
 
 /**Distortion Effect*/
-class Distortion:public Effect
+class Distortion final :public Effect
 {
     public:
         Distortion(EffectParams pars);

@@ -92,75 +92,120 @@ static const rtosc::Ports localPorts = {
             rPresetAtMulti(3, ad_global_freq, ad_voice_freq,
                               ad_voice_fm_freq,
                               sub_freq, sub_bandwidth),
+            rDepends(Pfreemode),
             rDefault(4),
             "Number of points in complex definition"),
     rParamZyn(Penvsustain, rDefaultDepends(loc),
             rPresetAtMulti(1, ad_global_freq, ad_voice_freq,
                               ad_voice_fm_freq,
                               sub_freq, sub_bandwidth),
+            rDepends(Pfreemode),
             rDefault(2),
             "Location of the sustain point"),
-    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
-    rParams(Penvval, MAX_ENVELOPE_POINTS, "Envelope Values"),
     rParamZyn(Penvstretch,  rShort("stretch"), rDefaultDepends(loc),
             rPresetAtMulti(0, ad_global_freq, ad_global_filter,
-                              ad_voice_freq, ad_voice_filter, ad_voice_fm_freq),
+                              ad_voice_freq, ad_voice_filter, ad_voice_fm_freq,
+                              sub_filter),
             rDefault(64),
             "Stretch with respect to frequency"),
     rToggle(Pforcedrelease, rShort("frcr"), rDefaultDepends(loc),
             rPresetAtMulti(true, ad_global_amp, ad_global_filter, ad_voice_amp,
-                                 ad_voice_fm_amp),
+                                 ad_voice_fm_amp, sub_filter),
             rDefault(false),
             "Force Envelope to fully evaluate"),
     rToggle(Plinearenvelope, rShort("lin/log"), rDefault(false),
             "Linear or Logarithmic Envelopes"),
     rToggle(Prepeating, rShort("repeat"), rDefault(false),
             "Repeat the Envelope"),
-    rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), "Attack Time"),
-    rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f), rDefaultDepends(loc),
+    rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), rDepends(Pfreemode),
+            "Attack Time"),
+    rParamF(A_dt,  rShort("a.dt"), rLogWithLogmin(0.f,41.0f, 0.0001f),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_freq, 0.254f),   rPreset(ad_global_filter, 0.127f),
               rPreset(ad_voice_freq, 0.127f),    rPreset(ad_voice_filter, 0.970f),
               rPreset(ad_voice_fm_freq, 3.620f), rPreset(ad_voice_fm_amp, 1.876f),
               rPreset(sub_freq, 0.254f),         rPreset(sub_bandwidth, 0.970f),
+              rPreset(sub_filter, 0.13 (0x1.041894p-3)),
               rDefault(0.0f),
               "Attack Time"),
 
-    rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(loc),
+    rParamZyn(PA_val, rShort("a.val"),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_voice_freq, 30),    rPreset(ad_voice_filter, 90),
               rPreset(ad_voice_fm_freq, 20),
               rPreset(sub_freq, 30),         rPreset(sub_bandwidth, 100),
               rDefault(64),
               "Attack Value"),
-    rParamDT(D_dt, rShort("d.dt"), rLinear(0,127), "Decay Time"),
-    rParamF(D_dt,  rShort("d.dt"), rLogWithLogmin(0.f, 41.0f, 0.0001f),  rDefaultDepends(loc),
+    rParamDT(D_dt, rShort("d.dt"), rLinear(0,127), rDepends(Pfreemode),
+              "Decay Time"),
+    rParamF(D_dt,  rShort("d.dt"), rLogWithLogmin(0.f, 41.0f, 0.0001f),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_amp, 0.127f),    rPreset(ad_global_filter, 0.970f),
               rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.970f),
               rPreset(ad_voice_fm_amp, 3.620f),
+              rPreset(sub_filter, 0.97),
               rDefault(0.009f),
               "Decay Time"),
-    rParamZyn(PD_val, rShort("d.val"), rDefaultDepends(loc),
+    rParamZyn(PD_val, rShort("d.val"),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rDefault(64), rPreset(ad_voice_filter, 40),
               "Decay Value"),
-    rParamZyn(PS_val, rShort("s.val"), rDefaultDepends(loc),
-              rDefault(64),
+    rParamZyn(PS_val, rShort("s.val"),
+              rDefaultDepends(loc), rDepends(Pfreemode), rDefault(64),
               rPresetAtMulti(127, ad_global_amp, ad_voice_amp, ad_voice_fm_amp),
               "Sustain Value"),
-    rParamDT(R_dt, rShort("r.dt"), rLinear(0,127), "Release Time"),
-    rParamF(R_dt,  rShort("r.dt"), rLogWithLogmin(0.f,41.0f,0.009f),  rDefaultDepends(loc),
+    rParamDT(R_dt, rShort("r.dt"), rLinear(0,127), rDepends(Pfreemode),
+              "Release Time"),
+    rParamF(R_dt,  rShort("r.dt"), rLogWithLogmin(0.f,41.0f,0.009f),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rPreset(ad_global_amp, 0.041f),
               rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.009f),
               rPreset(ad_voice_fm_freq, 1.876f), rPreset(ad_voice_fm_amp, 6.978f),
               rDefault(0.499f),
               "Release Time"),
-    rParamZyn(PR_val, rShort("r.val"), rDefaultDepends(loc),
+    rParamZyn(PR_val, rShort("r.val"),
+              rDefaultDepends(loc), rDepends(Pfreemode),
               rPresetAtMulti(40, ad_voice_filter, ad_voice_fm_freq),
               rDefault(64),
               "Release Value"),
+#undef rChangeCb
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); } \
+                  if(idx >= obj->Penvpoints) { obj->Penvpoints = idx + 1; }
+    rParamsDT(envdt,  MAX_ENVELOPE_POINTS, rProp(alias), "Envelope Delay Times"),
+    rArrayF(envdt, MAX_ENVELOPE_POINTS, rProp(parameter),
+            rEnabledBy(Pfreemode),
+            rDefault([0.0 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_freq, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 6.98 (0x1.be978ep+2) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_filter, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.97 (0x1.f0a3d8p-1) 0.01 (0x1.26e978p-7) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_fm_freq, [0.00 (0x0p+0) 3.62 (0x1.cf5c28p+1) 1.88 (0x1.e0418ap+0) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_voice_fm_amp, [0.00 (0x0p+0) 1.88 (0x1.e0418ap+0) 3.62 (0x1.cf5c28p+1) 6.98 (0x1.be978ep+2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_amp, [0.00 (0x0p+0) 0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.04 (0x1.4fdf3cp-5) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(ad_global_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_freq, [0.00 (0x0p+0) 0.25 (0x1.041894p-2) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_bandwidth, [0.00 (0x0p+0) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rPreset(sub_filter, [0.00 (0x0p+0) 0.13 (0x1.041894p-3) 0.97 (0x1.f0a3d8p-1) 0.50 (0x1.fef9dcp-2) 0.07 (0x1.242124p-4) 0.07 (0x1.242124p-4) ...]),
+            rDefaultDepends(loc), rDepends(Pfreemode,A_dt,D_dt,R_dt),
+            "Envelope Delay Times (ms)"),
+    rParams(Penvval, MAX_ENVELOPE_POINTS,
+        rEnabledBy(Pfreemode),
+        rDefault([64 64 ...]),
+        rPreset(ad_global_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_fm_amp, [0 127 127 0 64 64 ...]),
+        rPreset(ad_voice_fm_freq, [20 64 40 64 64 ...]),
+        rPreset(ad_voice_freq, [30 64 64 ...]),
+        rPreset(ad_voice_filter, [90 40 64 40 64 64 ...]),
+        rPreset(sub_bandwidth, [100 64 64 ...]),
+        rPreset(sub_freq, [30 64 64 ...]),
+        rDefaultDepends(loc) rDepends(Penvpoints,Pfreemode,PA_val,PD_val,PS_val,PR_val), "Envelope Values"),
+#undef rChangeCb
     {"Envmode:", rDoc("Envelope variant type"), NULL,
         rBegin;
         d.reply(d.loc, "i", env->Envmode);
         rEnd},
-
     {"envdt", rDoc("Envelope Delay Times (ms)"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
@@ -253,13 +298,12 @@ static const rtosc::Ports localPorts = {
 
         rEnd},
 };
-#undef  rChangeCb
 
 const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
-                               unsigned char Pforcedrelease_,
+                               bool Pforcedrelease_,
                                const AbsTime *time_):
         time(time_), last_update_timestamp(0)
 {
@@ -281,9 +325,9 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     Envmode         = ADSR_lin;
     Penvstretch     = Penvstretch_;
     Pforcedrelease  = Pforcedrelease_;
-    Pfreemode       = 1;
-    Plinearenvelope = 0;
-    Prepeating      = 0;
+    Pfreemode       = true;
+    Plinearenvelope = false;
+    Prepeating      = false;
 
     store2defaults();
 }
@@ -355,7 +399,7 @@ void EnvelopeParams::ADSRinit(float a_dt, float d_dt, char s_val, float r_dt)
     D_dt      = d_dt;
     PS_val    = s_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -369,7 +413,7 @@ void EnvelopeParams::ADSRinit_dB(float a_dt, float d_dt, char s_val, float r_dt)
     D_dt      = d_dt;
     PS_val    = s_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -383,7 +427,7 @@ void EnvelopeParams::ASRinit(char a_val, float a_dt, char r_val, float r_dt)
     A_dt      = a_dt;
     PR_val    = r_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 
     store2defaults();
@@ -404,7 +448,7 @@ void EnvelopeParams::ADSRinit_filter(char a_val,
     D_dt      = d_dt;
     R_dt      = r_dt;
     PR_val    = r_val;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
     store2defaults();
 }
@@ -417,7 +461,7 @@ void EnvelopeParams::ASRinit_bw(char a_val, float a_dt, char r_val, float r_dt)
     A_dt      = a_dt;
     PR_val    = r_val;
     R_dt      = r_dt;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
     store2defaults();
 }
@@ -495,7 +539,7 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
 }
 
 float EnvelopeParams::env_dB2rap(float db) {
-    return (powf(10.0f, db / 20.0f) - 0.01)/.99f;
+    return max(powf(10.0f, db / 20.0f) - 0.01,0.0)/.99f;
 }
 
 float EnvelopeParams::env_rap2dB(float rap) {
@@ -592,7 +636,7 @@ void EnvelopeParams::defaults()
     PD_val    = DD_val;
     PS_val    = DS_val;
     PR_val    = DR_val;
-    Pfreemode = 0;
+    Pfreemode = false;
     converttofree();
 }
 

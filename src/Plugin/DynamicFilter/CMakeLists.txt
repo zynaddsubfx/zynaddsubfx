@@ -4,7 +4,7 @@ dpf_add_plugin(ZynDynamicFilter
         DynamicFilter.cpp
 )
 
-target_include_directories(ZynDynamicFilter PUBLIC ".")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynDynamicFilter PRIVATE zynaddsubfx_core)
 

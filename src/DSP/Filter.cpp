@@ -59,7 +59,7 @@ Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
             filter->setgain(pars->getgain());
             break;
         case 4:
-            filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize);
+            filter = memory.alloc<CombFilter>(&memory, Ftype, 1000.0f, pars->getq(), srate, bufsize, pars->Plpf, pars->Phpf);
             filter->setgain(pars->getgain());
             break;
         default:

@@ -4,7 +4,7 @@ dpf_add_plugin(ZynReverb
         Reverb.cpp
 )
 
-target_include_directories(ZynReverb PUBLIC ".")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynReverb PRIVATE zynaddsubfx_core)
 

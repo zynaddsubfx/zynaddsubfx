@@ -4,7 +4,7 @@ dpf_add_plugin(ZynPhaser
         Phaser.cpp
 )
 
-target_include_directories(ZynPhaser PUBLIC ".")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
 target_link_libraries(ZynPhaser PRIVATE zynaddsubfx_core)
 

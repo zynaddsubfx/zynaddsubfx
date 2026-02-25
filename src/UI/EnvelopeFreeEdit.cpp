@@ -287,7 +287,7 @@ int EnvelopeFreeEdit::handle(int event)
       case FL_DRAG:
           if (currentpoint>=0){
               old_mod_state = mod_state;
-              mod_state = ctrldown << 1 | altdown;
+              mod_state = ctrldown << 1 | (int)altdown;
               if (old_mod_state != mod_state) {
                   cpx=x_;
                   cpy=y_;
