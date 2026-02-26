@@ -115,7 +115,8 @@ void CombFilter::setfreq_and_q(float freq, float q)
 void CombFilter::setfreq(float freq)
 {
     float ff = limit(freq, 25.0f, 40000.0f);
-    delay = ((float)samplerate)/ff - lpfDelay;
+    freq = ff;
+    delay = ((float)samplerate)/ff - lpfDelay - hpfDelay;
 }
 
 void CombFilter::setq(float q_)
@@ -168,13 +169,22 @@ void CombFilter::sethpf(unsigned char _Phpf)
     Phpf = _Phpf;
     if(Phpf == 0) { //No HighPass
         memory.dealloc(hpf);
+
+        hpfDelay = 0.0f; // Reset delay
     } else {
         const float fr = expf(sqrtf(Phpf / 127.0f) * logf(10000.0f)) + 20.0f;
-        if(hpf == NULL)
+
+        if(hpf == nullptr)
             hpf = memory.alloc<AnalogFilter>(1, fr, 1, 0, samplerate, buffersize);
         else
             hpf->setfreq(fr);
+
+        const float a = expf(-2.0f * PI * fr / samplerate);
+
+        hpfDelay = -a / (1.0f + a);
+
     }
+    setfreq(freq);
 }
 
 void CombFilter::setlpf(unsigned char _Plpf)
@@ -192,7 +202,9 @@ void CombFilter::setlpf(unsigned char _Plpf)
             lpf->setfreq(fr);
         const float a = expf(-2.0f * PI * fr / samplerate);
         lpfDelay = a / (1.0f - a);
+
     }
+    setfreq(freq);
 }
 
 };
