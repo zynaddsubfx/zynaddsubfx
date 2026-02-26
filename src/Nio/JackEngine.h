@@ -15,10 +15,7 @@
 #define JACK_ENGINE_H
 
 #include <string>
-#include <pthread.h>
-#include <semaphore.h>
 #include <jack/jack.h>
-#include <pthread.h>
 
 #include "MidiIn.h"
 #include "AudioOut.h"
