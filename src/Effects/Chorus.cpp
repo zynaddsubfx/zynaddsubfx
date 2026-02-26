@@ -56,8 +56,8 @@ rtosc::Ports Chorus::ports = {
             rPreset(10, 25) rPreset(11, 25)
             rDefault(0), "Frequency Randomness"),
     rEffParOpt(PLFOtype, 4, rShort("shape"),
-            rOptions(sine, tri),
-            rPresets(sine, sine, tri, sine, sine, sine, tri, tri, tri, sine, tri, tri),
+            rOptions(sine, tri, noise),
+            rPresets(sine, sine, tri, sine, sine, sine, tri, tri, tri, sine),
             "LFO Shape"),
     rEffPar(PStereo,  5, rShort("stereo"),
             rPresets(90, 98, 42, 42, 50, 60, 40, 94, 62, 24, 24, 24), "Stereo Mode"),
