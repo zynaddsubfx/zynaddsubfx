@@ -62,6 +62,7 @@ class Sympathetic final:public Effect
         unsigned char Punison_frequency_spread;
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
+        unsigned char Pscale;        //tuning scale of the string frequencies 0=generic, 1=piano, 2=guitar, 
 
         unsigned char spread, spread_old;
 
