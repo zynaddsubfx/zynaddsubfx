@@ -21,7 +21,8 @@
 
 namespace zyn {
 
-#define POLYMODES FIFO, \
+#define POLYMODES LEGACY, \
+FIFO, \
 LIFO, \
 SMART
 
@@ -144,7 +145,7 @@ class Controller
             int data;
             unsigned char portamento;
             /**Whether the portamento midi events are received or not*/
-            unsigned char polyMode = SMART;
+            unsigned char polyMode = LEGACY;
             /**Mode how polyphonic portamento starts*/
             unsigned char receive;
             /**Whether legato playing is needed to get portamento*/

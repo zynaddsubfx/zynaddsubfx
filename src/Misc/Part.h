@@ -274,11 +274,17 @@ class Part
         // Keep legato portamento separate as it works differently
         // PortamentoRealtime *legatoportamento;  // KEEP this existing member
 
-        // Helper methods for polyphonic portamento
-        PortamentoRealtime* createPortamentoForNote(float target_freq_log2);
+    // Helper methods for polyphonic portamento
+    // If isRunningNote is true, this indicates there is at least one running
+    // note in the pool (useful for legacy behavior which prefers running
+    // notes as portamento sources).
+    PortamentoRealtime* createPortamentoForNote(float target_freq_log2,
+                           bool isRunningNote);
         void recordNoteRelease(float freq_log2, PortamentoRealtime *port_ptr);
 
-
+        float oldfreq_log2;    // previous note pitch, used for portamento
+        float oldportamentofreq_log2; // previous portamento pitch
+        PortamentoRealtime *oldportamento; // previous portamento
 
         PortamentoRealtime *legatoportamento; // last used legato portamento
 

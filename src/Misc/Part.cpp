@@ -341,6 +341,9 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* 
     silent = false;
     legatoportamento = NULL;
 
+    oldfreq_log2 = -1.0f;
+    oldportamento = NULL;
+
     cleanup();
 
     Pname = new char[PART_MAX_NAME_LEN];
@@ -533,9 +536,6 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
 
         for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
             if (!recent_notes[i].available) continue;
-
-                //~ printf("Pool entry %d: freq=%f, time=%d\n", i, recent_notes[i].freq_log2, recent_notes[i].timestamp);
-
             if (recent_notes[i].timestamp < oldest_time) {
                 oldest = &recent_notes[i];
                 oldest_time = recent_notes[i].timestamp;
@@ -598,37 +598,67 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
 }
 
 // HELPER method to create portamento for individual notes
-PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2)
+PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
+                                                 bool isRunningNote)
 {
-    // Find best source frequency from recent note pool
+    // Legacy mode prefers currently-playing notes as sources (to match old
+    // behaviour / KitTest expectations). Non-legacy modes prefer recent
+    // released notes first and fall back to playing notes.
+    const unsigned char mode = ctl.portamento.polyMode;
+
+    // Helper to create a PortamentoRealtime from oldfreq (base) and
+    // oldportamento-adjusted freq. The threshold check uses oldfreq_log2
+    // while the resulting initial freqdelta uses oldportamentofreq_log2.
+    auto make_from_source = [&](float oldfreq_log2, float oldportamentofreq_log2)->PortamentoRealtime* {
+        Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2,
+                              oldportamentofreq_log2, target_freq_log2);
+        if (!portamento.active)
+            return nullptr;
+        return memory.alloc<PortamentoRealtime>(
+            this, memory,
+            [](PortamentoRealtime *realtime) {
+                // Cleanup callback - nothing special to do here
+            },
+            portamento
+        );
+    };
+
+    // Try recent released notes first (for non-legacy modes and as fallback)
     RecentNotePool::RecentNote* source = recent_note_pool.getBestSource(target_freq_log2,
-                                            ctl.portamento.polyMode);
-
-    if (!source) {
-        //~ printf("No source found in recent_note_pool\n");
-        return nullptr;
+                                            mode);
+    if (source) {
+        // RecentNotePool stores the final frequency (including any portamento
+        // offset). We attempt to recover the base frequency if the stored
+        // portamento_ptr is available; otherwise fall back to using the
+        // stored freq for both parameters (historic behaviour).
+        float oldportamentofreq = source->freq_log2;
+        float base_freq = source->freq_log2;
+        if (source->portamento_ptr) {
+            // If the released note stored a pointer to its realtime portamento,
+            // subtract its current freqdelta to recover the base frequency.
+            base_freq = source->freq_log2 - source->portamento_ptr->portamento.freqdelta_log2;
+        }
+        return make_from_source(base_freq, oldportamentofreq);
     }
 
+    // For non-legacy modes try playing notes as a last resort
+    if (mode != LEGACY) {
+        for (auto &d : notePool.activeDesc()) {
+            if (!d.playing()) continue;
 
-    float source_freq = source->freq_log2;
+            float base_freq = log2f(440.0f) + (d.note - 69.0f) / 12.0f;
+            float oldportamentofreq = base_freq;
+            if (d.portamentoRealtime && d.portamentoRealtime->portamento.active)
+                oldportamentofreq += d.portamentoRealtime->portamento.freqdelta_log2;
 
-
-    // Create portamento instance
-    Portamento portamento(ctl, synth, true, source_freq,
-                         source_freq, target_freq_log2);
-
-    if (!portamento.active) {
-        return nullptr;
+            PortamentoRealtime* rt = make_from_source(base_freq, oldportamentofreq);
+            if (rt)
+                return rt;
+        }
     }
 
-    return memory.alloc<PortamentoRealtime>(
-        this, memory,
-        [](PortamentoRealtime *realtime) {
-            // Cleanup callback - just null out any references
-            // The recent note pool will handle frequency tracking
-        },
-        portamento
-    );
+    // No suitable source available
+    return nullptr;
 }
 
 /*
@@ -672,21 +702,22 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
     // Advance time counter for recent note pool
     recent_note_pool.advance();
 
-    // For legato mode, use existing single portamento logic
-    if(doingLegato) {
-        PortamentoRealtime *portamento_realtime = NULL;
+    /* check if first note is played */
+    if(oldfreq_log2 < 0.0f)
+        oldfreq_log2 = note_log2_freq;
 
-        // Legacy single-portamento logic for legato mode
-        float oldfreq_log2 = note_log2_freq; // fallback
-        float oldportamentofreq_log2 = oldfreq_log2;
+    PortamentoRealtime *portamento_realtime = NULL;
 
-        // Try to get frequency from existing legato portamento
-        if (legatoportamento && legatoportamento->portamento.active) {
-            oldportamentofreq_log2 += legatoportamento->portamento.freqdelta_log2;
+    if (oldportamento && oldportamento->portamento.active) {
+            oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
         }
 
         Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2,
                              oldportamentofreq_log2, note_log2_freq);
+
+    // For legato mode, use existing single portamento logic
+    if(doingLegato || ctl.portamento.polyMode == LEGACY) {
+
         if(portamento.active) {
             if (legatoportamento) {
                 portamento_realtime = legatoportamento;
@@ -700,16 +731,18 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
                              part->legatoportamento = NULL;
                      },
                      portamento);
-                legatoportamento = portamento_realtime;
+                if(doingLegato) legatoportamento = portamento_realtime;
             }
         }
 
         Portamento *portamentoptr = portamento_realtime ?
             &portamento_realtime->portamento : nullptr;
 
-        LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
-        notePool.applyLegato(note, pars, portamento_realtime);
-        return true;
+        if (doingLegato) {
+            LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
+            notePool.applyLegato(note, pars, portamento_realtime);
+            return true;
+        }
     }
 
     // We know now that we are not doing legato
@@ -735,8 +768,14 @@ bool Part::NoteOnInternal(note_t note, unsigned char velocity, float note_log2_f
         limit_voices(note);
 
         try {
-            PortamentoRealtime* port_rt = createPortamentoForNote(note_log2_freq);
+            PortamentoRealtime* port_rt = portamento_realtime ? portamento_realtime : createPortamentoForNote(note_log2_freq,
+                                                                 isRunningNote);
             Portamento* port_ptr = port_rt ? &port_rt->portamento : nullptr;
+
+    // Save note freq and pointer to portamento state for next note
+    oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = port_rt;
 
             if(item.Padenabled) {
 

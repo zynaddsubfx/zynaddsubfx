@@ -86,7 +86,7 @@ const rtosc::Ports Controller::ports = {
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
-    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(SMART),
+    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(LEGACY),
         "Polyphonic Mode"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
@@ -146,6 +146,7 @@ void Controller::defaults()
     NRPN.receive                 = 1;
 
     portamento.portamento        = 0;
+    portamento.polyMode          = LEGACY;
     portamento.automode          = 1;
     portamento.proportional      = 0;
     portamento.propRate          = 80;
