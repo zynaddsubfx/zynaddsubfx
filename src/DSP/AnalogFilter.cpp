@@ -22,6 +22,7 @@
 
 
 const float MAX_FREQ = 20000.0f;
+const int windowSize = 8192;
 
 namespace zyn {
 
@@ -68,7 +69,7 @@ void AnalogFilter::cleanup()
 }
 
 AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
-        int stages, float gain, float fs, int &order)
+        int stages, float gain, float fs, int &order, bool loudnessCompEnabled)
 {
     AnalogFilter::Coeff coeff;
     bool  zerocoefs = false; //this is used if the freq is too high
@@ -261,13 +262,101 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
             assert(false && "wrong type for a filter");
             break;
     }
+
+    if (loudnessCompEnabled && type >= 6)
+{
+    // Bark band center frequencies (24 critical bands of human hearing)
+    // These represent the psychoacoustic frequency resolution of the human ear
+    const float barkCenterFreq[] = {
+        50.0f, 150.0f, 250.0f, 350.0f, 450.0f, 570.0f, 700.0f, 840.0f,
+        1000.0f, 1170.0f, 1370.0f, 1600.0f, 1850.0f, 2150.0f, 2500.0f, 2900.0f,
+        3400.0f, 4000.0f, 4800.0f, 5800.0f, 7000.0f, 8500.0f, 10500.0f, 13500.0f
+    };
+
+    // Bark band bandwidths (approximate ERB - Equivalent Rectangular Bandwidth)
+    // These widths correspond to human frequency resolution at each critical band
+    const float barkBandwidth[] = {
+        80.0f,  90.0f,  100.0f, 110.0f, 120.0f, 130.0f, 140.0f, 150.0f,
+        160.0f, 170.0f, 180.0f, 190.0f, 200.0f, 210.0f, 220.0f, 230.0f,
+        240.0f, 250.0f, 260.0f, 270.0f, 280.0f, 290.0f, 300.0f, 310.0f
+    };
+
+    const int numBarkBands = sizeof(barkCenterFreq) / sizeof(float);
+
+    float referenceLoudness = 0.0f;  // Loudness of flat frequency response
+    float filterLoudness = 0.0f;     // Loudness of current filter response
+
+    // Calculate loudness for each Bark band
+    for (int band = 0; band < numBarkBands; ++band)
+    {
+        float centerFreq = barkCenterFreq[band];
+        float bandwidth = barkBandwidth[band];
+
+        // Get magnitude response at Bark band center frequency
+        // calculateH returns |H(f)|^(stages+1), so we need to convert to linear magnitude
+        float magnitudeResponse = AnalogFilter::calculateH(centerFreq, fs, c, d, stages);
+        float linearMagnitude = 0.0f;
+
+        if (stages == 0) {
+            // stages=0: calculateH returns |H(f)| directly
+            linearMagnitude = sqrtf(magnitudeResponse);
+        } else {
+            // stages>=1: calculateH returns |H(f)|^(stages+1)
+            // Convert back to linear magnitude: |H(f)| = response^(1/(stages+1))
+            linearMagnitude = powf(magnitudeResponse, 0.5f / (stages + 1.0f));
+        }
+
+        // Get psychoacoustic weighting for this frequency
+        float weighting = calculateBS1770Weighting(centerFreq);
+
+        // Accumulate reference loudness (flat response = magnitude 1.0)
+        referenceLoudness += 1.0f * weighting * bandwidth;
+
+        // Accumulate filter loudness (current filter response)
+        filterLoudness += linearMagnitude * weighting * bandwidth;
+    }
+
+    // Calculate compensation factor
+    // This factor will scale the filter to have the same overall loudness as flat response
+    float compensationFactor = 1.0f;
+    if (filterLoudness > 0.0f) {
+        compensationFactor = referenceLoudness / filterLoudness;
+
+        // Apply reasonable limits to prevent extreme gain values
+        compensationFactor = fmaxf(0.1f, fminf(10.0f, compensationFactor));
+    }
+
+    // Debug output to verify compensation behavior
+    //~ printf("Bark Band Loudness Compensation:\n");
+    //~ printf("  Reference Loudness: %.6f\n", referenceLoudness);
+    //~ printf("  Filter Loudness:    %.6f\n", filterLoudness);
+    //~ printf("  Compensation Factor: %.6f\n", compensationFactor);
+    //~ printf("  Filter Gain Param:  %.6f\n", gain);
+
+    // Apply compensation to feedforward coefficients only
+    // This preserves the filter characteristics while adjusting overall loudness
+    c[0] *= compensationFactor;
+    c[1] *= compensationFactor;
+    c[2] *= compensationFactor;
+}
+
+    // return result including gain
     return coeff;
+}
+
+void AnalogFilter::setEqualPower(bool loudnessCompEnabled_)
+{
+    if(loudnessCompEnabled != loudnessCompEnabled_)
+    {
+        loudnessCompEnabled = loudnessCompEnabled_;
+        recompute = true;
+    }
 }
 
 void AnalogFilter::computefiltercoefs(float freq, float q)
 {
     coeff = AnalogFilter::computeCoeff(type, freq, q, stages, gain,
-            samplerate_f, order);
+            samplerate_f, order, loudnessCompEnabled);
 }
 
 
@@ -345,8 +434,9 @@ void AnalogFilter::setstages(int stages_)
     }
 }
 
-inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4])
+inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4], float &sumIn, float &sumOut, float window)
 {
+    sumIn += src*src*window;
     work[3] = src*coeff[0]
         + work[0]*coeff[1]
         + work[1]*coeff[2]
@@ -354,10 +444,12 @@ inline void AnalogBiquadFilterA(const float coeff[5], float &src, float work[4])
         + work[3]*coeff[4];
     work[1] = src;
     src     = work[3];
+    sumOut += src*src;
 }
 
-inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
+inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4], float &sumIn, float &sumOut, float window)
 {
+    sumIn += src*src*window;
     work[2] = src*coeff[0]
         + work[1]*coeff[1]
         + work[0]*coeff[2]
@@ -365,6 +457,7 @@ inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
         + work[2]*coeff[4];
     work[0] = src;
     src     = work[2];
+    sumOut += src*src;
 }
 
 void AnalogFilter::filterSample(float& smp)
@@ -396,30 +489,74 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist, float f, unsigned i
 
     if(order == 1) {  //First order filter
         for(unsigned int i = 0; i < bufsize; ++i) {
+            int windowIndex = (windowPos + i) % windowSize;
+            float windowPhase = float(windowIndex) / float(windowSize);
+            const float window = 0.5f * (1.0f - cosf(2.0f * M_PI * windowPhase));
+
+            sumIn += smp[i]*smp[i]*window;
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
                        + hist.y1 * coeff.d[1];
             hist.y1 = y0;
             hist.x1 = smp[i];
             smp[i]  = y0;
+            sumOut += smp[i]*smp[i]*window;
+
+            if (windowIndex==0 && loudnessCompEnabled)
+            {
+                compensationfactor = sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                printf("compensationfactor: %f\n", compensationfactor);
+                sumIn = 0.0f;
+                sumOut = 0.0f;
+            }
+            else compensationfactor = 1.0f;
+
         }
     } else if(order == 2) {//Second order filter
         const float coeff_[5] = {coeff.c[0], coeff.c[1], coeff.c[2],  coeff.d[1], coeff.d[2]};
         float work[4]  = {hist.x1, hist.x2, hist.y1, hist.y2};
+        float window = 0.0f;
+
         for(unsigned int i = 0; i < bufsize; i+=8) {
-            AnalogBiquadFilterA(coeff_, smp[i + 0], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 1], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 2], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 3], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 4], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 5], work);
-            AnalogBiquadFilterA(coeff_, smp[i + 6], work);
-            AnalogBiquadFilterB(coeff_, smp[i + 7], work);
+            for(int j = 0; j < 8; j++) {
+                int windowIndex = (windowPos + i + j) % windowSize;
+                window = 0.5f * (1.0f - cosf(2.0f * M_PI * windowIndex / (windowSize - 1)));
+
+                if(j % 2 == 0) {
+                    AnalogBiquadFilterA(coeff_, smp[i + j], work, sumIn, sumOut, window);
+                } else {
+                    AnalogBiquadFilterB(coeff_, smp[i + j], work, sumIn, sumOut, window);
+                }
+
+                if (windowIndex == 0 && loudnessCompEnabled) {
+
+                    // poor persons IIR filtering
+                    compensationfactor = 0.95f * compensationfactor + 0.05f * sqrt(sumIn/windowSize)/sqrt(sumOut/windowSize);
+                    sumIn *= 0.1f;
+                    sumOut *= 0.1f;
+                }
+                else compensationfactor = 1.0f;
+            }
         }
+
         hist.x1 = work[0];
         hist.x2 = work[1];
         hist.y1 = work[2];
         hist.y2 = work[3];
     }
+
+    if ( loudnessCompEnabled && sumOut > bufsize/256)
+    {
+
+        for(unsigned int i = 0; i < bufsize; ++i) {
+            int windowIndex = (windowPos + i) % windowSize;
+            const float t = float(windowIndex) / (windowSize - 1);
+            const float interpolatedFactor = compensationfactor_hist + t * (compensationfactor - compensationfactor_hist);
+            smp[i] *= (interpolatedFactor);
+        }
+        compensationfactor_hist = compensationfactor;
+    }
+
+    windowPos += bufsize;
 }
 
 void AnalogFilter::filterout(float *smp)
@@ -446,24 +583,41 @@ void AnalogFilter::filterout(float *smp)
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
 }
-
-float AnalogFilter::H(float freq)
+float AnalogFilter::calculateH(float freq, float fs, const float c[3], const float d[3], int stages)
 {
-    float fr = freq / samplerate_f * PI * 2.0f;
-    float x  = coeff.c[0], y = 0.0f;
+    float fr = freq / fs * PI * 2.0f;
+    float x = c[0], y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x += cosf(n * fr) * coeff.c[n];
-        y -= sinf(n * fr) * coeff.c[n];
+        x += cosf(n * fr) * c[n];
+        y -= sinf(n * fr) * c[n];
     }
     float h = x * x + y * y;
     x = 1.0f;
     y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x -= cosf(n * fr) * coeff.d[n];
-        y += sinf(n * fr) * coeff.d[n];
+        x -= cosf(n * fr) * d[n];
+        y += sinf(n * fr) * d[n];
     }
     h = h / (x * x + y * y);
     return powf(h, (stages + 1.0f) / 2.0f);
+}
+
+float AnalogFilter::H(float freq)
+{
+    return calculateH(freq, samplerate_f, coeff.c, coeff.d, stages);
+}
+
+float AnalogFilter::calculateBS1770Weighting(float freq)
+{
+    // ITU-R BS.1770 High-frequency shelf filter
+    //~ float f2 = freq * freq;
+
+    // RLB Weighting (Revised Low Frequency B-weighting)
+    float numerator = 1.0f;
+    float denominator = 1.0f + (12194.0f / freq) * (12194.0f / freq);
+
+    float weighting = numerator / denominator;
+    return weighting * weighting;
 }
 
 }
