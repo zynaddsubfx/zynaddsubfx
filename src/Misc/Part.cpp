@@ -615,7 +615,7 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
             return nullptr;
         return memory.alloc<PortamentoRealtime>(
             this, memory,
-            [](PortamentoRealtime *realtime) {
+            []([[maybe_unused]]PortamentoRealtime *realtime) {
                 // Cleanup callback - nothing special to do here
             },
             portamento
@@ -712,7 +712,6 @@ bool Part::NoteOnInternal(note_t note,
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
     PortamentoRealtime *portamento_realtime = NULL;
-    //~ Portamento *portamentoptr = NULL;
 
     if (oldportamento && oldportamento->portamento.active) {
             oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
@@ -770,8 +769,6 @@ bool Part::NoteOnInternal(note_t note,
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
-        //~ SynthParams pars{memory, ctl, synth, time, vel,
-            //~ portamentoptr, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         // Enforce voice limit, before we trigger new note
