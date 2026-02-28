@@ -145,6 +145,7 @@ class Controller
             int  data;
             bool portamento;
             unsigned char polyMode = LEGACY;
+            unsigned char glissando = 0;
             /**Whether the portamento midi events are received or not*/
             bool receive;
             /**Whether legato playing is needed to get portamento*/

@@ -88,6 +88,8 @@ const rtosc::Ports Controller::ports = {
         "Portamento Enable"),
     rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(LEGACY),
         "Polyphonic Mode"),
+    rParamZyn(portamento.glissando,     rShort("gliss"), rDefault(0),
+        "Portamento <-> Glissando"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
