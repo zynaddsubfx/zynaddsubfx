@@ -137,6 +137,14 @@ void Portamento::update(void)
     }
 }
 
+void Portamento::finish(void)
+{
+    if(!active)
+        return;
+    dx *= 100.0f;
+    update();
+}
+
 PortamentoRealtime::PortamentoRealtime(void *handle,
                                        Allocator &memory,
                                        std::function<void(PortamentoRealtime *)> cleanup,

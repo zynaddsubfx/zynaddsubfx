@@ -905,6 +905,18 @@ void Part::ReleaseAllKeys(void)
     }
 }
 
+/*
+ * Thos tells the portamento to jump to target frequency
+ */
+void Part::FinishPortamento(void)
+{
+    for(auto &desc:notePool.activeDesc()) {
+        if(!desc.playing())
+            continue;
+        notePool.finishPortamento(desc);
+    }
+}
+
 void Part::PolyphonicAftertouch(note_t note,
                 unsigned char velocity)
 {
@@ -977,6 +989,9 @@ void Part::SetController(unsigned int type, int par)
             ctl.setsustain(par);
             if(ctl.sustain.sustain == 0)
                 ReleaseSustainedKeys();
+            else if (true)//ctl.sustain.finishesPortamento)
+                FinishPortamento();
+
             break;
         case C_allsoundsoff:
             AllNotesOff(); //Panic

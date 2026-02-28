@@ -122,6 +122,8 @@ class Part
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
+        void FinishPortamento() REALTIME;
+
         /* The synthesizer part output */
         void ComputePartSmps() REALTIME; //Part output
 
