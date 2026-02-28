@@ -491,7 +491,7 @@ Part::~Part()
     }
 }
 
-static void assert_kit_sanity(const Part::Kit *kits)
+static void assert_kit_sanity([[maybe_unused]] const Part::Kit *kits)
 {
     for(int i=0; i<NUM_KIT_ITEMS; ++i) {
         //an enabled kit must have a corresponding parameter object

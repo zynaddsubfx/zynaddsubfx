@@ -281,7 +281,7 @@ protected:
       Load a program.
       The host may call this function from any context, including realtime processing.
     */
-    void loadProgram(uint32_t index) override
+    void loadProgram([[maybe_unused]]uint32_t index) override
     {
         setState(nullptr, defaultState);
         /*
