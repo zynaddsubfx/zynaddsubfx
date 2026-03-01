@@ -43,6 +43,11 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
+/**
+ * @brief The Part class represents a single instrument slot in the synthesizer.
+ * It manages MIDI routing, effects, controllers, and a "Kit" of up to 16
+ * sound engines (ADsynth, SUBsynth, PADsynth).
+ */
 #define rObject Part
 static const Ports partPorts = {
     rSelf(Part, rEnabledBy(Penabled)),
@@ -524,6 +529,12 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
     return synth_usage;
 }
 
+/**
+ * @brief Selects the frequency source for the next portamento glide based on the chosen mode.
+ * @param target_freq_log2 The frequency of the new note.
+ * @param mode The selection strategy (FIFO, LIFO, or SMART).
+ * @return A pointer to a recently released note, or nullptr if none found.
+ */
 RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2,
                                                          unsigned char mode)
 {
@@ -596,7 +607,14 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
     }
 }
 
-// HELPER method to create portamento for individual notes
+/**
+ * @brief Factory method for per-note portamento instances.
+ * Handles frequency recovery for released notes to ensure smooth glides even if
+ * the source note was itself in the middle of a glide.
+ * @param target_freq_log2 Destination frequency.
+ * @param isRunningNote True if other notes are currently active in this Part.
+ * @return An allocated PortamentoRealtime object or nullptr.
+ */
 PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
                                                  bool isRunningNote)
 {
@@ -660,8 +678,15 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
     return nullptr;
 }
 
-/*
- * Note On Messages
+/**
+ * @brief Internal handler for MIDI Note On events.
+ * * Logic flow:
+ * 1. Checks range and polyphony limits.
+ * 2. Updates the monophonic/legato note stack (monomem).
+ * 3. Handles old note releases for Mono/Legato modes.
+ * 4. Resolves Portamento source (Global vs. Polyphonic).
+ * 5. Iterates through the Kit items and triggers active engines (AD, SUB, PAD).
+ * * @return true if at least one note was successfully triggered.
  */
 bool Part::NoteOnInternal(note_t note,
                   unsigned char velocity,
@@ -1139,8 +1164,10 @@ void Part::verifyKeyMode(void)
 }
 
 
-/*
- * Set Part's key limit
+/**
+ * @brief Enforces the voice and key limits for the part.
+ * If the number of active notes exceeds the limit, the oldest notes are
+ * moved to a "releasing" state to make room.
  */
 void Part::setkeylimit(unsigned char Pkeylimit_)
 {
