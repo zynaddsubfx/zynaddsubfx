@@ -989,7 +989,7 @@ void Part::SetController(unsigned int type, int par)
             ctl.setsustain(par);
             if(ctl.sustain.sustain == 0)
                 ReleaseSustainedKeys();
-            else if (true)//ctl.sustain.finishesPortamento)
+            else if (ctl.sustain.stopsPortamento)
                 FinishPortamento();
 
             break;

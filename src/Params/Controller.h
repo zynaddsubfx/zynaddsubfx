@@ -138,7 +138,7 @@ class Controller
         struct { //Sustain
             int  data, sustain;
             bool receive;
-            bool finishesPortamento;
+            bool stopsPortamento;
         } sustain;
 
         struct { /**<Portamento*/

@@ -82,6 +82,8 @@ const rtosc::Ports Controller::ports = {
         "Sustain MIDI Receive"),
 #undef rChangeCb
 #define rChangeCb rChangeCbBase
+    rToggle(sustain.stopsPortamento, rDefault(false),
+        "Sustain finishes Portamento"),
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
