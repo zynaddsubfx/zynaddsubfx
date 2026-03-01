@@ -74,6 +74,8 @@ void Portamento::init(const Controller &ctl,
     if((ctl.portamento.pitchthreshtype == 1) && (absdeltanotefreq_log2 + 0.00001f < threshold_log2))
         return;
 
+    q = ctl.portamento.glissando / 127.0f;  // 0..1
+
     x = 0.0f;
     dx = synth.buffersize_f / (portamentotime * synth.samplerate_f);
     origfreqdelta_log2 = deltafreq_log2;
@@ -87,12 +89,60 @@ void Portamento::update(void)
     if(!active)
         return;
 
+    // Original portamento progress (0 to 1 over total time)
     x += dx;
     if(x > 1.0f) {
-        x    = 1.0f;
+        x = 1.0f;
         active = false;
     }
-    freqdelta_log2 = (1.0f - x) * origfreqdelta_log2;
+
+    // Parameter: 0 = pure portamento (continuous), 1 = pure glissando (stepped)
+    float hold_ratio = q;  // 0..1
+
+    // Calculate number of semitone steps
+    float total_semitones = fabsf(origfreqdelta_log2 * 12.0f);
+    int num_steps = (int)ceilf(total_semitones);
+
+    if(num_steps > 0 && hold_ratio > 0.001f) {
+        // Position within current step (0..1)
+        float step_position = x * num_steps;
+        int current_step = (int)floorf(step_position);
+        float step_progress = step_position - current_step;  // 0..1 within step
+
+        // Glissando curve: hold phase + slide phase
+        float effective_progress;
+
+        if(step_progress < hold_ratio) {
+            // Hold phase: constant frequency at current semitone
+            effective_progress = (float)current_step / num_steps;
+        } else {
+            // Slide phase: transition to next semitone
+            float slide_progress = (step_progress - hold_ratio) / (1.0f - hold_ratio);
+            effective_progress = (current_step + slide_progress) / num_steps;
+        }
+
+        // Ensure we reach exactly 1.0 at the end
+        if(current_step >= num_steps - 1) {
+            if(step_progress >= hold_ratio) {
+                // Final slide completed
+                effective_progress = 1.0f;
+            }
+        }
+
+        freqdelta_log2 = (1.0f - effective_progress) * origfreqdelta_log2;
+
+    } else {
+        // Original portamento (continuous)
+        freqdelta_log2 = (1.0f - x) * origfreqdelta_log2;
+    }
+}
+
+void Portamento::finish(void)
+{
+    if(!active)
+        return;
+    dx *= 100.0f;
+    update();
 }
 
 PortamentoRealtime::PortamentoRealtime(void *handle,

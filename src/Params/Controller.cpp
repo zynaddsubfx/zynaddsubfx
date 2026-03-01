@@ -82,10 +82,16 @@ const rtosc::Ports Controller::ports = {
         "Sustain MIDI Receive"),
 #undef rChangeCb
 #define rChangeCb rChangeCbBase
+    rToggle(sustain.stopsPortamento, rDefault(false),
+        "Sustain finishes Portamento"),
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(LEGACY),
+        "Polyphonic Mode"),
+    rParamZyn(portamento.glissando,     rShort("gliss"), rDefault(0),
+        "Portamento <-> Glissando"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
@@ -144,6 +150,7 @@ void Controller::defaults()
     NRPN.receive                 = true;
 
     portamento.portamento        = false;
+    portamento.polyMode          = LEGACY;
     portamento.automode          = true;
     portamento.proportional      = false;
     portamento.propRate          = 80;

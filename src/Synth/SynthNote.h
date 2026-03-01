@@ -77,6 +77,7 @@ class SynthNote
         /* For per-note filter cutoff */
         void setFilterCutoff(float);
         float getFilterCutoffRelFreq(void);
+        virtual void finishPortamento(void);
 
         /* Random numbers with own seed */
         float getRandomFloat();

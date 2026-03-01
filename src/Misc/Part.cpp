@@ -43,6 +43,11 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
+/**
+ * @brief The Part class represents a single instrument slot in the synthesizer.
+ * It manages MIDI routing, effects, controllers, and a "Kit" of up to 16
+ * sound engines (ADsynth, SUBsynth, PADsynth).
+ */
 #define rObject Part
 static const Ports partPorts = {
     rSelf(Part, rEnabledBy(Penabled)),
@@ -409,6 +414,7 @@ void Part::defaults()
     Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
+    recent_note_pool.clear();
 }
 
 void Part::defaultsinstrument()
@@ -490,18 +496,14 @@ Part::~Part()
     }
 }
 
-static void assert_kit_sanity(const Part::Kit *kits)
+static void assert_kit_sanity([[maybe_unused]] const Part::Kit *kits)
 {
-#ifdef NDEBUG
-    (void)kits;
-#else
     for(int i=0; i<NUM_KIT_ITEMS; ++i) {
         //an enabled kit must have a corresponding parameter object
         assert(!kits[i].Padenabled  || kits[i].adpars);
         assert(!kits[i].Ppadenabled || kits[i].padpars);
         assert(!kits[i].Psubenabled || kits[i].subpars);
     }
-#endif
 }
 
 static int kit_usage(const Part::Kit *kits, int note, int mode)
@@ -527,8 +529,164 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
     return synth_usage;
 }
 
-/*
- * Note On Messages
+/**
+ * @brief Selects the frequency source for the next portamento glide based on the chosen mode.
+ * @param target_freq_log2 The frequency of the new note.
+ * @param mode The selection strategy (FIFO, LIFO, or SMART).
+ * @return A pointer to a recently released note, or nullptr if none found.
+ */
+RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2,
+                                                         unsigned char mode)
+{
+    if (mode == FIFO) {
+        // Jupiter 8 style: Return oldest available note (FIFO order)
+        // This creates crossing glides when chord intervals change
+        uint32_t oldest_time = UINT32_MAX;
+        RecentNote* oldest = nullptr;
+
+        for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+            if (!recent_notes[i].available) continue;
+            if (recent_notes[i].timestamp < oldest_time) {
+                oldest = &recent_notes[i];
+                oldest_time = recent_notes[i].timestamp;
+            }
+        }
+
+        if (oldest) {
+            oldest->available = false; // Mark as used so next note gets next oldest
+        }
+        return oldest;
+
+    } else if (mode == LIFO) {
+        // Most recent released note for each new note (LIFO/stack order)
+        // Each released note is used once, starting with most recently released
+        uint32_t newest_time = 0;
+        RecentNote* newest = nullptr;
+
+        for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+            if (!recent_notes[i].available) continue;
+            float distance = fabsf(recent_notes[i].freq_log2 - target_freq_log2);
+            if(distance <= 0.01f ) continue;
+
+            if (recent_notes[i].timestamp > newest_time) {
+                newest = &recent_notes[i];
+                newest_time = recent_notes[i].timestamp;
+            }
+        }
+
+        if (newest) {
+            newest->available = false; // Mark as used - each note used only once
+        }
+        return newest;
+
+    } else { // SMART
+        // Strategy: find closest frequency match, or most recent if no close match
+        RecentNote* best = nullptr;
+        float best_distance = 999999.0f;
+        uint32_t best_time = 0;
+
+        for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+            if (!recent_notes[i].available) continue;
+
+            float distance = fabsf(recent_notes[i].freq_log2 - target_freq_log2);
+
+            // Prefer closer frequencies, but also consider recency
+            if (distance < best_distance ||
+                (distance < best_distance + 0.5f && recent_notes[i].timestamp > best_time)) {
+                best = &recent_notes[i];
+                best_distance = distance;
+                best_time = recent_notes[i].timestamp;
+            }
+        }
+
+        if (best) {
+            best->available = false; // Mark as used
+        }
+
+        return best;
+    }
+}
+
+/**
+ * @brief Factory method for per-note portamento instances.
+ * Handles frequency recovery for released notes to ensure smooth glides even if
+ * the source note was itself in the middle of a glide.
+ * @param target_freq_log2 Destination frequency.
+ * @param isRunningNote True if other notes are currently active in this Part.
+ * @return An allocated PortamentoRealtime object or nullptr.
+ */
+PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
+                                                 bool isRunningNote)
+{
+    // Legacy mode prefers currently-playing notes as sources (to match old
+    // behaviour / KitTest expectations). Non-legacy modes prefer recent
+    // released notes first and fall back to playing notes.
+    const unsigned char mode = ctl.portamento.polyMode;
+
+    // Helper to create a PortamentoRealtime from oldfreq (base) and
+    // oldportamento-adjusted freq. The threshold check uses oldfreq_log2
+    // while the resulting initial freqdelta uses oldportamentofreq_log2.
+    auto make_from_source = [&](float oldfreq_log2, float oldportamentofreq_log2)->PortamentoRealtime* {
+        Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2,
+                              oldportamentofreq_log2, target_freq_log2);
+        if (!portamento.active)
+            return nullptr;
+        return memory.alloc<PortamentoRealtime>(
+            this, memory,
+            []([[maybe_unused]]PortamentoRealtime *realtime) {
+                // Cleanup callback - nothing special to do here
+            },
+            portamento
+        );
+    };
+
+    // Try recent released notes first (for non-legacy modes and as fallback)
+    RecentNotePool::RecentNote* source = recent_note_pool.getBestSource(target_freq_log2,
+                                            mode);
+    if (source) {
+        // RecentNotePool stores the final frequency (including any portamento
+        // offset). We attempt to recover the base frequency if the stored
+        // portamento_ptr is available; otherwise fall back to using the
+        // stored freq for both parameters (historic behaviour).
+        float oldportamentofreq = source->freq_log2;
+        float base_freq = source->freq_log2;
+        if (source->portamento_ptr) {
+            // If the released note stored a pointer to its realtime portamento,
+            // subtract its current freqdelta to recover the base frequency.
+            base_freq = source->freq_log2 - source->portamento_ptr->portamento.freqdelta_log2;
+        }
+        return make_from_source(base_freq, oldportamentofreq);
+    }
+
+    // For non-legacy modes try playing notes as a last resort
+    if (mode != LEGACY) {
+        for (auto &d : notePool.activeDesc()) {
+            if (!d.playing()) continue;
+
+            float base_freq = log2f(440.0f) + (d.note - 69.0f) / 12.0f;
+            float oldportamentofreq = base_freq;
+            if (d.portamentoRealtime && d.portamentoRealtime->portamento.active)
+                oldportamentofreq += d.portamentoRealtime->portamento.freqdelta_log2;
+
+            PortamentoRealtime* rt = make_from_source(base_freq, oldportamentofreq);
+            if (rt)
+                return rt;
+        }
+    }
+
+    // No suitable source available
+    return nullptr;
+}
+
+/**
+ * @brief Internal handler for MIDI Note On events.
+ * * Logic flow:
+ * 1. Checks range and polyphony limits.
+ * 2. Updates the monophonic/legato note stack (monomem).
+ * 3. Handles old note releases for Mono/Legato modes.
+ * 4. Resolves Portamento source (Global vs. Polyphonic).
+ * 5. Iterates through the Kit items and triggers active engines (AD, SUB, PAD).
+ * * @return true if at least one note was successfully triggered.
  */
 bool Part::NoteOnInternal(note_t note,
                   unsigned char velocity,
@@ -567,6 +725,9 @@ bool Part::NoteOnInternal(note_t note,
     //Portamento
     lastnote = note;
 
+    // Advance time counter for recent note pool
+    recent_note_pool.advance();
+
     /* check if first note is played */
     if(oldfreq_log2 < 0.0f)
         oldfreq_log2 = note_log2_freq;
@@ -576,70 +737,43 @@ bool Part::NoteOnInternal(note_t note,
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
     PortamentoRealtime *portamento_realtime = NULL;
-    // If there is a currently ongoing glide, shift the starting point
-    // for any new portamento to where the current glide is right now
-    if (oldportamento && oldportamento->portamento.active)
-        oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
-    // Non-portamento settings and conditions say the note may have
-    // portamento, but it remains for Portamento.init to make the
-    // final decision depending on the portamento enable, threshold and
-    // other parameters.
-    Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2, oldportamentofreq_log2, note_log2_freq);
-    if(portamento.active) {
-        // If we're doing legato and we already have a portamento structure,
-        // reuse it.
-        if (doingLegato && legatoportamento) {
-            portamento_realtime = legatoportamento;
-            portamento_realtime->portamento = portamento;
-        } else {
-            // Create new one if we don't already have one, or for each
-            // note in poly/mono mode
-            portamento_realtime = memory.alloc<PortamentoRealtime>
-                (this,
-                 memory,
-                 // Cleanup function: Destroy any references we might
-                 // have to the current realtime pointer so that it
-                 // can not be (re)used, with disastrous results.
-                 [](PortamentoRealtime *realtime)
-                    {
-                        assert(realtime);
-                        Part *part = static_cast<Part *>(realtime->handle);
-                        assert(part);
-                        if (realtime == part->oldportamento) {
-                            // Since the last note is going away, capture
-                            // the portamento:ed pitch offset to our saved
-                            // previous note. This will be our starting
-                            // point for the next portamento glide.
-                            if (realtime->portamento.active)
-                                part->oldportamentofreq_log2 +=
-                                    realtime->portamento.freqdelta_log2;
-                            part->oldportamento = NULL;
-                        }
-                        if (realtime == part->legatoportamento)
-                            part->legatoportamento = NULL;
-                    },
-                 portamento
-                );
-            if (doingLegato)
-                legatoportamento = portamento_realtime;
+
+    if (oldportamento && oldportamento->portamento.active) {
+            oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
         }
-    }
 
-    // Create the portamento pointer that we distribute to the synth notes
-    Portamento *portamentoptr = NULL;
-    if(portamento_realtime)
-        portamentoptr = &portamento_realtime->portamento;
 
-    // Save note freq and pointer to portamento state for next note
-    oldfreq_log2 = note_log2_freq;
-    oldportamentofreq_log2 = oldfreq_log2;
-    oldportamento = portamento_realtime;
+    Portamento portamento(ctl, synth, isRunningNote, oldfreq_log2,
+                         oldportamentofreq_log2, note_log2_freq);
 
-    //Adjust Existing Notes
-    if(doingLegato) {
-        LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
-        notePool.applyLegato(note, pars, portamento_realtime);
-        return true;
+    // For legato mode, use existing single portamento logic
+    if(doingLegato || ctl.portamento.polyMode == LEGACY) {
+
+        if(portamento.active) {
+            if (legatoportamento) {
+                portamento_realtime = legatoportamento;
+                portamento_realtime->portamento = portamento;
+            } else {
+                portamento_realtime = memory.alloc<PortamentoRealtime>
+                    (this, memory,
+                     [](PortamentoRealtime *realtime) {
+                         Part *part = static_cast<Part *>(realtime->handle);
+                         if (realtime == part->legatoportamento)
+                             part->legatoportamento = NULL;
+                     },
+                     portamento);
+                if(doingLegato) legatoportamento = portamento_realtime;
+            }
+        }
+
+        Portamento *portamentoptr = portamento_realtime ?
+            &portamento_realtime->portamento : nullptr;
+
+        if (doingLegato) {
+            LegatoParams pars = {vel, portamentoptr, note_log2_freq, true, prng()};
+            notePool.applyLegato(note, pars, portamento_realtime);
+            return true;
+        }
     }
 
     // We know now that we are not doing legato, so we destroy the reference
@@ -653,35 +787,57 @@ bool Part::NoteOnInternal(note_t note,
     if(Platchmode)
         notePool.releaseLatched();
 
-    //Create New Notes
+    //Create New Notes with individual portamento instances
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
         ScratchString pre = prefix;
         auto &item = kit[i];
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
-        SynthParams pars{memory, ctl, synth, time, vel,
-            portamentoptr, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         // Enforce voice limit, before we trigger new note
         limit_voices(note);
 
         try {
-            if(item.Padenabled)
+            PortamentoRealtime* port_rt = portamento_realtime ? portamento_realtime : createPortamentoForNote(note_log2_freq,
+                                                                 isRunningNote);
+            Portamento* port_ptr = port_rt ? &port_rt->portamento : nullptr;
+
+    // Save note freq and pointer to portamento state for next note
+    oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = port_rt;
+
+            if(item.Padenabled) {
+
+                SynthParams pars{memory, ctl, synth, time, vel,
+                    port_ptr, note_log2_freq, false, prng()};
+
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/adpars/").c_str, constPowerMixing), 0, i},
-                                    portamento_realtime);
-            if(item.Psubenabled)
+                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i},
+                                    port_rt);
+            }
+
+            if(item.Psubenabled) {
+                SynthParams pars{memory, ctl, synth, time, vel,
+                    port_ptr, note_log2_freq, false, prng()};
+
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str, constPowerMixing), 1, i},
-                                    portamento_realtime);
-            if(item.Ppadenabled)
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm,
+                            (pre+"kit"+i+"/subpars/").c_str), 1, i},
+                                    port_rt);
+            }
+            if(item.Ppadenabled) {
+                SynthParams pars{memory, ctl, synth, time, vel,
+                    port_ptr, note_log2_freq, false, prng()};
+
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/padpars/").c_str, constPowerMixing), 2, i},
-                                    portamento_realtime);
+                            (pre+"kit"+i+"/padpars/").c_str), 2, i},
+                                    port_rt);
+            }
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
@@ -704,6 +860,23 @@ bool Part::NoteOnInternal(note_t note,
  */
 void Part::NoteOff(note_t note) //release the key
 {
+    // Before releasing notes, record their frequencies for portamento
+    for(auto &desc:notePool.activeDesc()) {
+        if(desc.note != note || !desc.playing())
+            continue;
+
+        // Calculate base frequency from MIDI note
+        float base_freq_log2 = (desc.note - 69.0f) / 12.0f + log2f(440.0f);
+
+        // Add any portamento offset
+        float final_freq_log2 = base_freq_log2;
+        if (desc.portamentoRealtime && desc.portamentoRealtime->portamento.active) {
+            final_freq_log2 += desc.portamentoRealtime->portamento.freqdelta_log2;
+        }
+        recent_note_pool.addReleasedNote(final_freq_log2, desc.portamentoRealtime);
+    }
+
+    // Original NoteOff logic continues...
     // This note is released, so we remove it from the list.
     if(!monomemEmpty())
         monomemPop(note);
@@ -754,6 +927,18 @@ void Part::ReleaseAllKeys(void)
             else
                 notePool.release(desc);
         }
+    }
+}
+
+/*
+ * Thos tells the portamento to jump to target frequency
+ */
+void Part::FinishPortamento(void)
+{
+    for(auto &desc:notePool.activeDesc()) {
+        if(!desc.playing())
+            continue;
+        notePool.finishPortamento(desc);
     }
 }
 
@@ -829,6 +1014,9 @@ void Part::SetController(unsigned int type, int par)
             ctl.setsustain(par);
             if(ctl.sustain.sustain == 0)
                 ReleaseSustainedKeys();
+            else if (ctl.sustain.stopsPortamento)
+                FinishPortamento();
+
             break;
         case C_allsoundsoff:
             AllNotesOff(); //Panic
@@ -976,8 +1164,10 @@ void Part::verifyKeyMode(void)
 }
 
 
-/*
- * Set Part's key limit
+/**
+ * @brief Enforces the voice and key limits for the part.
+ * If the number of active notes exceeds the limit, the oldest notes are
+ * moved to a "releasing" state to make room.
  */
 void Part::setkeylimit(unsigned char Pkeylimit_)
 {
@@ -1061,8 +1251,8 @@ void Part::ComputePartSmps()
     for(auto &d:notePool.activeDesc()) {
         d.age++;
         for(auto &s:notePool.activeNotes(d)) {
-            STACKALLOC(float, tmpoutr, synth.buffersize);
-            STACKALLOC(float, tmpoutl, synth.buffersize);
+            float tmpoutr[synth.buffersize];
+            float tmpoutl[synth.buffersize];
             auto &note = *s.note;
             note.noteout(&tmpoutl[0], &tmpoutr[0]);
 
@@ -1519,7 +1709,7 @@ void Part::getfromXML(XMLwrapper& xml)
         // portamento.automode will default to off, so no need to do anything
         // here).
         if (upgrade_3_0_7 && !Ppolymode)
-            ctl.portamento.automode = true;
+            ctl.portamento.automode = 1;
         xml.exitbranch();
     }
 }
@@ -1538,6 +1728,48 @@ uint8_t Part::Kit::sendto(void) const
 bool Part::Kit::validNote(char note) const
 {
     return !Pmuted && Penabled && inRange((uint8_t)note, Pminkey, Pmaxkey);
+}
+
+void RecentNotePool::addReleasedNote(float freq_log2,
+                                    PortamentoRealtime *port_ptr)
+{
+    recent_notes[write_index] = {
+        freq_log2, port_ptr,
+        current_time, true
+    };
+    write_index = (write_index + 1) % MAX_RECENT_NOTES;
+}
+
+
+bool RecentNotePool::hasRecentNotes() const
+{
+    for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+        if (recent_notes[i].available) return true;
+    }
+    return false;
+}
+
+void RecentNotePool::clear()
+{
+    for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+        recent_notes[i].available = false;
+        recent_notes[i].portamento_ptr = nullptr;
+    }
+    write_index = 0;
+}
+
+void RecentNotePool::cleanup()
+{
+    // Remove entries older than ~5 seconds TBD: use samplerate
+    const uint32_t max_age = 240000;
+
+    for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
+        if (recent_notes[i].available &&
+            (current_time - recent_notes[i].timestamp) > max_age) {
+            recent_notes[i].available = false;
+            recent_notes[i].portamento_ptr = nullptr;
+        }
+    }
 }
 
 }
