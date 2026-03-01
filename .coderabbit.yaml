@@ -1,0 +1,19 @@
+# .coderabbit.yaml
+# This is an example configuration file for CodeRabbit AI reviews.
+
+# Enables or disables commenting on trivial files (e.g., package-lock.json).
+# Default is false.
+review_trivial_files: false
+
+# A list of glob patterns to exclude certain files and directories from reviews.
+exclude:
+  - "ExternalPrograms/"
+  - "pixmaps/"
+  - "tlsf/"
+  - "DPF/"
+  - "instruments/"
+  - "*.desktop"
+  - "*.ico"
+  - "*.png"
+  - "*.svg"
+  - ".travis.yml"

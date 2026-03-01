@@ -1,0 +1,29 @@
+name: AI Code Review
+
+# This workflow triggers on pull request events.
+# 'opened': when a PR is first created.
+# 'synchronize': when new commits are pushed to the PR branch.
+# 'reopened': when a closed PR is reopened.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Set permissions for the job.
+# 'pull-requests: write' is needed for the AI to post comments.
+# 'contents: read' is needed to check out the code.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    steps:
+      # The main step that runs the CodeRabbit AI review action.
+      # It uses the GITHUB_TOKEN to authenticate and interact with the repository.
+      - name: Run AI Code Review
+        uses: coderabbitai/ai-pr-reviewer@v1
+        env:
+          # The GITHUB_TOKEN is automatically provided by GitHub Actions.
+          # No need to create a secret for this.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
