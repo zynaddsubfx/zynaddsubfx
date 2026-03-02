@@ -1,0 +1,12 @@
+reviews:
+  path_filters:
+    - "!ExternalPrograms/**"
+    - "!pixmaps/**"
+    - "!tlsf/**"
+    - "!DPF/**"
+    - "!instruments/**"
+    - "!**/*.desktop"
+    - "!**/*.ico"
+    - "!**/*.png"
+    - "!**/*.svg"
+    - "!.travis.yml"
