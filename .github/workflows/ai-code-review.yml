@@ -22,7 +22,7 @@ jobs:
       # The main step that runs the CodeRabbit AI review action.
       # It uses the GITHUB_TOKEN to authenticate and interact with the repository.
       - name: Run AI Code Review
-        uses: coderabbitai/ai-pr-reviewer@v1
+        uses: coderabbitai/ai-pr-reviewer@516a0728038a4363e7eb4ed6ee2cc23660a2a0a3  # v1
         env:
           # The GITHUB_TOKEN is automatically provided by GitHub Actions.
           # No need to create a secret for this.
