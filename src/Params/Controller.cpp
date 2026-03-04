@@ -456,8 +456,10 @@ void Controller::add2XML(XMLwrapper& xml)
     xml.addparbool("fm_amp_receive", fmamp.receive);
     xml.addparbool("volume_receive", volume.receive);
     xml.addparbool("sustain_receive", sustain.receive);
-
+    xml.addparbool("sustain_stops_portamento", sustain.stopsPortamento);
     xml.addparbool("portamento_receive", portamento.receive);
+    xml.addpar("portamento_polymode", portamento.polyMode);
+    xml.addpar("portamento_glissando", portamento.glissando);
     xml.addpar("portamento_time", portamento.time);
     xml.addpar("portamento_pitchthresh", portamento.pitchthresh);
     xml.addpar("portamento_pitchthreshtype", portamento.pitchthreshtype);
@@ -501,9 +503,14 @@ void Controller::getfromXML(XMLwrapper& xml)
                                      volume.receive);
     sustain.receive = xml.getparbool("sustain_receive",
                                       sustain.receive);
-
+    sustain.stopsPortamento = xml.getparbool("sustain_stops_portamento",
+                                             sustain.stopsPortamento);
     portamento.receive = xml.getparbool("portamento_receive",
                                          portamento.receive);
+    portamento.polyMode = xml.getpar("portamento_polymode",
+                                     portamento.polyMode, LEGACY, SMART);
+    portamento.glissando = xml.getpar127("portamento_glissando",
+                                         portamento.glissando);
     portamento.automode = xml.getparbool("portamento_auto",
                                          portamento.automode);
     portamento.time = xml.getpar127("portamento_time",

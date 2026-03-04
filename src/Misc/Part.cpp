@@ -623,6 +623,9 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
     // released notes first and fall back to playing notes.
     const unsigned char mode = ctl.portamento.polyMode;
 
+    if (mode == LEGACY)
+        return nullptr;
+
     // Helper to create a PortamentoRealtime from oldfreq (base) and
     // oldportamento-adjusted freq. The threshold check uses oldfreq_log2
     // while the resulting initial freqdelta uses oldportamentofreq_log2.
@@ -658,21 +661,20 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
         return make_from_source(base_freq, oldportamentofreq);
     }
 
-    // For non-legacy modes try playing notes as a last resort
-    if (mode != LEGACY) {
-        for (auto &d : notePool.activeDesc()) {
-            if (!d.playing()) continue;
+    // Try playing notes as a last resort
+    for (auto &d : notePool.activeDesc()) {
+        if (!d.playing()) continue;
 
-            float base_freq = log2f(440.0f) + (d.note - 69.0f) / 12.0f;
-            float oldportamentofreq = base_freq;
-            if (d.portamentoRealtime && d.portamentoRealtime->portamento.active)
-                oldportamentofreq += d.portamentoRealtime->portamento.freqdelta_log2;
+        float base_freq = log2f(440.0f) + (d.note - 69.0f) / 12.0f;
+        float oldportamentofreq = base_freq;
+        if (d.portamentoRealtime && d.portamentoRealtime->portamento.active)
+            oldportamentofreq += d.portamentoRealtime->portamento.freqdelta_log2;
 
-            PortamentoRealtime* rt = make_from_source(base_freq, oldportamentofreq);
-            if (rt)
-                return rt;
-        }
+        PortamentoRealtime* rt = make_from_source(base_freq, oldportamentofreq);
+        if (rt)
+            return rt;
     }
+
 
     // No suitable source available
     return nullptr;
@@ -787,6 +789,10 @@ bool Part::NoteOnInternal(note_t note,
     if(Platchmode)
         notePool.releaseLatched();
 
+    PortamentoRealtime* port_rt = portamento_realtime ? portamento_realtime : createPortamentoForNote(note_log2_freq,                                                         isRunningNote);
+    Portamento* port_ptr = port_rt ? &port_rt->portamento : nullptr;
+
+    bool inserted_any = false;
     //Create New Notes with individual portamento instances
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
         ScratchString pre = prefix;
@@ -800,14 +806,6 @@ bool Part::NoteOnInternal(note_t note,
         limit_voices(note);
 
         try {
-            PortamentoRealtime* port_rt = portamento_realtime ? portamento_realtime : createPortamentoForNote(note_log2_freq,
-                                                                 isRunningNote);
-            Portamento* port_ptr = port_rt ? &port_rt->portamento : nullptr;
-
-    // Save note freq and pointer to portamento state for next note
-    oldfreq_log2 = note_log2_freq;
-    oldportamentofreq_log2 = oldfreq_log2;
-    oldportamento = port_rt;
 
             if(item.Padenabled) {
 
@@ -841,11 +839,20 @@ bool Part::NoteOnInternal(note_t note,
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
-
+        inserted_any = true;
         //Partial Kit Use
         if(isNonKit() || (isSingleKit() && item.active()))
             break;
     }
+
+    // Save note freq and pointer to portamento state for next note
+    if (inserted_any) {
+        oldfreq_log2 = note_log2_freq;
+        oldportamentofreq_log2 = oldfreq_log2;
+        oldportamento = port_rt;
+    }
+
+
 
     if(isLegatoMode())
         notePool.upgradeToLegato();
