@@ -636,8 +636,12 @@ PortamentoRealtime* Part::createPortamentoForNote(float target_freq_log2,
             return nullptr;
         return memory.alloc<PortamentoRealtime>(
             this, memory,
-            []([[maybe_unused]]PortamentoRealtime *realtime) {
-                // Cleanup callback - nothing special to do here
+            [](PortamentoRealtime *realtime) {
+                Part *part = static_cast<Part *>(realtime->handle);
+                if(realtime == part->oldportamento)
+                    part->oldportamento = NULL;
+                if(realtime == part->legatoportamento)
+                    part->legatoportamento = NULL;
             },
             portamento
         );
@@ -760,6 +764,8 @@ bool Part::NoteOnInternal(note_t note,
                     (this, memory,
                      [](PortamentoRealtime *realtime) {
                          Part *part = static_cast<Part *>(realtime->handle);
+                         if (realtime == part->oldportamento)
+                             part->oldportamento = NULL;
                          if (realtime == part->legatoportamento)
                              part->legatoportamento = NULL;
                      },
