@@ -816,6 +816,7 @@ bool Part::NoteOnInternal(note_t note,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
                             wm, (pre+"kit"+i+"/adpars/").c_str), 0, i},
                                     port_rt);
+                inserted_any = true;
             }
 
             if(item.Psubenabled) {
@@ -826,6 +827,7 @@ bool Part::NoteOnInternal(note_t note,
                         {memory.alloc<SUBnote>(kit[i].subpars, pars, wm,
                             (pre+"kit"+i+"/subpars/").c_str), 1, i},
                                     port_rt);
+                inserted_any = true;
             }
             if(item.Ppadenabled) {
                 SynthParams pars{memory, ctl, synth, time, vel,
@@ -835,11 +837,11 @@ bool Part::NoteOnInternal(note_t note,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
                             (pre+"kit"+i+"/padpars/").c_str), 2, i},
                                     port_rt);
+                inserted_any = true;
             }
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
-        inserted_any = true;
         //Partial Kit Use
         if(isNonKit() || (isSingleKit() && item.active()))
             break;
