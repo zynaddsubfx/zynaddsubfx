@@ -147,10 +147,12 @@ void Controller::defaults()
     fmamp.receive                = true;
     volume.receive               = true;
     sustain.receive              = true;
+    sustain.stopsPortamento      = false;
     NRPN.receive                 = true;
 
     portamento.portamento        = false;
     portamento.polyMode          = LEGACY;
+    portamento.glissando         = 0;
     portamento.automode          = true;
     portamento.proportional      = false;
     portamento.propRate          = 80;
