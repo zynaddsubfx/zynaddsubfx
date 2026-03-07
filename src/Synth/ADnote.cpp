@@ -1454,7 +1454,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             // if zero is crossed on the rising slope of the modulator
             // reset phase at the carrier
             // if no modulation is selected reset only in a timewindow narrowed by FMnewamplitude
-            if (
+            if (vce.FMVoice >= 0 &&
                  ( (tw[i]>0.0f && fmold <=0.0f) ||
                     (tw[i]>=0.0f && fmold <0.0f) )
                 && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) || vce.FMEnabled != FMTYPE::NONE)
