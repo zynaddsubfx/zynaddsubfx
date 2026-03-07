@@ -309,7 +309,8 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_, Sync* 
     time(time_),
     sync(sync_),
     gzip_compression(gzip_compression),
-    interpolation(interpolation)
+    interpolation(interpolation),
+    recent_note_pool(synth_, time_)
 {
     loaded_file[0] = '\0';
 
@@ -583,7 +584,6 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
         // Strategy: find closest frequency match, or most recent if no close match
         RecentNote* best = nullptr;
         float best_distance = 999999.0f;
-        uint32_t best_time = 0;
 
         for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
             if (!recent_notes[i].available) continue;
@@ -591,11 +591,9 @@ RecentNotePool::RecentNote* RecentNotePool::getBestSource(float target_freq_log2
             float distance = fabsf(recent_notes[i].freq_log2 - target_freq_log2);
 
             // Prefer closer frequencies, but also consider recency
-            if (distance < best_distance ||
-                (distance < best_distance + 0.5f && recent_notes[i].timestamp > best_time)) {
+            if (distance < best_distance) {
                 best = &recent_notes[i];
                 best_distance = distance;
-                best_time = recent_notes[i].timestamp;
             }
         }
 
@@ -726,9 +724,6 @@ bool Part::NoteOnInternal(note_t note,
 
     //Portamento
     lastnote = note;
-
-    // Advance time counter for recent note pool
-    recent_note_pool.advance();
 
     /* check if first note is played */
     if(oldfreq_log2 < 0.0f)
@@ -1739,12 +1734,25 @@ bool Part::Kit::validNote(char note) const
     return !Pmuted && Penabled && inRange((uint8_t)note, Pminkey, Pmaxkey);
 }
 
+
+RecentNotePool::RecentNotePool(const SYNTH_T &synth_, const AbsTime &time_) :
+     write_index(0),
+    synth(synth_),
+    time(time_),
+    max_age(10 * synth.samplerate) {
+
+        for(int i = 0; i < MAX_RECENT_NOTES; ++i) {
+            recent_notes[i].available = false;
+            recent_notes[i].portamento_ptr = nullptr;
+        }
+    }
+
 void RecentNotePool::addReleasedNote(float freq_log2,
                                     PortamentoRealtime *port_ptr)
 {
     recent_notes[write_index] = {
         freq_log2, port_ptr,
-        current_time, true
+        time.time(), true
     };
     write_index = (write_index + 1) % MAX_RECENT_NOTES;
 }
@@ -1769,12 +1777,9 @@ void RecentNotePool::clear()
 
 void RecentNotePool::cleanup()
 {
-    // Remove entries older than ~5 seconds TBD: use samplerate
-    const uint32_t max_age = 240000;
-
     for (int i = 0; i < MAX_RECENT_NOTES; ++i) {
         if (recent_notes[i].available &&
-            (current_time - recent_notes[i].timestamp) > max_age) {
+            (time.time() - recent_notes[i].timestamp) > max_age) {
             recent_notes[i].available = false;
             recent_notes[i].portamento_ptr = nullptr;
         }

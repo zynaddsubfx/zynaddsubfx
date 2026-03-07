@@ -31,22 +31,16 @@ class RecentNotePool {
     struct RecentNote {
         float freq_log2;
         PortamentoRealtime *portamento_ptr;
-        uint32_t timestamp;  // frame counter for aging
+        int64_t timestamp;  // frame counter for aging
         bool available;
     };
+
+    RecentNotePool(const SYNTH_T &synth_, const AbsTime &time_);
 
     static const int MAX_RECENT_NOTES = 16;  // configurable
     RecentNote recent_notes[MAX_RECENT_NOTES];
     int write_index;
-    uint32_t current_time;
-
-public:
-    RecentNotePool() : write_index(0), current_time(0) {
-        for(int i = 0; i < MAX_RECENT_NOTES; ++i) {
-            recent_notes[i].available = false;
-            recent_notes[i].portamento_ptr = nullptr;
-        }
-    }
+    int64_t current_time;
 
     // Add a note when it's released
     void addReleasedNote(float freq_log2,
@@ -54,13 +48,6 @@ public:
 
     // Get best matching source for a new note
     RecentNote* getBestSource(float target_freq_log2, unsigned char mode);
-
-    // Clean up old entries and advance time
-    void advance() {
-        current_time++;
-        if(current_time % 1000 == 0) // cleanup every ~20 seconds at 48kHz
-            cleanup();
-    }
 
     // Check if we have any recent notes for portamento
     bool hasRecentNotes() const;
@@ -70,6 +57,9 @@ public:
 
 private:
     void cleanup();
+    const SYNTH_T &synth;
+    const AbsTime &time;
+    int64_t max_age;
 };
 
 
@@ -269,8 +259,7 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        // ADD polyphonic tracking:
-        RecentNotePool recent_note_pool;
+
 
         // Keep legato portamento separate as it works differently
         // PortamentoRealtime *legatoportamento;  // KEEP this existing member
@@ -298,6 +287,8 @@ class Part
         Sync* sync;
         const int &gzip_compression, &interpolation;
         bool constPowerMixing = true;
+        // ADD polyphonic tracking:
+        RecentNotePool recent_note_pool;
 };
 
 }
