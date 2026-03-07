@@ -15,53 +15,43 @@
 #include "../globals.h"
 #include "../Misc/Util.h"
 
+#include <chrono>
 #include <iostream>
 using namespace std;
 
 namespace zyn {
 
 NulEngine::NulEngine(const SYNTH_T &synth_)
-    :AudioOut(synth_), pThread(NULL)
+    :AudioOut(synth_)
 {
     name = "NULL";
-    playing_until.tv_sec  = 0;
-    playing_until.tv_usec = 0;
 }
 
-void *NulEngine::_AudioThread(void *arg)
+void NulEngine::AudioThread()
 {
-    return (static_cast<NulEngine *>(arg))->AudioThread();
-}
+    using duration = chrono::microseconds;
+    const duration increase(synth.buffersize * 1'000'000 / synth.samplerate);
 
-void *NulEngine::AudioThread()
-{
-    while(pThread) {
+    while(thread.joinable()) {
         getNext();
 
-        struct timeval now;
-        int remaining = 0;
-        gettimeofday(&now, NULL);
-        if((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0)) {
-            playing_until.tv_usec = now.tv_usec;
-            playing_until.tv_sec  = now.tv_sec;
+        time_point now = chrono::steady_clock::now();
+        if(playing_until == time_point()) {
+            playing_until = now;
         }
         else {
-            remaining = (playing_until.tv_usec - now.tv_usec)
-                        + (playing_until.tv_sec - now.tv_sec) * 1000000;
-            if(remaining > 10000) //Don't sleep() less than 10ms.
+            using namespace std::chrono_literals;
+            duration remaining = std::chrono::duration_cast<duration>(playing_until - now);
+            if(remaining > 10ms) //Don't sleep_for() less than 10ms.
                 //This will add latency...
-                os_usleep(remaining  - 10000);
-            if(remaining < 0)
+                this_thread::sleep_for(remaining  - 10ms);
+            else if(remaining < 0us) {
+                playing_until -= remaining;
                 cerr << "WARNING - too late" << endl;
+            }
         }
-        playing_until.tv_usec += synth.buffersize * 1000000
-                                 / synth.samplerate;
-        if(remaining < 0)
-            playing_until.tv_usec -= remaining;
-        playing_until.tv_sec  += playing_until.tv_usec / 1000000;
-        playing_until.tv_usec %= 1000000;
+        playing_until += increase;
     }
-    return NULL;
 }
 
 NulEngine::~NulEngine()
@@ -82,26 +72,19 @@ void NulEngine::setAudioEn(bool nval)
 {
     if(nval) {
         if(!getAudioEn()) {
-            pthread_t     *thread = new pthread_t;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-            pThread = thread;
-            pthread_create(pThread, &attr, _AudioThread, this);
+            thread = std::thread(&NulEngine::AudioThread, this);
         }
     }
     else
     if(getAudioEn()) {
-        pthread_t *thread = pThread;
-        pThread = NULL;
-        pthread_join(*thread, NULL);
-        delete thread;
+        std::thread tmpthread = std::move(thread);
+        tmpthread.join();
     }
 }
 
 bool NulEngine::getAudioEn() const
 {
-    return pThread;
+    return thread.joinable();
 }
 
 }
