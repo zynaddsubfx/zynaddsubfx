@@ -923,7 +923,10 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fm_amp_receive" value="yes" />
 <par_bool name="volume_receive" value="no" />
 <par_bool name="sustain_receive" value="yes" />
+<par_bool name="sustain_stops_portamento" value="no" />
 <par_bool name="portamento_receive" value="yes" />
+<par name="portamento_polymode" value="0" />
+<par name="portamento_glissando" value="0" />
 <par name="portamento_time" value="64" />
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />
@@ -1197,7 +1200,10 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fm_amp_receive" value="yes" />
 <par_bool name="volume_receive" value="yes" />
 <par_bool name="sustain_receive" value="yes" />
+<par_bool name="sustain_stops_portamento" value="no" />
 <par_bool name="portamento_receive" value="yes" />
+<par name="portamento_polymode" value="0" />
+<par name="portamento_glissando" value="0" />
 <par name="portamento_time" value="64" />
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />
@@ -3576,7 +3582,10 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fm_amp_receive" value="yes" />
 <par_bool name="volume_receive" value="yes" />
 <par_bool name="sustain_receive" value="yes" />
+<par_bool name="sustain_stops_portamento" value="no" />
 <par_bool name="portamento_receive" value="yes" />
+<par name="portamento_polymode" value="0" />
+<par name="portamento_glissando" value="0" />
 <par name="portamento_time" value="64" />
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />

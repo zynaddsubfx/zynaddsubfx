@@ -25,6 +25,44 @@
 namespace zyn {
 
 struct PortamentoParams;
+
+class RecentNotePool {
+    public:
+    struct RecentNote {
+        float freq_log2;
+        PortamentoRealtime *portamento_ptr;
+        int64_t timestamp;  // frame counter for aging
+        bool available;
+    };
+
+    RecentNotePool(const SYNTH_T &synth_, const AbsTime &time_);
+
+    static const int MAX_RECENT_NOTES = 16;  // configurable
+    RecentNote recent_notes[MAX_RECENT_NOTES];
+    int write_index;
+    int64_t current_time;
+
+    // Add a note when it's released
+    void addReleasedNote(float freq_log2,
+                        PortamentoRealtime *port_ptr);
+
+    // Get best matching source for a new note
+    RecentNote* getBestSource(float target_freq_log2, unsigned char mode);
+
+    // Check if we have any recent notes for portamento
+    bool hasRecentNotes() const;
+
+    // Clear all recent notes
+    void clear();
+
+private:
+    void cleanup();
+    const SYNTH_T &synth;
+    const AbsTime &time;
+    int64_t max_age;
+};
+
+
 /** Part implementation*/
 class Part
 {
@@ -73,6 +111,8 @@ class Part
                            int masterkeyshift) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
+
+        void FinishPortamento() REALTIME;
 
         /* The synthesizer part output */
         void ComputePartSmps() REALTIME; //Part output
@@ -219,6 +259,19 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
+
+
+        // Keep legato portamento separate as it works differently
+        // PortamentoRealtime *legatoportamento;  // KEEP this existing member
+
+        // Helper methods for polyphonic portamento
+        // If isRunningNote is true, this indicates there is at least one running
+        // note in the pool (useful for legacy behavior which prefers running
+        // notes as portamento sources).
+        PortamentoRealtime* createPortamentoForNote(float target_freq_log2,
+                               bool isRunningNote);
+        void recordNoteRelease(float freq_log2, PortamentoRealtime *port_ptr);
+
         float oldfreq_log2;    // previous note pitch, used for portamento
         float oldportamentofreq_log2; // previous portamento pitch
         PortamentoRealtime *oldportamento; // previous portamento
@@ -234,6 +287,8 @@ class Part
         Sync* sync;
         const int &gzip_compression, &interpolation;
         bool constPowerMixing = true;
+        // ADD polyphonic tracking:
+        RecentNotePool recent_note_pool;
 };
 
 }
