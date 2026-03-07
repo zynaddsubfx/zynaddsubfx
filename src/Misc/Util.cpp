@@ -82,13 +82,13 @@ inline void HannWindow(int N, float* w ) {
 void windowedsinc(float fc, float gain, int N, float *h) {
 
   // Compute the sinc filter.
-  float s[N];
+  STACKALLOC(float, s, N);
   for (int n = 0; n < N; n++) {
     s[n] = (n == (N-1)/2) ? 1 : sin(2 * M_PI * fc * (n - (N - 1) / 2)) / (2 * M_PI * fc * (n - (N - 1) / 2));
   }
 
   // Compute the window.
-  float w[N];
+  STACKALLOC(float, w, N);
   BlackmanHarrisWindow(N, w);
   //~ HannWindow(N, w);
 
@@ -153,7 +153,7 @@ float getdetune(unsigned char type,
     int fdetune = finedetune - 8192;
 
     switch(type) {
-//	case 1: is used for the default (see below)
+//  case 1: is used for the default (see below)
         case 2:
             cdet   = fabsf(cdetune * 10.0f);
             findet = fabsf(fdetune / 8192.0f) * 10.0f;
