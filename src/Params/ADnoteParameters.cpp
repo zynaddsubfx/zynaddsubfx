@@ -1239,6 +1239,7 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
     RCopy(FilterEnvelope);
     RCopy(FilterLfo);
     RCopy(Reson);
+    copy(wskernel);
 
     if ( time ) {
         last_update_timestamp = time->time();
