@@ -483,6 +483,12 @@ void NotePool::release(NoteDescriptor &d)
         s.note->releasekey();
 }
 
+void NotePool::finishPortamento(NoteDescriptor &d)
+{
+    for(auto s:activeNotes(d))
+        s.note->finishPortamento();
+}
+
 void NotePool::latch(NoteDescriptor &d)
 {
     d.setStatus(KEY_LATCHED);
