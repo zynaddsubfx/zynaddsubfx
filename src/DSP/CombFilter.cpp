@@ -153,6 +153,7 @@ void CombFilter::setfreq(float freq_)
 {
     freq = limit(freq_, 25.0f, 40000.0f);
     delay = ((float)samplerate) / freq - lpfDelay - hpfDelay;
+    delay = max((float)samplerate/40000.0f, delay);
 }
 
 /**
