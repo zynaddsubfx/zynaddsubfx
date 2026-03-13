@@ -44,7 +44,7 @@ class EQ final:public Effect
 
         struct {
             //parameters
-            unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
+            unsigned char Ptype, Pfreq, Pgain, Pq, Pstages, Ploud;
             //internal values
 
             /* TODO

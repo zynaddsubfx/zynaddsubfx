@@ -15,18 +15,33 @@
 
 namespace zyn {
 
-//Waveshaping(called by Distortion effect and waveshape from OscilGen)
-void waveShapeSmps(int n,
+// Originalversion MIT den neuen Parametern
+void waveShapeSmps(int buffersize,
                    float *smps,
-                   unsigned char type,
-                   unsigned char drive,
-                   unsigned char offset = 64,
-                   unsigned char funcpar = 0);
+                   const unsigned char type,
+                   const unsigned char drive,
+                   const unsigned char driveHist,
+                   const unsigned char offset,
+                   const unsigned char funcpar,
+                   const unsigned char loudnessComp,
+                   float &sumIn, float &sumOut,
+                   float &aWeightHistIn, float &aWeightHistOut,
+                   float &compensationfactor);
+
+// Überladene Version OHNE die neuen Parameter
+void waveShapeSmps(int buffersize,
+                   float *smps,
+                   const unsigned char type,
+                   const unsigned char drive,
+                   const unsigned char offset = 64,
+                   const unsigned char funcpar = 0);
 
 //calculate the polyblamp residual value (called by waveshape function)
-float polyblampres(float smp,
-                   float ws,
-                   float dMax);
+float polyblampres(const float smp,
+                   const float ws,
+                   const float dMax);
+
+
 }
 
 #endif
