@@ -485,7 +485,7 @@ if (filterwindow!=NULL){
           label DUAL
           xywh {45 45 100 20} labelfont 1 labelsize 10
         }
-      }    
+      }
     }
   }
   Function {make_phaser_window()} {} {
@@ -835,6 +835,17 @@ if (filterwindow!=NULL){
         label Shape
         tooltip {Shape Parameter} xywh {225 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
+      Fl_Box distp13_label {
+        label Comp
+        tooltip {Amount of Loudness Compensation} xywh {165 5 0 10} labelfont 1 labelsize 11
+        align 132
+        class Fl_Box
+      }
+      Fl_Dial distp13 {
+        tooltip {Amount of Loudness Compensation} xywh {140 18 15 15} box ROUND_DOWN_BOX maximum 127
+        code0 {o->init("parameter13");}
         class Fl_Osc_Dial
       }
       Fl_Dial distp7 {
@@ -1864,6 +1875,17 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
         label Shape
         tooltip {Shape Parameter} xywh {225 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
+      Fl_Box distp13_label {
+        label Comp
+        tooltip {Amount of Loudness Compensation} xywh {165 5 0 10} labelfont 1 labelsize 11
+        align 132
+        class Fl_Box
+      }
+      Fl_Dial distp13 {
+        tooltip {Amount of Loudness Compensation} xywh {140 18 15 15} box ROUND_DOWN_BOX maximum 127
+        code0 {o->init("parameter13");}
         class Fl_Osc_Dial
       }
       Fl_Dial distp7 {

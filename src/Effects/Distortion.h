@@ -46,6 +46,7 @@ class Distortion final :public Effect
         unsigned char Pprefiltering; //if you want to do the filtering before the distortion
         unsigned char Pfuncpar;      //for parametric functions
         unsigned char Poffset;       //the input offset
+        unsigned char Ploud;       //the input offset
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
@@ -53,6 +54,23 @@ class Distortion final :public Effect
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
+
+
+        float sumInL=0.0f;
+        float sumInR=0.0f;
+        float sumOutL=0.0f;
+        float sumOutR=0.0f;
+        float aWeightHistInL=0.0f;
+        float aWeightHistInR=0.0f;
+        float aWeightHistOutL=0.0f;
+        float aWeightHistOutR=0.0f;
+        unsigned int windowCounter = 0;
+        unsigned int windowPos = 0;
+        unsigned int PdriveHist = 0;
+
+        float compensationfactorL = 1.0f;
+        float compensationfactorR = 1.0f;
+
 };
 
 }
