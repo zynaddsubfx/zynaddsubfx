@@ -69,6 +69,8 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(12, 12, 60, 6, 6), "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
+    rEffPar(Pscale, 12, rShort("scl"), rLinear(0,2), rDefault(0),
+            rPresets(0, 1, 1, 2, 2), "Midi Note of Lowest String"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -211,16 +213,15 @@ void Sympathetic::sethpf(unsigned char _Phpf)
 
 void Sympathetic::calcFreqs()
 {
-    switch(Ppreset) {
+    switch(Pscale) {
         case 0:
+        default:
             calcFreqsGeneric();
             break;
         case 1:
-        case 2:
             calcFreqsPiano();
             break;
-        case 3:
-        case 4:
+        case 2:
             calcFreqsGuitar();
             break;
     }
