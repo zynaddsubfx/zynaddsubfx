@@ -1106,18 +1106,20 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
     namespace fs = std::filesystem;
 
     std::vector<string> files;
-    std::error_code ec;
 
-    for(const auto& entry : fs::directory_iterator(folder, ec))
+    try
     {
-        if(ec) { return{}; }
-
-        // note: is_directory is also true for symlinks to dirs
-        if(finddir == entry.is_directory())
-            files.push_back(entry.path().filename().string());
+        for(const auto& entry : fs::directory_iterator(folder))
+        {
+            // note: is_directory is also true for symlinks to dirs
+            if(finddir == entry.is_directory())
+                files.push_back(entry.path().filename().string());
+        }
+    } catch {
+        return {}
     }
 
-    if(finddir == true) // std::directory_iterator does not return ".."
+    if(finddir) // std::directory_iterator does not return ".."
         files.push_back("..");
 
     std::sort(begin(files), end(files));
@@ -2052,7 +2054,7 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Last acknowledged beat
     //Current offline status
 
-    auto duration = start_time - std::chrono::steady_clock::now();
+    auto duration = std::chrono::steady_clock::now() - start_time;
     using tick_t = std::chrono::duration<uint32_t, std::ratio<1, 100>>;  // 10 ms
     uint32_t now = std::chrono::duration_cast<tick_t>(duration).count();
     int32_t last_ack   = master->last_ack;
@@ -2450,7 +2452,7 @@ int MiddleWare::checkAutoSave(void) const
         const char *prefix = "zynaddsubfx-";
 
         //check for mandatory prefix
-        if(entry.is_directory() || filename.rfind(prefix, 0) != 0)
+        if(entry.is_directory(ec) || filename.rfind(prefix, 0) != 0)
             continue;
 
         int id = atoi(filename.c_str()+strlen(prefix));
