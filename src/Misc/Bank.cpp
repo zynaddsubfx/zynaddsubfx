@@ -296,16 +296,20 @@ int Bank::newbank(string newbankdirname)
 
     namespace fs = std::filesystem;
     try {
-        if (!fs::exists(bankdir))
+        if (fs::exists(bankdir))
+        {
+            if (!fs::is_directory(bankdir))
+                return -1;
+        }
+        else
             fs::create_directory(bankdir);
     } catch (...) {
         return -1;
     }
 
     const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
-
-    FILE *tmpfile = fopen(tmpfilename.c_str(), "w+");
-    fclose(tmpfile);
+    if(FILE *tmpfile = fopen(tmpfilename.c_str(), "w+"))
+        fclose(tmpfile);
 
     return loadbank(bankdir);
 }

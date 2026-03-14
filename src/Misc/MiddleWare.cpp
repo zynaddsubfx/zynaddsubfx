@@ -1115,8 +1115,8 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
             if(finddir == entry.is_directory())
                 files.push_back(entry.path().filename().string());
         }
-    } catch {
-        return {}
+    } catch(...) {
+        return {};
     }
 
     if(finddir) // std::directory_iterator does not return ".."
