@@ -315,6 +315,7 @@ class ADnote:public SynthNote
 
             //used by Frequency Modulation (for integration)
             float *FMoldsmp;
+            float *FMtw_orig;
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
@@ -324,6 +325,7 @@ class ADnote:public SynthNote
         //temporary buffer
         float  *tmpwavel;
         float  *tmpwaver;
+        float **tmpwave_mod;
         int     max_unison;
         float **tmpwave_unison;
 
