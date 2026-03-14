@@ -769,6 +769,7 @@ void ADnote::KillVoice(int nvoice)
     memory.devalloc(voice.unison_freq_rap);
     memory.devalloc(voice.unison_invert_phase);
     memory.devalloc(voice.FMoldsmp);
+    memory.devalloc(voice.FMtw_orig);
     memory.devalloc(voice.unison_vibratto.step);
     memory.devalloc(voice.unison_vibratto.position);
 
@@ -801,9 +802,12 @@ ADnote::~ADnote()
     memory.devalloc(tmpwaver);
     memory.devalloc(bypassl);
     memory.devalloc(bypassr);
-    for(int k = 0; k < max_unison; ++k)
+    for(int k = 0; k < max_unison; ++k) {
         memory.devalloc(tmpwave_unison[k]);
+        memory.devalloc(tmpwave_mod[k]);
+    }
     memory.devalloc(tmpwave_unison);
+    memory.devalloc(tmpwave_mod);
 }
 
 
