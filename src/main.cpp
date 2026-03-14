@@ -21,11 +21,12 @@
 #include <algorithm>
 #include <signal.h>
 
+#ifdef ZEST_GUI
 #ifndef WIN32
 #include <err.h>
-#endif
 #include <unistd.h>
-
+#endif
+#endif
 #include <getopt.h>
 
 #include <sys/types.h>

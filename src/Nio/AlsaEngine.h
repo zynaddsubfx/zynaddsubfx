@@ -14,7 +14,7 @@
 #ifndef ALSA_ENGINE_H
 #define ALSA_ENGINE_H
 
-#include <pthread.h>
+#include <thread>
 #include <string>
 #include <alsa/asoundlib.h>
 #include <queue>
@@ -42,9 +42,7 @@ class AlsaEngine:public AudioOut, MidiIn
 
     protected:
         void *AudioThread();
-        static void *_AudioThread(void *arg);
         void *MidiThread();
-        static void *_MidiThread(void *arg);
 
     private:
         bool openMidi();
@@ -59,7 +57,7 @@ class AlsaEngine:public AudioOut, MidiIn
             snd_seq_t  *handle;
             int alsaId;
             bool exiting;
-            pthread_t pThread;
+            std::thread thread;
         } midi;
 
         struct {
@@ -69,7 +67,7 @@ class AlsaEngine:public AudioOut, MidiIn
             snd_pcm_uframes_t frames;
             unsigned int      periods;
             short    *buffer;
-            pthread_t pThread;
+            std::thread thread;
             float peaks[1];
         } audio;
 

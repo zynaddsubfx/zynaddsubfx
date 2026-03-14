@@ -24,8 +24,6 @@
 #include <cstddef>
 #include <complex>
 
-#include <unistd.h>
-
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
