@@ -1498,7 +1498,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         //if I use VoiceOut[] as modulator
         for(int k = 0; k < vce.unison_size; ++k) {
             float *tw = tmpwave_unison[k];
-            const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
+            const float *smps = NoteVoicePar[vce.FMVoice].VoiceOut;
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 for (int i = 0; i < synth.buffersize; ++i)
                     tw[i] = -smps[i];
@@ -1513,7 +1513,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             int    freqhiFM = vce.oscfreqhiFM[k];
             int    freqloFM = (int)(vce.oscfreqloFM[k] * (1<<24));
             float *tw = tmpwave_unison[k];
-            const float *smps = NoteVoicePar[nvoice].FMSmp;
+            const float *smps = vce.FMSmp;
 
             for(int i = 0; i < synth.buffersize; ++i) {
                 tw[i] = (smps[poshiFM] * ((1<<24) - posloFM)
@@ -1614,7 +1614,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             int carposhi = poshi + FMmodposhi;
             int carposlo = poslo + FMmodposlo;
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
-                carposhi += NoteVoicePar[nvoice].phase_offset;
+                carposhi += vce.phase_offset;
 
             if(carposlo >= (1<<24)) {
                 carposhi++;
