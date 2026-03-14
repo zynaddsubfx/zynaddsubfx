@@ -1583,8 +1583,9 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         for(int i = 0; i < synth.buffersize; ++i) {
 
             if(NoteVoicePar[nvoice].syncEnabled &&
-                        ( (tw[i]>0.0f && fmold <=0.0f) ||
-                        (tw[i]>=0.0f && fmold <0.0f) )) {
+                         vce.FMVoice >= 0 &&  // B1
+   ( (tw[i]>0.0f && fmold <=0.0f) || (tw[i]>=0.0f && fmold <0.0f) ) &&  // B2
+   ((float(poshi)/synth.oscilsize < vce.FMnewamplitude) || vce.FMEnabled != FMTYPE::NONE)) {
                 poshi = 0.0f;
                 poslo = 0.0f;
             }
