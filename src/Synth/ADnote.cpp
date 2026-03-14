@@ -1572,6 +1572,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
     else {  //Phase or PWM modulation
         const float normalize = synth.oscilsize_f / 262144.0f;
         for(int k = 0; k < vce.unison_size; ++k) {
+            memcpy(tmpwave_mod[k], tmpwave_unison[k], synth.bufferbytes);
             float *tw = tmpwave_unison[k];
             for(int i = 0; i < synth.buffersize; ++i)
                 tw[i] *= normalize;
@@ -1664,6 +1665,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             poshi += freqhi;
             poshi &= synth.oscilsize - 1;
         }
+        vce.FMtw_orig[k] = tw_orig_old;
         vce.oscposhi[k] = poshi;
         vce.oscposlo[k] = (poslo)/((1<<24)*1.0f);
     }
