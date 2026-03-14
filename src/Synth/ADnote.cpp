@@ -1583,7 +1583,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         float *smps   = vce.OscilSmp;
         float *tw     = tmpwave_unison[k];
         float *tw_orig = tmpwave_mod[k];
-        //~ float  fmold = vce.FMoldsmp[k];
         int    poshi  = vce.oscposhi[k];
         int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
         int    freqhi = vce.oscfreqhi[k];
@@ -1597,7 +1596,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                    ((float(poshi)/synth.oscilsize < vce.FMnewamplitude) || // soft sync
                    FMmode != FMTYPE::NONE) // no soft sync with other modulation
               ) {
-                  //~ printf("%d  synced vce.FMEnabled: %d\n", i, (int)vce.FMEnabled);
                 poshi = 0;
                 poslo = 0;
             }
