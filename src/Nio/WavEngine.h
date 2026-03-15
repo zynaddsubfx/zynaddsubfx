@@ -15,7 +15,6 @@
 #ifndef WAVENGINE_H
 #define WAVENGINE_H
 #include "AudioOut.h"
-#include <string>
 #include <thread>
 #include "ZynSema.h"
 #include "SafeQueue.h"
@@ -49,7 +48,7 @@ class WavEngine:public AudioOut
         ZynSema  work;
         SafeQueue<float> buffer;
 
-        std::thread thread;
+        std::thread* thread = nullptr;
 };
 
 }
