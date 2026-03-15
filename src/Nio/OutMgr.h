@@ -76,15 +76,19 @@ class OutMgr
         unsigned int curStoredSmps() const {return priBuffCurrent.l - priBuf.l; }
         void removeStaleSmps();
 #if HAVE_BG_SYNTH_THREAD
-        void refillLock() { bgSynthMtx.lock(); }
-        void refillUnlock() { bgSynthMtx.unlock(); }
-        void refillWait() { std::unique_lock<std::mutex> lock(bgSynthMtx); bgSynthCond.wait(lock); }
+        using LockType = std::unique_lock<std::mutex>;
+        LockType refillLock() { return std::unique_lock<std::mutex>(bgSynthMtx); }
+        void refillWait(std::unique_lock<std::mutex>& lock) { bgSynthCond.wait(lock); }
         void refillWakeup() { bgSynthCond.notify_one(); }
 #else
-        void refillLock() { }
-        void refillUnlock() { }
+        struct DummyLock {
+            void lock() const {}
+            void unlock() const {};
+        };
+        using LockType = DummyLock;
+        LockType refillLock() { return {}; }
 #endif
-        void refillSmps(unsigned int);
+        void refillSmps(unsigned int, LockType&);
 
         AudioOut *currentOut; /**<The current output driver*/
 

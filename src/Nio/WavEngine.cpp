@@ -51,10 +51,8 @@ void WavEngine::Stop()
     if(!thread.joinable())
         return;
 
-    std::thread tmp = std::move(thread);
-
+    thread.join();
     work.post();
-    tmp.join();
     destroyFile();
 }
 
