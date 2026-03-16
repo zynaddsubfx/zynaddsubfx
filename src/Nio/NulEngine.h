@@ -15,6 +15,7 @@
 #define NUL_ENGINE_H
 
 #include <thread>
+#include <chrono>
 #include "../globals.h"
 #include "AudioOut.h"
 #include "MidiIn.h"
