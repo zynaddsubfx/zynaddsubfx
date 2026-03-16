@@ -256,9 +256,6 @@ int Bank::loadbank(string bankdirname)
         unsigned int startname = 0;
 
         for(unsigned int i = 0; i < 4 && i < filename.size(); ++i) {
-            if(filename.length() <= i)
-                break;
-
             if((filename[i] >= '0') && (filename[i] <= '9')) {
                 no = no * 10 + (filename[i] - '0');
                 startname++;

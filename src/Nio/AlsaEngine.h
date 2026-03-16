@@ -41,8 +41,8 @@ class AlsaEngine:public AudioOut, MidiIn
         bool getMidiEn() const;
 
     protected:
-        void *AudioThread();
-        void *MidiThread();
+        void AudioThread();
+        void MidiThread();
 
     private:
         bool openMidi();

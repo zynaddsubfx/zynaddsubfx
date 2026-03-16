@@ -47,7 +47,7 @@ AlsaEngine::~AlsaEngine()
     delete[] audio.buffer;
 }
 
-void *AlsaEngine::AudioThread()
+void AlsaEngine::AudioThread()
 {
     set_realtime();
     return processAudio();
@@ -94,7 +94,7 @@ bool AlsaEngine::getAudioEn() const
 }
 
 
-void *AlsaEngine::MidiThread(void)
+void AlsaEngine::MidiThread(void)
 {
     snd_seq_event_t *event;
     MidiEvent ev = {};
