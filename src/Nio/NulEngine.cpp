@@ -22,8 +22,11 @@ using namespace std;
 namespace zyn {
 
 NulEngine::NulEngine(const SYNTH_T &synth_)
-    :AudioOut(synth_)
+    :AudioOut(synth_), running(false)
 {
+    static_assert(std::atomic<bool>::is_always_lock_free,
+        "std::atomic<bool> is not always lock-free on this platform; "
+        "NulEngine requires lock-free atomics for safe thread signaling");
     name = "NULL";
 }
 
@@ -32,7 +35,7 @@ void NulEngine::AudioThread()
     using duration = chrono::microseconds;
     const duration increase(synth.buffersize * 1'000'000 / synth.samplerate);
 
-    while(thread.joinable()) {
+    while(running.load(std::memory_order_relaxed)) {
         getNext();
 
         time_point now = chrono::steady_clock::now();
@@ -72,13 +75,14 @@ void NulEngine::setAudioEn(bool nval)
 {
     if(nval) {
         if(!getAudioEn()) {
+            running.store(true, std::memory_order_relaxed);
             thread = std::thread(&NulEngine::AudioThread, this);
         }
     }
     else
     if(getAudioEn()) {
-        std::thread tmpthread = std::move(thread);
-        tmpthread.join();
+        running.store(false, std::memory_order_relaxed);
+        thread.join();
     }
 }
 
