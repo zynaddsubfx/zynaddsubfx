@@ -2446,7 +2446,7 @@ int MiddleWare::checkAutoSave(void) const
 
     for(const auto& entry : fs::directory_iterator(save_dir, ec))
     {
-        if(ec) { return{}; }
+        if(ec) continue;
 
         const std::string filename = entry.path().filename().string();
         const char *prefix = "zynaddsubfx-";
