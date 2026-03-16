@@ -14,13 +14,8 @@
 //Copyright (c) 2015 Christopher Oliver
 //License: GNU GPL version 2 or later
 
-static float identity(float value)
-{
-    return value;
-}
-
 Fl_Osc_TSlider::Fl_Osc_TSlider(int x, int y, int w, int h, const char *label)
-    :Fl_Osc_Slider(x, y, w, h, label), transform(identity)
+    :Fl_Osc_Slider(x, y, w, h, label), transform([](float value) -> float { return value; })
 {
     Fl_Group *save = Fl_Group::current();
     tipwin = new TipWin();
