@@ -1606,16 +1606,15 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             }
             tw_orig_old = tw_orig[i];
 
-            // REVERT-FM-CHANGE: use explicit 24-bit fixed point for FM fractional part
-            int FMmodposhi = 0;
-            F2I(tw[i], FMmodposhi);
-            int FMmodposlo = (int)((tw[i] - FMmodposhi) * (1<<24));
-            if(FMmodposlo < 0)
-                FMmodposlo++;
+            int FMmodfreqhi = 0;
+            F2I(tw[i], FMmodfreqhi);
+            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
+            if(FMmodfreqlo < 0)
+                FMmodfreqlo++;
 
             // carrier positions (integer+fixed-point fractional)
-            int carposhi = poshi + FMmodposhi;
-            int carposlo = poslo + FMmodposlo;
+            int carposhi = poshi + FMmodfreqhi;
+            int carposlo = (int)(poslo + FMmodfreqlo);
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 carposhi += vce.phase_offset;
 
