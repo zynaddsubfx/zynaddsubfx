@@ -1241,21 +1241,18 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
     float* smps = vce.OscilSmp;
 
     for (int k = 0; k < vce.unison_size; ++k) {
-    int poshi  = vce.oscposhi[k];
-    int poslo  = (int)(vce.oscposlo[k] * (1<<24));  // REVERT-PHASE-CHANGE: use explicit 24-bit fixed point
-    int freqhi = vce.oscfreqhi[k];
-    int freqlo = (int)(vce.oscfreqlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
-        float* tw  = tmpwave_unison[k];
-        //~ printf("freqhi: %d\n", freqhi);
+
+        int    poshi  = vce.oscposhi[k];
+        // convert floating point fractional part (sample interval phase)
+        // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
+        // by multiplying with precalculated 2^24 and casting to integer:
+        int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
+        int    freqhi = vce.oscfreqhi[k];
+        // same for phase increment:
+        int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
+        float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);  // sanity check
         for (int i = 0; i < synth.buffersize; ++i) {
-            // advance phase (fixed-point)
-            // REVERT-PHASE-CHANGE: use original carry/overflow ordering
-            poslo += freqlo;                 // increment fractional part
-            poshi += freqhi + (poslo >> 24); // add overflow over 24 bits in poslo to poshi
-            poslo &= 0xFFFFFF;               // remove overflow from poslo (keep 24 bits)
-            poshi &= synth.oscilsize - 1;    // wrap around wavetable size
-
             float out = 0.0f;
 
             // Determine if Anti-Aliasing is needed:
@@ -1297,17 +1294,51 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 
             } else {
                 // linear interpolation with wrapping
-                int poship1 = (poshi + 1) & (synth.oscilsize - 1);
-                // REVERT-PHASE-CHANGE: perform interpolation using 24-bit fixed point math
-                tw[i] = (smps[poshi] * ((1<<24) - poslo) + smps[poship1] * poslo) / (1.0f * (1<<24));
+                tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
+                poslo += freqlo;                 // increment fractional part
+                poshi += freqhi + (poslo >> 24); // add overflow over 24 bits in poslo to poshi
+                poslo &= 0xFFFFFF;               // remove overflow from poslo (keep 24 bits)
+                poshi &= synth.oscilsize - 1;    // wrap around wavetable size
             }
         }
 
         // save updated phase (convert back from fixed-point)
         vce.oscposhi[k] = poshi;
-    vce.oscposlo[k] = static_cast<float>(poslo) / (1<<24); // REVERT-PHASE-CHANGE
+        vce.oscposlo[k] = poslo/(16777216.0f);
     }
 }
+
+
+//~ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
+//~ {
+    //~ Voice& vce = NoteVoicePar[nvoice];
+    //~ for(int k = 0; k < vce.unison_size; ++k) {
+        //~ int    poshi  = vce.oscposhi[k];
+        //~ // convert floating point fractional part (sample interval phase)
+        //~ // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
+        //~ // by multiplying with precalculated 2^24 and casting to integer:
+        //~ int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
+        //~ int    freqhi = vce.oscfreqhi[k];
+        //~ // same for phase increment:
+        //~ int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
+        //~ float *smps   = NoteVoicePar[nvoice].OscilSmp;
+        //~ float *tw     = tmpwave_unison[k];
+        //~ assert(vce.oscfreqlo[k] < 1.0f);
+        //~ for(int i = 0; i < synth.buffersize; ++i) {
+            //~ tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
+            //~ poslo += freqlo;                // increment fractional part (sample interval phase)
+            //~ poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
+            //~ poslo &= 0xffffff;              // remove overflow from poslo
+            //~ poshi &= synth.oscilsize - 1;   // remove overflow
+        //~ }
+        //~ vce.oscposhi[k] = poshi;
+        //~ vce.oscposlo[k] = poslo/(16777216.0f);
+    //~ }
+//~ }
+
+
+
+
 
 /*
  * Computes the Oscillator (Mixing)
