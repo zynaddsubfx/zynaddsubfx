@@ -1451,9 +1451,9 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
 
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
-    int    poslo  = (int)(vce.oscposlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
-    int    freqhi = vce.oscfreqhi[k];
-    int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24)); // REVERT-PHASE-CHANGE
+        int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
+        int    freqhi = vce.oscfreqhi[k];
+        int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
@@ -1470,7 +1470,7 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
                 && (( float(poshi)/float(synth.oscilsize) < vce.FMnewamplitude) || vce.FMEnabled != FMTYPE::NONE)
                 ) {
                 fmold = tw[i];
-                tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(1.0f * (1<<24)) + smps[0])/2.0f; // REVERT-PHASE-CHANGE
+                tw[i] = ((smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f) + smps[0])/2.0f;
                 poslo = 0;
                 poshi = 0;
                 continue;
@@ -1478,14 +1478,14 @@ inline void ADnote::ComputeVoiceOscillatorSync(int nvoice)
             }
             fmold = tw[i];
 
-            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(1.0f * (1<<24)); // REVERT-PHASE-CHANGE
+            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
             poslo += freqlo;                // increment fractional part (sample interval phase)
             poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
             poslo &= 0xffffff;              // remove overflow from poslo
             poshi &= synth.oscilsize - 1;   // remove overflow
         }
         vce.oscposhi[k] = poshi;
-    vce.oscposlo[k] = poslo/((1<<24) * 1.0f); // REVERT-PHASE-CHANGE
+        vce.oscposlo[k] = poslo/(16777216.0f);
         vce.FMoldsmp[k] = fmold; // store value for next tick
     }
 }
@@ -1567,7 +1567,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = vce.FMoldsmp[k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                fmold = fmold + tw[i] * normalize;
+                fmold = fmold + (tw[i] * normalize);
                 tw[i] = fmold;
             }
             vce.FMoldsmp[k] = fmold;
