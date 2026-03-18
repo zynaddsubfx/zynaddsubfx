@@ -74,6 +74,16 @@ inline float CombFilter::tanhX(const float x)
     return (x * (105.0f + 10.0f * x2) / (105.0f + (45.0f + x2) * x2));
 }
 
+// Adjustable knee for different characters
+// knee > 1.0: softer limiting (later saturation)
+// knee < 1.0: harder limiting (earlier compression)
+// Use this if you want to control both threshold AND gain
+inline float feedback_saturate_direct(float x, float knee) {
+    // Lower knee = earlier saturation + lower gain
+    // Higher knee = later saturation + higher gain
+    return x / sqrtf(x * x + knee * knee);
+}
+
 /**
  * @brief Linear interpolation between samples in the ring buffer.
  * Essential for sub-sample delay times, allowing for precise frequency tuning.
@@ -111,9 +121,9 @@ void CombFilter::filterout(float *smp)
         const float outputPos = fmodf(outputIndex - delay + mem_size, mem_size);
 
         // Calculate feedback with forward and backward gains
-        float feedback = tanhX(
+        float feedback = feedback_saturate_direct(
             gainfwd * sampleLerp(input, inputPos) -
-            gainbwd * sampleLerp(output, outputPos));
+            gainbwd * sampleLerp(output, outputPos), 1.0f);
 
         // Optional: Apply filtering within the feedback loop
         if (lpf) lpf->filterSample(feedback);
