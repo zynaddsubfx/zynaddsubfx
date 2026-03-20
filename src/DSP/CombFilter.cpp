@@ -74,10 +74,18 @@ inline float CombFilter::tanhX(const float x)
     return (x * (105.0f + 10.0f * x2) / (105.0f + (45.0f + x2) * x2));
 }
 
-// Adjustable knee for different characters
-// knee > 1.0: softer limiting (later saturation)
-// knee < 1.0: harder limiting (earlier compression)
-// Use this if you want to control both threshold AND gain
+/**
+ * @brief Direct feedback saturation with adjustable knee characteristic.
+ * Used as a saturation function for the feedback loop to control compression
+ * threshold and character. Lower knee values result in earlier saturation and
+ * lower gain, while higher knee values produce later saturation and higher gain.
+ *
+ * @param x Input signal value.
+ * @param knee Saturation knee parameter. Values > 1.0 produce softer limiting
+ *            (later saturation), values < 1.0 produce harder limiting
+ *            (earlier compression).
+ * @return float Saturated output value bounded to the range defined by the knee.
+ */
 inline float feedback_saturate_direct(float x, float knee) {
     // Lower knee = earlier saturation + lower gain
     // Higher knee = later saturation + higher gain
@@ -94,7 +102,10 @@ inline float feedback_saturate_direct(float x, float knee) {
 inline float CombFilter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos;
     float poslo = pos - (float)poshi;
-    int poshi_next = (poshi + 1) % mem_size;
+    int poshi_next = poshi + 1;
+    if (poshi_next == mem_size)
+        poshi_next = 0;
+
     return smp[poshi] + poslo * (smp[poshi_next] - smp[poshi]);
 }
 
