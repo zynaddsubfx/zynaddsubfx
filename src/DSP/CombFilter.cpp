@@ -168,15 +168,24 @@ void CombFilter::setfreq_and_q(float freq, float q)
 
 /**
  * @brief Sets the filter frequency.
- * Adjusts the delay length based on the frequency, compensating for the
- * phase delays introduced by the internal LPF and HPF to keep the filter in tune.
+ * Sets the frequency and updates delay accordingly
  * * @param freq_ Frequency in Hz (limited between 25Hz and 40kHz).
  */
 void CombFilter::setfreq(float freq_)
 {
     freq = limit(freq_, 25.0f, 40000.0f);
+    updatedelay();
+}
+/**
+ * @brief Updates the delay length.
+ * Adjusts the delay length based on the frequency, compensating for the
+ * phase delays introduced by the internal LPF and HPF to keep the filter in tune.
+ * * @param freq_ Frequency in Hz (limited between 25Hz and 40kHz).
+ */
+void CombFilter::updatedelay()
+{
     delay = ((float)samplerate) / freq - lpfDelay - hpfDelay;
-    delay = max((float)samplerate/40000.0f, delay);
+    delay = limit((float)samplerate/40000.0f, 1.0f, delay);
 }
 
 /**
@@ -242,7 +251,7 @@ void CombFilter::sethpf(unsigned char _Phpf)
         // Approximation of filter phase delay for compensation
         hpfDelay = -a / (1.0f + a);
     }
-    setfreq(freq);
+    updatedelay();
 }
 
 /**
@@ -269,7 +278,7 @@ void CombFilter::setlpf(unsigned char _Plpf)
         // Approximation of filter phase delay for compensation
         lpfDelay = a / (1.0f - a);
     }
-    setfreq(freq);
+    updatedelay();
 }
 
 } // end namespace zyn

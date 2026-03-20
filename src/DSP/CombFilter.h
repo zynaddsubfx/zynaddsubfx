@@ -48,6 +48,7 @@ class CombFilter:public Filter
 
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
+        void updatedelay();
 
 
         float gainfwd;
