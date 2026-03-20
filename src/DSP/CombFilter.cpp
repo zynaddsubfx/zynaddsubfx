@@ -115,10 +115,17 @@ void CombFilter::filterout(float *smp)
         memcpy(&input[inputIndex], smp, buffersize * sizeof(float));
     }
 
+
+    float inputPos = inputIndex - delay;
+    if (inputPos < 0.0f)
+        inputPos += mem_size;
+
+    float outputPos = outputIndex - delay;
+    if (outputPos < 0.0f)
+        outputPos += mem_size;
+
     // 2. Sample-by-sample loop
     for (int i = 0; i < buffersize; i++) {
-        const float inputPos = fmodf(inputIndex + i - delay + mem_size, mem_size);
-        const float outputPos = fmodf(outputIndex - delay + mem_size, mem_size);
 
         // Calculate feedback with forward and backward gains
         float feedback = feedback_saturate_direct(
@@ -138,6 +145,12 @@ void CombFilter::filterout(float *smp)
         smp[i] *= outgain;
 
         outputIndex = (outputIndex + 1) % mem_size;
+        inputPos += 1.0f;
+        if (inputPos >= mem_size)
+            inputPos -= mem_size;
+        outputPos += 1.0f;
+        if (outputPos >= mem_size)
+            outputPos -= mem_size;
     }
 
     // Update input pointer for next block
