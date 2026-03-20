@@ -1308,38 +1308,6 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
     }
 }
 
-
-//~ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
-//~ {
-    //~ Voice& vce = NoteVoicePar[nvoice];
-    //~ for(int k = 0; k < vce.unison_size; ++k) {
-        //~ int    poshi  = vce.oscposhi[k];
-        //~ // convert floating point fractional part (sample interval phase)
-        //~ // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
-        //~ // by multiplying with precalculated 2^24 and casting to integer:
-        //~ int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
-        //~ int    freqhi = vce.oscfreqhi[k];
-        //~ // same for phase increment:
-        //~ int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
-        //~ float *smps   = NoteVoicePar[nvoice].OscilSmp;
-        //~ float *tw     = tmpwave_unison[k];
-        //~ assert(vce.oscfreqlo[k] < 1.0f);
-        //~ for(int i = 0; i < synth.buffersize; ++i) {
-            //~ tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
-            //~ poslo += freqlo;                // increment fractional part (sample interval phase)
-            //~ poshi += freqhi + (poslo>>24);  // add overflow over 24 bits in poslo to poshi
-            //~ poslo &= 0xffffff;              // remove overflow from poslo
-            //~ poshi &= synth.oscilsize - 1;   // remove overflow
-        //~ }
-        //~ vce.oscposhi[k] = poshi;
-        //~ vce.oscposlo[k] = poslo/(16777216.0f);
-    //~ }
-//~ }
-
-
-
-
-
 /*
  * Computes the Oscillator (Mixing)
  */
