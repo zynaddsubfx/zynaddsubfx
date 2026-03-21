@@ -64,7 +64,7 @@ class CombFilter:public Filter
         unsigned int outputIndex=0;
 
         Allocator &memory;
-        int mem_size;
+        unsigned int mem_size;
 
 };
 

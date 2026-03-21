@@ -102,8 +102,8 @@ inline float feedback_saturate_direct(float x, float knee) {
 inline float CombFilter::sampleLerp(float *smp, float pos) {
     int poshi = (int)pos;
     float poslo = pos - (float)poshi;
-    int poshi_next = poshi + 1;
-    if (poshi_next == mem_size)
+    unsigned int poshi_next = poshi + 1;
+    if (poshi_next >= mem_size)
         poshi_next = 0;
 
     return smp[poshi] + poslo * (smp[poshi_next] - smp[poshi]);
@@ -155,7 +155,10 @@ void CombFilter::filterout(float *smp)
         // Apply output stage gain
         smp[i] *= outgain;
 
-        outputIndex = (outputIndex + 1) % mem_size;
+        outputIndex += 1;
+        if (outputIndex >= mem_size)
+            outputIndex -= mem_size;
+
         inputPos += 1.0f;
         if (inputPos >= mem_size)
             inputPos -= mem_size;
@@ -196,7 +199,7 @@ void CombFilter::setfreq(float freq_)
 void CombFilter::updatedelay()
 {
     delay = ((float)samplerate) / freq - lpfDelay - hpfDelay;
-    delay = limit((float)samplerate/40000.0f, 1.0f, delay);
+    delay = max(delay, (float)samplerate/40000.0f);
 }
 
 /**
