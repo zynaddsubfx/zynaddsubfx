@@ -2105,6 +2105,16 @@ void ADnote::releasekey()
 }
 
 /*
+ * finish Portamento
+ */
+void ADnote::finishPortamento()
+{
+    if (portamento) {
+            portamento->finish();
+        }
+}
+
+/*
  * Check if the note is finished
  */
 bool ADnote::finished() const
