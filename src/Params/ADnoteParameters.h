@@ -31,7 +31,7 @@ const int WSKERNELSIZE = WSBASESIZE * WSOVERSAMPLING + 1;
 const float WSREALCUTOFF = WSCUTOFF / WSOVERSAMPLING;
 
 enum class FMTYPE {
-    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, SELFPM_MOD
 };
 
 /*****************************************************************/

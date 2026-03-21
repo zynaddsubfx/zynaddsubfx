@@ -163,8 +163,10 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
                 c[0]  = (1.0f + cs) / 2.0f / tmp;
                 c[1]  = -(1.0f + cs) / tmp;
                 c[2]  = (1.0f + cs) / 2.0f / tmp;
-                d[1]  = -2.0f * cs / tmp * -1.0f;
-                d[2]  = (1.0f - alpha) / tmp * -1.0f;
+                //1e-6 is for stability with a low cutoff freq and float32
+                //calculations
+                d[1]  = -2.0f * cs / tmp * -1.0f - 1e-6;
+                d[2]  = (1.0f - alpha) / tmp * -1.0f - 1e-6;
             }
             else
                 c[0] = c[1] = c[2] = d[1] = d[2] = 0.0f;

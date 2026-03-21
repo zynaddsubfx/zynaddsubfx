@@ -21,15 +21,10 @@
 
 //static int numobj = 0;
 
-static float identity(float value)
-{
-    return value;
-}
-
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
     :Fl_Dial(x, y, w, h, label), reset_value(0), integer_step(true),
      use_rounding(false),  oldvalue(0.0f), pos(false), textset(false),
-     transform(identity)
+     transform([](float value) -> float { return value; })
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
