@@ -208,6 +208,9 @@ class ADnote:public SynthNote
             /* Waveform of the Voice */
             float *OscilSmp;
 
+            /* max freq inside OscilSmp */
+            float OscilFreqMin;
+
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
 
@@ -325,6 +328,7 @@ class ADnote:public SynthNote
 
             //used by Frequency Modulation (for integration)
             float *FMoldsmp;
+            float *FMtw_orig;
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
@@ -336,6 +340,7 @@ class ADnote:public SynthNote
         //temporary buffer
         float  *tmpwavel;
         float  *tmpwaver;
+        float **tmpwave_mod;
         int     max_unison;
         float **tmpwave_unison;
 
