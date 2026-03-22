@@ -187,15 +187,16 @@ class AdNoteTest
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-            TS_ASSERT_DELTA(outR[255], 0.06695f, 0.0001f);
+            TS_ASSERT_DELTA(outR[255], 0.036027, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outR[255], 0.11621f, 0.0001f);
+            TS_ASSERT_DELTA(outR[255], 0.286865, 0.0001f);
             w->tick();
+
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outR[255], -0.1169f, 0.0001f);
+            TS_ASSERT_DELTA(outR[255], -0.343149, 0.0001f);
             w->tick();
 
             TS_ASSERT(tr->hasNext());

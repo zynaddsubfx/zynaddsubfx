@@ -228,12 +228,18 @@ float Envelope::envout(bool doWatch)
     }
 
     if(keyreleased && forcedrelease) { //do the forced release
-        int releaseindex = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); //if there is no sustain point, use the last point for release
+        int releaseindex = (envsustain < 0) ?
+                           (envpoints - 1) :
+                           (envsustain + 1); //if there is no sustain point, use the last point for release
 
         if(envdt[releaseindex] < 0.00000001f)
             out = envval[releaseindex];
         else
-            out = bezier3(envoutval, envcpy[releaseindex*2-1], envcpy[releaseindex*2], envval[releaseindex], t);
+            out = bezier3(envoutval,
+                          envcpy[releaseindex*2-1],
+                          envcpy[releaseindex*2],
+                          envval[releaseindex],
+                          t);
 
         t += envdt[releaseindex];
 
@@ -273,7 +279,9 @@ float Envelope::envout(bool doWatch)
             break;
         }
         // Check if we should stop at sustain point (with repeat mode)
-        else if (repeating && new_currentpoint == envsustain && !keyreleased) {
+        else if (repeating &&
+                 new_currentpoint == envsustain &&
+                 !keyreleased) {
             // Stay at sustain point in repeat mode
             new_t = 0.0f;  // Reset to beginning of sustain
             break;
