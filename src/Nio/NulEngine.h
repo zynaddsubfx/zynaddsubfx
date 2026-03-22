@@ -14,6 +14,7 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
+#include <atomic>
 #include <thread>
 #include <chrono>
 #include "../globals.h"
@@ -42,8 +43,9 @@ class NulEngine:public AudioOut, MidiIn
 
     private:
         using time_point = std::chrono::time_point<std::chrono::steady_clock>;
-        time_point     playing_until;
-        std::thread    thread;
+        time_point       playing_until;
+        std::thread      thread;
+        std::atomic_flag running = false;
 };
 
 }

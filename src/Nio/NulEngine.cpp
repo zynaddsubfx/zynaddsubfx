@@ -32,7 +32,7 @@ void NulEngine::AudioThread()
     using duration = chrono::microseconds;
     const duration increase(synth.buffersize * 1'000'000 / synth.samplerate);
 
-    while(thread.joinable()) {
+    while(running.test()) {
         getNext();
 
         time_point now = chrono::steady_clock::now();
@@ -72,11 +72,13 @@ void NulEngine::setAudioEn(bool nval)
 {
     if(nval) {
         if(!getAudioEn()) {
+            running.test_and_set();
             thread = std::thread(&NulEngine::AudioThread, this);
         }
     }
     else
     if(getAudioEn()) {
+        running.clear();
         std::thread tmpthread = std::move(thread);
         tmpthread.join();
     }
@@ -84,7 +86,7 @@ void NulEngine::setAudioEn(bool nval)
 
 bool NulEngine::getAudioEn() const
 {
-    return thread.joinable();
+    return running.test();
 }
 
 }
