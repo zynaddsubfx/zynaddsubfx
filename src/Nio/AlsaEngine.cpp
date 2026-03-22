@@ -382,9 +382,9 @@ void AlsaEngine::stopAudio()
 {
     if(!getAudioEn())
         return;
-    audio.running.clear();
 
     snd_pcm_t *handle = audio.handle;
+    audio.running.clear();
     audio.thread.join();
     snd_pcm_drain(handle);
     if(snd_pcm_close(handle))
