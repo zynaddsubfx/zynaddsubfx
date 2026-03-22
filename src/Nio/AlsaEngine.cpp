@@ -90,7 +90,7 @@ void AlsaEngine::setAudioEn(bool nval)
 
 bool AlsaEngine::getAudioEn() const
 {
-    return audio.handle;
+    return audio.running.test();
 }
 
 
@@ -258,8 +258,6 @@ bool AlsaEngine::openMidi()
     if(alsaport < 0)
         return false;
 
-    midi.running.test_and_set();
-
     midi.thread = std::thread(&AlsaEngine::MidiThread, this);
 
     return true;
@@ -304,7 +302,7 @@ short *AlsaEngine::interleave(const Stereo<float *> &smps)
 
 bool AlsaEngine::openAudio()
 {
-    if(getAudioEn())
+    if(audio.running.test_and_set())
         return true;
 
     int rc = 0;
@@ -391,10 +389,12 @@ void AlsaEngine::stopAudio()
 {
     if(!getAudioEn())
         return;
+    audio.running.clear();
 
     snd_pcm_t *handle = audio.handle;
     audio.handle = NULL;
-    audio.thread.join();
+    if(audio.thread.joinable())
+        audio.thread.join();
     snd_pcm_drain(handle);
     if(snd_pcm_close(handle))
         cout << "Error: in snd_pcm_close " << __LINE__ << ' ' << __FILE__
@@ -403,7 +403,7 @@ void AlsaEngine::stopAudio()
 
 void AlsaEngine::processAudio()
 {
-    while(audio.handle) {
+    while(audio.running.test()) {
         audio.buffer = interleave(getNext());
         snd_pcm_t *handle = audio.handle;
         int rc = snd_pcm_writei(handle, audio.buffer, synth.buffersize);
