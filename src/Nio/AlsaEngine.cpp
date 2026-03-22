@@ -267,10 +267,8 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if(midi.running.test()) {
-        midi.running.clear();
-        midi.thread.join();
-    }
+    midi.running.clear();
+    midi.thread.join();
     snd_seq_close(handle);
 }
 
