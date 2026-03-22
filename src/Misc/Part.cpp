@@ -552,6 +552,7 @@ bool Part::NoteOnInternal(note_t note,
         monomemPush(note);
         monomem[note].velocity  = velocity;
         monomem[note].note_log2_freq = note_log2_freq;
+        monomem[note].chan = chan;
 
     } else if(!monomemEmpty())
         monomemClear();
@@ -786,6 +787,8 @@ void Part::PolyphonicAftertouch(note_t note,
 void Part::MPEAftertouch(int chan,
                 unsigned char velocity)
 {
+    if(!Pnoteon || Pdrummode)
+        return;
 
     /*
      * Don't allow the velocity to reach zero.
