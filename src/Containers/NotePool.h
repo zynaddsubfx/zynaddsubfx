@@ -38,9 +38,10 @@ class NotePool
             uint8_t size;
             uint8_t status;
             bool    legatoMirror;
+            char chan;
+
             PortamentoRealtime *portamentoRealtime;
             bool operator==(NoteDescriptor);
-            char chan;
 
             //status checks
             bool playing(void) const;

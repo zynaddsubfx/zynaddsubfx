@@ -182,10 +182,11 @@ void SynthNote::setPitchBend(float value) {
         cents *= ctl.pitchwheel.bendrange_down;
     else
         cents *= ctl.pitchwheel.bendrange;
-    float relfreq = powf(2, cents / 1200.0f);
+    float absolute_log2_freq = legato.getNoteLog2Freq() + (cents / 1200.0f);
+
     legato.setSilent(true); //Let legato.update(...) return 0.
     LegatoParams pars{legato.getVelocity(),
-               legato.getPortamento(), relfreq, true, legato.getSeed()};
+               legato.getPortamento(), absolute_log2_freq, true, legato.getSeed()};
     try {
         legatonote(pars);
     } catch (std::bad_alloc &ba) {

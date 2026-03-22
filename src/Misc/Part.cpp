@@ -532,7 +532,8 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
  */
 bool Part::NoteOnInternal(note_t note,
                   unsigned char velocity,
-                  float note_log2_freq)
+                  float note_log2_freq,
+                  char chan)
 {
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
@@ -672,16 +673,16 @@ bool Part::NoteOnInternal(note_t note,
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
                             wm, (pre+"kit"+i+"/adpars/").c_str, constPowerMixing), 0, i},
-                                    portamento_realtime);
+                                    portamento_realtime, false, chan);
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str, constPowerMixing), 1, i},
-                                    portamento_realtime);
+                                    portamento_realtime, false, chan);
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
                             (pre+"kit"+i+"/padpars/").c_str, constPowerMixing), 2, i},
-                                    portamento_realtime);
+                                    portamento_realtime, false, chan);
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
@@ -990,7 +991,8 @@ void Part::MonoMemRenote()
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
     NoteOnInternal(mmrtempnote,
            monomem[mmrtempnote].velocity,
-           monomem[mmrtempnote].note_log2_freq);
+           monomem[mmrtempnote].note_log2_freq,
+           monomem[mmrtempnote].chan);
 }
 
 bool Part::getNoteLog2Freq(int masterkeyshift, float &note_log2_freq)

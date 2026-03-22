@@ -984,7 +984,7 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
-                    part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq);
+                    part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq, chan);
             }
         }
         activeNotes[note] = 1;
@@ -1021,6 +1021,9 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
  */
 void Master::handleMPEController(int chan, int type, int par)
 {
+    if(chan < 0 || chan >= 16)
+        return;
+
     switch(type) {
     case C_pitch:
         channelState[chan].pitchBend = par;

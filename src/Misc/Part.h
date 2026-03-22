@@ -55,15 +55,15 @@ class Part
 
         //returns true when note is successfully applied
         bool NoteOn(note_t note, uint8_t vel, int shift,
-                    float log2_freq) REALTIME {
+                    float log2_freq, char chan = 0) REALTIME {
             return (getNoteLog2Freq(shift, log2_freq) &&
-                NoteOnInternal(note, vel, log2_freq));
+                NoteOnInternal(note, vel, log2_freq, chan));
         };
 
         //returns true when note is successfully applied
         bool NoteOnInternal(note_t note,
                     unsigned char velocity,
-                    float note_log2_freq) REALTIME;
+                    float note_log2_freq, char chan = 0) REALTIME;
         void NoteOff(note_t note) REALTIME;
         void PolyphonicAftertouch(note_t note,
                                   unsigned char velocity) REALTIME;
@@ -216,6 +216,7 @@ class Part
         struct {
             unsigned char velocity;
             float note_log2_freq;
+            char chan;
         } monomem[256];
         /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
