@@ -50,7 +50,7 @@ AlsaEngine::~AlsaEngine()
 void AlsaEngine::AudioThread()
 {
     set_realtime();
-    return processAudio();
+    processAudio();
 }
 
 bool AlsaEngine::Start()
@@ -225,7 +225,6 @@ void AlsaEngine::MidiThread(void)
         }
         snd_seq_free_event(event);
     }
-    return NULL;
 }
 
 bool AlsaEngine::openMidi()
@@ -401,7 +400,7 @@ void AlsaEngine::stopAudio()
              << endl;
 }
 
-void *AlsaEngine::processAudio()
+void AlsaEngine::processAudio()
 {
     while(audio.handle) {
         audio.buffer = interleave(getNext());
@@ -420,7 +419,6 @@ void *AlsaEngine::processAudio()
              throw "Could not recover ALSA connection";
         }
     }
-    return NULL;
 }
 
 }

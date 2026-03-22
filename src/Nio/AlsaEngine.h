@@ -71,7 +71,7 @@ class AlsaEngine:public AudioOut, MidiIn
             float peaks[1];
         } audio;
 
-        void *processAudio();
+        void processAudio();
 };
 
 }
