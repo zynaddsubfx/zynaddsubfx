@@ -67,10 +67,13 @@ class Part
         void NoteOff(note_t note) REALTIME;
         void PolyphonicAftertouch(note_t note,
                                   unsigned char velocity) REALTIME;
+        void MPEAftertouch(int chan,
+                                  unsigned char velocity) REALTIME;
         void AllNotesOff() REALTIME; //panic
         void SetController(unsigned int type, int par) REALTIME;
-        void SetController(unsigned int type, note_t, float value,
+        void SetController(unsigned int type, note_t note, float value,
                            int masterkeyshift) REALTIME;
+        void SetMPEController(char chan, unsigned int type, int par) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 

@@ -1017,12 +1017,37 @@ void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 }
 
 /*
+ * MPE Messages (velocity=0 for NoteOff)
+ */
+void Master::handleMPEController(int chan, int type, int par)
+{
+    switch(type) {
+    case C_pitch:
+        channelState[chan].pitchBend = par;
+        break;
+    case C_aftertouch:
+        channelState[chan].pressure  = par;
+        break;
+    case C_filtercutoff:
+        channelState[chan].timbre    = par;
+        break;
+    default:
+        return;
+    }
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if((0 == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            part[npart]->SetMPEController(chan,type, par);
+
+}
+
+/*
  * Controllers
  */
 void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
         return;
+    handleMPEController(chan, type, par);
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)

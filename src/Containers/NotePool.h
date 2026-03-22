@@ -40,6 +40,7 @@ class NotePool
             bool    legatoMirror;
             PortamentoRealtime *portamentoRealtime;
             bool operator==(NoteDescriptor);
+            char chan;
 
             //status checks
             bool playing(void) const;
@@ -123,8 +124,12 @@ class NotePool
         NotePool(void);
 
         //Operations
-        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc,
-                        PortamentoRealtime *portamento_realtime=NULL, bool legato=false);
+        void insertNote(note_t note,
+                        uint8_t sendto,
+                        SynthDescriptor desc,
+                        PortamentoRealtime *portamento_realtime=NULL,
+                        bool legato=false,
+                        char chan=0);
         void insertLegatoNote(NoteDescriptor desc, SynthDescriptor sdesc);
 
         void upgradeToLegato(void);

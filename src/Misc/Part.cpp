@@ -782,6 +782,25 @@ void Part::PolyphonicAftertouch(note_t note,
     }
 }
 
+void Part::MPEAftertouch(int chan,
+                unsigned char velocity)
+{
+
+    /*
+     * Don't allow the velocity to reach zero.
+     * Keep it alive until note off.
+     */
+    if(velocity == 0)
+        velocity = 1;
+
+    const float vel = getVelocity(velocity, Pvelsns, Pveloffs);
+    for(auto &d:notePool.activeDesc()) {
+        if(d.chan == chan && d.playing())
+            for(auto &s:notePool.activeNotes(d))
+                s.note->setVelocity(vel);
+    }
+}
+
 /*
  * Controllers
  */
@@ -912,6 +931,36 @@ void Part::SetController(unsigned int type, note_t note, float value,
             if(d.note == note && d.playing())
                 for(auto &s:notePool.activeNotes(d))
                     s.note->setFilterCutoff(value);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+/*
+ * MPE note controllers.
+ */
+void Part::SetMPEController(char chan, unsigned int type, int par)
+{
+    switch (type) {
+    case C_pitch:
+        for(auto &d:notePool.activeDesc()) {
+            if(d.chan == chan && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setPitchBend(par);
+        }
+        break;
+
+    case C_aftertouch:
+        MPEAftertouch(chan, floorf(par));
+        break;
+
+    case C_filtercutoff:
+        for(auto &d:notePool.activeDesc()) {
+            if(d.chan == chan && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setFilterCutoff(par);
         }
         break;
     default:

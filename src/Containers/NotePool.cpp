@@ -186,7 +186,12 @@ int NotePool::usedSynthDesc(void) const
     return cnt;
 }
 
-void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, PortamentoRealtime *portamento_realtime, bool legato)
+void NotePool::insertNote(note_t note,
+                          uint8_t sendto,
+                          SynthDescriptor desc,
+                          PortamentoRealtime *portamento_realtime,
+                          bool legato,
+                          char chan)
 {
     //Get first free note descriptor
     int desc_id = getMergeableDescriptor(note, sendto, legato, ndesc);
@@ -209,6 +214,7 @@ void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, Por
     ndesc[desc_id].status              = KEY_PLAYING;
     ndesc[desc_id].legatoMirror        = legato;
     ndesc[desc_id].portamentoRealtime  = portamento_realtime;
+    ndesc[desc_id].chan  = chan;
 
     sdesc[sdesc_id] = desc;
     return;

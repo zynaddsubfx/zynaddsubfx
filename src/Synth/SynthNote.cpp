@@ -175,6 +175,27 @@ void SynthNote::setPitch(float log2_freq_) {
     }
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
+void SynthNote::setPitchBend(float value) {
+
+    float cents = value / 8192.0f;
+    if(ctl.pitchwheel.is_split && cents < 0)
+        cents *= ctl.pitchwheel.bendrange_down;
+    else
+        cents *= ctl.pitchwheel.bendrange;
+    float relfreq = powf(2, cents / 1200.0f);
+    legato.setSilent(true); //Let legato.update(...) return 0.
+    LegatoParams pars{legato.getVelocity(),
+               legato.getPortamento(), relfreq, true, legato.getSeed()};
+    try {
+        legatonote(pars);
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
+    }
+    legato.setDecounter(0); //avoid chopping sound due fade-in
+}
+
+
+
 
 void SynthNote::setFilterCutoff(float value)
 {
