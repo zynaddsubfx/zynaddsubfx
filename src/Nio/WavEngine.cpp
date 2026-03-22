@@ -53,8 +53,7 @@ void WavEngine::Stop()
 
     running.clear();
     work.post();
-    if(thread.joinable())
-        thread.join();
+    thread.join();
 
     destroyFile();
 }

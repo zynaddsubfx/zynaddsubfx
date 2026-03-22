@@ -73,16 +73,14 @@ void NulEngine::Stop()
 void NulEngine::setAudioEn(bool nval)
 {
     if(nval) {
-        if(!getAudioEn()) {
-            running.test_and_set();
+        if(!running.test_and_set()) {
             thread = std::thread(&NulEngine::AudioThread, this);
         }
     }
     else
     if(getAudioEn()) {
         running.clear();
-        if(thread.joinable())
-            thread.join();
+        thread.join();
     }
 }
 

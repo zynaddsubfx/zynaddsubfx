@@ -140,9 +140,7 @@ void SndioEngine::stopAudio()
     if(!getAudioEn())
         return;
     audio.running.clear();
-
-    if(audio.thread.joinable())
-        audio.thread.join();
+    audio.thread.join();
 
     rc = sio_stop(handle);
     if(rc != 1)
@@ -173,8 +171,7 @@ void SndioEngine::stopMidi()
     if(!getMidiEn())
         return;
     midi.running.clear();
-    if(midi.thread.joinable())
-        midi.thread.join();
+    midi.thread.join();
 
     mio_close(handle);
 }

@@ -269,8 +269,7 @@ void AlsaEngine::stopMidi()
     snd_seq_t *handle = midi.handle;
     if(midi.running.test()) {
         midi.running.clear();
-        if(midi.thread.joinable())
-            midi.thread.join();
+        midi.thread.join();
     }
     snd_seq_close(handle);
 }
@@ -388,8 +387,7 @@ void AlsaEngine::stopAudio()
     audio.running.clear();
 
     snd_pcm_t *handle = audio.handle;
-    if(audio.thread.joinable())
-        audio.thread.join();
+    audio.thread.join();
     snd_pcm_drain(handle);
     if(snd_pcm_close(handle))
         cout << "Error: in snd_pcm_close " << __LINE__ << ' ' << __FILE__
