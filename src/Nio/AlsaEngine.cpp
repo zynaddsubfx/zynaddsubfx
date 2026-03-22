@@ -77,7 +77,7 @@ void AlsaEngine::setMidiEn(bool nval)
 
 bool AlsaEngine::getMidiEn() const
 {
-    return midi.handle;
+    return midi.running.test();
 }
 
 void AlsaEngine::setAudioEn(bool nval)
@@ -229,7 +229,7 @@ void AlsaEngine::MidiThread(void)
 
 bool AlsaEngine::openMidi()
 {
-    if(getMidiEn())
+    if(midi.running.test_and_set())
         return true;
 
     int alsaport;
