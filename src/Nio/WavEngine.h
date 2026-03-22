@@ -15,6 +15,7 @@
 #ifndef WAVENGINE_H
 #define WAVENGINE_H
 #include "AudioOut.h"
+#include <atomic>
 #include <string>
 #include <thread>
 #include "ZynSema.h"
@@ -50,6 +51,7 @@ class WavEngine:public AudioOut
         SafeQueue<float> buffer;
 
         std::thread thread;
+        std::atomic_flag running{false};
 };
 
 }

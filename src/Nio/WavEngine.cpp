@@ -40,7 +40,7 @@ bool WavEngine::openAudio()
 
 bool WavEngine::Start()
 {
-    if(!thread.joinable())
+    if(!running.test_and_set())
         thread = std::thread(&WavEngine::AudioThread, this);
 
     return true;
@@ -48,17 +48,20 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-    if(!thread.joinable())
+    if(!running.test())
         return;
 
-    thread.join();
+    running.clear();
     work.post();
+    if(thread.joinable())
+        thread.join();
+
     destroyFile();
 }
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
 {
-    if(!thread.joinable())
+    if(!running.test())
         return;
 
 
@@ -94,7 +97,7 @@ void WavEngine::AudioThread()
 {
     short *recordbuf_16bit = new short[2 * synth.buffersize];
 
-    while(!work.wait() && thread.joinable()) {
+    while(!work.wait() && running.test()) {
         for(int i = 0; i < synth.buffersize; ++i) {
             float left = 0.0f, right = 0.0f;
             buffer.pop(left);
