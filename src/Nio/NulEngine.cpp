@@ -79,8 +79,8 @@ void NulEngine::setAudioEn(bool nval)
     else
     if(getAudioEn()) {
         running.clear();
-        std::thread tmpthread = std::move(thread);
-        tmpthread.join();
+        if(thread.joinable())
+            thread.join();
     }
 }
 
