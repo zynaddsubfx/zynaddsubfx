@@ -67,7 +67,7 @@ void SndioEngine::setAudioEn(bool nval)
 
 bool SndioEngine::getAudioEn() const
 {
-    return audio.handle;
+    return audio.running.test();
 }
 
 void SndioEngine::setMidiEn(bool nval)
@@ -80,7 +80,7 @@ void SndioEngine::setMidiEn(bool nval)
 
 bool SndioEngine::getMidiEn() const
 {
-    return midi.handle;
+    return midi.running.test();
 }
 
 void SndioEngine::AudioThread()
@@ -99,13 +99,18 @@ bool SndioEngine::openAudio()
 {
     int rc;
 
-    if(getAudioEn())
+    if(audio.running.test_and_set())
         return true;
 
     audio.handle = NULL;
 
+    auto crash = [](std::atomic_flag& audio_running, const char* msg) {
+        fprintf(stderr, "%s\n", msg);
+        audio_running.clear();
+    };
+
     if((audio.handle = sio_open(SIO_DEVANY, SIO_PLAY, 0)) == NULL) {
-        fprintf(stderr, "unable to open sndio audio device\n");
+        crash(audio.running, "unable to open sndio audio device");
         return false;
     }
 
@@ -116,7 +121,7 @@ bool SndioEngine::openAudio()
 
     rc = sio_setpar(audio.handle, &audio.params);
     if(rc != 1) {
-        fprintf(stderr, "unable to set sndio audio parameters");
+        crash(audio.running, "unable to set sndio audio parameters");
         return false;
     }
 
@@ -124,7 +129,7 @@ bool SndioEngine::openAudio()
 
     rc = sio_start(audio.handle);
     if(rc != 1) {
-        fprintf(stderr, "unable to start sndio audio");
+        crash(audio.running, "unable to start sndio audio");
         return false;
     }
 
@@ -139,6 +144,7 @@ void SndioEngine::stopAudio()
 
     if(!getAudioEn())
         return;
+    audio.running.clear();
 
     audio.handle = NULL;
 
@@ -154,17 +160,16 @@ void SndioEngine::stopAudio()
 
 bool SndioEngine::openMidi()
 {
-    if(getMidiEn())
+    if(midi.running.test_and_set())
         return true;
 
     midi.handle = NULL;
 
     if((midi.handle = mio_open(MIO_PORTANY, MIO_IN, 1)) == NULL) {
         fprintf(stderr, "unable to open sndio midi device\n");
+        midi.running.clear();
         return false;
     }
-
-    midi.exiting = false;
 
     midi.thread = std::thread(&SndioEngine::MidiThread, this);
     return true;
@@ -176,12 +181,9 @@ void SndioEngine::stopMidi()
 
     if(!getMidiEn())
         return;
-
-    if(midi.handle) {
-        midi.exiting = true;
-        if(midi.thread.joinable())
-            midi.thread.join();
-    }
+    midi.running.clear();
+    if(midi.thread.joinable())
+        midi.thread.join();
 
     midi.handle = NULL;
 
@@ -194,7 +196,7 @@ void SndioEngine::processAudio()
     size_t len;
     struct sio_hdl *handle;
 
-    while(audio.handle) {
+    while(audio.running.test()) {
         audio.buffer = interleave(getNext());
         handle = audio.handle;
         len = sio_write(handle, audio.buffer, audio.buffer_size);
@@ -226,7 +228,7 @@ void SndioEngine::processMidi()
     }
 
     while(1) {
-        if(midi.exiting)
+        if(!midi.running.test())
             break;
 
         nfds = mio_pollfd(midi.handle, pfd, POLLIN);

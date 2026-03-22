@@ -13,6 +13,7 @@
 #ifndef SNDIO_ENGINE_H
 #define SNDIO_ENGINE_H
 
+#include <atomic>
 #include <thread>
 #include <queue>
 #include <sndio.h>
@@ -59,6 +60,7 @@ class SndioEngine:public AudioOut, MidiIn
             struct sio_par params;
             short *buffer;
             size_t buffer_size;
+            std::atomic_flag running{false};
             std::thread thread;
             float peaks[1];
         } audio;
@@ -66,7 +68,7 @@ class SndioEngine:public AudioOut, MidiIn
         struct {
             std::string device;
             struct mio_hdl *handle;
-            bool exiting;
+            std::atomic_flag running{false};
             std::thread thread;
         } midi;
 };
