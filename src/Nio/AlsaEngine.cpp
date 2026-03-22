@@ -34,10 +34,8 @@ AlsaEngine::AlsaEngine(const SYNTH_T &synth)
 {
     audio.buffer = new short[synth.buffersize * 2];
     name = "ALSA";
-    audio.handle = NULL;
     audio.peaks[0] = 0;
 
-    midi.handle  = NULL;
     midi.alsaId  = -1;
 }
 
@@ -269,14 +267,12 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if(midi.handle && midi.running.test()) {
+    if(midi.running.test()) {
         midi.running.clear();
         if(midi.thread.joinable())
             midi.thread.join();
     }
-    midi.handle = NULL;
-    if(handle)
-        snd_seq_close(handle);
+    snd_seq_close(handle);
 }
 
 short *AlsaEngine::interleave(const Stereo<float *> &smps)
@@ -392,7 +388,6 @@ void AlsaEngine::stopAudio()
     audio.running.clear();
 
     snd_pcm_t *handle = audio.handle;
-    audio.handle = NULL;
     if(audio.thread.joinable())
         audio.thread.join();
     snd_pcm_drain(handle);
