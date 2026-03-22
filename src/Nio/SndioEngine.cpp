@@ -30,12 +30,9 @@ SndioEngine::SndioEngine(const SYNTH_T &synth)
     :AudioOut(synth)
 {
     name = "SNDIO";
-    audio.handle = NULL;
     audio.buffer = new short[synth.buffersize * 2];
     audio.buffer_size = synth.buffersize * 2 * sizeof(short);
     audio.peaks[0] = 0;
-
-    midi.handle  = NULL;
 }
 
 SndioEngine::~SndioEngine()
@@ -102,8 +99,6 @@ bool SndioEngine::openAudio()
     if(audio.running.test_and_set())
         return true;
 
-    audio.handle = NULL;
-
     auto crash = [](std::atomic_flag& audio_running, const char* msg) {
         fprintf(stderr, "%s\n", msg);
         audio_running.clear();
@@ -146,8 +141,6 @@ void SndioEngine::stopAudio()
         return;
     audio.running.clear();
 
-    audio.handle = NULL;
-
     if(audio.thread.joinable())
         audio.thread.join();
 
@@ -162,8 +155,6 @@ bool SndioEngine::openMidi()
 {
     if(midi.running.test_and_set())
         return true;
-
-    midi.handle = NULL;
 
     if((midi.handle = mio_open(MIO_PORTANY, MIO_IN, 1)) == NULL) {
         fprintf(stderr, "unable to open sndio midi device\n");
@@ -185,21 +176,16 @@ void SndioEngine::stopMidi()
     if(midi.thread.joinable())
         midi.thread.join();
 
-    midi.handle = NULL;
-
-    if(handle)
-        mio_close(handle);
+    mio_close(handle);
 }
 
 void SndioEngine::processAudio()
 {
     size_t len;
-    struct sio_hdl *handle;
 
     while(audio.running.test()) {
         audio.buffer = interleave(getNext());
-        handle = audio.handle;
-        len = sio_write(handle, audio.buffer, audio.buffer_size);
+        len = sio_write(audio.handle, audio.buffer, audio.buffer_size);
         if(len == 0) // write error according to sndio examples
             cerr << "sio_write error" << endl;
     }
