@@ -43,10 +43,8 @@ In ZynAddSubFX, the wetness is applied after all stages were passed.
 the sound, low frequency. They often appear in order to control the effect.
 They can have some of the following controls:
 ** *LFO Type* determines the shape of the LFO. If not present, the LFO is a
-sine wave. The other choices are triange wave and noise.
-** *Freq* determines the LFO's frequency for sine and triangle and in case of
-noise the cutoff frequency of a lowpass filter aplied to random values. That
-determines the speed of the changing values.
+sine wave.
+** *Freq* determines the LFO's frequency.
 ** *Dpth* is a multiplier to the LFO. Thus, it determines the LFOs amplitude
 and its influence.
 ** *Rnd* is the LFO amplitude's randomness
@@ -188,6 +186,7 @@ The basic components of distortion are mainly
 
 * a preamplifier
 * the waveshaping function
+* optional loudness compensation
 * filters
 
 Preamplification changes the volume before the wave is shaped, and is indeed the
@@ -242,6 +241,9 @@ means that afterwards, a percentage of the left side is applied to the right
 side, and, synchronously, the other way round. It is a kind of interpolation
 between left and right. If you set the LR Mix to 0.0, you will always have a
 stereo output.
+* The button *comp* enables the dynamic loudnes compensation. It is acomplished
+by clalculating the a-weighted rms of both input and output signal and using their
+ratio as compensation factor.
 
 Dynamic Filter
 ~~~~~~~~~~~~~
