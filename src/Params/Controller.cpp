@@ -82,10 +82,16 @@ const rtosc::Ports Controller::ports = {
         "Sustain MIDI Receive"),
 #undef rChangeCb
 #define rChangeCb rChangeCbBase
+    rToggle(sustain.stopsPortamento, rDefault(false),
+        "Sustain finishes Portamento"),
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(LEGACY),
+        "Polyphonic Mode"),
+    rParamZyn(portamento.glissando,     rShort("gliss"), rDefault(0),
+        "Portamento <-> Glissando"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
@@ -141,9 +147,12 @@ void Controller::defaults()
     fmamp.receive                = true;
     volume.receive               = true;
     sustain.receive              = true;
+    sustain.stopsPortamento      = false;
     NRPN.receive                 = true;
 
     portamento.portamento        = false;
+    portamento.polyMode          = LEGACY;
+    portamento.glissando         = 0;
     portamento.automode          = true;
     portamento.proportional      = false;
     portamento.propRate          = 80;
@@ -449,8 +458,10 @@ void Controller::add2XML(XMLwrapper& xml)
     xml.addparbool("fm_amp_receive", fmamp.receive);
     xml.addparbool("volume_receive", volume.receive);
     xml.addparbool("sustain_receive", sustain.receive);
-
+    xml.addparbool("sustain_stops_portamento", sustain.stopsPortamento);
     xml.addparbool("portamento_receive", portamento.receive);
+    xml.addpar("portamento_polymode", portamento.polyMode);
+    xml.addpar("portamento_glissando", portamento.glissando);
     xml.addpar("portamento_time", portamento.time);
     xml.addpar("portamento_pitchthresh", portamento.pitchthresh);
     xml.addpar("portamento_pitchthreshtype", portamento.pitchthreshtype);
@@ -494,9 +505,14 @@ void Controller::getfromXML(XMLwrapper& xml)
                                      volume.receive);
     sustain.receive = xml.getparbool("sustain_receive",
                                       sustain.receive);
-
+    sustain.stopsPortamento = xml.getparbool("sustain_stops_portamento",
+                                             sustain.stopsPortamento);
     portamento.receive = xml.getparbool("portamento_receive",
                                          portamento.receive);
+    portamento.polyMode = xml.getpar("portamento_polymode",
+                                     portamento.polyMode, LEGACY, SMART);
+    portamento.glissando = xml.getpar127("portamento_glissando",
+                                         portamento.glissando);
     portamento.automode = xml.getparbool("portamento_auto",
                                          portamento.automode);
     portamento.time = xml.getpar127("portamento_time",

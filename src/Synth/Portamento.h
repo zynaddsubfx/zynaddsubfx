@@ -58,6 +58,7 @@ class Portamento {
                   float newfreq_log2);
         /**Update portamento's freqrap to next value based upon dx*/
         void update(void);
+        void finish(void);
         /**if the portamento is in use*/
         bool active;
         /**this value is used to compute the actual portamento
@@ -75,6 +76,8 @@ class Portamento {
         float dx;
         /** this is used for computing freqdelta_log2 value from x*/
         float origfreqdelta_log2;
+        /** q morphs from portamento at 0.0 to glissando at 1.0 */
+        float q;
 };
 
 class PortamentoRealtime {

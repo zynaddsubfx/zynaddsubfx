@@ -15,8 +15,21 @@
 
 namespace zyn {
 
-//Waveshaping(called by Distortion effect and waveshape from OscilGen)
-void waveShapeSmps(int n,
+// Originalversion MIT den neuen Parametern
+void waveShapeSmps(int buffersize,
+                   float *smps,
+                   unsigned char type,
+                   unsigned char drive,
+                   unsigned char driveHist,
+                   unsigned char offset,
+                   unsigned char funcpar,
+                   unsigned char loudnessComp,
+                   float &sumIn, float &sumOut,
+                   float &aWeightHistIn, float &aWeightHistOut,
+                   float &compensationfactor);
+
+// Überladene Version OHNE die neuen Parameter
+void waveShapeSmps(int buffersize,
                    float *smps,
                    unsigned char type,
                    unsigned char drive,
@@ -27,6 +40,8 @@ void waveShapeSmps(int n,
 float polyblampres(float smp,
                    float ws,
                    float dMax);
+
+
 }
 
 #endif
