@@ -25,6 +25,7 @@
 #include "Time.h"
 #include "Bank.h"
 #include "Recorder.h"
+#include "Util.h"
 
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
@@ -110,6 +111,7 @@ class Master
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         void setController(char chan, int type, note_t note, float value);
+        void setMPEController(int chan, int type, int value);
         //void NRPN...
 
 
@@ -250,6 +252,7 @@ class Master
                            rtosc::savefile_dispatcher_t* dispatcher);
 
     private:
+        void handleMPEController(int chan, int type, int par);
         std::atomic<bool> run_osc_in_use = { false };
         void (*unknown_address_cb)(void*,bool,rtosc::msg_t) = nullptr;
         void* unknown_address_cb_ptr;
@@ -257,6 +260,8 @@ class Master
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
+
+        MPEState channelState[16];
 
         //information relevant to generating plugin audio samples
         float *bufl;
