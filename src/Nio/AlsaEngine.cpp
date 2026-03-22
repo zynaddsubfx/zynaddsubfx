@@ -102,8 +102,8 @@ void AlsaEngine::MidiThread(void)
     int error;
 
     set_realtime();
-    while(1) {
-        if(midi.exiting)
+    while(true) {
+        if(!midi.running.test())
             break;
         error = snd_seq_event_input(midi.handle, &event);
         if (error < 0) {
@@ -258,7 +258,7 @@ bool AlsaEngine::openMidi()
     if(alsaport < 0)
         return false;
 
-    midi.exiting = false;
+    midi.running.test_and_set();
 
     midi.thread = std::thread(&AlsaEngine::MidiThread, this);
 
@@ -271,9 +271,10 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if(midi.handle && midi.thread.joinable()) {
-        midi.exiting = true;
-        midi.thread.join();
+    if(midi.handle && midi.running.test()) {
+        midi.running.clear();
+        if(midi.thread.joinable())
+            midi.thread.join();
     }
     midi.handle = NULL;
     if(handle)

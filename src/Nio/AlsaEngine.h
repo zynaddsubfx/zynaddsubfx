@@ -14,6 +14,7 @@
 #ifndef ALSA_ENGINE_H
 #define ALSA_ENGINE_H
 
+#include <atomic>
 #include <thread>
 #include <string>
 #include <alsa/asoundlib.h>
@@ -56,7 +57,7 @@ class AlsaEngine:public AudioOut, MidiIn
             std::string device;
             snd_seq_t  *handle;
             int alsaId;
-            bool exiting;
+            std::atomic_flag running = false;
             std::thread thread;
         } midi;
 
