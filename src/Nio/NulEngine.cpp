@@ -55,7 +55,9 @@ void NulEngine::AudioThread()
 }
 
 NulEngine::~NulEngine()
-{}
+{
+    Stop();
+}
 
 bool NulEngine::Start()
 {
