@@ -45,7 +45,7 @@ class NulEngine:public AudioOut, MidiIn
         using time_point = std::chrono::time_point<std::chrono::steady_clock>;
         time_point       playing_until;
         std::thread      thread;
-        std::atomic_flag running = false;
+        std::atomic_flag running{false};
 };
 
 }
