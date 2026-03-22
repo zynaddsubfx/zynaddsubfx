@@ -16,9 +16,9 @@ namespace zyn {
     buffersize(buffersize_)
     {
         // setup the smoother for gain parameter
+        gain_smoothing.cutoff(1.0f);
         gain_smoothing.sample_rate(samplerate/16);
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
-        gain_smoothing.cutoff(1.0f);
         gain_smoothing.reset(gainbwd);
         pos_writer = 0;
     }
@@ -96,7 +96,7 @@ namespace zyn {
         // this should prevent popping noise when controlled binary with 0 / 127
         // new control rate = samplerate / 16
         const unsigned int gainbufsize = buffersize / 16;
-        float gainbuf[gainbufsize]; // buffer for value smoothing filter
+        STACKALLOC(float, gainbuf, gainbufsize); // buffer for value smoothing filter
         if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
             std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
 

@@ -16,6 +16,7 @@
 #include <cstdio>
 #include "../../tlsf/tlsf.h"
 #include "Allocator.h"
+#include "Util.h"
 
 namespace zyn {
 
@@ -89,7 +90,7 @@ void AllocatorClass::dealloc_mem(void *memory)
 bool AllocatorClass::lowMemory(unsigned n, size_t chunk_size) const
 {
     //This should stay on the stack
-    void *buf[n];
+    STACKALLOC(void*, buf, n);
     for(unsigned i=0; i<n; ++i)
         buf[i] = tlsf_malloc(impl->tlsf, chunk_size);
     bool outOfMem = false;

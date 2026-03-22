@@ -98,8 +98,12 @@ class OscilGen:public Presets, NoCopyNoMove
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
         short get(OscilGenBuffers& bfrs, float *smps, float freqHz, int resonance = 0) const;
+        short getMaxFreq(OscilGenBuffers& bfrs) const;
         short get(float *smps, float freqHz, int resonance = 0) {
             return get(myBuffers(), smps, freqHz, resonance);
+        }
+        short getMaxFreq() {
+            return getMaxFreq(myBuffers());
         }
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
@@ -147,8 +151,8 @@ class OscilGen:public Presets, NoCopyNoMove
         bool          Pfilterbeforews;
         unsigned char Psatype, Psapar; //spectrum adjust
 
-        int Pharmonicshift; //how the harmonics are shifted
-        int Pharmonicshiftfirst; //if the harmonic shift is done before waveshaping and filter
+        int  Pharmonicshift; //how the harmonics are shifted
+        bool Pharmonicshiftfirst; //if the harmonic shift is done before waveshaping and filter
 
         unsigned char Pmodulation; //what modulation is applied to the oscil
         unsigned char Pmodulationpar1, Pmodulationpar2, Pmodulationpar3; //the parameter of the parameters

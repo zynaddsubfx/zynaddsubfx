@@ -58,9 +58,12 @@ static const Ports sysefxPort =
             //be ...Psysefxvol#N/part#M
             //and the number "N" is one or two digits at most
 
-            // go backto the '/'
+            // go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -90,9 +93,12 @@ static const Ports sysefsendto =
         rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same workaround as before
-            //go backto the '/'
+            //go back to the '/'
             const char* m_findslash = m + strlen(m),
                       * loc_findslash = d.loc + strlen(d.loc);
+#ifdef NDEBUG
+            (void)m_findslash;
+#endif
             for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
                 assert(*loc_findslash == *m_findslash);
             assert(m_findslash + 1 == m);
@@ -640,7 +646,7 @@ class DataObj:public rtosc::RtData
         }
         virtual void reply(const char *msg) override
         {
-            if(rtosc_message_length(msg, -1) == 0)
+            if(rtosc_message_length(msg, std::numeric_limits<size_t>::max()) == 0)
                 fprintf(stderr, "Warning: Invalid Rtosc message '%s'\n", msg);
             bToU->raw_write(msg);
         }
@@ -1102,13 +1108,13 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outl2 = part[npart]->partoutl,
+                  *outr2 = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                if (fabsf(outl[i]) > vuoutpeakpartl[npart])
-                    vuoutpeakpartl[npart] = fabsf(outl[i]);
-                if (fabsf(outr[i]) > vuoutpeakpartr[npart])
-                    vuoutpeakpartr[npart] = fabsf(outr[i]);
+                if (fabsf(outl2[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabsf(outl2[i]);
+                if (fabsf(outr2[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabsf(outr2[i]);
             }
         }
         else
@@ -1306,7 +1312,7 @@ bool Master::AudioOut(float *outl, float *outr)
                                   part[efxpart]->partoutr);
         }
 
-    float gainbuf[synth.buffersize];
+    STACKALLOC(float, gainbuf, synth.buffersize);
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1357,8 +1363,8 @@ bool Master::AudioOut(float *outl, float *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue;  //the effect is disabled
 
-        float tmpmixl[synth.buffersize];
-        float tmpmixr[synth.buffersize];
+        STACKALLOC(float, tmpmixl, synth.buffersize);
+        STACKALLOC(float, tmpmixr, synth.buffersize);
         //Clean up the samples used by the system effects
         memset(tmpmixl, 0, synth.bufferbytes);
         memset(tmpmixr, 0, synth.bufferbytes);
@@ -1551,6 +1557,7 @@ Master::~Master()
 
     delete fft;
     delete memory;
+    delete sync;
 }
 
 

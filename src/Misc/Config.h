@@ -41,20 +41,21 @@ class Config
 
         struct {
             oss_devs_t oss_devs;
-            int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+            int   SampleRate, SoundBufferSize, OscilSize;
+            bool  SwapStereo;
             bool  AudioOutputCompressor;
             int   WindowsWaveOutId, WindowsMidiInId;
-            int   BankUIAutoClose;
+            bool  BankUIAutoClose;
             int   GzipCompression;
             int   Interpolation;
-            int   SaveFullXml; // when saving to a file save entire tree including disabled parts (Zynmuse)
+            bool  SaveFullXml; // when saving to a file save entire tree including disabled parts (Zynmuse)
             std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
             std::string presetsDirList[MAX_BANK_ROOT_DIRS];
             std::string favoriteList[MAX_BANK_ROOT_DIRS];
-            int CheckPADsynth;
-            int IgnoreProgramChange;
-            int UserInterfaceMode;
-            int VirKeybLayout;
+            bool  CheckPADsynth;
+            bool  IgnoreProgramChange;
+            int   UserInterfaceMode;
+            int   VirKeybLayout;
             std::string LinuxALSAaudioDev;
             std::string nameTag;
         } cfg;

@@ -187,7 +187,7 @@ class XMLwrapper
          * @param name The parameter name.
          * @param defaultpar The default value if the real value is not found.
          */
-        int getparbool(const std::string &name, int defaultpar) const;
+        bool getparbool(const std::string &name, bool defaultpar) const;
 
         /**
          * Get the string value stored in the node.

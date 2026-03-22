@@ -203,7 +203,7 @@ void InitWinMidi(int midi)
         long int res=midiInOpen(&winmidiinhandle,i,(DWORD_PTR)(void*)WinMidiInProc,0,CALLBACK_FUNCTION);
         if(res == MMSYSERR_NOERROR) {
             res=midiInStart(winmidiinhandle);
-            printf("[INFO] Starting Windows MIDI At %d with code %d(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
+            printf("[INFO] Starting Windows MIDI At %d with code %ld(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
             if(res == 0)
                 return;
         } else
@@ -632,7 +632,7 @@ int main(int argc, char *argv[])
     wait_t msg_waitlist;
     middleware->setUiCallback(0, [](void*v,const char*msg) {
             wait_t &wait = *(wait_t*)v;
-            size_t len = rtosc_message_length(msg, -1);
+            size_t len = rtosc_message_length(msg, (std::numeric_limits<size_t>::max)());
             char *copy = new char[len];
             memcpy(copy, msg, len);
             wait.push_back(copy);
@@ -716,7 +716,7 @@ int main(int argc, char *argv[])
         gui_pid = fork();
         if(gui_pid == 0) {
             auto exec_fusion = [&addr](const char* path) {
-                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload", nullptr); };
 #ifndef __APPLE__
             if(fusion_dir && *fusion_dir)
             {

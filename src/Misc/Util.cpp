@@ -42,6 +42,76 @@ bool isPlugin = false;
 
 prng_t prng_state = 0x1234;
 
+inline void BlackmanHarrisWindow(int N, float* w )
+{
+    const float a0      = 0.35875f;
+    const float a1      = 0.48829f;
+    const float a2      = 0.14128f;
+    const float a3      = 0.01168f;
+
+    for(auto i = 0; i < N; i++ )
+    {
+        w[i]   = a0 - (a1 * cosf( (2.0f * M_PI * i) / (N - 1) )) + (a2 * cosf( (4.0f * M_PI * i) / (N - 1) )) - (a3 * cosf( (6.0f * M_PI * i) / (N - 1) ));
+    }
+}
+
+inline float i0(float x) {
+  return 1 + x * x / 4;
+}
+
+// Compute the Kaiser window.
+inline void KaiserWindow(float beta, int N, float* w ) {
+    for (int n = 0; n < N; n++) {
+        w[n] = i0(beta * sqrt(1 - pow(2 * n / (N - 1) - 1, 2))) / i0(beta);
+    }
+}
+
+inline void HannWindow(int N, float* w ) {
+    for (int n = 0; n < N; n++) {
+        w[n] = 0.5 * (1 - cos(2 * M_PI * n / (N - 1)));
+    }
+}
+
+// Compute a windowed sinc kernel
+//
+// Args:
+//   fc:    Cutoff frequency as a fraction of the sampling rate (in (0, 0.5))
+//   gain:  gain factor of the kernel
+//   h:     Output array
+//
+void windowedsinc(float fc, float gain, int N, float *h) {
+
+  // Compute the sinc filter.
+  STACKALLOC(float, s, N);
+  for (int n = 0; n < N; n++) {
+    s[n] = (n == (N-1)/2) ? 1 : sin(2 * M_PI * fc * (n - (N - 1) / 2)) / (2 * M_PI * fc * (n - (N - 1) / 2));
+  }
+
+  // Compute the window.
+  STACKALLOC(float, w, N);
+  BlackmanHarrisWindow(N, w);
+  //~ HannWindow(N, w);
+
+
+  // Multiply the sinc filter by the window.
+  for (int n = 0; n < N; n++) {
+    h[n] = s[n] * w[n];
+  }
+
+  // summarize the kernel to get gain.
+  float sum = 0;
+  for (int n = 0; n < N; n++) {
+    sum += h[n];
+  }
+
+  // divide by measured gain, multiply wanted gain.
+  for (int n = 0; n < N; n++) {
+    const float factor = gain/sum;
+    h[n] *= factor;
+  }
+}
+
+
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
@@ -83,7 +153,7 @@ float getdetune(unsigned char type,
     int fdetune = finedetune - 8192;
 
     switch(type) {
-//	case 1: is used for the default (see below)
+//  case 1: is used for the default (see below)
         case 2:
             cdet   = fabsf(cdetune * 10.0f);
             findet = fabsf(fdetune / 8192.0f) * 10.0f;
@@ -221,7 +291,11 @@ float SYNTH_T::numRandom()
 
 float interpolate(const float *data, size_t len, float pos)
 {
+#ifdef NDEBUG
+    (void)len;
+#else
     assert(len > (size_t)pos + 1 && pos >= 0);
+#endif
     const unsigned int l_pos      = (int)pos;
     const unsigned int r_pos      = l_pos + 1;
     const float rightness = pos - (float)l_pos;
@@ -239,8 +313,8 @@ float cinterpolate(const float *data, size_t len, float pos)
 
 char *rtosc_splat(const char *path, std::set<std::string> v)
 {
-    char argT[v.size()+1];
-    rtosc_arg_t arg[v.size()];
+    STACKALLOC(char, argT, v.size()+1);
+    STACKALLOC(rtosc_arg_t, arg, v.size());
     unsigned i=0;
     for(auto &vv : v) {
         argT[i]  = 's';

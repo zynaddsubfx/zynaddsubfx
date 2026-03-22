@@ -91,9 +91,9 @@ class MemoryStressTest
             for ( size_t note_idx = 0; note_idx < 1000; ++ note_idx ) {
                 try {
                     notes.push_back(new ADnote(defaultPreset, pars));
-                } catch (std::exception & e) {
+                } catch ([[maybe_unused]] std::exception & e) {
 #if defined(DEBUG)
-                    std::cerr << "couldn't push note #" << note_idx << std::endl;
+                    std::cerr << "couldn't push note #" << note_idx << ": " << e.what() << std::endl;
 #endif
                 }
             }

@@ -43,7 +43,7 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
             osc->write(loc, "i", w());
         }
 
-        void OSC_value(unsigned N, void *data, const char *name) override
+        void OSC_value(unsigned N, void *data, [[maybe_unused]] const char *name) override
         {
             assert(!strcmp(name, "profile"));
             assert(N==w()*sizeof(float));
@@ -51,7 +51,7 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
             redraw();
         }
 
-        void OSC_value(float x, const char *name) override
+        void OSC_value(float x, [[maybe_unused]] const char *name) override
         {
             assert(!strcmp(name, "profile"));
             realbw = x;

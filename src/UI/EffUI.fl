@@ -462,6 +462,10 @@ if (filterwindow!=NULL){
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
+        MenuItem {} {
+          label NOISE
+          xywh {35 35 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Choice chorusp10 {
         label {Mode}

@@ -82,10 +82,16 @@ const rtosc::Ports Controller::ports = {
         "Sustain MIDI Receive"),
 #undef rChangeCb
 #define rChangeCb rChangeCbBase
+    rToggle(sustain.stopsPortamento, rDefault(false),
+        "Sustain finishes Portamento"),
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rOption(portamento.polyMode, rOptions(POLYMODES), rDefault(LEGACY),
+        "Polyphonic Mode"),
+    rParamZyn(portamento.glissando,     rShort("gliss"), rDefault(0),
+        "Portamento <-> Glissando"),
     rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
@@ -130,29 +136,32 @@ void Controller::defaults()
     pitchwheel.bendrange         = 200; //2 halftones
     pitchwheel.bendrange_down    = 0; //Unused by default
     pitchwheel.is_split          = false;
-    expression.receive           = 1;
+    expression.receive           = true;
     panning.depth                = 64;
     filtercutoff.depth           = 64;
     filterq.depth                = 64;
     bandwidth.depth              = 64;
-    bandwidth.exponential        = 0;
+    bandwidth.exponential        = false;
     modwheel.depth               = 80;
-    modwheel.exponential         = 0;
-    fmamp.receive                = 1;
-    volume.receive               = 1;
-    sustain.receive              = 1;
-    NRPN.receive                 = 1;
+    modwheel.exponential         = false;
+    fmamp.receive                = true;
+    volume.receive               = true;
+    sustain.receive              = true;
+    sustain.stopsPortamento      = false;
+    NRPN.receive                 = true;
 
-    portamento.portamento        = 0;
-    portamento.automode          = 1;
-    portamento.proportional      = 0;
+    portamento.portamento        = false;
+    portamento.polyMode          = LEGACY;
+    portamento.glissando         = 0;
+    portamento.automode          = true;
+    portamento.proportional      = false;
     portamento.propRate          = 80;
     portamento.propDepth         = 90;
-    portamento.receive           = 1;
+    portamento.receive           = true;
     portamento.time              = 64;
     portamento.updowntimestretch = 64;
     portamento.pitchthresh       = 3;
-    portamento.pitchthreshtype   = 1;
+    portamento.pitchthreshtype   = true;
 
     resonancecenter.depth        = 64;
     resonancebandwidth.depth     = 64;
@@ -360,7 +369,7 @@ void Controller::setportamento(int value)
 {
     portamento.data = value;
     if(portamento.receive != 0)
-        portamento.portamento = ((value < 64) ? 0 : 1);
+        portamento.portamento = (value >= 64);
 }
 
 void Controller::setresonancecenter(int value)
@@ -393,7 +402,7 @@ void Controller::setresonancebw(void)
 //Returns 0 if there is NRPN or 1 if there is not
 int Controller::getnrpn(int *parhi, int *parlo, int *valhi, int *vallo)
 {
-    if(NRPN.receive == 0)
+    if(!NRPN.receive)
         return 1;
     if((NRPN.parhi < 0) || (NRPN.parlo < 0) || (NRPN.valhi < 0)
        || (NRPN.vallo < 0))
@@ -449,8 +458,10 @@ void Controller::add2XML(XMLwrapper& xml)
     xml.addparbool("fm_amp_receive", fmamp.receive);
     xml.addparbool("volume_receive", volume.receive);
     xml.addparbool("sustain_receive", sustain.receive);
-
+    xml.addparbool("sustain_stops_portamento", sustain.stopsPortamento);
     xml.addparbool("portamento_receive", portamento.receive);
+    xml.addpar("portamento_polymode", portamento.polyMode);
+    xml.addpar("portamento_glissando", portamento.glissando);
     xml.addpar("portamento_time", portamento.time);
     xml.addpar("portamento_pitchthresh", portamento.pitchthresh);
     xml.addpar("portamento_pitchthreshtype", portamento.pitchthreshtype);
@@ -494,24 +505,29 @@ void Controller::getfromXML(XMLwrapper& xml)
                                      volume.receive);
     sustain.receive = xml.getparbool("sustain_receive",
                                       sustain.receive);
-
+    sustain.stopsPortamento = xml.getparbool("sustain_stops_portamento",
+                                             sustain.stopsPortamento);
     portamento.receive = xml.getparbool("portamento_receive",
                                          portamento.receive);
+    portamento.polyMode = xml.getpar("portamento_polymode",
+                                     portamento.polyMode, LEGACY, SMART);
+    portamento.glissando = xml.getpar127("portamento_glissando",
+                                         portamento.glissando);
     portamento.automode = xml.getparbool("portamento_auto",
                                          portamento.automode);
     portamento.time = xml.getpar127("portamento_time",
                                      portamento.time);
     portamento.pitchthresh = xml.getpar127("portamento_pitchthresh",
                                             portamento.pitchthresh);
-    portamento.pitchthreshtype = xml.getpar127("portamento_pitchthreshtype",
-                                                portamento.pitchthreshtype);
-    portamento.portamento = xml.getpar127("portamento_portamento",
-                                           portamento.portamento);
+    portamento.pitchthreshtype = (bool) xml.getpar("portamento_pitchthreshtype",
+                                                   portamento.pitchthreshtype, 0, 1);
+    portamento.portamento = (bool) xml.getpar("portamento_portamento",
+                                              portamento.portamento, 0, 1);
     portamento.updowntimestretch = xml.getpar127(
         "portamento_updowntimestretch",
         portamento.updowntimestretch);
-    portamento.proportional = xml.getpar127("portamento_proportional",
-                                             portamento.proportional);
+    portamento.proportional = (bool) xml.getpar("portamento_proportional",
+                                                portamento.proportional, 0, 1);
     portamento.propRate = xml.getpar127("portamento_proprate",
                                          portamento.propRate);
     portamento.propDepth = xml.getpar127("portamento_propdepth",

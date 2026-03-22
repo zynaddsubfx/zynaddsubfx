@@ -20,8 +20,18 @@
 
 namespace zyn {
 
+/**
+ * The size of the windowes sinc kernel
+ * This must be an odd number
+ */
+#define WSBASESIZE 8
+#define WSCUTOFF 0.05f
+#define WSOVERSAMPLING 32.0f
+const int WSKERNELSIZE = WSBASESIZE * WSOVERSAMPLING + 1;
+const float WSREALCUTOFF = WSCUTOFF / WSOVERSAMPLING;
+
 enum class FMTYPE {
-    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, SELFPM_MOD
 };
 
 /*****************************************************************/
@@ -39,8 +49,10 @@ struct ADnoteGlobalParam {
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
 
-    unsigned char PStereo;
+    bool PStereo;
 
+    // float array for windowed sinc kernel
+    float_t* wskernel;
 
     /******************************************
     *     FREQUENCY GLOBAL PARAMETERS        *
@@ -98,7 +110,7 @@ struct ADnoteGlobalParam {
     Resonance *Reson;
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
-    unsigned char Hrandgrouping;
+    bool Hrandgrouping;
 
     const AbsTime *time;
     int64_t last_update_timestamp;
@@ -152,7 +164,7 @@ struct ADnoteVoiceParam {
     unsigned char PDelay;
 
     /** If the resonance is enabled for this voice */
-    unsigned char Presonance;
+    bool Presonance;
 
     // What external oscil should I use, -1 for internal OscilSmp&FMSmp
     short int Pextoscil, PextFMoscil;
@@ -162,8 +174,8 @@ struct ADnoteVoiceParam {
     unsigned char Poscilphase, PFMoscilphase;
 
     // filter bypass
-    unsigned char Pfilterbypass;
-    unsigned char PfilterFcCtlBypass;
+    bool Pfilterbypass;
+    bool PfilterFcCtlBypass;
 
     /** Voice oscillator */
     OscilGen *OscilGn;
@@ -173,7 +185,7 @@ struct ADnoteVoiceParam {
     **********************************/
 
     /** If the base frequency is fixed to 440 Hz*/
-    unsigned char Pfixedfreq;
+    bool Pfixedfreq;
 
     /* Equal temperate (this is used only if the Pfixedfreq is enabled)
        If this parameter is 0, the frequency is fixed (to 440 Hz);
@@ -196,12 +208,12 @@ struct ADnoteVoiceParam {
     unsigned char POffsetHz;
 
     /* Frequency Envelope */
-    unsigned char   PFreqEnvelopeEnabled;
+    bool PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;
 
     /* Frequency LFO */
-    unsigned char PFreqLfoEnabled;
-    LFOParams    *FreqLfo;
+    bool PFreqLfoEnabled;
+    LFOParams *FreqLfo;
 
 
     /***************************
@@ -219,7 +231,7 @@ struct ADnoteVoiceParam {
     float volume;
 
     /* If the Volume negative */
-    unsigned char PVolumeminus;
+    bool PVolumeminus;
 
     /* if AntiAliasing is enabled */
     bool PAAEnabled;
@@ -228,12 +240,12 @@ struct ADnoteVoiceParam {
     unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
-    unsigned char   PAmpEnvelopeEnabled;
+    bool PAmpEnvelopeEnabled;
     EnvelopeParams *AmpEnvelope;
 
     /* Amplitude LFO */
-    unsigned char PAmpLfoEnabled;
-    LFOParams    *AmpLfo;
+    bool PAmpLfoEnabled;
+    LFOParams *AmpLfo;
 
 
 
@@ -242,16 +254,16 @@ struct ADnoteVoiceParam {
     *************************/
 
     /* Voice Filter */
-    unsigned char PFilterEnabled;
+    bool PFilterEnabled;
     FilterParams *VoiceFilter;
 
     /* Filter Envelope */
-    unsigned char   PFilterEnvelopeEnabled;
+    bool PFilterEnvelopeEnabled;
     EnvelopeParams *FilterEnvelope;
 
     /* Filter LFO */
-    unsigned char PFilterLfoEnabled;
-    LFOParams    *FilterLfo;
+    bool PFilterLfoEnabled;
+    LFOParams *FilterLfo;
 
     // filter velocity sensing
     unsigned char PFilterVelocityScale;
@@ -293,14 +305,14 @@ struct ADnoteVoiceParam {
     unsigned char PFMDetuneType;
 
     /* FM base freq fixed at 440Hz */
-    unsigned char PFMFixedFreq;
+    bool PFMFixedFreq;
 
     /* Frequency Envelope of the Modulator */
-    unsigned char   PFMFreqEnvelopeEnabled;
+    bool PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
     /* Frequency Envelope of the Modulator */
-    unsigned char   PFMAmpEnvelopeEnabled;
+    bool PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
     /* Voice is being synced by modulator

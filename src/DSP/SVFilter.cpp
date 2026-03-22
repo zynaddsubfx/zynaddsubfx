@@ -209,7 +209,7 @@ void SVFilter::filterout(float *smp)
 {
     assert((buffersize % 8) == 0);
 
-    float freqbuf[buffersize];
+    STACKALLOC(float, freqbuf, buffersize);
 
     if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
     {
