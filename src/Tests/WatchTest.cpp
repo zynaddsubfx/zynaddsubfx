@@ -31,7 +31,6 @@
 #include "../Params/LFOParams.h"
 #include "../Synth/LFO.h"
 #include "../Synth/SynthNote.h"
-#include <unistd.h>
 using namespace std;
 using namespace zyn;
 

@@ -32,44 +32,35 @@ OutMgr &OutMgr::getInstance(const SYNTH_T *synth)
 
 #if HAVE_BG_SYNTH_THREAD
 void *
-OutMgr::_refillThread(void *arg)
-{
-    return static_cast<OutMgr *>(arg)->refillThread();
-}
-
-void *
 OutMgr::refillThread()
 {
-    refillLock();
+    auto lock = refillLock();
     while (bgSynthEnabled) {
-        refillSmps(stales + synth.buffersize);
+        refillSmps(stales + synth.buffersize, lock);
         refillWakeup();
-        refillWait();
+        refillWait(lock);
     }
-    refillUnlock();
     return 0;
 }
 
 void
 OutMgr::setBackgroundSynth(bool enable)
 {
-    void *dummy;
-
     if (bgSynthEnabled == enable)
         return;
     if (bgSynthEnabled) {
-        refillLock();
-        bgSynthEnabled = false;
-        refillWakeup();
-        refillUnlock();
-
-        pthread_join(bgSynthThread, &dummy);
+        {
+            auto lock = refillLock();
+            bgSynthEnabled = false;
+            refillWakeup();
+        }
+        bgSynthThread.join();
     } else {
-        refillLock();
-        bgSynthEnabled = true;
-        refillUnlock();
-
-        pthread_create(&bgSynthThread, 0, &_refillThread, this);
+        {
+            auto lock = refillLock();
+            bgSynthEnabled = true;
+        }
+        bgSynthThread = std::thread(&OutMgr::refillThread, this);
     }
 }
 #endif
@@ -90,8 +81,6 @@ OutMgr::OutMgr(const SYNTH_T *synth_)
     memset(outr, 0, synth.bufferbytes);
 
 #if HAVE_BG_SYNTH_THREAD
-    pthread_mutex_init(&bgSynthMtx, 0);
-    pthread_cond_init(&bgSynthCond, 0);
     bgSynthEnabled = false;
 #endif
     midiFlushOffset = 0;
@@ -113,18 +102,14 @@ OutMgr::~OutMgr()
     delete [] priBuf.r;
     delete [] outr;
     delete [] outl;
-#if HAVE_BG_SYNTH_THREAD
-    pthread_cond_destroy(&bgSynthCond);
-    pthread_mutex_destroy(&bgSynthMtx);
-#endif
 }
 
-void OutMgr::refillSmps(unsigned int smpsLimit)
+void OutMgr::refillSmps(unsigned int smpsLimit, LockType& lock)
 {
     InMgr &midi = InMgr::getInstance();
 
     while(smpsLimit > curStoredSmps()) {
-        refillUnlock();
+        lock.unlock();
         if(!midi.empty() &&
            !midi.flush(midiFlushOffset, midiFlushOffset + synth.buffersize)) {
           midiFlushOffset += synth.buffersize;
@@ -132,7 +117,7 @@ void OutMgr::refillSmps(unsigned int smpsLimit)
           midiFlushOffset = 0;
         }
         master->AudioOut(outl, outr);
-        refillLock();
+        lock.lock();
         addSmps(outl, outr);
     }
 }
@@ -150,7 +135,7 @@ Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
     auto retval = priBuf;
     //SysEv->execute();
-    refillLock();
+    [[maybe_unused]] auto lock = refillLock();
     /* cleanup stales, if any */
     if(frameSize + stales > maxStoredSmps)
         removeStaleSmps();
@@ -160,13 +145,13 @@ Stereo<float *> OutMgr::tick(unsigned int frameSize)
         assert(frameSize <= (unsigned int)synth.buffersize);
         /* wait for background samples to complete, if any */
         while(frameSize + stales > curStoredSmps())
-            refillWait();
+            refillWait(lock);
     } else {
 #endif
         /* check if drivers ask for too many samples */
         assert(frameSize + stales <= maxStoredSmps);
         /* produce samples foreground, if any */
-        refillSmps(frameSize + stales);
+        refillSmps(frameSize + stales, lock);
 #if HAVE_BG_SYNTH_THREAD
     }
 #endif
@@ -179,7 +164,6 @@ Stereo<float *> OutMgr::tick(unsigned int frameSize)
         refillWakeup();
     }
 #endif
-    refillUnlock();
     return retval;
 }
 
@@ -223,7 +207,6 @@ string OutMgr::getSink() const
         cerr << "BUG: No current output in OutMgr " << __LINE__ << endl;
         return "ERROR";
     }
-    return "ERROR";
 }
 
 void OutMgr::setAudioCompressor(bool isEnabled)

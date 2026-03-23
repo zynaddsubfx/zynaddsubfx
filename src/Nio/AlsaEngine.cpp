@@ -34,12 +34,9 @@ AlsaEngine::AlsaEngine(const SYNTH_T &synth)
 {
     audio.buffer = new short[synth.buffersize * 2];
     name = "ALSA";
-    audio.handle = NULL;
     audio.peaks[0] = 0;
 
-    midi.handle  = NULL;
     midi.alsaId  = -1;
-    midi.pThread = 0;
 }
 
 AlsaEngine::~AlsaEngine()
@@ -48,15 +45,10 @@ AlsaEngine::~AlsaEngine()
     delete[] audio.buffer;
 }
 
-void *AlsaEngine::_AudioThread(void *arg)
-{
-    return (static_cast<AlsaEngine *>(arg))->AudioThread();
-}
-
-void *AlsaEngine::AudioThread()
+void AlsaEngine::AudioThread()
 {
     set_realtime();
-    return processAudio();
+    processAudio();
 }
 
 bool AlsaEngine::Start()
@@ -83,7 +75,7 @@ void AlsaEngine::setMidiEn(bool nval)
 
 bool AlsaEngine::getMidiEn() const
 {
-    return midi.handle;
+    return midi.running.test();
 }
 
 void AlsaEngine::setAudioEn(bool nval)
@@ -96,16 +88,11 @@ void AlsaEngine::setAudioEn(bool nval)
 
 bool AlsaEngine::getAudioEn() const
 {
-    return audio.handle;
-}
-
-void *AlsaEngine::_MidiThread(void *arg)
-{
-    return static_cast<AlsaEngine *>(arg)->MidiThread();
+    return audio.running.test();
 }
 
 
-void *AlsaEngine::MidiThread(void)
+void AlsaEngine::MidiThread(void)
 {
     snd_seq_event_t *event;
     MidiEvent ev = {};
@@ -113,8 +100,8 @@ void *AlsaEngine::MidiThread(void)
     int error;
 
     set_realtime();
-    while(1) {
-        if(midi.exiting)
+    while(true) {
+        if(!midi.running.test())
             break;
         error = snd_seq_event_input(midi.handle, &event);
         if (error < 0) {
@@ -236,12 +223,11 @@ void *AlsaEngine::MidiThread(void)
         }
         snd_seq_free_event(event);
     }
-    return NULL;
 }
 
 bool AlsaEngine::openMidi()
 {
-    if(getMidiEn())
+    if(midi.running.test_and_set())
         return true;
 
     int alsaport;
@@ -270,12 +256,8 @@ bool AlsaEngine::openMidi()
     if(alsaport < 0)
         return false;
 
-    midi.exiting = false;
-    pthread_attr_t attr;
+    midi.thread = std::thread(&AlsaEngine::MidiThread, this);
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&midi.pThread, &attr, _MidiThread, this);
     return true;
 }
 
@@ -285,13 +267,9 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if((NULL != midi.handle) && midi.pThread) {
-        midi.exiting = true;
-        pthread_join(midi.pThread, 0);
-    }
-    midi.handle = NULL;
-    if(handle)
-        snd_seq_close(handle);
+    midi.running.clear();
+    midi.thread.join();
+    snd_seq_close(handle);
 }
 
 short *AlsaEngine::interleave(const Stereo<float *> &smps)
@@ -317,7 +295,7 @@ short *AlsaEngine::interleave(const Stereo<float *> &smps)
 
 bool AlsaEngine::openAudio()
 {
-    if(getAudioEn())
+    if(audio.running.test_and_set())
         return true;
 
     int rc = 0;
@@ -396,10 +374,7 @@ bool AlsaEngine::openAudio()
     //snd_pcm_hw_params_get_period_time(audio.params, &val, NULL);
 
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&audio.pThread, &attr, _AudioThread, this);
+    audio.thread = std::thread(&AlsaEngine::AudioThread, this);
     return true;
 }
 
@@ -409,17 +384,17 @@ void AlsaEngine::stopAudio()
         return;
 
     snd_pcm_t *handle = audio.handle;
-    audio.handle = NULL;
-    pthread_join(audio.pThread, NULL);
+    audio.running.clear();
+    audio.thread.join();
     snd_pcm_drain(handle);
     if(snd_pcm_close(handle))
         cout << "Error: in snd_pcm_close " << __LINE__ << ' ' << __FILE__
              << endl;
 }
 
-void *AlsaEngine::processAudio()
+void AlsaEngine::processAudio()
 {
-    while(audio.handle) {
+    while(audio.running.test()) {
         audio.buffer = interleave(getNext());
         snd_pcm_t *handle = audio.handle;
         int rc = snd_pcm_writei(handle, audio.buffer, synth.buffersize);
@@ -436,7 +411,6 @@ void *AlsaEngine::processAudio()
              throw "Could not recover ALSA connection";
         }
     }
-    return NULL;
 }
 
 }

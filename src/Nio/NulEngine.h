@@ -14,8 +14,9 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
-#include <sys/time.h>
-#include <pthread.h>
+#include <atomic>
+#include <thread>
+#include <chrono>
 #include "../globals.h"
 #include "AudioOut.h"
 #include "MidiIn.h"
@@ -35,15 +36,16 @@ class NulEngine:public AudioOut, MidiIn
         bool getAudioEn() const;
 
         void setMidiEn(bool) {}
-        bool getMidiEn() const {return true; }
+        bool getMidiEn() const { return true; }
 
     protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
+        void AudioThread();
 
     private:
-        struct timeval playing_until;
-        pthread_t     *pThread;
+        using time_point = std::chrono::time_point<std::chrono::steady_clock>;
+        time_point       playing_until;
+        std::thread      thread;
+        std::atomic_flag running;
 };
 
 }
