@@ -38,9 +38,9 @@ using std::min;
 using std::max;
 
 struct MPEState {
-    float pitchBend;
-    float pressure;
-    float timbre; // CC74
+    float pitchBend = 0.0f;
+    float pressure = 0.0f;
+    float timbre = 64.0f; // CC74
 };
 
 /**
