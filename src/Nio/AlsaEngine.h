@@ -57,7 +57,7 @@ class AlsaEngine:public AudioOut, MidiIn
             std::string device;
             snd_seq_t  *handle;
             int alsaId;
-            std::atomic_flag running{false};
+            std::atomic_flag running;
             std::thread thread;
         } midi;
 
@@ -69,7 +69,7 @@ class AlsaEngine:public AudioOut, MidiIn
             unsigned int      periods;
             short    *buffer;
             std::thread thread;
-            std::atomic_flag running{false};
+            std::atomic_flag running;
             float peaks[1];
         } audio;
 

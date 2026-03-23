@@ -51,7 +51,7 @@ class WavEngine:public AudioOut
         SafeQueue<float> buffer;
 
         std::thread thread;
-        std::atomic_flag running{false};
+        std::atomic_flag running;
 };
 
 }
