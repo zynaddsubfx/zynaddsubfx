@@ -250,7 +250,7 @@ class Master
         //Returns 0 if OK, <0 in case of failure
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
-
+        bool MPEenabled;
     private:
         void handleMPEController(int chan, int type, int par);
         std::atomic<bool> run_osc_in_use = { false };
@@ -260,6 +260,7 @@ class Master
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
+
 
         MPEState channelState[16];
 

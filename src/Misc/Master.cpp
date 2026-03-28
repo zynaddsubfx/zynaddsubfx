@@ -601,6 +601,8 @@ static const Ports master_ports = {
         rBOIL_END},
     {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
             [](const char*,RtData&) {}},
+    rToggle(MPEenabled, rShort("MPE"),
+            rDefault(false), "MPE enable"),
     {"learn:s", rProp(deprecated) rDoc("MIDI Learn"), 0,
         rBegin;
         int free_slot = m->automate.free_slot();
@@ -1050,7 +1052,7 @@ void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
         return;
-    handleMPEController(chan, type, par);
+    if(MPEenabled) handleMPEController(chan, type, par);
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
@@ -1075,9 +1077,9 @@ void Master::setController(char chan, int type, int par)
                     break;
             }
         }
-    } else {  //other controllers
+    } else if(!MPEenabled) {  //other controllers
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all part assigned to the channel
-            if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            if(((chan == part[npart]->Prcvchn) || MPEenabled) && (part[npart]->Penabled != 0) )
                 part[npart]->SetController(type, par);
 
         if(type == C_allsoundsoff) { //cleanup insertion/system FX
