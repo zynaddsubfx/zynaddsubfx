@@ -46,7 +46,7 @@ bool WavEngine::Start()
     return true;
 }
 
-void WavEngine::Stop()
+void WavEngine::Pause()
 {
     if(!running.test())
         return;
@@ -55,6 +55,11 @@ void WavEngine::Stop()
     work.post();
     thread.join();
 
+}
+
+void WavEngine::Stop()
+{
+    Pause();
     destroyFile();
 }
 

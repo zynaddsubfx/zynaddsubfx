@@ -85,7 +85,7 @@ void Recorder::stop()
 void Recorder::pause()
 {
     status = 0;
-    Nio::waveStop();
+    Nio::wavePause();
 }
 
 int Recorder::recording()

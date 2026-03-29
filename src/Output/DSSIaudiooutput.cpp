@@ -39,6 +39,7 @@ namespace Nio {
     void masterSwap(zyn::Master *){};
     void waveNew(WavFile *){}
     void waveStart(void){}
+    void wavePause(void){}
     void waveStop(void){}
     void waveEnd(void){}
     bool setSource(string){return true;}
