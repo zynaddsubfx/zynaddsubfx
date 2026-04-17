@@ -1152,6 +1152,7 @@ void ADnote::computecurrentparameters()
                 (voicepitch + globalpitch) / 12.0f); //Hz frequency
             voicefreq *=
                 powf(ctl.pitchwheel.relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
+                //~ powf(NoteVoicePar[nvoice].relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
             setfreq(nvoice, voicefreq + NoteVoicePar[nvoice].OffsetHz);
 
             /***************/

@@ -259,7 +259,9 @@ enum MidiControllers {
     C_resetallcontrollers = 121,
     C_portamento = 65, C_resonance_center = 77, C_resonance_bandwidth = 78,
 
-    C_dataentryhi = 0x06, C_dataentrylo = 0x26, C_nrpnhi = 99, C_nrpnlo = 98
+    C_dataentryhi = 0x06, C_dataentrylo = 0x26,
+    C_nrpnhi = 99, C_nrpnlo = 98,
+    C_rpnhi = 101, C_rpnlo = 100
 };
 
 enum LegatoMsg {

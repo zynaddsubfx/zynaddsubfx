@@ -25,6 +25,7 @@
 #include "Time.h"
 #include "Bank.h"
 #include "Recorder.h"
+#include "Util.h"
 
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
@@ -33,6 +34,7 @@
 namespace zyn {
 
 class Allocator;
+class Part;
 
 struct vuData {
     vuData(void);
@@ -110,6 +112,7 @@ class Master
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         void setController(char chan, int type, note_t note, float value);
+        void setMPEController(int chan, int type, int value);
         //void NRPN...
 
 
@@ -248,8 +251,17 @@ class Master
         //Returns 0 if OK, <0 in case of failure
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
-
+        bool MPEenabled;
     private:
+        void handleMPEController(int chan, int type, int par);
+        bool isLowerZoneMember(int chan) const;
+        bool isUpperZoneMember(int chan) const;
+        bool isMPEMemberChannel(int chan) const;
+        bool channelMatchesPart(const Part *p, int chan) const;
+        void resetMPEConfig(void);
+        void processMPERPN(int chan, int type, int value);
+        void applyMPERPN(int chan);
+        float getMPEPitchBendRangeCents(int chan) const;
         std::atomic<bool> run_osc_in_use = { false };
         void (*unknown_address_cb)(void*,bool,rtosc::msg_t) = nullptr;
         void* unknown_address_cb_ptr;
@@ -257,6 +269,18 @@ class Master
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
+
+
+        MPEState channelState[16];
+        int mpe_pitchbend_range_cents[16];
+        int mpe_rpn_msb[16];
+        int mpe_rpn_lsb[16];
+        int mpe_data_msb[16];
+        int mpe_data_lsb[16];
+        int mpe_lower_master_channel;
+        int mpe_upper_master_channel;
+        int mpe_lower_member_channels;
+        int mpe_upper_member_channels;
 
         //information relevant to generating plugin audio samples
         float *bufl;

@@ -73,6 +73,8 @@ class SynthNote
 
         /* For per-note pitch */
         void setPitch(float log2_freq_);
+        void setPitchBend(float log2_freq_);
+        void setPitchBend(float log2_freq_, float bend_range_cents);
 
         /* For per-note filter cutoff */
         void setFilterCutoff(float);
