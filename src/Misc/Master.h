@@ -34,6 +34,7 @@
 namespace zyn {
 
 class Allocator;
+class Part;
 
 struct vuData {
     vuData(void);
@@ -253,6 +254,14 @@ class Master
         bool MPEenabled;
     private:
         void handleMPEController(int chan, int type, int par);
+        bool isLowerZoneMember(int chan) const;
+        bool isUpperZoneMember(int chan) const;
+        bool isMPEMemberChannel(int chan) const;
+        bool channelMatchesPart(const Part *p, int chan) const;
+        void resetMPEConfig(void);
+        void processMPERPN(int chan, int type, int value);
+        void applyMPERPN(int chan);
+        float getMPEPitchBendRangeCents(int chan) const;
         std::atomic<bool> run_osc_in_use = { false };
         void (*unknown_address_cb)(void*,bool,rtosc::msg_t) = nullptr;
         void* unknown_address_cb_ptr;
@@ -263,6 +272,15 @@ class Master
 
 
         MPEState channelState[16];
+        int mpe_pitchbend_range_cents[16];
+        int mpe_rpn_msb[16];
+        int mpe_rpn_lsb[16];
+        int mpe_data_msb[16];
+        int mpe_data_lsb[16];
+        int mpe_lower_master_channel;
+        int mpe_upper_master_channel;
+        int mpe_lower_member_channels;
+        int mpe_upper_member_channels;
 
         //information relevant to generating plugin audio samples
         float *bufl;

@@ -175,13 +175,23 @@ void SynthNote::setPitch(float log2_freq_) {
     }
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
-void SynthNote::setPitchBend(float value) {
+void SynthNote::setPitchBend(float value)
+{
+    setPitchBend(value, -1.0f);
+}
 
+void SynthNote::setPitchBend(float value, float bend_range_cents)
+{
     float cents = value / 8192.0f;
-    if(ctl.pitchwheel.is_split && cents < 0)
-        cents *= ctl.pitchwheel.bendrange_down;
-    else
-        cents *= ctl.pitchwheel.bendrange;
+    if(bend_range_cents < 0.0f) {
+        if(ctl.pitchwheel.is_split && cents < 0)
+            cents *= ctl.pitchwheel.bendrange_down;
+        else
+            cents *= ctl.pitchwheel.bendrange;
+    }
+    else {
+        cents *= bend_range_cents;
+    }
     float absolute_log2_freq = legato.getNoteLog2Freq() + (cents / 1200.0f);
 
     legato.setSilent(true); //Let legato.update(...) return 0.

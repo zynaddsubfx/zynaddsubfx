@@ -103,6 +103,37 @@ class MiddleWareTest
             TS_ASSERT(0.1f < sum);
         }
 
+        void testMPEMemberChannelRouting()
+        {
+            auto renderEnergy = [&](Master *m, int nframes) {
+                float energy = 0.0f;
+                for(int n = 0; n < nframes; ++n) {
+                    m->AudioOut(outL, outR);
+                    for(int i = 0; i < synth->buffersize; ++i)
+                        energy += fabsf(outL[i]);
+                }
+                return energy;
+            };
+
+            // Baseline: with MPE disabled, channel 2 should not trigger part0.
+            master[0]->MPEenabled = false;
+            master[0]->noteOn(2, 64, 100);
+            float energy_without_mpe = renderEnergy(master[0], 3);
+            master[0]->noteOff(2, 64);
+            master[0]->ShutUp();
+
+            // With MPE enabled, member channel routing should reach part0.
+            master[0]->MPEenabled = true;
+            master[0]->noteOn(2, 64, 100);
+            float energy_with_mpe = renderEnergy(master[0], 3);
+            master[0]->noteOff(2, 64);
+            master[0]->ShutUp();
+
+            TS_ASSERT(energy_without_mpe < 0.001f);
+            TS_ASSERT(energy_with_mpe > 0.1f);
+            TS_ASSERT(energy_with_mpe > energy_without_mpe + 0.1f);
+        }
+
         string loadfile(string fname) const
         {
             std::ifstream t(fname.c_str());
@@ -156,6 +187,7 @@ int main()
     MiddleWareTest test;
     RUN_TEST(testInit);
     RUN_TEST(testPanic);
+    RUN_TEST(testMPEMemberChannelRouting);
     RUN_TEST(testLoad);
     RUN_TEST(testChangeToOutOfRangeProgram);
     return test_summary();

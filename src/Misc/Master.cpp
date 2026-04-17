@@ -972,7 +972,127 @@ void Master::defaults()
     }
 
     microtonal.defaults();
+    MPEenabled = false;
+    resetMPEConfig();
     ShutUp();
+}
+
+void Master::resetMPEConfig(void)
+{
+    mpe_lower_master_channel = 0;
+    mpe_upper_master_channel = 15;
+    mpe_lower_member_channels = 15;
+    mpe_upper_member_channels = 0;
+
+    for(int chan = 0; chan < 16; ++chan) {
+        channelState[chan].pitchBend = 0.0f;
+        channelState[chan].pressure = 0.0f;
+        channelState[chan].timbre = 64.0f;
+        mpe_pitchbend_range_cents[chan] = ctl.pitchwheel.bendrange;
+        mpe_rpn_msb[chan] = -1;
+        mpe_rpn_lsb[chan] = -1;
+        mpe_data_msb[chan] = -1;
+        mpe_data_lsb[chan] = -1;
+    }
+}
+
+bool Master::isLowerZoneMember(int chan) const
+{
+    return chan > mpe_lower_master_channel
+        && chan <= mpe_lower_master_channel + mpe_lower_member_channels;
+}
+
+bool Master::isUpperZoneMember(int chan) const
+{
+    return chan < mpe_upper_master_channel
+        && chan >= mpe_upper_master_channel - mpe_upper_member_channels;
+}
+
+bool Master::isMPEMemberChannel(int chan) const
+{
+    return isLowerZoneMember(chan) || isUpperZoneMember(chan);
+}
+
+bool Master::channelMatchesPart(const Part *p, int chan) const
+{
+    if(chan == p->Prcvchn)
+        return true;
+
+    if(!MPEenabled)
+        return false;
+
+    if(p->Prcvchn != 0)
+        return false;
+
+    return isMPEMemberChannel(chan);
+}
+
+void Master::processMPERPN(int chan, int type, int value)
+{
+    if(!MPEenabled)
+        return;
+    if(chan < 0 || chan >= 16)
+        return;
+
+    switch(type) {
+    case C_rpnhi:
+        mpe_rpn_msb[chan] = value;
+        mpe_data_msb[chan] = -1;
+        mpe_data_lsb[chan] = -1;
+        break;
+    case C_rpnlo:
+        mpe_rpn_lsb[chan] = value;
+        mpe_data_msb[chan] = -1;
+        mpe_data_lsb[chan] = -1;
+        break;
+    case C_dataentryhi:
+        mpe_data_msb[chan] = value;
+        applyMPERPN(chan);
+        break;
+    case C_dataentrylo:
+        mpe_data_lsb[chan] = value;
+        applyMPERPN(chan);
+        break;
+    default:
+        break;
+    }
+}
+
+void Master::applyMPERPN(int chan)
+{
+    if(mpe_rpn_msb[chan] < 0 || mpe_rpn_lsb[chan] < 0 || mpe_data_msb[chan] < 0)
+        return;
+
+    const int rpn = (mpe_rpn_msb[chan] << 7) | mpe_rpn_lsb[chan];
+    if(rpn == 0x0000) {
+        int cents = mpe_data_msb[chan] * 100;
+        if(mpe_data_lsb[chan] >= 0)
+            cents += (mpe_data_lsb[chan] * 100) / 128;
+        if(cents < 0)
+            cents = 0;
+        if(cents > 6400)
+            cents = 6400;
+        mpe_pitchbend_range_cents[chan] = cents;
+    }
+    else if(rpn == 0x0006) {
+        int member_channels = mpe_data_msb[chan];
+        if(member_channels < 0)
+            member_channels = 0;
+        if(member_channels > 15)
+            member_channels = 15;
+
+        if(chan == mpe_lower_master_channel)
+            mpe_lower_member_channels = member_channels;
+        else if(chan == mpe_upper_master_channel)
+            mpe_upper_member_channels = member_channels;
+    }
+}
+
+float Master::getMPEPitchBendRangeCents(int chan) const
+{
+    if(chan < 0 || chan >= 16)
+        return ctl.pitchwheel.bendrange;
+    return mpe_pitchbend_range_cents[chan];
 }
 
 /*
@@ -983,7 +1103,7 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
     if(velocity) {
         sync->notify();
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-            if(chan == part[npart]->Prcvchn) {
+            if(channelMatchesPart(part[npart], chan)) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq, chan);
@@ -1002,8 +1122,8 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 void Master::noteOff(char chan, note_t note)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
-            part[npart]->NoteOff(note);
+        if(channelMatchesPart(part[npart], chan) && part[npart]->Penabled)
+            part[npart]->NoteOff(note, chan);
     activeNotes[note] = 0;
 }
 
@@ -1013,7 +1133,7 @@ void Master::noteOff(char chan, note_t note)
 void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(chan == part[npart]->Prcvchn)
+        if(channelMatchesPart(part[npart], chan))
             if(part[npart]->Penabled)
                 part[npart]->PolyphonicAftertouch(note, velocity);
 }
@@ -1040,8 +1160,10 @@ void Master::handleMPEController(int chan, int type, int par)
         return;
     }
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if((0 == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
-            part[npart]->SetMPEController(chan,type, par);
+        if((0 == part[npart]->Prcvchn) && (part[npart]->Penabled != 0)
+           && isMPEMemberChannel(chan))
+            part[npart]->SetMPEController(chan, type, par,
+                getMPEPitchBendRangeCents(chan));
 
 }
 
@@ -1052,11 +1174,12 @@ void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
         return;
+    processMPERPN(chan, type, par);
     if(MPEenabled) handleMPEController(chan, type, par);
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
-       || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
+       || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;

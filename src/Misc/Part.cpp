@@ -706,12 +706,19 @@ bool Part::NoteOnInternal(note_t note,
  */
 void Part::NoteOff(note_t note) //release the key
 {
+    NoteOff(note, -1);
+}
+
+void Part::NoteOff(note_t note, char chan) //release the key
+{
     // This note is released, so we remove it from the list.
-    if(!monomemEmpty())
+    if(!monomemEmpty() && (chan < 0 || monomem[note].chan == chan))
         monomemPop(note);
 
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
+            continue;
+        if(chan >= 0 && desc.chan != chan)
             continue;
         // if latch is on we ignore noteoff, but set the state to latched
         if(Platchmode) {
@@ -945,14 +952,15 @@ void Part::SetController(unsigned int type, note_t note, float value,
 /*
  * MPE note controllers.
  */
-void Part::SetMPEController(char chan, unsigned int type, int par)
+void Part::SetMPEController(char chan, unsigned int type, int par,
+                            float pitchbend_range_cents)
 {
     switch (type) {
     case C_pitch:
         for(auto &d:notePool.activeDesc()) {
             if(d.chan == chan && d.playing())
                 for(auto &s:notePool.activeNotes(d))
-                    s.note->setPitchBend(par);
+                    s.note->setPitchBend(par, pitchbend_range_cents);
         }
         break;
 
