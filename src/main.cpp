@@ -31,8 +31,10 @@
 #include <algorithm>
 #include <signal.h>
 
+#ifndef WIN32
 #ifdef ZEST_GUI
 #include <unistd.h>
+#endif
 #endif
 #include <getopt.h>
 
