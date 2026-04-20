@@ -114,6 +114,8 @@ class ADnote:public SynthNote
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
 
+        void finishPortamento(void) override;
+
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)

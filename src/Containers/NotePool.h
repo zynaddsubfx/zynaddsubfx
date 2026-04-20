@@ -149,6 +149,7 @@ class NotePool
         void releaseSustainingNotes(void);
         void releaseNote(note_t note);
         void release(NoteDescriptor &d);
+        void finishPortamento(NoteDescriptor &d);
         void latch(NoteDescriptor &d);
 
 

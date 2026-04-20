@@ -21,6 +21,15 @@
 
 namespace zyn {
 
+#define POLYMODES LEGACY, \
+FIFO, \
+LIFO, \
+SMART
+
+enum {
+    POLYMODES
+};
+
 /**(Midi) Controllers implementation*/
 class Controller
 {
@@ -129,12 +138,15 @@ class Controller
         struct { //Sustain
             int  data, sustain;
             bool receive;
+            bool stopsPortamento;
         } sustain;
 
         struct { /**<Portamento*/
             //parameters
             int  data;
             bool portamento;
+            unsigned char polyMode = LEGACY;
+            unsigned char glissando = 0;
             /**Whether the portamento midi events are received or not*/
             bool receive;
             /**Whether legato playing is needed to get portamento*/
