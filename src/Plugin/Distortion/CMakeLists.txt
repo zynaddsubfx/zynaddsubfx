@@ -1,40 +1,21 @@
+dpf_add_plugin(ZynDistortion
+    TARGETS clap lv2 vst2 vst3
+    FILES_DSP
+        Distortion.cpp
+)
 
-include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho .)
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR} .)
 
-add_library(ZynDistortion_lv2 SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Distortion.cpp)
-add_library(ZynDistortion_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Distortion.cpp)
+target_link_libraries(ZynDistortion PRIVATE zynaddsubfx_core)
 
-set_target_properties(ZynDistortion_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
-set_target_properties(ZynDistortion_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynDistortion_lv2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynDistortion_lv2 PROPERTIES OUTPUT_NAME "ZynDistortion")
-set_target_properties(ZynDistortion_lv2 PROPERTIES PREFIX "")
-
-set_target_properties(ZynDistortion_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST2")
-set_target_properties(ZynDistortion_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynDistortion_vst PROPERTIES RUNTIME_OUTPUT_DIRECTORY "vst")
-set_target_properties(ZynDistortion_vst PROPERTIES OUTPUT_NAME "ZynDistortion")
-set_target_properties(ZynDistortion_vst PROPERTIES PREFIX "")
-
-if(APPLE)
-    target_link_libraries(ZynDistortion_lv2 zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_lv2_descriptor" "-Wl,-exported_symbol,_lv2_generate_ttl")
-    target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_VSTPluginMain")
-else()
-    target_link_libraries(ZynDistortion_lv2 zynaddsubfx_core ${OS_LIBRARIES})
-    target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES})
-endif()
-
-install(TARGETS ZynDistortion_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynDistortion.lv2/)
-install(TARGETS ZynDistortion_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
-
-add_custom_command(TARGET ZynDistortion_lv2 POST_BUILD
-    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynDistortion_lv2>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
-
-add_dependencies(ZynDistortion_lv2 lv2-ttl-generator)
+dpf__determine_vst3_package_architecture(vst3_arch)
+install(TARGETS ZynDistortion-lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynDistortion.lv2/)
+install(TARGETS ZynDistortion-vst2 LIBRARY DESTINATION ${PluginLibDir}/vst/)
+install(TARGETS ZynDistortion-vst3 LIBRARY DESTINATION ${PluginLibDir}/vst3/ZynDistortion.vst3/Contents/${vst3_arch}/)
+install(TARGETS ZynDistortion-clap LIBRARY DESTINATION ${PluginLibDir}/clap/)
 
 install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynDistortion.ttl
-    DESTINATION ${PluginLibDir}/lv2/ZynDistortion.lv2/)
+	${CMAKE_BINARY_DIR}/bin/ZynDistortion.lv2/manifest.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynDistortion.lv2/presets.ttl
+	${CMAKE_BINARY_DIR}/bin/ZynDistortion.lv2/ZynDistortion_dsp.ttl
+	DESTINATION ${PluginLibDir}/lv2/ZynDistortion.lv2/)

@@ -74,19 +74,19 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "LFO Frequency";
             parameter.symbol = "lfofreq";
             parameter.ranges.def = 70.0f;
             break;
         case 1:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "LFO Randomness";
             parameter.symbol = "lforand";
             parameter.ranges.def = 0.0f;
             break;
         case 2:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "LFO Type";
             parameter.symbol = "lfotype";
             parameter.ranges.def = 0.0f;
@@ -100,19 +100,19 @@ protected:
             */
             break;
         case 3:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "LFO Stereo";
             parameter.symbol = "lfostereo";
             parameter.ranges.def = 62.0f;
             break;
         case 4:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Depth";
             parameter.symbol = "depth";
             parameter.ranges.def = 60.0f;
             break;
         case 5:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Feedback";
             parameter.symbol = "fb";
             parameter.ranges.def = 105.0f;
@@ -125,13 +125,13 @@ protected:
             parameter.ranges.max = 100.0f;
             break;
         case 7:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "L/R Cross";
             parameter.symbol = "lrcross";
             parameter.ranges.def = 0.0f;
             break;
         case 8:
-            parameter.hints |= kParameterIsAutomable;
+            parameter.hints |= kParameterIsAutomatable;
             parameter.name   = "Phase";
             parameter.symbol = "phase";
             parameter.ranges.def = 64.0f;
