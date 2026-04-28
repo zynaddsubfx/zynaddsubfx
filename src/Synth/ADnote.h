@@ -54,6 +54,17 @@ class ADnote:public SynthNote
 
 
         virtual SynthNote *cloneLegato(void) override;
+    // special FMVoice value meaning: use Part post-effect output as modulator
+    static const int FMVOICE_PART_FEEDBACK = -2;
+
+    /**Hook called by Part after an effect writes its output.
+     * Implementations may copy the post-effect buffers into internal
+     * per-voice buffers (e.g. VoiceOut) so they can be used as
+     * modulation sources on the next processing block.
+     * Default behaviour is to do nothing (see SynthNote).
+     */
+    virtual void applyPartEffectToRelevantVoices(const float *efxoutl,
+                                                 const float *efxoutr);
     private:
 
         void setupVoice(int nvoice);
@@ -114,11 +125,14 @@ class ADnote:public SynthNote
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
 
+        void finishPortamento(void) override;
+
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
         float note_log2_freq;
         float velocity;
+
 
         ONOFFTYPE   NoteEnabled;
 
@@ -196,6 +210,9 @@ class ADnote:public SynthNote
             /* Waveform of the Voice */
             float *OscilSmp;
 
+            /* max freq inside OscilSmp */
+            float OscilFreqMin;
+
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
 
@@ -251,6 +268,7 @@ class ADnote:public SynthNote
 
             // Voice Output used by other voices if use this as modullator
             float *VoiceOut;
+
 
             /* Wave of the Voice */
             float *FMSmp;
@@ -312,15 +330,19 @@ class ADnote:public SynthNote
 
             //used by Frequency Modulation (for integration)
             float *FMoldsmp;
+            float *FMtw_orig;
 
             //1 - if it is the fitst tick (used to fade in the sound)
             char firsttick;
+
+            float *twold;
 
         } NoteVoicePar[NUM_VOICES];
 
         //temporary buffer
         float  *tmpwavel;
         float  *tmpwaver;
+        float **tmpwave_mod;
         int     max_unison;
         float **tmpwave_unison;
 

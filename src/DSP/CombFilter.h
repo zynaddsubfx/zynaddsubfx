@@ -48,12 +48,15 @@ class CombFilter:public Filter
 
         float tanhX(const float x);
         float sampleLerp(float *smp, float pos);
+        void updatedelay();
 
 
         float gainfwd;
         float gainbwd;
-        float delay;
-        float lpfDelay;
+        float delay = 0.0f;
+        float lpfDelay = 0.0f;
+        float hpfDelay = 0.0f;
+        float freq = 440.0f;
 
         class AnalogFilter *lpf, *hpf; //filters
 
@@ -61,7 +64,7 @@ class CombFilter:public Filter
         unsigned int outputIndex=0;
 
         Allocator &memory;
-        int mem_size;
+        unsigned int mem_size;
 
 };
 

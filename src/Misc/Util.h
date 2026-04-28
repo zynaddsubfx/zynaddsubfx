@@ -31,6 +31,14 @@ namespace zyn {
 #define STACKALLOC(type, name, size) type name[size]
 #endif
 
+
+void windowedsinc(float fc, float gain, int N, float *h);
+
+template <typename T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+    return (v < lo) ? lo : (v > hi) ? hi : v;
+}
+
 extern bool isPlugin;
 bool fileexists(const char *filename);
 

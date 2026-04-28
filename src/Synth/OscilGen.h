@@ -98,8 +98,12 @@ class OscilGen:public Presets, NoCopyNoMove
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
         short get(OscilGenBuffers& bfrs, float *smps, float freqHz, int resonance = 0) const;
+        short getMaxFreq(OscilGenBuffers& bfrs) const;
         short get(float *smps, float freqHz, int resonance = 0) {
             return get(myBuffers(), smps, freqHz, resonance);
+        }
+        short getMaxFreq() {
+            return getMaxFreq(myBuffers());
         }
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 

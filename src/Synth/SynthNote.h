@@ -68,6 +68,14 @@ class SynthNote
 
         virtual SynthNote *cloneLegato(void) = 0;
 
+    /**
+     * Hook: deliver part-effect outputs to the note so the note
+     * implementation may copy them into internal buffers (e.g. VoiceOut).
+     * Called from Part after an insertion effect has produced its output.
+     * Default implementation does nothing.
+     */
+    virtual void applyPartEffectToRelevantVoices(const float *efxoutl, const float *efxoutr) { (void)efxoutl; (void)efxoutr; }
+
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
 
@@ -77,6 +85,7 @@ class SynthNote
         /* For per-note filter cutoff */
         void setFilterCutoff(float);
         float getFilterCutoffRelFreq(void);
+        virtual void finishPortamento(void);
 
         /* Random numbers with own seed */
         float getRandomFloat();

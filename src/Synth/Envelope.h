@@ -39,22 +39,24 @@ class Envelope
         void watch(float time, float value);
 
     private:
-        int   envpoints;
-        int   envsustain;    //"-1" means disabled
-        float envdt[MAX_ENVELOPE_POINTS]; //seconds
+        int   envpoints;     // number of envelope points
+        int   envsustain;    // "-1" means disabled
+        float envdt[MAX_ENVELOPE_POINTS];  //seconds
         float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
-        float envstretch;
+        float envcpy[MAX_ENVELOPE_CPOINTS] = {};// [-1.0f .. 1.0f]
+        float envstretch;    // how much lower notes are slower
         int   linearenvelope;
         int   mode;
         bool  repeating;
 
-        int   currentpoint;    //current envelope point (starts from 1)
-        bool  forcedrelease;
-        bool  keyreleased;    //if the key was released
-        bool  envfinish;
-        float t; // the time from the last point
-        float inct; // the time increment
-        float envoutval; //used to do the forced release
+        int   currentpoint = 1;     //current envelope point (starts from 1)
+        bool  forcedrelease;        // true if key release should jump to release segment
+        bool  keyreleased = false;  // true if the key was released
+        bool  envfinish = false;    // true if the end of release phase is reached
+        float t = 0.0f;             // the time from the last point
+        float tRelease = 0.0f;      // release duration
+        float inct;                 // the time increment
+        float envoutval = 0.0f;     // used to do the forced release
 
         VecWatchPoint watchOut;
 };
