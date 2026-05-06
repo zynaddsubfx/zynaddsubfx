@@ -28,6 +28,8 @@
 
 #include <lo/lo.h>
 #include <rtosc/thread-link.h>
+#include <cstdlib>
+#include <cstdio>
 
 /* ------------------------------------------------------------------------------------------------------------
  * MiddleWare thread class */
@@ -383,6 +385,7 @@ protected:
             const uint8_t status  = midiEvent.data[0] & 0xF0;
             const char    channel = midiEvent.data[0] & 0x0F;
 
+
             switch (status)
             {
             case 0x80: {
@@ -437,6 +440,11 @@ protected:
                         middleware->pendingSetProgram(i, program);
                     }
                 }
+            } break;
+
+            case 0xD0: {
+                const int pressure = midiEvent.data[1];
+                master->setController(channel, zyn::C_aftertouch, pressure);
             } break;
 
             case 0xE0: {

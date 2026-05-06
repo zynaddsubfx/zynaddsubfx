@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <cmath>
 #include <atomic>
+#include <cstdlib>
 #include <unistd.h>
 
 using namespace std;
@@ -996,6 +997,19 @@ void Master::resetMPEConfig(void)
     }
 }
 
+void Master::syncMPEEnableState(void)
+{
+    if(MPEenabled) {
+        if(!mpeWasEnabled) {
+            resetMPEConfig();
+        }
+        mpeWasEnabled = true;
+    }
+    else {
+        mpeWasEnabled = false;
+    }
+}
+
 bool Master::isLowerZoneMember(int chan) const
 {
     return chan > mpe_lower_master_channel
@@ -1021,16 +1035,17 @@ bool Master::channelMatchesPart(const Part *p, int chan) const
     if(!MPEenabled)
         return false;
 
-    if(p->Prcvchn != 0)
-        return false;
+    if((p->Prcvchn == mpe_lower_master_channel) && isLowerZoneMember(chan))
+        return true;
 
-    return isMPEMemberChannel(chan);
+    if((p->Prcvchn == mpe_upper_master_channel) && isUpperZoneMember(chan))
+        return true;
+
+    return false;
 }
 
 void Master::processMPERPN(int chan, int type, int value)
 {
-    if(!MPEenabled)
-        return;
     if(chan < 0 || chan >= 16)
         return;
 
@@ -1081,6 +1096,13 @@ void Master::applyMPERPN(int chan)
         if(member_channels > 15)
             member_channels = 15;
 
+        // Host-announced MPE configuration should enable MPE routing,
+        // even if UI-side MPE toggle did not reach this Master instance.
+        if(member_channels > 0 && !MPEenabled) {
+            MPEenabled = true;
+            mpeWasEnabled = true;
+        }
+
         if(chan == mpe_lower_master_channel)
             mpe_lower_member_channels = member_channels;
         else if(chan == mpe_upper_master_channel)
@@ -1100,10 +1122,13 @@ float Master::getMPEPitchBendRangeCents(int chan) const
  */
 void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
+    syncMPEEnableState();
     if(velocity) {
         sync->notify();
+        int matched_parts = 0;
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(channelMatchesPart(part[npart], chan)) {
+                matched_parts++;
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq, chan);
@@ -1121,9 +1146,13 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
  */
 void Master::noteOff(char chan, note_t note)
 {
+    syncMPEEnableState();
+    int matched_parts = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(channelMatchesPart(part[npart], chan) && part[npart]->Penabled)
+        if(channelMatchesPart(part[npart], chan) && part[npart]->Penabled) {
+            matched_parts++;
             part[npart]->NoteOff(note, chan);
+        }
     activeNotes[note] = 0;
 }
 
@@ -1132,6 +1161,12 @@ void Master::noteOff(char chan, note_t note)
  */
 void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
+    syncMPEEnableState();
+    if(MPEenabled) {
+        handleMPEController(chan, C_aftertouch, velocity);
+        return;
+    }
+
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if(channelMatchesPart(part[npart], chan))
             if(part[npart]->Penabled)
@@ -1147,6 +1182,7 @@ void Master::handleMPEController(int chan, int type, int par)
         return;
 
     switch(type) {
+    case C_pitchwheel:
     case C_pitch:
         channelState[chan].pitchBend = par;
         break;
@@ -1160,8 +1196,9 @@ void Master::handleMPEController(int chan, int type, int par)
         return;
     }
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if((0 == part[npart]->Prcvchn) && (part[npart]->Penabled != 0)
-           && isMPEMemberChannel(chan))
+        if((part[npart]->Penabled != 0)
+           && isMPEMemberChannel(chan)
+           && channelMatchesPart(part[npart], chan))
             part[npart]->SetMPEController(chan, type, par,
                 getMPEPitchBendRangeCents(chan));
 
@@ -1174,6 +1211,13 @@ void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
         return;
+    syncMPEEnableState();
+
+    const bool isMPEExpressionController = (type == C_pitchwheel)
+        || (type == C_pitch)
+        || (type == C_aftertouch)
+        || (type == C_filtercutoff);
+
     processMPERPN(chan, type, par);
     if(MPEenabled) handleMPEController(chan, type, par);
     automate.handleMidi(chan, type, par);
@@ -1200,10 +1244,12 @@ void Master::setController(char chan, int type, int par)
                     break;
             }
         }
-    } else if(!MPEenabled) {  //other controllers
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all part assigned to the channel
-            if(((chan == part[npart]->Prcvchn) || MPEenabled) && (part[npart]->Penabled != 0) )
-                part[npart]->SetController(type, par);
+    } else {  //other controllers
+        if(!(MPEenabled && isMPEExpressionController)) {
+            for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all matching parts
+                if(channelMatchesPart(part[npart], chan) && (part[npart]->Penabled != 0))
+                    part[npart]->SetController(type, par);
+        }
 
         if(type == C_allsoundsoff) { //cleanup insertion/system FX
             for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
@@ -1221,6 +1267,7 @@ void Master::setController(char chan, int type, note_t note, float value)
 {
     if(frozenState)
         return;
+    syncMPEEnableState();
 
     /* Send the controller to all part assigned to the channel */
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)

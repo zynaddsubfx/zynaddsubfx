@@ -772,12 +772,10 @@ void Part::PolyphonicAftertouch(note_t note,
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
 
-    /*
-     * Don't allow the velocity to reach zero.
-     * Keep it alive until note off.
-     */
+    // In MPE streams hosts often send pressure=0 at note start.
+    // Mapping that to note velocity would effectively mute the note.
     if(velocity == 0)
-        velocity = 1;
+        return;
 
     // MonoMem stuff:
     if(!Ppolymode)   // if Poly is off
@@ -797,12 +795,9 @@ void Part::MPEAftertouch(int chan,
     if(!Pnoteon || Pdrummode)
         return;
 
-    /*
-     * Don't allow the velocity to reach zero.
-     * Keep it alive until note off.
-     */
+    // Ignore zero pressure (common at note start in MPE streams)
     if(velocity == 0)
-        velocity = 1;
+        return;
 
     const float vel = getVelocity(velocity, Pvelsns, Pveloffs);
     for(auto &d:notePool.activeDesc()) {
@@ -956,6 +951,7 @@ void Part::SetMPEController(char chan, unsigned int type, int par,
                             float pitchbend_range_cents)
 {
     switch (type) {
+    case C_pitchwheel:
     case C_pitch:
         for(auto &d:notePool.activeDesc()) {
             if(d.chan == chan && d.playing())
@@ -969,6 +965,7 @@ void Part::SetMPEController(char chan, unsigned int type, int par,
         break;
 
     case C_filtercutoff:
+        // Apply filter cutoff only to already-playing notes
         for(auto &d:notePool.activeDesc()) {
             if(d.chan == chan && d.playing())
                 for(auto &s:notePool.activeNotes(d))

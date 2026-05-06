@@ -253,6 +253,7 @@ class Master
                            rtosc::savefile_dispatcher_t* dispatcher);
         bool MPEenabled;
     private:
+        void syncMPEEnableState(void);
         void handleMPEController(int chan, int type, int par);
         bool isLowerZoneMember(int chan) const;
         bool isUpperZoneMember(int chan) const;
@@ -281,6 +282,7 @@ class Master
         int mpe_upper_master_channel;
         int mpe_lower_member_channels;
         int mpe_upper_member_channels;
+        bool mpeWasEnabled = false;
 
         //information relevant to generating plugin audio samples
         float *bufl;
