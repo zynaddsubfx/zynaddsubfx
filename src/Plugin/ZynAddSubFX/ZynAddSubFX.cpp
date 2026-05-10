@@ -641,6 +641,7 @@ namespace Nio {
    std::string getSink(void){return "";}
    void waveNew(WavFile*){}
    void waveStart(){}
+   void wavePause(){}
    void waveStop(){}
    void setAudioCompressor(bool){}
    bool getAudioCompressor(void){return false;}

@@ -1788,6 +1788,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         rEnd},
     //drop this message into the abyss
     {"ui/title:", 0, 0, [](const char *, RtData &) {}},
+    {"isPlugin:", rDoc("Returns whether zyn is operating in plugin mode (and not standalone)"), 0, [](const char* , RtData& d) {d.reply(d.loc, isPlugin ? "T" : "F");}},
     {"quit:", rDoc("Stops the Zynaddsubfx process"),
      0, [](const char *, RtData&) {Pexitprogram = 1;}},
     // may only be called when Master is not being run

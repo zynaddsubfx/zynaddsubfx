@@ -177,6 +177,11 @@ void Nio::waveStart(void)
     out->wave->Start();
 }
 
+void Nio::wavePause(void)
+{
+    out->wave->Pause();
+}
+
 void Nio::waveStop(void)
 {
     out->wave->Stop();

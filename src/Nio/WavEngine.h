@@ -32,6 +32,7 @@ class WavEngine:public AudioOut
 
         bool openAudio();
         bool Start();
+        void Pause();
         void Stop();
 
         void setAudioEn(bool /*nval*/) {}

@@ -54,6 +54,7 @@ namespace Nio
     //Wave writing
     void waveNew(class WavFile *wave);
     void waveStart(void);
+    void wavePause(void);
     void waveStop(void);
     void waveEnd(void);
 
