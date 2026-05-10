@@ -11,7 +11,7 @@
   of the License, or (at your option) any later version.
 */
 
-#ifdef _WIN32
+#ifdef WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
