@@ -129,10 +129,7 @@ void BankDb::clear(void)
 
 static std::string getCacheName(void)
 {
-    char name[512] = {};
-    snprintf(name, sizeof(name), "%s%s", os_homepath().c_str(),
-            "/.zynaddsubfx-bank-cache.xml");
-    return name;
+    return os_homepath() / ".zynaddsubfx-bank-cache.xml";
 }
 
 static bvec loadCache(void)
