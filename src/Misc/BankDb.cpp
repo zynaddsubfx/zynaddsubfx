@@ -130,7 +130,7 @@ void BankDb::clear(void)
 static std::string getCacheName(void)
 {
     char name[512] = {};
-    snprintf(name, sizeof(name), "%s%s", getenv("HOME"),
+    snprintf(name, sizeof(name), "%s%s", os_homepath().c_str(),
             "/.zynaddsubfx-bank-cache.xml");
     return name;
 }

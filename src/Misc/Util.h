@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <set>
+#include <filesystem>
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
@@ -72,6 +73,9 @@ std::uint32_t os_getpid();
 //! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
 #endif
+
+std::filesystem::path os_homepath();
+std::filesystem::path os_localpath();
 
 std::string legalizeFilename(std::string filename);
 

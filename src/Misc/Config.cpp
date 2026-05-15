@@ -19,6 +19,7 @@
 #include <rtosc/port-sugar.h>
 
 #include "Config.h"
+#include "Util.h"
 #include "../globals.h"
 #include "XMLwrapper.h"
 
@@ -481,7 +482,7 @@ void Config::saveConfig(const char *filename) const
 void Config::getConfigFileName(char *name, int namesize) const
 {
     name[0] = 0;
-    snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
+    snprintf(name, namesize, "%s%s", os_homepath().c_str(), "/.zynaddsubfxXML.cfg");
 }
 
 }

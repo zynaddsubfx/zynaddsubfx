@@ -13,30 +13,34 @@
 
 #include "globals.h"
 #include "Util.h"
-#include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cinttypes>
 #include <fstream>
 
-#include <inttypes.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+#ifdef WIN32
+    #include <windows.h>
+    #include <shlobj.h>
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include <cstdlib>
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+    #include <err.h>
+#endif
+
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
 #endif
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
 
-#define errx(...) {}
 #ifndef errx
-#include <err.h>
+#define errx(...) {}
 #endif
 
 #include <rtosc/rtosc.h>
@@ -189,6 +193,69 @@ std::string os_pid_as_padded_string()
 }
 
 #endif
+
+#ifdef WIN32
+static std::string windows_get_path(REFKNOWNFOLDERID rfid)
+{
+    PWSTR wide_path = nullptr;
+
+    HRESULT hr = SHGetKnownFolderPath(rfid, 0, nullptr, &wide_path);
+    if (FAILED(hr) || !wide_path)
+        return {};
+
+    // Calculate size for UTF-16 -> UTF-8 conversion
+    int utf8_size = WideCharToMultiByte(CP_UTF8, 0, wide_path, -1,
+        nullptr, 0, nullptr, nullptr);
+    if (utf8_size <= 0) {
+        CoTaskMemFree(wide_path);
+        return {};
+    }
+
+    // Do the conversion
+    std::string result(utf8_size, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wide_path, -1,
+        result.data(), utf8_size, nullptr, nullptr);
+
+    CoTaskMemFree(wide_path);
+    return result;
+}
+#endif
+
+std::filesystem::path os_homepath()
+{
+#ifdef WIN32
+    return windows_get_path(FOLDERID_Profile);
+#else
+
+    // Prefer HOME variable
+    if (const char* home = std::getenv("HOME")) {
+        if (*home)
+            return home;
+    }
+
+    // Fallback: passwd database
+    const struct passwd* pw = getpwuid(getuid());
+    if (pw && pw->pw_dir)
+        return pw->pw_dir;
+
+    return {};
+#endif
+}
+
+std::filesystem::path os_localpath()
+{
+#ifdef WIN32
+    return std::filesystem::path(windows_get_path(FOLDERID_Profile)) / "zynaddsubfx";
+#else
+    // Prefer XDG variable
+    if (const char* home = std::getenv("HOME")) {
+        if (*home)
+            return std::filesystem::path(home) / "zynaddsubfx";
+    }
+    // Fallback: via HOME path
+    return os_homepath() / ".local" / "share" / "zynaddsubfx";
+#endif
+}
 
 std::string legalizeFilename(std::string filename)
 {
