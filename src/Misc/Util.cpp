@@ -21,16 +21,16 @@
 #include <cinttypes>
 #include <fstream>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #ifdef WIN32
     #include <windows.h>
     #include <shlobj.h>
 #else
     #include <unistd.h>
-    #include <sys/types.h>
     #include <pwd.h>
     #include <cstdlib>
-    #include <sys/types.h>
-    #include <sys/stat.h>
     #include <fcntl.h>
     #include <err.h>
 #endif
