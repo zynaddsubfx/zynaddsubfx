@@ -81,6 +81,18 @@ std::string legalizeFilename(std::string filename);
 
 void invSignal(float *sig, size_t len);
 
+// Replacing the whole code base to use filesystem::path would be overkill
+// (and partially impossible, i.e. some libs like zlib don't support it). So
+// this function cleanly converts filesystem::path to string.
+// For Windows, this is usually required because filesystem::path uses wchar_t
+// For Linux, this is almost a no-op, but if the underlying system uses Latin1
+// to encode filenames, this is a better approach than "p.native()"
+inline std::string fsPathToString(const std::filesystem::path& p)
+{
+    auto u8 = p.u8string();
+    return {u8.begin(), u8.end()};
+}
+
 template<class T>
 std::string stringFrom(T x)
 {

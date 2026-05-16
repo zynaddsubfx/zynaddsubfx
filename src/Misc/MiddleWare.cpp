@@ -1666,7 +1666,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         const int save_id       = rtosc_argument(msg,0).i;
         const string save_file  = "autosave-"+to_s(save_id)+".xmz";
         const fs::path save_loc = os_localpath() / save_file;
-        impl.loadMaster(save_loc.c_str());
+        impl.loadMaster(fsPathToString(save_loc).c_str());
         //XXX it would be better to remove the autosave after there is a new
         //autosave, but this method should work for non-immediate crashes :-|
         fs::remove(save_loc.c_str());
@@ -1903,7 +1903,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
                 std::error_code ec;
                 std::filesystem::create_directories(os_localpath(), ec);
                 if(!ec) {
-                    std::string save_file = os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz");
+                    std::string save_file = fsPathToString(
+                        os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz"));
                     printf("doing an autosave <%s>...\n", save_file.c_str());
                     int res = master->saveXML(save_file.c_str());
                     (void)res;
@@ -2479,8 +2480,7 @@ int MiddleWare::checkAutoSave(void) const
 
 void MiddleWare::removeAutoSave(void)
 {
-    std::string save_file = os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz");
-    std::filesystem::remove(save_file.c_str());
+    std::filesystem::remove(os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz"));
 }
 
 Fl_Osc_Interface *MiddleWare::spawnUiApi(void)
