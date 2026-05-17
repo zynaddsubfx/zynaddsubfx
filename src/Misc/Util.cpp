@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WIN32
+#ifdef _MSC_VER
     #include <windows.h>
     #include <shlobj.h>
 #else
