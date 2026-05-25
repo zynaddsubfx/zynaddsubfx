@@ -200,7 +200,7 @@ std::string os_pid_as_padded_string()
 
 #endif
 
-#ifdef _MSC_VER
+#ifdef WIN32
 static std::string windows_get_path(REFKNOWNFOLDERID rfid)
 {
     PWSTR wide_path = nullptr;
