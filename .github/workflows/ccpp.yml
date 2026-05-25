@@ -23,18 +23,19 @@ jobs:
             deps2: "",
             testdeps: "",
             info: "",
-            # Note: Plugin does not work on MSVC yet - DPF must be updated
+            # Note: Config "Debug" is fragile on Github Actions - we avoid it here
+            # Note: Plugin does not work on MSVC yet - DPF must be updated first
             config: "cmake
                     -B build
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
-                    -DCMAKE_BUILD_TYPE=Debug
+                    -DCMAKE_BUILD_TYPE=RelWithDebInfo
                     -DPluginEnable=FALSE
                     -DGuiModule=fltk
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
-            build: "cmake --build build --config Debug",
-            test: "ctest --output-on-failure --test-dir build -C Debug",
+            build: "cmake --build build --config RelWithDebInfo",
+            test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
             config-fusion: "cmake
                     -B build
