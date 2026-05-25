@@ -196,7 +196,7 @@ std::string os_pid_as_padded_string()
 
 #endif
 
-#ifdef WIN32
+#ifdef _MSC_VER
 static std::string windows_get_path(REFKNOWNFOLDERID rfid)
 {
     PWSTR wide_path = nullptr;
@@ -225,10 +225,26 @@ static std::string windows_get_path(REFKNOWNFOLDERID rfid)
 
 std::filesystem::path os_homepath()
 {
-#ifdef WIN32
+#ifdef _MSC_VER
     return windows_get_path(FOLDERID_Profile);
-#else
+#elif defined (WIN32)
+    // Try USERPROFILE variable
+    if (const char* userprofile = std::getenv("USERPROFILE")) {
+        if (*userprofile)
+            return userprofile;
+    }
 
+    // Try HOMEPATH + HOMEDRIVE
+    if (const char* homepath = std::getenv("HOMEPATH")) {
+        if (const char* homedrive = std::getenv("HOMEDRIVE")) {
+            std::string combined = std::string(homedrive) + homepath;
+            if (!combined.empty())
+                return combined;
+        }
+    }
+
+    return {};
+#else
     // Prefer HOME variable
     if (const char* home = std::getenv("HOME")) {
         if (*home)
