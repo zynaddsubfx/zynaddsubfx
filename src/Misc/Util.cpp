@@ -29,12 +29,12 @@
     #include <shlobj.h>
 #else
     #include <unistd.h>
-    #ifndef WIN32
-        #include <pwd.h>
-    #endif
     #include <cstdlib>
     #include <fcntl.h>
-    #include <err.h>
+    #ifndef WIN32
+        #include <err.h>
+        #include <pwd.h>
+    #endif
 #endif
 
 #ifdef HAVE_SCHEDULER
