@@ -24,17 +24,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
+#ifdef WIN32
     #include <windows.h>
     #include <shlobj.h>
-#else
-    #include <unistd.h>
-    #include <cstdlib>
-    #include <fcntl.h>
-    #ifndef WIN32
-        #include <err.h>
-        #include <pwd.h>
+    #include <knownfolders.h>
+    #ifdef MSC_VER
+        #include <unistd.h>
+        #include <cstdlib>
+        #include <fcntl.h>
     #endif
+#else
+    #include <err.h>
+    #include <pwd.h>
 #endif
 
 #ifdef HAVE_SCHEDULER
