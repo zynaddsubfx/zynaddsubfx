@@ -25,15 +25,17 @@
 #include <sys/stat.h>
 
 #ifdef _MSC_VER
-    #include <unistd.h>
-    #include <cstdlib>
-    #include <fcntl.h>
+    #include <windows.h>
+    #include <shlobj.h>
+    #include <knownfolders.h>
 #else
     #include <unistd.h>
     #include <cstdlib>
     #include <fcntl.h>
-    #include <err.h>
-    #include <pwd.h>
+    #indef WIN32
+        #include <err.h>
+        #include <pwd.h>
+    #endif
 #endif
 
 #ifdef HAVE_SCHEDULER
