@@ -29,7 +29,9 @@
     #include <shlobj.h>
 #else
     #include <unistd.h>
-    #include <pwd.h>
+    #ifndef WIN32
+        #include <pwd.h>
+    #endif
     #include <cstdlib>
     #include <fcntl.h>
     #include <err.h>
