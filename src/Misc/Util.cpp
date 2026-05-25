@@ -26,8 +26,6 @@
 
 #ifdef _MSC_VER
     #include <windows.h>
-    #include <shlobj.h>
-    #include <knownfolders.h>
 #else
     #include <unistd.h>
     #include <cstdlib>
@@ -36,6 +34,11 @@
         #include <err.h>
         #include <pwd.h>
     #endif
+#endif
+
+#ifdef WIN32
+    #include <shlobj.h>
+    #include <knownfolders.h>
 #endif
 
 #ifdef HAVE_SCHEDULER
