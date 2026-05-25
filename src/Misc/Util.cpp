@@ -32,7 +32,7 @@
     #include <unistd.h>
     #include <cstdlib>
     #include <fcntl.h>
-    #indef WIN32
+    #ifndef WIN32
         #include <err.h>
         #include <pwd.h>
     #endif
