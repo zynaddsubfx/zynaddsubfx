@@ -24,16 +24,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WIN32
-    #include <windows.h>
-    #include <shlobj.h>
-    #include <knownfolders.h>
-    #ifdef MSC_VER
-        #include <unistd.h>
-        #include <cstdlib>
-        #include <fcntl.h>
-    #endif
+#ifdef _MSC_VER
+    #include <unistd.h>
+    #include <cstdlib>
+    #include <fcntl.h>
 #else
+    #include <unistd.h>
+    #include <cstdlib>
+    #include <fcntl.h>
     #include <err.h>
     #include <pwd.h>
 #endif
