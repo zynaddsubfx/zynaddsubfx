@@ -47,7 +47,7 @@ jobs:
                     ",
             build-fusion: "cmake --build build --config RelWithDebInfo",
             pack-fusion: "cd build && cpack -G NSIS -C RelWithDebInfo",
-            pack-fusion-path: "build\src\zynaddsubfx.exe",
+            pack-fusion-path: "build\\src\\zynaddsubfx.exe",
           }
           - {
             name: "MinGW (no-gui + zest)",
@@ -208,7 +208,6 @@ jobs:
         with:
           name: windows
           path: ${{ matrix.config.pack-path }}
-"
 
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
