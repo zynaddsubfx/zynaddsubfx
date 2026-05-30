@@ -41,11 +41,13 @@ jobs:
                     -B build
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
-                    -DCMAKE_BUILD_TYPE=Release
+                    -DCMAKE_BUILD_TYPE=RelWithDebInfo
                     -DPluginEnable=FALSE
                     -DGuiModule=zest
                     ",
-            build-fusion: "cmake --build build --config Release"
+            build-fusion: "cmake --build build --config RelWithDebInfo",
+            pack-fusion: "cd build && cpack -G NSIS -C RelWithDebInfo",
+            pack-fusion-path: "build\src\zynaddsubfx.exe",
           }
           - {
             name: "MinGW (no-gui + zest)",
@@ -197,6 +199,16 @@ jobs:
       - name: make-fusion
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build-fusion }}
+      - name: package-fusion
+        if: ${{ matrix.config.enabled == 1 }}
+        run: ${{ matrix.config.pack-fusion }}
+      - name: upload-artifacts
+        if: ${{ matrix.config.enabled == 1 }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: ${{ matrix.config.pack-path }}
+"
 
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
