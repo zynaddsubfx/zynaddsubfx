@@ -30,6 +30,7 @@ jobs:
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
                     -DCMAKE_BUILD_TYPE=RelWithDebInfo
+                    -DCMAKE_VERBOSE_MAKEFILE=ON
                     -DPluginEnable=FALSE
                     -DGuiModule=fltk
                     ",
@@ -42,12 +43,13 @@ jobs:
                     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
                     -DRTOSC_WERROR=1
                     -DCMAKE_BUILD_TYPE=RelWithDebInfo
+                    -DCMAKE_VERBOSE_MAKEFILE=ON
                     -DPluginEnable=FALSE
                     -DGuiModule=zest
                     ",
             build-fusion: "cmake --build build --config RelWithDebInfo",
             pack-fusion: "cd build && cpack -G NSIS -C RelWithDebInfo",
-            pack-fusion-path: "build\\src\\zynaddsubfx.exe",
+            pack-fusion-path: "build/src/zynaddsubfx.exe",
           }
           - {
             name: "MinGW (no-gui + zest)",
@@ -90,68 +92,6 @@ jobs:
                             ",
             build-fusion: "cmake --build build-fusion"
           }
-          - {
-            name: "Ubuntu gcc (fltk 1.3 + zest)",
-            enabled: 1,
-            os: ubuntu-latest,
-            update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
-            deps2: "sudo apt-get install liblo-dev",
-            testdeps: "sudo apt-get install ruby",
-            info: "cmake --version && gcc --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
-          - {
-            name: "Ubuntu clang+lld (fltk 1.3 + zest)",
-            enabled: 1,
-            os: ubuntu-latest,
-            update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
-            deps2: "sudo apt-get install liblo-dev",
-            testdeps: "sudo apt-get install ruby",
-            info: "cmake --version && clang --version",
-            # the only really different line to gcc:
-            config: "cd build && \
-                cmake \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
-                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=fltk ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && \
-                cmake \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
-                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
-          - {
-            name: "macOS clang (no-gui)",
-            enabled: 1,
-            os: macos-latest,
-            update: "cmake --version && clang --version",
-            deps1: "brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm",
-            deps2: "brew install libmxml --HEAD",
-            testdeps: "brew install ruby",
-            info: "cmake --version && clang --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: ""  # Tries to compile as objective C. Possibly, DPF/pugl update required
-            #build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
     steps:
       - name: check out
         if: ${{ matrix.config.enabled == 1 }}
@@ -188,8 +128,14 @@ jobs:
       - name: make
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build }}
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: collect-link-command
+        run: |
+          find build -name link.txt
+      - name: dumpbin-dependencies
+        if: ${{ matrix.config.os == 'windows-latest' }}
+        shell: cmd
+        run: |
+          dumpbin /DEPENDENTS build\src\zynaddsubfx.exe
       - name: make test
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.test }}
@@ -199,6 +145,11 @@ jobs:
       - name: make-fusion
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build-fusion }}
+      - name: objdump-dependencies
+        if: ${{ matrix.config.name == 'MinGW (no-gui + zest)' }}
+        run: |
+          x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe \
+            | grep "DLL Name"
       - name: package-fusion
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.pack-fusion }}
@@ -207,29 +158,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: windows
-          path: ${{ matrix.config.pack-path }}
-
-#  build_arch_linux_system_rtosc:
-#    runs-on: ubuntu-latest
-#    container:
-#      image: archlinux:latest
-#    steps:
-#      - name: Install dependencies
-#        run: pacman --noconfirm -Syu alsa-lib base-devel cmake cxxtest dssi fftw fltk git jack ladspa liblo libxpm mxml portaudio rtosc zlib
-#      - uses: actions/checkout@v2
-#        with:
-#          submodules: recursive
-#      # test does not seem to work in a container and reports:
-#      # Process not started
-#      #  /__w/zynaddsubfx/zynaddsubfx/build/src/Tests/check-ports.rb
-#      # [no such file or directory]
-#      - name: Disable PortChecker test
-#        run: sed -e '/add_test(PortChecker/d' -i src/Tests/CMakeLists.txt
-#      - name: Build zynaddsubfx
-#        run: |
-#          cmake -DCMAKE_INSTALL_PREFIX=/usr -DZYN_SYSTEM_RTOSC=ON -B build -S .
-#          make VERBOSE=1 -C build
-#      - name: Test zynaddsubfx
-#        run: make VERBOSE=1 -k test ARGS='-VVd' -C build
-#      - name: Install zynaddsubfx
-#        run: make VERBOSE=1 install -C build
+          path: ${{ matrix.config.pack-fusion-path }}
