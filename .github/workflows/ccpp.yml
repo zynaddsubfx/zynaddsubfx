@@ -15,86 +15,220 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {
-            name: "Windows MSVC (fltk, disabled)",
-            enabled: 0,
-            os: windows-latest,
-            deps1: "",
-            deps2: "",
-            testdeps: "",
-            info: "",
-            config: "cmake
-                    -B build
-                    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-                    -DRTOSC_WERROR=1
-                    -DCMAKE_BUILD_TYPE=Debug
-                    ",
-            configext: "cmake -B build -DCompileExtensiveTests=ON ..",
-            build: "cmake --build build --config Debug",
-            test: "ctest --output-on-failure --test-dir build"
-          }
-          - {
-            name: "Ubuntu gcc (fltk 1.3 + zest)",
-            enabled: 1,
-            os: ubuntu-latest,
-            update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
-            deps2: "sudo apt-get install liblo-dev",
-            testdeps: "sudo apt-get install ruby",
-            info: "cmake --version && gcc --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
-          - {
-            name: "Ubuntu clang+lld (fltk 1.3 + zest)",
-            enabled: 1,
-            os: ubuntu-latest,
-            update: "sudo apt-get update",
-            deps1: "sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3",
-            deps2: "sudo apt-get install liblo-dev",
-            testdeps: "sudo apt-get install ruby",
-            info: "cmake --version && clang --version",
-            # the only really different line to gcc:
-            config: "cd build && \
-                cmake \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
-                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=fltk ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && \
-                cmake \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
-                -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument' \
-                -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
-          - {
-            name: "macOS clang (no-gui)",
-            enabled: 1,
-            os: macos-latest,
-            update: "cmake --version && clang --version",
-            deps1: "brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm",
-            deps2: "brew install libmxml --HEAD",
-            testdeps: "brew install ruby",
-            info: "cmake --version && clang --version",
-            config: "cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..",
-            configext: "cd build && cmake -DCompileExtensiveTests=ON ..",
-            build: "cd build && make VERBOSE=1",
-            test: "cd build && ctest --output-on-failure",
-            config-fusion: "cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..",
-            build-fusion: ""  # Tries to compile as objective C. Possibly, DPF/pugl update required
-            #build-fusion: "cd build-fusion && make VERBOSE=1"
-          }
+          - name: Windows MSVC (fltk + zest)
+            enabled: 1
+            os: windows-latest
+            update: ""
+            deps1: ""
+            deps2: ""
+            testdeps: ""
+            info: ""
+            config: >-
+              cmake
+              -B build
+              -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+              -DRTOSC_WERROR=1
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo
+              -DCMAKE_VERBOSE_MAKEFILE=ON
+              -DPluginEnable=FALSE
+              -DGuiModule=fltk
+            configext: cmake -S . -B build -DCompileExtensiveTests=ON
+            build: cmake --build build --config RelWithDebInfo --verbose
+            build-log: ci-artifacts/build.log
+            test: ctest --output-on-failure --test-dir build -C RelWithDebInfo
+            config-fusion: >-
+              cmake
+              -B build
+              -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+              -DRTOSC_WERROR=1
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo
+              -DCMAKE_VERBOSE_MAKEFILE=ON
+              -DPluginEnable=FALSE
+              -DGuiModule=zest
+            build-fusion: cmake --build build --config RelWithDebInfo --verbose
+            build-fusion-log: ci-artifacts/build-fusion.log
+            dependency-report-command: >-
+              call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
+              dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe > ci-artifacts\dumpbin-dependencies.txt
+            dependency-report-shell: cmd
+            linker-commands-command: |
+              python - <<'PY'
+              from pathlib import Path
+              import re
+
+              logs = [
+                  ('build', Path('ci-artifacts/build.log')),
+                  ('build-fusion', Path('ci-artifacts/build-fusion.log')),
+              ]
+              pattern = re.compile(r'(?i)(?:^|[\\/])link(?:\.exe)?\b')
+              sections = []
+              for label, log_path in logs:
+                  if not log_path.exists():
+                      continue
+                  matches = []
+                  for raw_line in log_path.read_text(encoding='utf-8', errors='ignore').splitlines():
+                      line = raw_line.strip()
+                      if line and pattern.search(line):
+                          matches.append(line)
+                  if matches:
+                      sections.append(f'### {label}\n' + '\n'.join(matches))
+
+              output_path = Path('ci-artifacts/linker-commands.txt')
+              output_path.parent.mkdir(parents=True, exist_ok=True)
+              output_path.write_text(
+                  ('\n\n'.join(sections) + '\n') if sections else '',
+                  encoding='utf-8',
+              )
+              if not sections:
+                  raise SystemExit('No MSVC linker commands found in build logs')
+              PY
+            linker-commands-shell: bash
+            pack-fusion: cd build && cpack -G NSIS -C RelWithDebInfo
+            artifact-name: windows-msvc-linker-commands
+            artifact-paths: |
+              ci-artifacts/dumpbin-dependencies.txt
+              ci-artifacts/linker-commands.txt
+          - name: MinGW (no-gui + zest)
+            enabled: 1
+            os: ubuntu-latest
+            update: sudo apt-get update
+            deps1: sudo apt-get install -y mingw-w64 cmake ninja-build wine64
+            deps2: ./build-mingw-deps "$RUNNER_TEMP"
+            testdeps: ""
+            info: ""
+            config: >-
+              PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig
+              cmake
+              -S .
+              -B build
+              -G Ninja
+              -DRTOSC_WERROR=ON
+              -DWerror=ON
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake
+              -DMINGW_PREFIX=$RUNNER_TEMP/prefix
+              -DPluginEnable=FALSE
+              -DCMAKE_BUILD_TYPE=Debug
+              -DCompileTests=ON
+            configext: cd build && cmake -DCompileExtensiveTests=ON ..
+            build: cmake --build build --verbose
+            build-log: ci-artifacts/build.log
+            test: cd build && ctest --output-on-failure
+            config-fusion: >-
+              PKG_CONFIG_PATH=$RUNNER_TEMP/prefix/lib/pkgconfig
+              cmake
+              -S .
+              -B build-fusion
+              -G Ninja
+              -DRTOSC_WERROR=ON
+              -DWerror=ON
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake
+              -DMINGW_PREFIX=$RUNNER_TEMP/prefix
+              -DPluginEnable=FALSE
+              -DCMAKE_BUILD_TYPE=Release
+              -DGuiModule=zest
+            build-fusion: cmake --build build-fusion --verbose
+            build-fusion-log: ci-artifacts/build-fusion.log
+            dependency-report-command: >-
+              x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe
+              > ci-artifacts/objdump-dependencies.txt
+            dependency-report-shell: bash
+            linker-commands-command: |
+              rm -f ci-artifacts/linker-commands.txt
+              while IFS= read -r file; do
+                printf '### %s\n' "$file" >> ci-artifacts/linker-commands.txt
+                cat "$file" >> ci-artifacts/linker-commands.txt
+                printf '\n\n' >> ci-artifacts/linker-commands.txt
+              done < <(find build build-fusion -path '*/CMakeFiles/*/link.txt' | sort)
+              test -s ci-artifacts/linker-commands.txt
+            linker-commands-shell: bash
+            pack-fusion: ""
+            artifact-name: mingw-linker-commands
+            artifact-paths: |
+              ci-artifacts/objdump-dependencies.txt
+              ci-artifacts/linker-commands.txt
+          - name: Ubuntu gcc (fltk 1.3 + zest)
+            enabled: 1
+            os: ubuntu-latest
+            update: sudo apt-get update
+            deps1: sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3
+            deps2: sudo apt-get install liblo-dev
+            testdeps: sudo apt-get install ruby
+            info: cmake --version && gcc --version
+            config: cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=fltk ..
+            configext: cd build && cmake -DCompileExtensiveTests=ON ..
+            build: cd build && make VERBOSE=1
+            build-log: ci-artifacts/build.log
+            test: cd build && ctest --output-on-failure
+            config-fusion: cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..
+            build-fusion: cd build-fusion && make VERBOSE=1
+            build-fusion-log: ci-artifacts/build-fusion.log
+            dependency-report-command: ""
+            dependency-report-shell: bash
+            linker-commands-command: ""
+            linker-commands-shell: bash
+            pack-fusion: ""
+            artifact-name: ""
+            artifact-paths: ""
+          - name: Ubuntu clang+lld (fltk 1.3 + zest)
+            enabled: 1
+            os: ubuntu-latest
+            update: sudo apt-get update
+            deps1: sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev fltk1.3
+            deps2: sudo apt-get install liblo-dev
+            testdeps: sudo apt-get install ruby
+            info: cmake --version && clang --version
+            config: >-
+              cd build &&
+              cmake
+              -DCMAKE_C_COMPILER=clang
+              -DCMAKE_CXX_COMPILER=clang++
+              -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument'
+              -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument'
+              -DRTOSC_WERROR=ON -DWerror=ON ..
+            configext: cd build && cmake -DCompileExtensiveTests=ON -DGuiModule=fltk ..
+            build: cd build && make VERBOSE=1
+            build-log: ci-artifacts/build.log
+            test: cd build && ctest --output-on-failure
+            config-fusion: >-
+              cd build-fusion &&
+              cmake
+              -DCMAKE_C_COMPILER=clang
+              -DCMAKE_CXX_COMPILER=clang++
+              -DCMAKE_C_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument'
+              -DCMAKE_CXX_FLAGS='-fuse-ld=lld -Wno-unused-command-line-argument'
+              -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..
+            build-fusion: cd build-fusion && make VERBOSE=1
+            build-fusion-log: ci-artifacts/build-fusion.log
+            dependency-report-command: ""
+            dependency-report-shell: bash
+            linker-commands-command: ""
+            linker-commands-shell: bash
+            pack-fusion: ""
+            artifact-name: ""
+            artifact-paths: ""
+          - name: macOS clang (no-gui)
+            enabled: 1
+            os: macos-latest
+            update: cmake --version && clang --version
+            deps1: brew install extra-cmake-modules liblo zlib fftw fluid-synth libxpm
+            deps2: brew install libmxml --HEAD
+            testdeps: brew install ruby
+            info: cmake --version && clang --version
+            config: cd build && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=off ..
+            configext: cd build && cmake -DCompileExtensiveTests=ON ..
+            build: cd build && make VERBOSE=1
+            build-log: ci-artifacts/build.log
+            test: cd build && ctest --output-on-failure
+            config-fusion: cd build-fusion && cmake -DRTOSC_WERROR=ON -DWerror=ON -DGuiModule=zest ..
+            build-fusion: ""
+            build-fusion-log: ci-artifacts/build-fusion.log
+            dependency-report-command: ""
+            dependency-report-shell: bash
+            linker-commands-command: ""
+            linker-commands-shell: bash
+            pack-fusion: ""
+            artifact-name: ""
+            artifact-paths: ""
     steps:
       - name: check out
         if: ${{ matrix.config.enabled == 1 }}
@@ -102,26 +236,27 @@ jobs:
         with:
           fetch-depth: 0
       - name: update_apt
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.update != '' }}
         run: ${{ matrix.config.update }}
       - name: install_deps1
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.deps1 != '' }}
         run: ${{ matrix.config.deps1 }}
       - name: install_deps2
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.deps2 != '' }}
         run: ${{ matrix.config.deps2 }}
       - name: install_test_deps1
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.testdeps != '' }}
         run: ${{ matrix.config.testdeps }}
       - name: submodule
         if: ${{ matrix.config.enabled == 1 }}
         run: git submodule update --init --recursive
       - name: info
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.info != '' }}
         run: ${{ matrix.config.info }}
       - name: create_builddirs
         if: ${{ matrix.config.enabled == 1 }}
-        run: mkdir build; mkdir build-fusion
+        shell: bash
+        run: mkdir -p build build-fusion ci-artifacts
       - name: configure
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.config }}
@@ -130,16 +265,40 @@ jobs:
         run: ${{ matrix.config.configext }}
       - name: make
         if: ${{ matrix.config.enabled == 1 }}
-        run: ${{ matrix.config.build }}
+        shell: bash
+        run: |
+          set -o pipefail
+          ${{ matrix.config.build }} 2>&1 | tee ${{ matrix.config.build-log }}
       - name: make test
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.test }}
       - name: configure-fusion
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.config-fusion != '' }}
         run: ${{ matrix.config.config-fusion }}
       - name: make-fusion
-        if: ${{ matrix.config.enabled == 1 }}
-        run: ${{ matrix.config.build-fusion }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.build-fusion != '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          ${{ matrix.config.build-fusion }} 2>&1 | tee ${{ matrix.config.build-fusion-log }}
+      - name: save-dependency-report
+        if: ${{ matrix.config.enabled == 1 && matrix.config.dependency-report-command != '' }}
+        shell: ${{ matrix.config.dependency-report-shell }}
+        run: ${{ matrix.config.dependency-report-command }}
+      - name: save-linker-commands
+        if: ${{ matrix.config.enabled == 1 && matrix.config.linker-commands-command != '' }}
+        shell: ${{ matrix.config.linker-commands-shell }}
+        run: ${{ matrix.config.linker-commands-command }}
+      - name: package-fusion
+        if: ${{ matrix.config.enabled == 1 && matrix.config.pack-fusion != '' }}
+        run: ${{ matrix.config.pack-fusion }}
+      - name: upload-artifacts
+        if: ${{ matrix.config.enabled == 1 && matrix.config.artifact-paths != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.config.artifact-name }}
+          path: ${{ matrix.config.artifact-paths }}
+          if-no-files-found: error
 
 #  build_arch_linux_system_rtosc:
 #    runs-on: ubuntu-latest
