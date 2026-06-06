@@ -128,9 +128,6 @@ jobs:
       - name: make
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build }}
-      - name: collect-link-command
-        run: |
-          find build -name link.txt
       - name: dumpbin-dependencies
         if: ${{ matrix.config.os == 'windows-latest' }}
         shell: cmd
