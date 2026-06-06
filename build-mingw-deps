@@ -49,7 +49,6 @@ main()
         local tarball=$tmp_dir/${archives[$i]}.tar.gz
         [ -f "$tarball" ] || wget "${urls[$i]}" -O "$tarball"
         tar -C "$tmp_dir/" -xf "$tarball"
-        # rm "$tarball"
     done
 
     [ -d "$tmp_dir/prefix" ] || mkdir "$tmp_dir/prefix"
