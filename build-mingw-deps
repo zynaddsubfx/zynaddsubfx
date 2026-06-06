@@ -75,7 +75,7 @@ main()
             --disable-shared \
             --enable-static
         sed -i "s/^AR\t*=.*$/AR = x86_64-w64-mingw32-ar/" Makefile
-        sed -i '12 d; 14 d' mxml-file.c  # remove the two broken 4.0.4 include lines before building
+        sed -i '12 d; 14 d' mxml-file.c  # drop the _WIN32 guard so unistd.h stays included for the MinGW build
         make libmxml.a
         make -i install TARGETS="")
 
