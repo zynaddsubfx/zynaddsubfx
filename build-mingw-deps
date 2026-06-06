@@ -76,7 +76,10 @@ main()
             --enable-static
         sed -i "s/^AR\t*=.*$/AR = x86_64-w64-mingw32-ar/" Makefile
         # Keep unistd.h visible for the MinGW cross-build by removing the Windows-only include guard.
-        sed -i '/^#ifndef _WIN32$/d; /^#endif \\/\\/ !_WIN32$/d' mxml-file.c
+        sed -i \
+            -e '/^#ifndef _WIN32$/d' \
+            -e '/^#endif \/\/ !_WIN32$/d' \
+            mxml-file.c
         make libmxml.a
         make -i install TARGETS="")
 
