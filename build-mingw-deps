@@ -30,7 +30,7 @@ main()
     local tmp_dir
     if [ "$1" ]
     then
-        [ -d "$1" ] || die "Error: Directory \"$1\" does not exit"
+        [ -d "$1" ] || die "Error: Directory \"$1\" does not exist"
         tmp_dir=$1
     else
         tmp_dir=$(mktemp -d "/tmp/build-mingw-deps.XXXXXXXXXX")
