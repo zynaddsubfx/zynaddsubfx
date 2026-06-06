@@ -86,7 +86,7 @@ jobs:
                   encoding='utf-8',
               )
               if not sections:
-                  raise SystemExit('No MSVC linker commands found in build logs')
+                  raise SystemExit('No linker commands found in build logs')
               PY
             linker-commands-shell: bash
             pack-fusion: cd build && cpack -G NSIS -C RelWithDebInfo
