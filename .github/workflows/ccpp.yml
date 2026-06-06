@@ -47,15 +47,22 @@ jobs:
               -DGuiModule=zest
             build-fusion: cmake --build build --config RelWithDebInfo --verbose
             build-fusion-log: ci-artifacts/build-fusion.log
-            dependency-report-command: >-
-              set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" &&
-              if not exist "%VSWHERE%" exit /b 1 &&
-              for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -requires
-              Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Auxiliary\Build\vcvars64.bat`)
-              do set "VCVARS=%%i" &&
-              if not defined VCVARS exit /b 1 &&
-              call "%VCVARS%" && dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe >
-              ci-artifacts\dumpbin-dependencies.txt
+            dependency-report-command: |
+              @echo off
+              set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+              if not exist "%VSWHERE%" (
+                echo vswhere.exe not found
+                exit /b 1
+              )
+              set "VSWHERE_ARGS=-latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+              set "VCVARS="
+              for /f "usebackq delims=" %%i in (`"%VSWHERE%" %VSWHERE_ARGS% -find VC\Auxiliary\Build\vcvars64.bat`) do set "VCVARS=%%i"
+              if not defined VCVARS (
+                echo vcvars64.bat not found
+                exit /b 1
+              )
+              call "%VCVARS%"
+              dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe > ci-artifacts\dumpbin-dependencies.txt
             dependency-report-shell: cmd
             linker-commands-command: |
               python - <<'PY'
