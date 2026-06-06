@@ -133,7 +133,7 @@ jobs:
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          dumpbin /DEPENDENTS build\src\zynaddsubfx.exe
+          dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe
       - name: make test
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.test }}
