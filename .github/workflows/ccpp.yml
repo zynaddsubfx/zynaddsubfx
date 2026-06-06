@@ -295,12 +295,16 @@ jobs:
           set -o pipefail
           ${{ matrix.config.build-fusion }} 2>&1 | tee ${{ matrix.config.build-fusion-log }}
       - name: save-dependency-report
-        if: ${{ matrix.config.enabled == 1 && matrix.config.dependency-report-command != '' }}
-        shell: ${{ matrix.config.dependency-report-shell }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config.os != 'windows-latest' && matrix.config.dependency-report-command != '' }}
+        shell: bash
+        run: ${{ matrix.config.dependency-report-command }}
+      - name: save-dependency-report-windows
+        if: ${{ matrix.config.enabled == 1 && matrix.config.os == 'windows-latest' && matrix.config.dependency-report-command != '' }}
+        shell: cmd
         run: ${{ matrix.config.dependency-report-command }}
       - name: save-linker-commands
         if: ${{ matrix.config.enabled == 1 && matrix.config.linker-commands-command != '' }}
-        shell: ${{ matrix.config.linker-commands-shell }}
+        shell: bash
         run: ${{ matrix.config.linker-commands-command }}
       - name: package-fusion
         if: ${{ matrix.config.enabled == 1 && matrix.config.pack-fusion != '' }}
