@@ -38,7 +38,7 @@ main()
 
     local urls=(
         https://www.fftw.org/fftw-3.3.10.tar.gz                                           # GPL-2.0-or-later
-        https://github.com/radarsat1/liblo/archive/refs/tags/0.34.tar.gz                  # GPL-2.1-only
+        https://github.com/radarsat1/liblo/archive/refs/tags/0.34.tar.gz                  # LGPL-2.1-only
         https://github.com/michaelrsweet/mxml/releases/download/v4.0.4/mxml-4.0.4.tar.gz  # Apache-2.0 (but GPL2 exceptions)
         https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz           # MIT
         https://downloads.sourceforge.net/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz)          # libpng-2.0
@@ -75,7 +75,7 @@ main()
             --disable-shared \
             --enable-static
         sed -i "s/^AR\t*=.*$/AR = x86_64-w64-mingw32-ar/" Makefile
-        sed -i '12 d; 14 d' mxml-file.c  # only valid for mxml-4.0.4
+        sed -i '12 d; 14 d' mxml-file.c  # remove the two broken 4.0.4 include lines before building
         make libmxml.a
         make -i install TARGETS="")
 
