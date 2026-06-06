@@ -48,7 +48,9 @@ jobs:
             build-fusion: cmake --build build --config RelWithDebInfo --verbose
             build-fusion-log: ci-artifacts/build-fusion.log
             dependency-report-command: >-
-              call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
+              for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+              -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+              -find VC\Auxiliary\Build\vcvars64.bat`) do call "%%i" &&
               dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe > ci-artifacts\dumpbin-dependencies.txt
             dependency-report-shell: cmd
             linker-commands-command: |
