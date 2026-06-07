@@ -35,7 +35,8 @@ jobs:
                     -DGuiModule=fltk
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
-            build: "cmake --build build --config RelWithDebInfo",
+            build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
+            dump-libs: "Select-String -Path build.log -Pattern '\.lib' | Set-Content linked-libs.txt"
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
             config-fusion: "cmake
@@ -67,6 +68,7 @@ jobs:
                      -G Ninja
                      -DRTOSC_WERROR=ON
                      -DWerror=ON
+                     -DCMAKE_VERBOSE_MAKEFILE=ON
                      -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw64.cmake
                      -DMINGW_PREFIX=$RUNNER_TEMP/prefix
                      -DPluginEnable=FALSE
@@ -128,6 +130,11 @@ jobs:
       - name: make
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build }}
+      - name: upload linked libs
+        uses: actions/upload-artifact@v7
+        with:
+          name: linked-libraries
+          path: linked-libraries.txt
       - name: dumpbin-dependencies
         if: ${{ matrix.config.os == 'windows-latest' }}
         shell: cmd
