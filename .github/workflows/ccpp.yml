@@ -36,7 +36,7 @@ jobs:
                     ",
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
-            dump-libs: "Select-String -Path build.log -Pattern '\.lib' | Set-Content linked-libs.txt"
+            dump-libs: "Select-String -Path build.log -Pattern '\.lib' | Set-Content linked-libs.txt",
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
             config-fusion: "cmake
