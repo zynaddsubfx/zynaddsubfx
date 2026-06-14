@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-project(zynaddsubfx)
-set(VERSION_MAJOR "3")
-set(VERSION_MINOR "0")
-set(VERSION_REVISION "7")
+project(ZynAddSubFX
+    DESCRIPTION "ZynAddSubFX software synthesizer"
+    VERSION 3.0.7
+    HOMEPAGE_URL "https://zynaddsubfx.sourceforge.io/")
+string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME_LCASE)
 cmake_policy(SET CMP0072 NEW)
 
 #Set data directory, if any
@@ -75,3 +76,20 @@ add_custom_target(uninstall
                   "${CMAKE_COMMAND}" -P
                   "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
 
+## CPack
+SET(CPACK_PACKAGE_VENDOR             "ZynAddSubFX Developers")
+SET(CPACK_RESOURCE_FILE_README       "${CMAKE_SOURCE_DIR}/README.adoc")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE   "${CPACK_RESOURCE_FILE_README}")
+SET(CPACK_RESOURCE_FILE_LICENSE      "${CMAKE_SOURCE_DIR}/COPYING")
+SET(CPACK_PACKAGE_EXECUTABLES        "${CMAKE_PROJECT_NAME_LCASE}" "${CMAKE_PROJECT_NAME}")
+SET(CPACK_SOURCE_GENERATOR           "TBZ2")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME   "${CMAKE_PROJECT_NAME_LCASE}-${PROJECT_VERSION}")
+set(CPACK_SOURCE_IGNORE_FILES        "/build;/\.github;/\.git/;/\.gitignore;/\.gitmodules;/\.travis.yml;/\.yamllint;/TODO-release\.md;/style\.sh;/style\.cfg;${CPACK_SOURCE_IGNORE_FILES}")
+# Disable strip for Debug|RelWithDebInfo
+if(CMAKE_BUILD_TYPE MATCHES "Deb")
+        unset(CPACK_STRIP_FILES)
+else()
+        set(CPACK_STRIP_FILES TRUE)
+endif()
+
+INCLUDE(CPack)

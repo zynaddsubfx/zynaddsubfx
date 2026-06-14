@@ -159,7 +159,7 @@ jobs:
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.pack-fusion }}
       - name: upload-artifacts
-        if: ${{ matrix.config.enabled == 1 }}
+        if: ${{ matrix.config.enabled == 1 && matrix.config['pack-fusion-path'] }}
         uses: actions/upload-artifact@v7
         with:
           name: windows
