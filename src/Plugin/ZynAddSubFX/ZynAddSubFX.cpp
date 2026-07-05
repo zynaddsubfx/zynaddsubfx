@@ -226,6 +226,15 @@ protected:
             parameter.ranges.max = 999999.0f;
             parameter.ranges.def = 0.0f;
             break;
+        case kParamMPEenabled:
+            parameter.hints  = kParameterIsAutomable;
+            parameter.name   = "MPE Enable";
+            parameter.symbol = "mpe_enable";
+            parameter.unit   = "";
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            parameter.ranges.def = 0.0f;
+            break;
         }
         if(index <= kParamSlot16) {
             parameter.hints  = kParameterIsAutomable;
@@ -248,6 +257,8 @@ protected:
         {
         case kParamOscPort:
             return oscPort;
+        case kParamMPEenabled:
+            return master->MPEenabled ? 1.0f : 0.0f;
         }
         if(index <= kParamSlot16) {
             return master->automate.getSlot(index - kParamSlot1);
@@ -265,6 +276,8 @@ protected:
     {
         if(index <= kParamSlot16)
             master->automate.setSlot(index - kParamSlot1, value);
+        else if(index == kParamMPEenabled)
+            master->MPEenabled = (value > 0.0f);
     }
 
    /* --------------------------------------------------------------------------------------------------------

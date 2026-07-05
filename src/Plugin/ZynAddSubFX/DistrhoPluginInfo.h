@@ -63,6 +63,7 @@ enum Parameters {
     kParamSlot15,
     kParamSlot16,
     kParamOscPort,
+    kParamMPEenabled,
     kParamCount
 };
 
