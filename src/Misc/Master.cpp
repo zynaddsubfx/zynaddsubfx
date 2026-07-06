@@ -1271,7 +1271,7 @@ void Master::setController(char chan, int type, note_t note, float value)
 
     /* Send the controller to all part assigned to the channel */
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+        if(channelMatchesPart(part[npart], chan) && (part[npart]->Penabled != 0))
             part[npart]->SetController(type, note, value, keyshift);
 }
 
