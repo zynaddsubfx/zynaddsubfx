@@ -1082,6 +1082,22 @@ void Part::ComputePartSmps()
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
         if(!Pefxbypass[nefx]) {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
+
+            // Deliver this effect's output to notes that were routed to this
+            // effect. Notes can pick up the post-effect signal (e.g. copy
+            // it into their VoiceOut buffers) by implementing the
+            // applyPartEffectToRelevantVoices() hook.
+            for (auto &d : notePool.activeDesc()) {
+                if ((int)d.sendto != nefx)
+                    continue;
+                for (auto &s : notePool.activeNotes(d)) {
+                    if (s.note)
+                        s.note->applyPartEffectToRelevantVoices(
+                            partefx[nefx]->efxoutl,
+                            partefx[nefx]->efxoutr);
+                }
+            }
+
             if(Pefxroute[nefx] == 2)
                 for(int i = 0; i < synth.buffersize; ++i) {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
