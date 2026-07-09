@@ -1093,8 +1093,8 @@ void Part::ComputePartSmps()
                 for (auto &s : notePool.activeNotes(d)) {
                     if (s.note)
                         s.note->applyPartEffectToRelevantVoices(
-                            partfxinputl[nefx],
-                            partfxinputr[nefx]);
+                            partefx[nefx]->efxoutl,
+                            partefx[nefx]->efxoutr);
                 }
             }
 
