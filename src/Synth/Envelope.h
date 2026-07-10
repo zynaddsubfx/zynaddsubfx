@@ -53,6 +53,7 @@ class Envelope
         bool  keyreleased;    //if the key was released
         bool  envfinish;
         float t; // the time from the last point
+        float tRelease; // watch offset for forced release
         float inct; // the time increment
         float envoutval; //used to do the forced release
 
