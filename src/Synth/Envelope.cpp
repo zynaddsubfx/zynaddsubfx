@@ -76,6 +76,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
     currentpoint = 1; //the envelope starts from 1
     keyreleased  = false;
     t = 0.0f;
+    tRelease = 0.0f;
     envfinish = false;
     inct      = envdt[1];
     envoutval = 0.0f;
@@ -93,8 +94,10 @@ void Envelope::releasekey()
     if(keyreleased)
         return;
     keyreleased = true;
-    if(forcedrelease)
+    if(forcedrelease) {
+        tRelease = t;
         t = 0.0f;
+    }
 }
 
 void Envelope::forceFinish(void)
@@ -217,7 +220,7 @@ float Envelope::envout(bool doWatch)
     envoutval = out;
 
     if(doWatch) {
-        watch(currentpoint + t, envoutval);
+        watch(currentpoint + t + tRelease, envoutval);
     }
     return out;
 }
