@@ -40,9 +40,17 @@
 #include <cmath>
 #include <atomic>
 #include <cstdlib>
+#include <cstdio>
 #include <unistd.h>
 
 using namespace std;
+
+/* MPE Debug */
+#define MPE_DBG(...) do { \
+    static FILE *mpe_f = NULL; \
+    if(!mpe_f) { mpe_f = fopen("/tmp/zyn_mpe_debug.log","a"); } \
+    if(mpe_f) { fprintf(mpe_f, "Master: " __VA_ARGS__); fflush(mpe_f); } \
+} while(0)
 using namespace rtosc;
 
 namespace zyn {
@@ -1088,6 +1096,7 @@ void Master::applyMPERPN(int chan)
         if(cents > 6400)
             cents = 6400;
         mpe_pitchbend_range_cents[chan] = cents;
+        MPE_DBG("RPN 0x0000 PitchBendRange chan=%d cents=%d\n", chan, cents);
     }
     else if(rpn == 0x0006) {
         int member_channels = mpe_data_msb[chan];
@@ -1095,6 +1104,9 @@ void Master::applyMPERPN(int chan)
             member_channels = 0;
         if(member_channels > 15)
             member_channels = 15;
+
+        MPE_DBG("RPN 0x0006 MPE Config chan=%d member_channels=%d MPEenabled=%d\n",
+                chan, member_channels, MPEenabled);
 
         // Host-announced MPE configuration should enable MPE routing,
         // even if UI-side MPE toggle did not reach this Master instance.
@@ -1129,6 +1141,8 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(channelMatchesPart(part[npart], chan)) {
                 matched_parts++;
+                MPE_DBG("noteOn chan=%d note=%d vel=%d -> Part %d (Prcvchn=%d)\n",
+                        chan, note, velocity, npart, part[npart]->Prcvchn);
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq, chan);
@@ -1184,12 +1198,16 @@ void Master::handleMPEController(int chan, int type, int par)
     switch(type) {
     case C_pitchwheel:
     case C_pitch:
+        MPE_DBG("handleMPEController chan=%d type=%s val=%d\n",
+                chan, type==C_pitchwheel?"pitchwheel":"pitch", par);
         channelState[chan].pitchBend = par;
         break;
     case C_aftertouch:
+        MPE_DBG("handleMPEController chan=%d type=aftertouch val=%d\n", chan, par);
         channelState[chan].pressure  = par;
         break;
     case C_filtercutoff:
+        MPE_DBG("handleMPEController chan=%d type=cutoff val=%d\n", chan, par);
         channelState[chan].timbre    = par;
         break;
     default:
@@ -1198,9 +1216,13 @@ void Master::handleMPEController(int chan, int type, int par)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((part[npart]->Penabled != 0)
            && isMPEMemberChannel(chan)
-           && channelMatchesPart(part[npart], chan))
+           && channelMatchesPart(part[npart], chan)) {
+            MPE_DBG("handleMPEController -> Part %d SetMPEController chan=%d par=%d bend_range=%.0f\n",
+                    npart, chan, par,
+                    getMPEPitchBendRangeCents(chan));
             part[npart]->SetMPEController(chan, type, par,
                 getMPEPitchBendRangeCents(chan));
+        }
 
 }
 
@@ -1217,6 +1239,10 @@ void Master::setController(char chan, int type, int par)
         || (type == C_pitch)
         || (type == C_aftertouch)
         || (type == C_filtercutoff);
+
+    if(isMPEExpressionController)
+        MPE_DBG("setController chan=%d type=%d par=%d MPEenabled=%d\n",
+                chan, type, par, MPEenabled);
 
     processMPERPN(chan, type, par);
     if(MPEenabled) handleMPEController(chan, type, par);
