@@ -30,16 +30,6 @@
 #include <rtosc/thread-link.h>
 #include <cstdlib>
 #include <cstdio>
-#include <unistd.h>
-
-/* ------------------------------------------------------------------------------------------------------------
- * MPE Debug */
-#define MPE_DBG(...) ((void)0)
-
-__attribute__((constructor)) static void _zyn_mpe_ctor(void) {
-    fprintf(stderr, "ZYN_CTOR: constructor running, PID=%d\n", getpid());
-    MPE_DBG("plugin loaded (PID=%d)\n", getpid());
-}
 
 /* ------------------------------------------------------------------------------------------------------------
  * MiddleWare thread class */
@@ -236,15 +226,6 @@ protected:
             parameter.ranges.max = 999999.0f;
             parameter.ranges.def = 0.0f;
             break;
-        case kParamMPEenabled:
-            parameter.hints  = kParameterIsAutomable;
-            parameter.name   = "MPE Enable";
-            parameter.symbol = "mpe_enable";
-            parameter.unit   = "";
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            parameter.ranges.def = 0.0f;
-            break;
         }
         if(index <= kParamSlot16) {
             parameter.hints  = kParameterIsAutomable;
@@ -267,8 +248,6 @@ protected:
         {
         case kParamOscPort:
             return oscPort;
-        case kParamMPEenabled:
-            return master->MPEenabled ? 1.0f : 0.0f;
         }
         if(index <= kParamSlot16) {
             return master->automate.getSlot(index - kParamSlot1);
@@ -286,8 +265,6 @@ protected:
     {
         if(index <= kParamSlot16)
             master->automate.setSlot(index - kParamSlot1, value);
-        else if(index == kParamMPEenabled)
-            master->MPEenabled = (value > 0.0f);
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -377,7 +354,6 @@ protected:
         {
             //if (! isOffline())
             {
-                MPE_DBG("run() mutex FAILED, zeroing output\n");
                 std::memset(outputs[0], 0, sizeof(float)*frames);
                 std::memset(outputs[1], 0, sizeof(float)*frames);
                 return;
@@ -390,22 +366,6 @@ protected:
         for (uint32_t i=0; i<midiEventCount; ++i)
         {
             const MidiEvent& midiEvent(midiEvents[i]);
-
-            {
-                const uint8_t st = midiEvent.data[0] & 0xF0;
-                const uint8_t ch = midiEvent.data[0] & 0x0F;
-                if(st == 0x90)
-                    MPE_DBG("run() NoteOn  chan=%d note=%d vel=%d\n", ch, midiEvent.data[1], midiEvent.data[2]);
-                else if(st == 0x80)
-                    MPE_DBG("run() NoteOff chan=%d note=%d\n", ch, midiEvent.data[1]);
-                else if(st == 0xE0) {
-                    int pb = ((midiEvent.data[2] << 7) | midiEvent.data[1]) - 8192;
-                    MPE_DBG("run() PitchBend chan=%d val=%d\n", ch, pb);
-                } else if(st == 0xB0)
-                    MPE_DBG("run() CC      chan=%d ctrl=%d val=%d\n", ch, midiEvent.data[1], midiEvent.data[2]);
-                else if(st == 0xD0)
-                    MPE_DBG("run() ChPress chan=%d val=%d\n", ch, midiEvent.data[1]);
-            }
 
             if (midiEvent.frame >= frames)
                 continue;
