@@ -1,0 +1,107 @@
+MPE (MIDI Polyphonic Expression)
+=================================
+
+ZynAddSubFX supports MPE (MIDI Polyphonic Expression) per the MPE
+specification (v1.1, ISBN 978-1-937544-22-3).
+
+MPE allows per-note control of pitch bend, aftertouch (channel pressure),
+and timbre (CC74) by assigning each note to its own MIDI channel within
+a zone.
+
+
+Zones
+-----
+
+Two MPE zones are supported:
+
+Lower Zone::
+  Master channel 0, member channels 1..15 (default).
+Upper Zone::
+  Master channel 15, member channels 0 (default, no members).
+
+A part assigned to a zone's master channel will receive notes from all
+member channels of that zone.
+
+Configuration via RPN 0x0006::
+  Send RPN 0x0006 on the master channel to set the number of member
+  channels. Example (lower zone, 5 members):
+
+    [MIDI CC 101] RPN MSB    = 0x00
+    [MIDI CC 100] RPN LSB    = 0x06
+    [MIDI CC 6]   Data Entry = 5
+
+  If member channels > 0 and MPE is not yet enabled, MPE is automatically
+  enabled. Sending member channels = 0 removes all member channels from
+  the zone, effectively disabling routing for that zone.
+
+
+Controllers
+-----------
+
+In MPE mode, the following controllers on member channels are intercepted
+and forwarded to the appropriate notes via the MPE path:
+
+  Pitch Bend (C_pitchwheel)::
+    Stored per channel in `channelState[chan].pitchBend`. Applied to
+    active notes via `Part::SetMPEController`.
+
+  Aftertouch (C_aftertouch)::
+    Stored in `channelState[chan].pressure`. Forwarded to active notes.
+
+  Timbre / CC74 (C_filtercutoff)::
+    Stored in `channelState[chan].timbre`. Forwarded to active notes.
+
+Manager Channel Pitch Bend::
+  Pitch bend on a zone's master channel is applied to all notes on all
+  member channels of that zone via `Part::ApplyMPEManagerBend`.
+
+
+Pitch Bend Range (RPN 0x0000)
+-----------------------------
+
+The pitch bend range is configurable per channel via RPN 0x0000:
+
+  [MIDI CC 101] RPN MSB    = 0x00
+  [MIDI CC 100] RPN LSB    = 0x00
+  [MIDI CC 6]   Data Entry = <semitones>
+
+Range is clamped to 0..6400 cents (0..64 semitones). Fine adjustment
+via Data Entry LSB (CC 38) for sub-semitone resolution.
+
+
+Stored Bend on NoteOn (MPE Section 2.2.6)
+------------------------------------------
+
+When a note is played on a member channel, any previously received
+pitch bend values are applied immediately:
+
+  * Member channel pitch bend is applied via `SetMPEController`.
+  * Manager channel pitch bend is applied via `ApplyMPEManagerBend`.
+
+This ensures that controller changes received before a note starts are
+reflected in the note's initial pitch.
+
+
+Implementation Details
+----------------------
+
+Source files:
+
+  src/Misc/Master.h::
+    `MPEenabled` (public bool), `MPEState channelState[16]`,
+    `mpe_*` zone configuration fields.
+
+  src/Misc/Master.cpp::
+    `handleMPEController()` -- stores and forwards MPE controllers.
+    `processMPERPN()` / `applyMPERPN()` -- handles RPN 0x0000/0x0006.
+    `channelMatchesPart()` -- routes member channels to zone parts.
+    `syncMPEEnableState()` -- manages MPE enable/disable transitions.
+
+  src/Misc/Part.cpp::
+    `SetMPEController()` -- applies MPE controllers to active notes.
+    `ApplyMPEManagerBend()` -- applies manager channel pitch bend.
+
+  src/Synth/SynthNote.cpp::
+    `setMPEPitchBend()` -- per-note pitch bend storage and application.
+
+Tests: `src/Tests/MiddlewareTest.cpp` (testMPE*)
