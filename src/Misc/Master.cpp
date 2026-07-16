@@ -1272,6 +1272,10 @@ void Master::setController(char chan, int type, int par)
             }
         }
     } else {  //other controllers
+        const bool isMPEExpressionController = (type == C_pitchwheel)
+            || (type == C_pitch)
+            || (type == C_aftertouch)
+            || (type == C_filtercutoff);
         if(!(MPEenabled && isMPEExpressionController)) {
             for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all matching parts
                 if(channelMatchesPart(part[npart], chan) && (part[npart]->Penabled != 0))

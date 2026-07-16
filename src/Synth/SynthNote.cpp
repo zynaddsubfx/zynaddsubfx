@@ -15,8 +15,6 @@
 #include "../globals.h"
 #include <cstdio>
 
-/* MPE Debug */
-#define MPE_DBG(...) ((void)0)
 #include <cstring>
 #include <new>
 #include <iostream>
@@ -196,10 +194,6 @@ void SynthNote::setPitchBend(float value, float bend_range_cents)
         else
             cents *= ctl.pitchwheel.bendrange;
         float absolute_log2_freq = legato.getNoteLog2Freq() + (cents / 1200.0f);
-        MPE_DBG("setPitchBend val=%.0f range=%.0f -> cents=%.1f base_l2freq=%.3f new_l2freq=%.3f\n",
-                value, bend_range_cents, cents,
-                legato.getNoteLog2Freq(), absolute_log2_freq);
-
         legato.setSilent(true);
         LegatoParams pars{legato.getVelocity(),
                    legato.getPortamento(), absolute_log2_freq, true, legato.getSeed()};
@@ -214,9 +208,6 @@ void SynthNote::setPitchBend(float value, float bend_range_cents)
         // MPE path: store bend value, no legato transition
         cents *= bend_range_cents;
         mpe_bend_member_cents = cents;
-        MPE_DBG("setMPEPitchBend val=%.0f range=%.0f -> mpe_member=%.1f mpe_manager=%.1f total=%.1f\n",
-                value, bend_range_cents, mpe_bend_member_cents,
-                mpe_bend_manager_cents, mpe_bend_member_cents + mpe_bend_manager_cents);
     }
 }
 

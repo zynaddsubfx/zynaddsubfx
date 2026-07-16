@@ -29,8 +29,6 @@
 #include "../Containers/ScratchString.h"
 #include "../DSP/FFTwrapper.h"
 
-/* MPE Debug */
-#define MPE_DBG(...) ((void)0)
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -538,7 +536,6 @@ bool Part::NoteOnInternal(note_t note,
                   float note_log2_freq,
                   char chan)
 {
-    MPE_DBG("NoteOnInternal note=%d vel=%d chan=%d Ppolymode=%d\n", note, velocity, chan, Ppolymode);
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
@@ -965,14 +962,8 @@ void Part::SetMPEController(char chan, unsigned int type, int par,
                     s.note->setMPEPitchBend(par, pitchbend_range_cents);
             }
         }
-        if(!found)
-            MPE_DBG("SetMPEController PITCH chan=%d val=%d range=%.0f -> NO matching notes!\n",
-                    chan, par, pitchbend_range_cents);
-        else
-            MPE_DBG("SetMPEController PITCH chan=%d val=%d range=%.0f -> %d notes bent\n",
-                    chan, par, pitchbend_range_cents, found);
-        break;
     }
+    break;
 
     case C_aftertouch:
         MPEAftertouch(chan, floorf(par));
