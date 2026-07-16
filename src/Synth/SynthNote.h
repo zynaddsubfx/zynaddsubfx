@@ -76,6 +76,10 @@ class SynthNote
         void setPitchBend(float log2_freq_);
         void setPitchBend(float log2_freq_, float bend_range_cents);
 
+        /* MPE pitch bend: stores bend value without triggering legato */
+        void setMPEPitchBend(float value, float bend_range_cents);
+        void setMPEManagerBend(float value, float bend_range_cents);
+
         /* For per-note filter cutoff */
         void setFilterCutoff(float);
         float getFilterCutoffRelFreq(void);
@@ -137,6 +141,8 @@ class SynthNote
         const AbsTime    &time;
         WatchManager     *wm;
         smooth_float     filtercutoff_relfreq;
+        float mpe_bend_member_cents;
+        float mpe_bend_manager_cents;
     private:
         bool m_constPowerMixing;
 };

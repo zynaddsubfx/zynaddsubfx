@@ -13,6 +13,14 @@
 #include "../Params/Controller.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
+#include <cstdio>
+
+/* MPE Debug */
+#define MPE_DBG(...) do { \
+    static FILE *mpe_f = NULL; \
+    if(!mpe_f) { mpe_f = fopen("/tmp/zyn_mpe_debug.log","a"); } \
+    if(mpe_f) { fprintf(mpe_f, "Note:   " __VA_ARGS__); fflush(mpe_f); } \
+} while(0)
 #include <cstring>
 #include <new>
 #include <iostream>
@@ -23,6 +31,8 @@ SynthNote::SynthNote(const SynthParams &pars, bool constPowerMixing)
     :memory(pars.memory),
     legato(pars.synth, pars.velocity, pars.portamento,
             pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time),
+            mpe_bend_member_cents(0.0f),
+            mpe_bend_manager_cents(0.0f),
             m_constPowerMixing(constPowerMixing)
 {}
 
@@ -184,25 +194,46 @@ void SynthNote::setPitchBend(float value, float bend_range_cents)
 {
     float cents = value / 8192.0f;
     if(bend_range_cents < 0.0f) {
+        // Non-MPE path: use legato transition as before
         if(ctl.pitchwheel.is_split && cents < 0)
             cents *= ctl.pitchwheel.bendrange_down;
         else
             cents *= ctl.pitchwheel.bendrange;
+        float absolute_log2_freq = legato.getNoteLog2Freq() + (cents / 1200.0f);
+        MPE_DBG("setPitchBend val=%.0f range=%.0f -> cents=%.1f base_l2freq=%.3f new_l2freq=%.3f\n",
+                value, bend_range_cents, cents,
+                legato.getNoteLog2Freq(), absolute_log2_freq);
+
+        legato.setSilent(true);
+        LegatoParams pars{legato.getVelocity(),
+                   legato.getPortamento(), absolute_log2_freq, true, legato.getSeed()};
+        try {
+            legatonote(pars);
+        } catch (std::bad_alloc &ba) {
+            std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
+        }
+        legato.setDecounter(0);
     }
     else {
+        // MPE path: store bend value, no legato transition
         cents *= bend_range_cents;
+        mpe_bend_member_cents = cents;
+        MPE_DBG("setMPEPitchBend val=%.0f range=%.0f -> mpe_member=%.1f mpe_manager=%.1f total=%.1f\n",
+                value, bend_range_cents, mpe_bend_member_cents,
+                mpe_bend_manager_cents, mpe_bend_member_cents + mpe_bend_manager_cents);
     }
-    float absolute_log2_freq = legato.getNoteLog2Freq() + (cents / 1200.0f);
+}
 
-    legato.setSilent(true); //Let legato.update(...) return 0.
-    LegatoParams pars{legato.getVelocity(),
-               legato.getPortamento(), absolute_log2_freq, true, legato.getSeed()};
-    try {
-        legatonote(pars);
-    } catch (std::bad_alloc &ba) {
-        std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
-    }
-    legato.setDecounter(0); //avoid chopping sound due fade-in
+void SynthNote::setMPEPitchBend(float value, float bend_range_cents)
+{
+    float cents = (value / 8192.0f) * bend_range_cents;
+    mpe_bend_member_cents = cents;
+}
+
+void SynthNote::setMPEManagerBend(float value, float bend_range_cents)
+{
+    float cents = (value / 8192.0f) * bend_range_cents;
+    mpe_bend_manager_cents = cents;
 }
 
 

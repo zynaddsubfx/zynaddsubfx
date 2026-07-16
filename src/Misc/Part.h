@@ -76,6 +76,7 @@ class Part
                            int masterkeyshift) REALTIME;
         void SetMPEController(char chan, unsigned int type, int par,
                               float pitchbend_range_cents) REALTIME;
+        void ApplyMPEManagerBend(char chan, int par, float range_cents) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 

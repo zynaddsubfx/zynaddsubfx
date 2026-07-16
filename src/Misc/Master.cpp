@@ -1144,8 +1144,23 @@ void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
                 MPE_DBG("noteOn chan=%d note=%d vel=%d -> Part %d (Prcvchn=%d)\n",
                         chan, note, velocity, npart, part[npart]->Prcvchn);
                 fakepeakpart[npart] = velocity * 2;
-                if(part[npart]->Penabled)
+                if(part[npart]->Penabled) {
                     part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq, chan);
+                    int c = chan; // char→int cast for array index
+                    if(MPEenabled && isMPEMemberChannel(chan)) {
+                        // MPE §2.2.6: apply stored member channel pitch bend
+                        if(channelState[c].pitchBend != 0.0f)
+                            part[npart]->SetMPEController(chan, C_pitchwheel,
+                                (int)channelState[c].pitchBend,
+                                getMPEPitchBendRangeCents(c));
+                        // MPE §2.2.6: apply stored manager channel pitch bend
+                        int mc = mpe_lower_master_channel;
+                        if(channelState[mc].pitchBend != 0.0f)
+                            part[npart]->ApplyMPEManagerBend(c,
+                                (int)channelState[mc].pitchBend,
+                                ctl.pitchwheel.bendrange);
+                    }
+                }
             }
         }
         activeNotes[note] = 1;
@@ -1213,6 +1228,7 @@ void Master::handleMPEController(int chan, int type, int par)
     default:
         return;
     }
+    // Apply to matching parts: member channels go through SetMPEController
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((part[npart]->Penabled != 0)
            && isMPEMemberChannel(chan)
@@ -1224,6 +1240,16 @@ void Master::handleMPEController(int chan, int type, int par)
                 getMPEPitchBendRangeCents(chan));
         }
 
+    // Manager channel in MPE mode: apply manager bend to all member notes
+    if(MPEenabled && (chan == mpe_lower_master_channel
+                   || chan == mpe_upper_master_channel)) {
+        float range = ctl.pitchwheel.bendrange;
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+            if(part[npart]->Penabled)
+                for(int mc = 0; mc < 16; ++mc)
+                    if(isMPEMemberChannel(mc))
+                        part[npart]->ApplyMPEManagerBend(mc, par, range);
+    }
 }
 
 /*
@@ -1246,6 +1272,10 @@ void Master::setController(char chan, int type, int par)
 
     processMPERPN(chan, type, par);
     if(MPEenabled) handleMPEController(chan, type, par);
+    // Manager-Channel Pitch Wheel in MPE mode: auch an Part.SetController,
+    // aber nur wenn es nicht von handleMPEController bereits via MPE erledigt wird.
+    // handleMPEController blockiert auf Manager-Channel (isMPEMemberChannel=false),
+    // also leiten wir es hier an SetController weiter.
     automate.handleMidi(chan, type, par);
     midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)

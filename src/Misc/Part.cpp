@@ -28,6 +28,13 @@
 #include "../Synth/PADnote.h"
 #include "../Containers/ScratchString.h"
 #include "../DSP/FFTwrapper.h"
+
+/* MPE Debug */
+#define MPE_DBG(...) do { \
+    static FILE *mpe_f = NULL; \
+    if(!mpe_f) { mpe_f = fopen("/tmp/zyn_mpe_debug.log","a"); } \
+    if(mpe_f) { fprintf(mpe_f, "Part:   " __VA_ARGS__); fflush(mpe_f); } \
+} while(0)
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -535,6 +542,7 @@ bool Part::NoteOnInternal(note_t note,
                   float note_log2_freq,
                   char chan)
 {
+    MPE_DBG("NoteOnInternal note=%d vel=%d chan=%d Ppolymode=%d\n", note, velocity, chan, Ppolymode);
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
@@ -952,13 +960,23 @@ void Part::SetMPEController(char chan, unsigned int type, int par,
 {
     switch (type) {
     case C_pitchwheel:
-    case C_pitch:
+    case C_pitch: {
+        int found = 0;
         for(auto &d:notePool.activeDesc()) {
-            if(d.chan == chan && d.playing())
+            if(d.chan == chan && d.playing()) {
+                found++;
                 for(auto &s:notePool.activeNotes(d))
-                    s.note->setPitchBend(par, pitchbend_range_cents);
+                    s.note->setMPEPitchBend(par, pitchbend_range_cents);
+            }
         }
+        if(!found)
+            MPE_DBG("SetMPEController PITCH chan=%d val=%d range=%.0f -> NO matching notes!\n",
+                    chan, par, pitchbend_range_cents);
+        else
+            MPE_DBG("SetMPEController PITCH chan=%d val=%d range=%.0f -> %d notes bent\n",
+                    chan, par, pitchbend_range_cents, found);
         break;
+    }
 
     case C_aftertouch:
         MPEAftertouch(chan, floorf(par));
@@ -974,6 +992,15 @@ void Part::SetMPEController(char chan, unsigned int type, int par,
         break;
     default:
         break;
+    }
+}
+
+void Part::ApplyMPEManagerBend(char chan, int par, float range_cents)
+{
+    for(auto &d:notePool.activeDesc()) {
+        if(d.chan == chan && d.playing())
+            for(auto &s:notePool.activeNotes(d))
+                s.note->setMPEManagerBend(par, range_cents);
     }
 }
 

@@ -276,7 +276,9 @@ void PADnote::computecurrentparameters()
 
     realfreq =
         powf(2.0f, note_log2_freq + globalpitch / 12.0f + portamentofreqdelta_log2) *
-        powf(ctl.pitchwheel.relfreq, BendAdjust) + OffsetHz;
+        powf(ctl.pitchwheel.relfreq, BendAdjust) *
+        powf(2.0f, (mpe_bend_member_cents + mpe_bend_manager_cents) / 1200.0f)
+        + OffsetHz;
 }
 
 

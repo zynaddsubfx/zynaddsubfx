@@ -465,6 +465,8 @@ void SUBnote::computecurrentparameters()
 
         envfreq *=
             powf(ctl.pitchwheel.relfreq, BendAdjust); //pitch wheel
+        envfreq *=
+            powf(2.0f, (mpe_bend_member_cents + mpe_bend_manager_cents) / 1200.0f);
 
         //Update frequency while portamento is converging
         if(portamento) {
