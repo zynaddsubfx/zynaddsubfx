@@ -46,11 +46,7 @@
 using namespace std;
 
 /* MPE Debug */
-#define MPE_DBG(...) do { \
-    static FILE *mpe_f = NULL; \
-    if(!mpe_f) { mpe_f = fopen("/tmp/zyn_mpe_debug.log","a"); } \
-    if(mpe_f) { fprintf(mpe_f, "Master: " __VA_ARGS__); fflush(mpe_f); } \
-} while(0)
+#define MPE_DBG(...) ((void)0)
 using namespace rtosc;
 
 namespace zyn {

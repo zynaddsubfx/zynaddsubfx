@@ -34,12 +34,7 @@
 
 /* ------------------------------------------------------------------------------------------------------------
  * MPE Debug */
-#define MPE_DBG(...) do { \
-    static FILE *mpe_f = NULL; \
-    if(!mpe_f) { mpe_f = fopen("/tmp/zyn_mpe_debug.log","w"); \
-        if(!mpe_f) { fprintf(stderr, "ZYN_FAIL: fopen failed: %m\n"); } } \
-    if(mpe_f) { fprintf(mpe_f, "Plugin: " __VA_ARGS__); fflush(mpe_f); } \
-} while(0)
+#define MPE_DBG(...) ((void)0)
 
 __attribute__((constructor)) static void _zyn_mpe_ctor(void) {
     fprintf(stderr, "ZYN_CTOR: constructor running, PID=%d\n", getpid());
