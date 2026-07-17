@@ -74,7 +74,7 @@ public:
     // LFO control parameters (typically 0-127 MIDI range unless specified)
     unsigned char Pfreq;        //!< Frequency parameter (0-127), controls LFO speed
     unsigned char Prandomness;  //!< Randomness parameter (0-127), adds variation to frequency
-    unsigned char PLFOtype;     //!< LFO type parameter (0-2): 0=Sine, 1=Triangle, 2=Square
+    unsigned char PLFOtype;     //!< LFO type parameter (0-2): 0=Sine, 1=Triangle, 2=Noise
     unsigned char Pstereo;      //!< Stereo phase spread parameter (-64 to +64), controls stereo width
 
 private:
@@ -109,7 +109,7 @@ private:
     float lfornd;       //!< Current randomness factor for frequency variation
 
     // LFO configuration
-    char lfotype;       //!< Current LFO type (0=Sine, 1=Triangle, 2=Square)
+    char lfotype;       //!< Current LFO type (0=Sine, 1=Triangle, 2=Noise)
 
     // System configuration
     float samplerate_f; //!< Sample rate in Hz
