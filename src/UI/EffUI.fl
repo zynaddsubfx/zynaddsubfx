@@ -591,6 +591,10 @@ if (filterwindow!=NULL){
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
+        MenuItem {} {
+          label NOISE
+          xywh {35 35 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Dial phaserp5 {
         label {St.df}
@@ -745,6 +749,10 @@ if (filterwindow!=NULL){
         MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label NOISE
+          xywh {35 35 100 20} labelfont 1 labelsize 10
         }
       }
       Fl_Dial awp10 {
@@ -1148,6 +1156,10 @@ eqgraph->update();}
         MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label NOISE
+          xywh {35 35 100 20} labelfont 1 labelsize 10
         }
       }
       Fl_Button {} {
