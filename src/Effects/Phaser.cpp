@@ -68,7 +68,7 @@ rtosc::Ports Phaser::ports = {
     rEffParOpt(lfo.PLFOtype,    4, rShort("type"),
             rPreset(4, tri), rPresetsAt(6, tri, tri), rPreset(11, tri),
             rDefault(sine),
-            rOptions(sine, tri), "lfo shape"),
+            rOptions(sine, tri, noise), "lfo shape"),
     rEffPar(lfo.Pstereo,     5, rShort("stereo"),
             rPresetsAt(1, 88, 66, 66, 110, 58), rDefault(64),
             "Left/right channel phase shift"),
