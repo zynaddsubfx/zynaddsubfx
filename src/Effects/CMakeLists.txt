@@ -10,6 +10,7 @@ set(zynaddsubfx_effect_SRCS
 	Effects/EffectMgr.cpp
 	Effects/EQ.cpp
 	Effects/Phaser.cpp
+	Effects/PitchDrop.cpp
 	Effects/Reverb.cpp
 	Effects/Sympathetic.cpp
 	Effects/Reverse.cpp
