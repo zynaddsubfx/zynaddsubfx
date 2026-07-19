@@ -243,8 +243,9 @@ void Sympathetic::calcFreqsGeneric()
     for (unsigned int i = 0; i < Punison_size * Pstrings; i += Punison_size)
     {
         const float n_norm = (float)(i / Punison_size) / (float)(Pstrings - 1);
+        const float n = (float)(i / Punison_size);
 
-        float log2Base = (float)i / 36.0f;
+        float log2Base = n / 12.0f;
 
         float nonlinearDeform = 0.0f;
         if (beta != 1.0f && n_norm > 0.0f) {
