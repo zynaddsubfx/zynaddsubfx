@@ -63,10 +63,19 @@ class Sympathetic final:public Effect
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
 
+        unsigned char Pinharmonicity = 0;
+        unsigned char Pbeta = 64;
+        unsigned char Pgamma = 64;
+
         unsigned char spread, spread_old;
 
         float freqs[NUM_SYMPATHETIC_STRINGS];
         float baseFreq;
+        float inharmonicity = 0.0f;
+        float beta = 1.0f;
+        float gamma = 2.0f;
+
+        unsigned int srate;
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
