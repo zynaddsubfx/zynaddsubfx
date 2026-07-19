@@ -62,6 +62,9 @@ class Sympathetic final:public Effect
         unsigned char Punison_frequency_spread;
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
+        unsigned char PcontactDist;
+        unsigned char PcontactStrength;
+        unsigned char PcontactPos;
 
         unsigned char spread, spread_old;
 

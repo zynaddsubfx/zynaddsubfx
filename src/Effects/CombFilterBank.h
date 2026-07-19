@@ -22,6 +22,20 @@ class CombFilterBank
 
     void setStrings(unsigned int nr, const float basefreq);
 
+    /** Contact proximity to the string.
+     *  0.0 = finger touching the string (maximum sensitivity, lower threshold)
+     *  1.0 = no contact (minimum sensitivity, higher threshold)
+     *  Controls how easily contact events are triggered. */
+    float contactOffset = 1.0f;
+
+    /** Contact material hardness / energy transfer.
+     *  0.0 = soft material (no energy reflected back into string)
+     *  1.0 = hard material (maximum energy reflected back)
+     *  Controls how much of the detected contact excitation is fed back. */
+    float contactStrength = 0.0f;
+
+    /** Contact position along the string as fraction of delay (0..0.5) */
+    float contactPosition = 0.25f;
 
     private:
     static float tanhX(const float x);
@@ -40,7 +54,9 @@ class CombFilterBank
     int samplerate=0;
     unsigned int buffersize=0;
 
-
+    float hp_state[NUM_SYMPATHETIC_STRINGS] = {};
+    float env[NUM_SYMPATHETIC_STRINGS] = {};
+    float contactResponse[NUM_SYMPATHETIC_STRINGS] = {};
 };
 
 }
