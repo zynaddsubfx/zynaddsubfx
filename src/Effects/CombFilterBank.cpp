@@ -15,12 +15,12 @@ namespace zyn {
     samplerate(samplerate_),
     buffersize(buffersize_)
     {
-        // setup the smoother for gain parameter
         gain_smoothing.cutoff(1.0f);
         gain_smoothing.sample_rate(samplerate/16);
-        gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
+        gain_smoothing.thresh(0.02f);
         gain_smoothing.reset(gainbwd);
         pos_writer = 0;
+        for (unsigned int j=0; j<NUM_SYMPATHETIC_STRINGS; j++) env[j] = 0.1f;
     }
 
     CombFilterBank::~CombFilterBank()
@@ -30,7 +30,6 @@ namespace zyn {
 
     void CombFilterBank::setStrings(unsigned int nrOfStringsNew, const float baseFreqNew)
     {
-        // limit nrOfStringsNew
         nrOfStringsNew = min(NUM_SYMPATHETIC_STRINGS,nrOfStringsNew);
 
         if(nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq)
@@ -52,71 +51,104 @@ namespace zyn {
                     memory.devalloc(string_smps[i]);
         } else
         {
-            // free the old buffers (wrong size for baseFreqNew)
             for(unsigned int i = 0; i < nrOfStrings; ++i)
                 memory.devalloc(string_smps[i]);
 
-            // allocate buffers with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
                 string_smps[i] = memory.valloc<float>(mem_size_new);
                 memset(string_smps[i], 0, mem_size_new*sizeof(float));
             }
-            // update mem_size and baseFreq
             mem_size = mem_size_new;
             baseFreq = baseFreqNew;
-            // reset writer position
             pos_writer = 0;
         }
-        // update nrOfStrings
         nrOfStrings = nrOfStringsNew;
     }
 
     inline float CombFilterBank::tanhX(const float x)
     {
-        // Pade approximation of tanh(x) bound to [-1 .. +1]
-        // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
         const float x2 = x*x;
         return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
     }
 
     inline float CombFilterBank::sampleLerp(const float *smp, const float pos) const {
-        int poshi = (int)pos; // integer part (pos >= 0)
-        float poslo = pos - (float) poshi; // decimal part
-        // linear interpolation between samples
-        return smp[poshi] + poslo * (smp[(poshi+1)%mem_size]-smp[poshi]);
+        int poshi = (int)pos;
+        float poslo = pos - (float) poshi;
+        if (poslo > 0.001)
+            return smp[poshi] + poslo * (smp[(poshi+1)%mem_size]-smp[poshi]);
+        else
+            return smp[poshi];
     }
 
     void CombFilterBank::filterout(float *smp)
     {
-        // no string -> no sound
         if (nrOfStrings==0) return;
 
-        // interpolate gainbuf values over buffer length using value smoothing filter (lp)
-        // this should prevent popping noise when controlled binary with 0 / 127
-        // new control rate = samplerate / 16
         const unsigned int gainbufsize = buffersize / 16;
-        STACKALLOC(float, gainbuf, gainbufsize); // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
-            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
+        STACKALLOC(float, gainbuf, gainbufsize);
+        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) )
+            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd);
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
-            // apply input gain
             const float input_smp = smp[i]*inputgain;
 
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 if (delays[j] == 0.0f) continue;
-                assert(float(mem_size)>delays[j]);
-                // calculate the feedback sample positions in the buffer
-                const float pos_reader = fmodf(float(pos_writer+mem_size) - delays[j], float(mem_size));
 
-                // sample at that position
-                const float sample = sampleLerp(string_smps[j], pos_reader);
-                string_smps[j][pos_writer] = input_smp + tanhX(sample*gainbuf[i/16]);
+                float sMain = 0.0f;
+                float sLeft = 0.0f;
+                float sRight = 0.0f;
+
+                const float baseDelay = delays[j];
+                const float contactPos = contactPosition;
+
+                auto readTaps = [&](float d, float weight) {
+                    if (weight <= 0.0f) return;
+
+                    float dm = min(d, float(mem_size));
+                    sMain += sampleLerp(string_smps[j], fmodf(float(pos_writer + mem_size) - dm, float(mem_size))) * weight;
+
+                    float dl = min(dm * contactPos, float(mem_size));
+                    float dr = min(dm * (1.0f - contactPos), float(mem_size));
+                    sLeft  += sampleLerp(string_smps[j], (pos_writer + mem_size - int(dl)) % mem_size) * weight;
+                    sRight += sampleLerp(string_smps[j], (pos_writer + mem_size - int(dr)) % mem_size) * weight;
+                };
+
+                readTaps(baseDelay, 1.0f);
+
+                const float damp_range = 0.5f;
+                float wr = (1.0f - damp_range) + damp_range * contactPos;
+                float wl = (1.0f - damp_range) + damp_range * (1.0f - contactPos);
+
+                float contactIn = (wl * sLeft + wr * sRight) / (wr + wl);
+
+                contactIn -= hp_state[j];
+                hp_state[j] += 0.001f * contactIn;
+
+                env[j] += 0.0001f * (fabsf(sMain) - env[j]);
+                float thresh = 3.5f * contactOffset * env[j];
+                float excess = fmaxf(0.0f, contactIn - thresh);
+
+                float approximity = 1.0f - contactOffset;
+                contactResponse[j] *= 0.5f;
+                if (excess > 0.0f) {
+                    float drive = 4.0f + 16.0f * approximity;
+                    float n = 4.0f;
+                    float shapedExcess = excess * drive / powf(1.0f + powf(fabsf(excess * drive), n), 1.0f / n);
+                    contactResponse[j] += 0.5f * shapedExcess;
+                }
+
+                const float hockeyFactor = powf(approximity, 16);
+                const float w_cont = contactStrength * (contactResponse[j] + hockeyFactor * (1.0f - contactResponse[j]));
+                const float delta = contactIn - sMain;
+
+                const float feedback = tanhX((sMain + w_cont * delta) * gainbuf[i/16]);
+                string_smps[j][pos_writer] = input_smp + feedback;
             }
-            // mix output buffer samples to output sample
+
             smp[i]=0.0f;
             unsigned int nrOfActualStrings = 0;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
@@ -125,12 +157,8 @@ namespace zyn {
                     nrOfActualStrings++;
                 }
 
-            // apply output gain to sum of strings and
-            // divide by nrOfStrings to get mean value
-            // division by zero is catched at the beginning filterOut()
             smp[i] *= outgain / (float)nrOfActualStrings;
 
-            // increment writing position
             ++pos_writer %= mem_size;
         }
     }

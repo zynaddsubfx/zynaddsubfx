@@ -69,6 +69,9 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(12, 12, 60, 6, 6), "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
+    rEffPar(PcontactDist, 19, rShort("contact"), rDefault(64), "contact distance"),
+    rEffPar(PcontactStrength, 20, rShort("strength"), rDefault(0), "contact strength"),
+    rEffPar(PcontactPos, 21, rShort("cpos"), rDefault(64), "contact position"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -92,6 +95,9 @@ Sympathetic::Sympathetic(EffectParams pars)
       Punison_frequency_spread(30),
       Pstrings(12),
       Pbasenote(57),
+      PcontactDist(64),
+      PcontactStrength(0),
+      PcontactPos(64),
       baseFreq(220.0f)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -389,6 +395,24 @@ void Sympathetic::changepar(int npar, unsigned char value)
                 calcFreqs();
             }
             break;
+        case 19:
+            if (PcontactDist!=127-value) {
+                PcontactDist = 127-value;
+                filterBank->contactOffset = (float)(PcontactDist*PcontactDist) / (127.0f * 127.0f);
+            }
+            break;
+        case 20:
+            if (PcontactStrength!=value) {
+                PcontactStrength = value;
+                filterBank->contactStrength = (float)(value*value) / (127.0f * 127.0f);
+            }
+            break;
+        case 21:
+            if (PcontactPos!=value) {
+                PcontactPos = value;
+                filterBank->contactPosition = (float)value / 254.0f;
+            }
+            break;
         default:
             break;
     }
@@ -409,6 +433,9 @@ unsigned char Sympathetic::getpar(int npar) const
         case 9:  return Punison_size;
         case 10: return Pstrings;
         case 11: return Pbasenote;
+        case 19: return 127-PcontactDist;
+        case 20: return PcontactStrength;
+        case 21: return PcontactPos;
         default: return 0; //in case of bogus parameter number
     }
 }
