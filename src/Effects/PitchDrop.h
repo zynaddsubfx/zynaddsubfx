@@ -25,7 +25,7 @@ class PitchDrop final:public Effect
         unsigned char Pvolume;
         unsigned char PdropRate = 64;
         unsigned char PmaxDrop  = 0;
-        unsigned char PfadingTime = 96;
+        unsigned char PfadingTime = 5;
         unsigned char PfreqOffset = 64;
         unsigned char Plfodepth = 0;
 

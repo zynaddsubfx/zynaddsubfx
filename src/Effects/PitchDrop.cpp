@@ -11,7 +11,7 @@ namespace zyn {
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
-const float drop_freeverb_freqs[8] = {1116.0f, 1188.0f, 1277.0f, 1356.0f, 1422.0f, 1491.0f, 1557.0f, 1617.0f};
+const float drop_freeverb_delays[8] = {1116.0f, 1188.0f, 1277.0f, 1356.0f, 1422.0f, 1491.0f, 1557.0f, 1617.0f};
 
 rtosc::Ports PitchDrop::ports = {
     {"preset::i", rProp(parameter)
@@ -56,7 +56,7 @@ PitchDrop::PitchDrop(EffectParams pars)
     // Setup 8 freeverb-style comb filters
     const unsigned int nstrings = 8;
     for(unsigned int i = 0; i < nstrings; i++)
-        filterBank->delays[i] = ((float)samplerate) * drop_freeverb_freqs[i] / 44100.0f;
+        filterBank->delays[i] = ((float)samplerate) * drop_freeverb_delays[i] / 44100.0f;
 
     const unsigned int mem_size_new = (int)ceilf((filterBank->delays[0] * 32.0f * 1.03f + buffersize + 2) / 16) * 16;
     filterBank->setStrings(nstrings, mem_size_new);
