@@ -38,7 +38,11 @@ jobs:
             build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
             dump-libs: 'Select-String -Path build.log -Pattern "\.lib" | Set-Content linked-libs.txt',
             dump_dependencies_shell: cmd,
-            dump_dependencies: "call \"%ProgramFiles%\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat\"
+            dump_dependencies: "set \"VS=%ProgramFiles%\\Microsoft Visual Studio\\2022\"
+                                && set \"VCPATH=\\VC\\Auxiliary\\Build\\vcvars64.bat\"
+                                && if not defined VCINSTALLDIR if exist \"%VS%\\Enterprise%VCPATH%\" call \"%VS%\\Enterprise%VCPATH%\"
+                                && if not defined VCINSTALLDIR if exist \"%VS%\\Professional%VCPATH%\" call \"%VS%\\Professional%VCPATH%\"
+                                && if not defined VCINSTALLDIR if exist \"%VS%\\Community%VCPATH%\" call \"%VS%\\Community%VCPATH%\"
                                 && dumpbin /DEPENDENTS build\\src\\RelWithDebInfo\\zynaddsubfx.exe > dependency-windows-latest.txt",
             dump_dependencies_output: dependency-windows-latest.txt,
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
