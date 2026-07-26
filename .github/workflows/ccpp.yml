@@ -38,9 +38,8 @@ jobs:
             build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
             dump-libs: 'Select-String -Path build.log -Pattern "\.lib" | Set-Content linked-libs.txt',
             dump_dependencies_shell: cmd,
-            dump_dependencies: 'for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-                                -latest -products * -find "VC\Tools\MSVC\**\bin\Hostx64\x64\dumpbin.exe"`)
-                                do "%%i" /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe > dependency-windows-latest.txt',
+            dump_dependencies: "call \"%ProgramFiles%\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat\"
+                                && dumpbin /DEPENDENTS build\\src\\RelWithDebInfo\\zynaddsubfx.exe > dependency-windows-latest.txt",
             dump_dependencies_output: dependency-windows-latest.txt,
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
