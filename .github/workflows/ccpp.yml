@@ -37,6 +37,10 @@ jobs:
             configext: "cmake -B build -DCompileExtensiveTests=ON ..",
             build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
             dump-libs: 'Select-String -Path build.log -Pattern "\.lib" | Set-Content linked-libs.txt',
+            dump_dependencies_shell: cmd,
+            dump_dependencies: "call \"%ProgramFiles%\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat\"
+                                && dumpbin /DEPENDENTS build\\src\\RelWithDebInfo\\zynaddsubfx.exe > dependency-windows-latest.txt",
+            dump_dependencies_output: dependency-windows-latest.txt,
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
             config-fusion: "cmake
@@ -93,6 +97,10 @@ jobs:
                             -DGuiModule=zest
                             ",
             build-fusion: "cmake --build build-fusion"
+            ,
+            dump_dependencies_shell: bash,
+            dump_dependencies: "x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe | grep \"DLL Name\" > dependency-ubuntu-latest.txt",
+            dump_dependencies_output: dependency-ubuntu-latest.txt
           }
     steps:
       - name: check out
@@ -135,12 +143,16 @@ jobs:
         with:
           name: linked-libraries
           path: linked-libraries.txt
-      - name: dumpbin-dependencies
-        if: ${{ matrix.config.os == 'windows-latest' }}
-        shell: cmd
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          dumpbin /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe
+      - name: dump-dependencies
+        if: ${{ matrix.config.enabled == 1 && matrix.config.dump_dependencies }}
+        shell: ${{ matrix.config.dump_dependencies_shell }}
+        run: ${{ matrix.config.dump_dependencies }}
+      - name: upload dependency dump
+        if: ${{ matrix.config.enabled == 1 && matrix.config.dump_dependencies_output }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependencies-${{ matrix.config.os }}
+          path: ${{ matrix.config.dump_dependencies_output }}
       - name: make test
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.test }}
@@ -150,11 +162,6 @@ jobs:
       - name: make-fusion
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.build-fusion }}
-      - name: objdump-dependencies
-        if: ${{ matrix.config.name == 'MinGW (no-gui + zest)' }}
-        run: |
-          x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe \
-            | grep "DLL Name"
       - name: package-fusion
         if: ${{ matrix.config.enabled == 1 }}
         run: ${{ matrix.config.pack-fusion }}
