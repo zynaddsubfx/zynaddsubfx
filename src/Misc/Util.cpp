@@ -13,27 +13,40 @@
 
 #include "globals.h"
 #include "Util.h"
-#include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cinttypes>
 #include <fstream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+
+#ifdef _MSC_VER
+    #include <windows.h>
+#else
+    #include <unistd.h>
+    #include <cstdlib>
+    #include <fcntl.h>
+    #ifndef WIN32
+        #include <err.h>
+        #include <pwd.h>
+    #endif
+#endif
+
+#ifdef WIN32
+    #include <shlobj.h>
+    #include <knownfolders.h>
+#endif
+
 #ifdef HAVE_SCHEDULER
 #include <sched.h>
 #endif
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 
-#define errx(...) {}
 #ifndef errx
-#include <err.h>
+#define errx(...) {}
 #endif
 
 #include <rtosc/rtosc.h>
@@ -138,31 +151,16 @@ void set_realtime()
 }
 
 
-
-#ifdef WIN32
-#include <windows.h>
-
-//https://stackoverflow.com/questions/5801813/c-usleep-is-obsolete-workarounds-for-windows-mingw
-void os_usleep(long usec)
+std::uint32_t os_getpid()
 {
-    HANDLE timer;
-    LARGE_INTEGER ft;
-
-    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
-
-    timer = CreateWaitableTimer(NULL, TRUE, NULL);
-    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
-    WaitForSingleObject(timer, INFINITE);
-    CloseHandle(timer);
-}
+#ifdef _MSC_VER
+    return static_cast<std::uint32_t>(GetCurrentProcessId());
 #else
-
-void os_usleep(long length)
-{
-    usleep(length);
-}
+    return static_cast<std::uint32_t>(getpid());
 #endif
+}
 
+#ifndef _MSC_VER
 //!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
@@ -195,9 +193,90 @@ std::string os_pid_as_padded_string()
     char result_str[max_pid_len << 1];
     std::fill_n(result_str, max_pid_len, '0');
     std::size_t written = snprintf(result_str + max_pid_len, max_pid_len,
-        "%d", (int)getpid());
+        "%" PRIu32, os_getpid());
     // the below pointer should never cause segfaults:
     return result_str + max_pid_len + written - os_guess_pid_length();
+}
+
+#endif
+
+#ifdef WIN32
+static std::string windows_get_path(REFKNOWNFOLDERID rfid)
+{
+    PWSTR wide_path = nullptr;
+
+    HRESULT hr = SHGetKnownFolderPath(rfid, 0, nullptr, &wide_path);
+    if (FAILED(hr) || !wide_path)
+        return {};
+
+    // Calculate size for UTF-16 -> UTF-8 conversion
+    int utf8_size = WideCharToMultiByte(CP_UTF8, 0, wide_path, -1,
+        nullptr, 0, nullptr, nullptr);
+    if (utf8_size <= 0) {
+        CoTaskMemFree(wide_path);
+        return {};
+    }
+
+    // Do the conversion
+    std::string result(utf8_size, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wide_path, -1,
+        result.data(), utf8_size, nullptr, nullptr);
+
+    CoTaskMemFree(wide_path);
+    return result;
+}
+#endif
+
+std::filesystem::path os_homepath()
+{
+#ifdef _MSC_VER
+    return windows_get_path(FOLDERID_Profile);
+#elif defined (WIN32)
+    // Try USERPROFILE variable
+    if (const char* userprofile = std::getenv("USERPROFILE")) {
+        if (*userprofile)
+            return userprofile;
+    }
+
+    // Try HOMEPATH + HOMEDRIVE
+    if (const char* homepath = std::getenv("HOMEPATH")) {
+        if (const char* homedrive = std::getenv("HOMEDRIVE")) {
+            std::string combined = std::string(homedrive) + homepath;
+            if (!combined.empty())
+                return combined;
+        }
+    }
+
+    return {};
+#else
+    // Prefer HOME variable
+    if (const char* home = std::getenv("HOME")) {
+        if (*home)
+            return home;
+    }
+
+    // Fallback: passwd database
+    const struct passwd* pw = getpwuid(getuid());
+    if (pw && pw->pw_dir)
+        return pw->pw_dir;
+
+    return {};
+#endif
+}
+
+std::filesystem::path os_localpath()
+{
+#ifdef WIN32
+    return std::filesystem::path(windows_get_path(FOLDERID_Profile)) / "zynaddsubfx";
+#else
+    // Prefer XDG variable
+    if (const char* home = std::getenv("HOME")) {
+        if (*home)
+            return std::filesystem::path(home) / "zynaddsubfx";
+    }
+    // Fallback: via HOME path
+    return os_homepath() / ".local" / "share" / "zynaddsubfx";
+#endif
 }
 
 std::string legalizeFilename(std::string filename)

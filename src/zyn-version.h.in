@@ -42,9 +42,9 @@ public:
 
     //! constructs the current zynaddsubfx version
     constexpr version_type() :
-        version_type(${VERSION_MAJOR},
-                     ${VERSION_MINOR},
-                     ${VERSION_REVISION})
+        version_type(${PROJECT_VERSION_MAJOR},
+                     ${PROJECT_VERSION_MINOR},
+                     ${PROJECT_VERSION_PATCH})
     {
     }
 

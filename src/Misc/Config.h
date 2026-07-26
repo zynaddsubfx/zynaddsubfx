@@ -76,7 +76,7 @@ class Config
     private:
         void readConfig(const char *filename);
         void saveConfig(const char *filename) const;
-        void getConfigFileName(char *name, int namesize) const;
+        std::string getConfigFileName() const;
 };
 
 }

@@ -19,6 +19,7 @@
 #include <rtosc/port-sugar.h>
 
 #include "Config.h"
+#include "Util.h"
 #include "../globals.h"
 #include "XMLwrapper.h"
 
@@ -230,9 +231,8 @@ void Config::init()
 //get the midi input devices name
     cfg.currentBankDir = "./testbnk";
 
-    char filename[MAX_STRING_SIZE];
-    getConfigFileName(filename, MAX_STRING_SIZE);
-    readConfig(filename);
+    std::string filename = getConfigFileName();
+    readConfig(filename.c_str());
 
     if(cfg.bankRootDirList[0].empty()) {
         //banks
@@ -285,9 +285,7 @@ Config::~Config()
 
 void Config::save() const
 {
-    char filename[MAX_STRING_SIZE];
-    getConfigFileName(filename, MAX_STRING_SIZE);
-    saveConfig(filename);
+    saveConfig(getConfigFileName().c_str());
 }
 
 void Config::clearbankrootdirlist()
@@ -478,10 +476,9 @@ void Config::saveConfig(const char *filename) const
     delete (xmlcfg);
 }
 
-void Config::getConfigFileName(char *name, int namesize) const
+std::string Config::getConfigFileName() const
 {
-    name[0] = 0;
-    snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
+    return fsPathToString(os_homepath() / ".zynaddsubfxXML.cfg");
 }
 
 }

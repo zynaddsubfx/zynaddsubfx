@@ -2,6 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+  #include <malloc.h>
+#endif
 
 int tap_quiet    = 0;
 int global_err   = 0;

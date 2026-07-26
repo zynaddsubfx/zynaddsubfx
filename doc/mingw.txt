@@ -1,0 +1,6 @@
+Quick setup for Arch Linux:
+
+* `pacman -S mingw-w64-gcc ninja wine autoconf automake`
+* `mkdir /tmp/mingw`
+* `./build-mingw-deps /tmp/mingw`
+* Run `cmake` and `make` like in `.github/workflows/ccpp.yml` (MinGW job)

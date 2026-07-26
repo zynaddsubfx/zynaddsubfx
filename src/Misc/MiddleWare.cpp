@@ -26,8 +26,6 @@
 #include <rtosc/port-sugar.h>
 #include <lo/lo.h>
 
-#include <unistd.h>
-
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
 
@@ -187,7 +185,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     assert(!path.empty());
     path += "sample";
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_MSC_VER)
     unsigned num = p->sampleGenerator([&path,&d]
                        (unsigned N, PADnoteParameters::Sample &&s)
                        {
@@ -566,7 +564,7 @@ public:
         assert(filename);
 
         //load part in async fashion when possible
-#ifndef WIN32
+#if !defined(WIN32) || defined(_MSC_VER)
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -596,11 +594,12 @@ public:
         }
 
         Part *p = alloc.get();
-#else
-        Part *p = new Part(*master->memory, synth, master->time,
+#else  // Windows without MSVC
+        Part *p = new Part(*master->memory, synth, master->time, master->sync,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
-                &master->microtonal, master->fft);
+                &master->microtonal, master->fft, &master->watcher,
+		("/part"+to_s(npart)+"/").c_str());
         p->partno  = npart % NUM_MIDI_CHANNELS;
         p->Prcvchn = npart % NUM_MIDI_CHANNELS;
 
@@ -918,7 +917,7 @@ public:
     // Add a message for handleMsg to a queue
     void queueMsg(const char* msg)
     {
-        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, -1));
+        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, (std::numeric_limits<size_t>::max)()));
     }
 
     void write(const char *path, const char *args, ...);
@@ -1427,7 +1426,7 @@ void save_cb(const char *msg, RtData &d)
         std::size_t msgmax = (savefile.length()-1) / max_each;
         for(std::size_t pos = 0; pos < savefile.length(); pos += max_each)
         {
-            std::size_t len = std::min(max_each, savefile.length() - pos);
+            std::size_t len = (std::min)(max_each, savefile.length() - pos);
             d.reply(d.loc, "stiis",
                     file.c_str(), request_time, msgcount++, msgmax,
                     savefile.substr(pos, len).c_str());
@@ -1663,22 +1662,22 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         rEnd},
     {"reload_auto_save:i", 0, 0,
         rBegin
-        const int save_id      = rtosc_argument(msg,0).i;
-        const string save_dir  = string(getenv("HOME")) + "/.local";
-        const string save_file = "zynaddsubfx-"+to_s(save_id)+"-autosave.xmz";
-        const string save_loc  = save_dir + "/" + save_file;
-        impl.loadMaster(save_loc.c_str());
+        namespace fs = std::filesystem;
+        const int save_id       = rtosc_argument(msg,0).i;
+        const string save_file  = "autosave-"+to_s(save_id)+".xmz";
+        const fs::path save_loc = os_localpath() / save_file;
+        impl.loadMaster(fsPathToString(save_loc).c_str());
         //XXX it would be better to remove the autosave after there is a new
         //autosave, but this method should work for non-immediate crashes :-|
-        remove(save_loc.c_str());
+        fs::remove(save_loc.c_str());
         rEnd},
     {"delete_auto_save:i", 0, 0,
         rBegin
-        const int save_id      = rtosc_argument(msg,0).i;
-        const string save_dir  = string(getenv("HOME")) + "/.local";
-        const string save_file = "zynaddsubfx-"+to_s(save_id)+"-autosave.xmz";
-        const string save_loc  = save_dir + "/" + save_file;
-        remove(save_loc.c_str());
+        namespace fs = std::filesystem;
+        const int save_id       = rtosc_argument(msg,0).i;
+        const string save_file  = "autosave-"+to_s(save_id)+".xmz";
+        const fs::path save_loc = os_localpath() / save_file;
+        fs::remove(save_loc.c_str());
         rEnd},
     {"load_xmz:s:st", 0, 0, load_cb<false>},
     {"load_osc:s:st", 0, 0, load_cb<true>},
@@ -1901,11 +1900,16 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     presetsstore(*config), autoSave(-1, [this]() {
             auto master = this->master;
             this->doReadOnlyOp([master](){
-                std::string home = getenv("HOME");
-                std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
-                printf("doing an autosave <%s>...\n", save_file.c_str());
-                int res = master->saveXML(save_file.c_str());
-                (void)res;});})
+                std::error_code ec;
+                std::filesystem::create_directories(os_localpath(), ec);
+                if(!ec) {
+                    std::string save_file = fsPathToString(
+                        os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz"));
+                    printf("doing an autosave <%s>...\n", save_file.c_str());
+                    int res = master->saveXML(save_file.c_str());
+                    (void)res;
+                }
+                });})
 {
     bToU = new rtosc::ThreadLink(4096*2*16,1024/16);
     uToB = new rtosc::ThreadLink(4096*2*16,1024/16);
@@ -2436,20 +2440,18 @@ int MiddleWare::checkAutoSave(void) const
 {
     namespace fs = std::filesystem;
 
-    //save spec zynaddsubfx-PID-autosave.xmz
-    const std::string home     = getenv("HOME");
-    const std::string save_dir = home+"/.local/";
+    //save spec autosave-PID.xmz
 
     int    reload_save = -1;
 
     std::error_code ec;
 
-    for(const auto& entry : fs::directory_iterator(save_dir, ec))
+    for(const auto& entry : fs::directory_iterator(os_localpath(), ec))
     {
         if(ec) continue;
 
         const std::string filename = entry.path().filename().string();
-        const char *prefix = "zynaddsubfx-";
+        const char *prefix = "autosave-";
 
         //check for mandatory prefix
         if(entry.is_directory(ec) || filename.rfind(prefix, 0) != 0)
@@ -2478,9 +2480,7 @@ int MiddleWare::checkAutoSave(void) const
 
 void MiddleWare::removeAutoSave(void)
 {
-    std::string home = getenv("HOME");
-    std::string save_file = home+"/.local/zynaddsubfx-"+to_s(getpid())+"-autosave.xmz";
-    remove(save_file.c_str());
+    std::filesystem::remove(os_localpath() / ("autosave-"+to_s(os_getpid())+".xmz"));
 }
 
 Fl_Osc_Interface *MiddleWare::spawnUiApi(void)
