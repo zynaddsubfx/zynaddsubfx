@@ -38,8 +38,9 @@ jobs:
             build: "cmake --build build --config RelWithDebInfo | Tee-Object build.log",
             dump-libs: 'Select-String -Path build.log -Pattern "\.lib" | Set-Content linked-libs.txt',
             dump_dependencies_shell: cmd,
-            dump_dependencies: "call \"%ProgramFiles%\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat\"
-                                && dumpbin /DEPENDENTS build\\src\\RelWithDebInfo\\zynaddsubfx.exe > dependency-windows-latest.txt",
+            dump_dependencies: 'for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+                                -latest -products * -find "VC\Tools\MSVC\**\bin\Hostx64\x64\dumpbin.exe"`)
+                                do "%%i" /DEPENDENTS build\src\RelWithDebInfo\zynaddsubfx.exe > dependency-windows-latest.txt',
             dump_dependencies_output: dependency-windows-latest.txt,
             test: "ctest --output-on-failure --test-dir build -C RelWithDebInfo",
             # re-use build dir, to avoid rebuilding deps with vcpkg
@@ -96,10 +97,9 @@ jobs:
                             -DCMAKE_BUILD_TYPE=Release
                             -DGuiModule=zest
                             ",
-            build-fusion: "cmake --build build-fusion"
-            ,
+            build-fusion: "cmake --build build-fusion",
             dump_dependencies_shell: bash,
-            dump_dependencies: "x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe | grep \"DLL Name\" > dependency-ubuntu-latest.txt",
+            dump_dependencies: 'x86_64-w64-mingw32-objdump -p build-fusion/src/zynaddsubfx.exe | grep "DLL Name" > dependency-ubuntu-latest.txt',
             dump_dependencies_output: dependency-ubuntu-latest.txt
           }
     steps:
