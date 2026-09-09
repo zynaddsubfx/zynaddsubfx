@@ -66,7 +66,7 @@ Sibling projects
 ~~~~~~~~~~~~~~~~
 
 - rtosc       - realtime open sound control https://github.com/fundamental/rtosc
-- mruby-zest  - the framework for the zyn-fusion GUI https://github.com/mruby-zest/mruby-zest
+- mruby-zest  - the framework for the zyn-fusion GUI https://github.com/mruby-zest/mruby-zest-build
 
 
 License
