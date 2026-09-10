@@ -14,8 +14,16 @@
 #include <jack/jack.h>
 #include <string>
 #include <cstring>
-#include <err.h>
 #include <cstdio>
+#ifdef _MSC_VER
+#include <cstdlib>
+static void errx(int rval, const char* errstr) {
+    std::fprintf(stderr, "zynaddsubfx: %s\n", errstr);
+    std::exit(rval);
+}
+#else
+#include <err.h>
+#endif
 #include <cassert>
 
 #include "Nio.h"
@@ -81,8 +89,10 @@ bool JackMultiEngine::Start(void)
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
+#ifndef _MSC_VER
     if(Nio::pidInClientName)
         clientname += "_" + os_pid_as_padded_string();
+#endif
     jack_status_t jackstatus;
 
     if(instance_name)

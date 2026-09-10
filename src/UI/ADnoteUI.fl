@@ -8,6 +8,11 @@ decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 decl {//License: GNU GPL version 2 or later} {private local
 } 
 
+decl {\#define WIN32_LEAN_AND_MEAN} {public local
+}
+decl {\#define _WINSOCKAPI_} {public local
+}
+
 decl {\#include "../Params/ADnoteParameters.h"} {public local
 } 
 decl {\#include "ResonanceUI.h"} {public local

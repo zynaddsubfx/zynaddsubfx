@@ -64,8 +64,10 @@ bool JackEngine::connectServer(string server)
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
+#ifndef _MSC_VER
     if(Nio::pidInClientName)
         clientname += "_" + os_pid_as_padded_string();
+#endif
 
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
@@ -282,6 +284,7 @@ void JackEngine::stopMidi()
         disconnectJack();
 }
 
+#ifndef _MSC_VER
 int JackEngine::clientId()
 {
     if(NULL != jackClient)
@@ -289,6 +292,7 @@ int JackEngine::clientId()
     else
         return -1;
 }
+#endif
 
 string JackEngine::clientName()
 {
@@ -402,7 +406,7 @@ void JackEngine::handleMidi(unsigned long frames)
 
         memset(buf, 0, sizeof(buf));
         memcpy(buf, jack_midi_event.buffer,
-            std::min(sizeof(buf), jack_midi_event.size));
+            (std::min)(sizeof(buf), jack_midi_event.size));
 
         /* make sure the values are within range */
         buf[1] &= 0x7F;

@@ -14,11 +14,13 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <stdint.h>
 #include <algorithm>
 #include <set>
+#include <filesystem>
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
@@ -64,15 +66,32 @@ extern float getdetune(unsigned char type,
  * pthread_attr_t*/
 void set_realtime();
 
-/**Os independent sleep in microsecond*/
-void os_usleep(long length);
+/** OS independent return of PID */
+std::uint32_t os_getpid();
 
+#ifndef _MSC_VER
 //! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
+#endif
+
+std::filesystem::path os_homepath();
+std::filesystem::path os_localpath();
 
 std::string legalizeFilename(std::string filename);
 
 void invSignal(float *sig, size_t len);
+
+// Replacing the whole code base to use filesystem::path would be overkill
+// (and partially impossible, i.e. some libs like zlib don't support it). So
+// this function cleanly converts filesystem::path to string.
+// For Windows, this is usually required because filesystem::path uses wchar_t
+// For Linux, this is almost a no-op, but if the underlying system uses Latin1
+// to encode filenames, this is a better approach than "p.native()"
+inline std::string fsPathToString(const std::filesystem::path& p)
+{
+    auto u8 = p.u8string();
+    return {u8.begin(), u8.end()};
+}
 
 template<class T>
 std::string stringFrom(T x)

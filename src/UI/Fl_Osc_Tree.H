@@ -55,7 +55,7 @@ class Fl_Osc_Tree: public Fl_Tree
 
 
             if(reason==1) {
-                char *colon = index(pathname, ':');
+                char *colon = strchr(pathname, ':');
                 if(colon) {
                     *colon = 0;
                     t->osc->writeValue("/learn", string(pathname));
@@ -70,8 +70,8 @@ class Fl_Osc_Tree: public Fl_Tree
                     t->remove(i);
                 for(const Port &port : p) {
                     printf("handling '%s'\n", port.name);
-                    const bool subnodes   = index(port.name, '/');
-                    const bool enumerated = index(port.name, '#');
+                    const bool subnodes   = strchr(port.name, '/');
+                    const bool enumerated = strchr(port.name, '#');
                     const string path = std::string(pathname)+"/"+port.name;
                     if(!enumerated) {
                         t->sprout(path);
@@ -80,7 +80,7 @@ class Fl_Osc_Tree: public Fl_Tree
                         char tmpb[1024];
                         assert(path.length() < 1024);
                         strncpy(tmpa, path.c_str(), sizeof(tmpa));
-                        char *pound = index(tmpa, '#');
+                        char *pound = strchr(tmpa, '#');
                         int N = atoi(pound+1);
                         *pound = 0;
                         char terminal = subnodes ? '/' : '\0';
@@ -107,11 +107,10 @@ class Fl_Osc_Tree: public Fl_Tree
 
             for(const Port &port : *p) {
                 const char *name  = port.name;
-                if(!index(name, '/'))//only accept objects that will have subports
+                if(!strchr(name, '/'))//only accept objects that will have subports
                     continue;
                 if(rtosc_match(name, s.c_str(), nullptr)) {
-                    return subtree_lookup(port.ports,
-                            s.substr(index(s.c_str(), '/')-s.c_str()+1));
+                    return subtree_lookup(port.ports, s.substr(s.find('/') + 1));
                 }
             }
 

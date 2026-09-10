@@ -12,7 +12,96 @@
 #ifndef ZYNSEMA_H
 #define ZYNSEMA_H
 
-#if defined __APPLE__ || defined WIN32
+#if defined _MSC_VER
+
+// avoid double inclusion if win socket headers
+#define WIN32_LEAN_AND_MEAN
+#define _WINSOCKAPI_
+
+#include <windows.h>
+#include <synchapi.h>  // WaitOnAddress / WakeByAddress*
+#include <atomic>
+
+namespace zyn {
+
+enum { PTHREAD_PROCESS_PRIVATE, PTHREAD_PROCESS_SHARED };
+
+class ZynSema
+{
+public:
+    ZynSema() noexcept
+    : _count(0)
+    {}
+
+    ~ZynSema() = default;
+
+    // s is ignored (POSIX pshared flag, meaningless on Windows)
+    int init(int /*s*/, int v) noexcept
+    {
+        _count.store(v, std::memory_order_release);
+        return 0;
+    }
+
+    int post() noexcept
+    {
+        LONG prev = _count.fetch_add(1, std::memory_order_release);
+
+        // If there were waiters, wake one
+        if (prev < 0)
+        {
+            WakeByAddressSingle(&_count);
+        }
+        return 0;
+    }
+
+    int wait() noexcept
+    {
+        LONG value = _count.fetch_sub(1, std::memory_order_acquire);
+
+        if (value > 0)
+            return 0;
+
+        // We must wait
+        for (;;)
+        {
+            LONG expected = value - 1;
+            WaitOnAddress(&_count, &expected, sizeof(expected), INFINITE);
+
+            value = _count.load(std::memory_order_acquire);
+            if (value >= 0)
+                return 0;
+        }
+    }
+
+    int trywait() noexcept
+    {
+        LONG value = _count.load(std::memory_order_acquire);
+
+        while (value > 0)
+        {
+            if (_count.compare_exchange_weak(
+                value, value - 1,
+                std::memory_order_acquire,
+                std::memory_order_relaxed))
+            {
+                return 0;
+            }
+        }
+        return -1; // EAGAIN equivalent
+    }
+
+    int getvalue() noexcept
+    {
+        return static_cast<int>(_count.load(std::memory_order_relaxed));
+    }
+
+private:
+    std::atomic<LONG> _count;
+};
+
+}
+
+#elif defined __APPLE__ || defined WIN32
 
 #include <pthread.h>
 

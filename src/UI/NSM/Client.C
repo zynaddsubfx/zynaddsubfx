@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#if defined(_WIN32)
+#if defined(WIN32)
   #include <process.h>   // for _getpid()
   #define getpid _getpid
 #else
