@@ -40,6 +40,23 @@ else()
     include_directories(rtosc/include)
 endif()
 
+#Include DPF
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/DPF/CMakeLists.txt")
+    message(STATUS "DPF NOT FOUND")
+    message(STATUS "Attempting to checkout submodule")
+    find_package(Git REQUIRED)
+    execute_process(COMMAND git submodule update --init --recursive)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/DPF/CMakeLists.txt")
+        message(WARNING "FAILED TO CHECKOUT DPF\n"
+        "Plugins will NOT build.\n"
+        "Please check file permissions and your network")
+        set (PluginEnable OFF)
+    endif()
+else()
+    message(STATUS "Found DPF Submodule...")
+    add_subdirectory(DPF)
+endif()
+
 enable_testing()
 include(CTestConfig.cmake)
 #Currently the only directories that use cmake
