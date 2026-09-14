@@ -20,6 +20,8 @@
 #include <rtosc/port-sugar.h>
 #include "../globals.h"
 
+#define INH_MAX_OCTAVES 3.0f
+
 namespace zyn {
 
 #define rObject Sympathetic
@@ -69,6 +71,9 @@ rtosc::Ports Sympathetic::ports = {
             rPresets(12, 12, 60, 6, 6), "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57),// basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             rPresets(57, 57, 33, 52, 52), "Midi Note of Lowest String"),
+    rEffPar(Pinharmonicity, 16, rShort("inharmonicity"), rDefault(0), "inharmonicity"),
+    rEffPar(Pbeta, 17, rShort("beta"), rDefault(64), "beta"),
+    rEffPar(Pgamma, 18, rShort("gamma"), rDefault(64), "gamma"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -92,7 +97,8 @@ Sympathetic::Sympathetic(EffectParams pars)
       Punison_frequency_spread(30),
       Pstrings(12),
       Pbasenote(57),
-      baseFreq(220.0f)
+      baseFreq(220.0f),
+      srate(pars.srate)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -229,18 +235,48 @@ void Sympathetic::calcFreqs()
 void Sympathetic::calcFreqsGeneric()
 {
     const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
-    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
-    const float unison_real_spread_down = 1.0f/unison_real_spread_up;
+    const float unison_real_spread_up   = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    const float unison_real_spread_down = 1.0f / unison_real_spread_up;
 
-    for(unsigned int i = 0; i < (unsigned int)Punison_size*Pstrings; i+=Punison_size)
+    const float min_freq = baseFreq * 0.125f;
+
+    for (unsigned int i = 0; i < Punison_size * Pstrings; i += Punison_size)
     {
-        const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
-        filterBank->delays[i] = ((float)samplerate)/centerFreq;
-        if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
-        if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
-    }
-    filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+        const float n_norm = (float)(i / Punison_size) / (float)(Pstrings - 1);
+        const float n = (float)(i / Punison_size);
 
+        float log2Base = n / 12.0f;
+
+        float nonlinearDeform = 0.0f;
+        if (beta != 1.0f && n_norm > 0.0f) {
+            float scaled = powf(n_norm, beta) - n_norm;
+            nonlinearDeform = scaled * (INH_MAX_OCTAVES / 12.0f);
+        }
+
+        float inharmonicOffset = 0.0f;
+        if (inharmonicity > 0.0f && Pstrings > 1) {
+            float shaped = powf(n_norm, gamma);
+            float rising = 1.0f - powf(1.0f - shaped, 2);
+            inharmonicOffset = inharmonicity * rising * INH_MAX_OCTAVES;
+        }
+
+        float log2Offset = log2Base + nonlinearDeform + inharmonicOffset;
+        float centerFreq = baseFreq * powf(2.0f, log2Offset);
+
+        if (centerFreq < min_freq) {
+            filterBank->delays[i] = 0.0f;
+            if (Punison_size > 1) filterBank->delays[i + 1] = 0.0f;
+            if (Punison_size > 2) filterBank->delays[i + 2] = 0.0f;
+            continue;
+        }
+
+        filterBank->delays[i] = ((float)samplerate) / centerFreq;
+        if (Punison_size > 1)
+            filterBank->delays[i + 1] = ((float)samplerate) / (centerFreq * unison_real_spread_up);
+        if (Punison_size > 2)
+            filterBank->delays[i + 2] = ((float)samplerate) / (centerFreq * unison_real_spread_down);
+    }
+    filterBank->setStrings(Pstrings * Punison_size, baseFreq);
 }
 
 void Sympathetic::calcFreqsPiano()
@@ -389,6 +425,27 @@ void Sympathetic::changepar(int npar, unsigned char value)
                 calcFreqs();
             }
             break;
+case 16:
+            if (Pinharmonicity!=value) {
+                Pinharmonicity = value;
+                inharmonicity = (float)value / 127.0f;
+                calcFreqs();
+            }
+            break;
+        case 17:
+            if (Pbeta!=value) {
+                Pbeta = value;
+                beta = 1.5f - ((float)value / 256.0f) * 2.0f;
+                calcFreqs();
+            }
+            break;
+        case 18:
+            if (Pgamma!=value) {
+                Pgamma = value;
+                gamma = 3.0f - ((float)value / 64.0f);
+                calcFreqs();
+            }
+            break;
         default:
             break;
     }
@@ -409,6 +466,9 @@ unsigned char Sympathetic::getpar(int npar) const
         case 9:  return Punison_size;
         case 10: return Pstrings;
         case 11: return Pbasenote;
+        case 16: return Pinharmonicity;
+        case 17: return Pbeta;
+        case 18: return Pgamma;
         default: return 0; //in case of bogus parameter number
     }
 }
